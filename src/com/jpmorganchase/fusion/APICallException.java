@@ -28,11 +28,17 @@ public class APICallException extends Exception{
 
         String errorMsg = "Unknown";
          switch(this.responseCode){
+             case 401:
+                errorMsg = "The bearer token is missing or an invalid bearer token was provided";
+             break;
              case 403:
                  errorMsg = "Not permitted. Check credentials are correct or you are subscribed to the dataset";
                  break;
+             case 404:
+                 errorMsg = "The requested resource does not exist.";
+                 break;
              case 500:
-                 errorMsg = "Internal API error";
+                 errorMsg = "Internal API error. There was an error processing the request.";
                  break;
 
         }

@@ -6,22 +6,24 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 /**
- *
+ * An object that holds credentials that can be used to authenticate.
  */
 public class FusionCredentials {
 
     //Constants definitions
     private static String NO_PROXY = "";
-    private static String DEFAULT_CREDENTIALS_FILE = "config/client_credentials.json";
+    private static final String DEFAULT_CREDENTIALS_FILE = "config/client_credentials.json";
 
     private String clientID;
     private String clientSecret;
     private String resource;
     private String authServerURL;
-    private String proxies;
+    private String proxyAddress;
+    private int proxyPort;
     private String username;
     private String password;
     private boolean grantTypePassword = false;
+    private boolean useProxy = false;
 
     /**
      * Returns the URL of an authentication service providing an OIDC token
@@ -64,13 +66,15 @@ public class FusionCredentials {
      * @param anAuthServerURL the URL for the authentication server
      * @param theProxies proxies addresses, required if connecting from behind a firewall.
      */
-    public FusionCredentials(String aClientID, String aClientSecret, String aResource, String anAuthServerURL, String theProxies){
+    public FusionCredentials(String aClientID, String aClientSecret, String aResource, String anAuthServerURL, String proxyAddress, int proxyPort){
 
         this.clientID = aClientID;
         this.clientSecret = aClientSecret;
         this.resource = aResource;
         this.authServerURL = anAuthServerURL;
-        this.proxies = theProxies;
+        this.proxyAddress = proxyAddress;
+        this.proxyPort = proxyPort;
+        this.useProxy = true;
 
     }
 
@@ -83,7 +87,7 @@ public class FusionCredentials {
      */
     public FusionCredentials(String aClientID, String aClientSecret, String aResource, String anAuthServerURL){
 
-        this(aClientID, aClientSecret,aResource,anAuthServerURL, NO_PROXY);
+        this(aClientID, aClientSecret,aResource,anAuthServerURL, NO_PROXY, 0);
 
     }
 
@@ -93,9 +97,9 @@ public class FusionCredentials {
      * @param aClientSecret an OIDC client secret
      * @param theProxies proxies addresses, required if connecting from behind a firewall.
      */
-    public FusionCredentials(String aClientID, String aClientSecret, String theProxies){
+    public FusionCredentials(String aClientID, String aClientSecret, String proxyAddress, int proxyPort){
 
-        this(aClientID, aClientSecret,"JPMC:URI:RS-93742-Fusion-PROD","https://authe.jpmorgan.com/as/token.oauth2", theProxies);
+        this(aClientID, aClientSecret,"JPMC:URI:RS-93742-Fusion-PROD","https://authe.jpmorgan.com/as/token.oauth2", proxyAddress, proxyPort);
 
     }
 
@@ -106,7 +110,7 @@ public class FusionCredentials {
      */
     public FusionCredentials(String aClientID, String aClientSecret){
 
-        this(aClientID, aClientSecret,"JPMC:URI:RS-93742-Fusion-PROD","https://authe.jpmorgan.com/as/token.oauth2", NO_PROXY);
+        this(aClientID, aClientSecret,"JPMC:URI:RS-93742-Fusion-PROD","https://authe.jpmorgan.com/as/token.oauth2", NO_PROXY,0);
 
     }
 
@@ -119,7 +123,7 @@ public class FusionCredentials {
      * @param anAuthServerURL the URL for the authentication server
      * @param theProxies proxies addresses, required if connecting from behind a firewall.
      */
-    public FusionCredentials(String aClientID, String username, String password, String aResource, String anAuthServerURL, String theProxies){
+    public FusionCredentials(String aClientID, String username, String password, String aResource, String anAuthServerURL, String proxyAddress, int proxyPort){
 
         this.grantTypePassword = true;
         this.clientID = aClientID;
@@ -127,7 +131,9 @@ public class FusionCredentials {
         this.password = password;
         this.resource = aResource;
         this.authServerURL = anAuthServerURL;
-        this.proxies = theProxies;
+        this.proxyAddress = proxyAddress;
+        this.proxyPort = proxyPort;
+        this.useProxy = true;
 
     }
 
@@ -239,5 +245,30 @@ public class FusionCredentials {
      */
     public String getPassword(){
         return this.password;
+    }
+
+    /**
+     * A flag to toggle whether to use a proxy or not
+     * @return true if a proxy should be used, false otherwise
+     *
+     */
+    public boolean useProxy(){
+        return this.useProxy;
+    }
+
+    /**
+     * Address of a proxy server to use
+     * @return proxy address
+     */
+    public String getProxyAddress(){
+        return this.proxyAddress;
+    }
+
+    /**
+     * Proxy port number to use
+     * @return proxy port number
+     */
+    public int getProxyPort(){
+        return this.proxyPort;
     }
 }

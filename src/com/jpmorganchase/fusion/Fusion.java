@@ -1,9 +1,12 @@
 package com.jpmorganchase.fusion;
 
+import sun.jvm.hotspot.ui.tree.RootTreeNodeAdapter;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +25,7 @@ public class Fusion {
 
     private FusionAPIManager api;
     private String defaultCatalog = DEFAULT_CATALOG;
+    private final String rootURL;
 
     /**
      * Object members
@@ -31,11 +35,21 @@ public class Fusion {
     /**
      * Constructor
      * @param myCredentials a populated credentials object
+     * @param rootURL override the API URL root
      */
-    public Fusion(FusionCredentials myCredentials){
+    public Fusion(FusionCredentials myCredentials, String rootURL){
 
         this.credentials = myCredentials;
+        this.rootURL = rootURL;
         api = FusionAPIManager.getAPIManager(this.credentials);
+    }
+
+    /**
+     * Constructor that uses the default base URL
+     * @param myCredentials a populated credentials object
+     */
+    public Fusion(FusionCredentials myCredentials){
+        this(myCredentials, ROOT_URL);
     }
 
     /**
@@ -43,7 +57,17 @@ public class Fusion {
      * @param credentialsFile a path to a credentials file
      */
     public Fusion(String credentialsFile){
-        this(FusionCredentials.readCredentialsFile(credentialsFile));
+        this(FusionCredentials.readCredentialsFile(credentialsFile), ROOT_URL);
+        api = FusionAPIManager.getAPIManager(credentials);
+    }
+
+    /**
+     * The constructor will read the API credentials from file and connect to the API
+     * @param credentialsFile a path to a credentials file
+     * @param rootURL override the API URL root
+     */
+    public Fusion(String credentialsFile, String rootURL){
+        this(FusionCredentials.readCredentialsFile(credentialsFile), rootURL);
         api = FusionAPIManager.getAPIManager(credentials);
     }
 
@@ -51,8 +75,7 @@ public class Fusion {
      * The constructor will read the API credentials from file and connect to the API
      */
     public Fusion(){
-
-        this(FusionCredentials.readCredentialsFile(DEFAULT_CREDENTIALS_FILE));
+        this(FusionCredentials.readCredentialsFile(DEFAULT_CREDENTIALS_FILE), ROOT_URL);
         api = FusionAPIManager.getAPIManager(credentials);
     }
 
@@ -87,12 +110,10 @@ public class Fusion {
     public Map<String, Catalog> listCatalogs() throws Exception {
 
         HashMap<String, Catalog> catalogs = new HashMap<>();
-        String url = ROOT_URL.concat("catalogs/");
+        String url = this.rootURL.concat("catalogs/");
         Map<String, Map> catalogMetadata = this.callForMap(url);
-        Iterator entries = catalogMetadata.entrySet().iterator();
-        while (entries.hasNext()) {
-            Map.Entry pair = (Map.Entry) entries.next();
-            Map values = (Map) pair.getValue();
+        for (Map.Entry<String, Map> pair : catalogMetadata.entrySet()) {
+            Map<String, String> values = (Map) pair.getValue();
             Catalog catalog = Catalog.factory(values);
             catalogs.put(catalog.getIdentifier(), catalog);
 
@@ -107,7 +128,7 @@ public class Fusion {
      */
     public Map catalogResources(String catalogName) throws Exception{
 
-        String url = String.format("%1scatalogs/%2s",ROOT_URL, catalogName);
+        String url = String.format("%1scatalogs/%2s",this.rootURL, catalogName);
         return this.callForMap(url);
     }
 
@@ -118,16 +139,14 @@ public class Fusion {
      * @param contains a search keyword.
      * @param idContains is true if only apply the filter to the identifier
      */
-    public Map listProducts(String catalogName, String contains, boolean idContains) throws Exception{
+    public Map<String, DataProduct> listProducts(String catalogName, String contains, boolean idContains) throws Exception{
 
         HashMap<String, DataProduct> products = new HashMap<>();
-        String url = String.format("%1scatalogs/%2s/products",ROOT_URL, catalogName);
+        String url = String.format("%1scatalogs/%2s/products",this.rootURL, catalogName);
         Map<String, Map> productMetadata = this.callForMap(url);
-        Iterator entries = productMetadata.entrySet().iterator();
 
-        while (entries.hasNext()) {
-            Map.Entry pair = (Map.Entry) entries.next();
-            Map values = (Map) pair.getValue();
+        for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
+            Map<String, String> values = (Map) pair.getValue();
             DataProduct dataProduct = DataProduct.factory(values);
             products.put(dataProduct.getIdentifier(), dataProduct);
 
@@ -141,7 +160,7 @@ public class Fusion {
      * Get a list of the data products in the default catalog
      * @param catalogName a String representing the identifier of the catalog to query.
      */
-    public Map listProducts(String catalogName) throws Exception {
+    public Map<String, DataProduct> listProducts(String catalogName) throws Exception {
 
         return listProducts(catalogName, null, false);
 
@@ -150,10 +169,8 @@ public class Fusion {
     /**
      * Get a list of the data products in the default catalog
      */
-    public Map listProducts() throws Exception{
-
+    public Map<String,DataProduct> listProducts() throws Exception{
         return listProducts(this.getDefaultCatalog(), null, false);
-
     }
 
 
@@ -163,17 +180,15 @@ public class Fusion {
      * @param contains a search keyword.
      * @param idContains is true if only apply the filter to the identifier
      */
-    public Map listDatasets(String catalogName, String contains, boolean idContains) throws Exception{
+    public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) throws Exception{
 
 
         HashMap<String, Dataset> datasets = new HashMap<>();
-        String url = String.format("%1scatalogs/%2s/datasets",ROOT_URL, catalogName);
+        String url = String.format("%1scatalogs/%2s/datasets",this.rootURL, catalogName);
         Map<String, Map> productMetadata = this.callForMap(url);
-        Iterator entries = productMetadata.entrySet().iterator();
 
-        while (entries.hasNext()) {
-            Map.Entry pair = (Map.Entry) entries.next();
-            Map values = (Map) pair.getValue();
+        for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
+            Map<String, String> values = (Map) pair.getValue();
             Dataset dataset = Dataset.factory(values);
             datasets.put(dataset.getIdentifier(), dataset);
 
@@ -187,14 +202,14 @@ public class Fusion {
      * Get a list of the datasets in the specified catalog
      * @param catalogName a String representing the identifier of the catalog to query.
      */
-    public Map listDatasets(String catalogName) throws Exception{
+    public Map<String, Dataset>  listDatasets(String catalogName) throws Exception{
         return listDatasets(catalogName, null, false);
     }
 
     /**
      * Get a list of the datasets in the default catalog
      */
-    public Map listDatasets() throws Exception{
+    public Map<String, Dataset>  listDatasets() throws Exception{
         return listDatasets(this.getDefaultCatalog(), null, false);
     }
 
@@ -207,7 +222,7 @@ public class Fusion {
      */
     public Map datasetResources(String catalogName, String dataset) throws Exception{
 
-        String url = String.format("%1scatalogs/%2s/datasets/%3s",ROOT_URL, catalogName, dataset);
+        String url = String.format("%1scatalogs/%2s/datasets/%3s",this.rootURL, catalogName, dataset);
         return this.callForMap(url);
     }
 
@@ -226,16 +241,14 @@ public class Fusion {
      * @param catalogName a String representing the identifier of the catalog to query.
      * @param dataset a String representing the dataset identifier to query.
      */
-    public Map listDatasetMembers(String catalogName, String dataset) throws Exception{
+    public Map<String, DatasetSeries> listDatasetMembers(String catalogName, String dataset) throws Exception{
 
         HashMap<String, DatasetSeries> datasetSeries = new HashMap<>();
-        String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries",ROOT_URL, catalogName, dataset);
+        String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries",this.rootURL, catalogName, dataset);
         Map<String, Map> productMetadata = this.callForMap(url);
-        Iterator entries = productMetadata.entrySet().iterator();
 
-        while (entries.hasNext()) {
-            Map.Entry pair = (Map.Entry) entries.next();
-            Map values = (Map) pair.getValue();
+        for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
+            Map<String, String> values = (Map) pair.getValue();
             DatasetSeries datasetSeriesMember = DatasetSeries.factory(values);
             datasetSeries.put(datasetSeriesMember.getIdentifier(), datasetSeriesMember);
 
@@ -261,7 +274,7 @@ public class Fusion {
      */
     public Map datasetMemberResources(String catalogName, String dataset, String seriesMember) throws Exception{
 
-        String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries/%4s",ROOT_URL, catalogName, dataset, seriesMember);
+        String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries/%4s",this.rootURL, catalogName, dataset, seriesMember);
         return this.callForMap(url);
     }
 
@@ -280,23 +293,20 @@ public class Fusion {
      * @param catalogName a String representing the identifier of the catalog to query.
      * @param dataset a String representing the dataset identifier to query.
      */
-    public Map listAttributes(String catalogName, String dataset) throws Exception{
+    public Map<String, Attribute> listAttributes(String catalogName, String dataset) throws Exception{
 
         HashMap<String, Attribute> attributes = new HashMap<>();
-        String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes",ROOT_URL, catalogName,dataset);
+        String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes",this.rootURL, catalogName,dataset);
         Map<String, Map> productMetadata = this.callForMap(url);
-        Iterator entries = productMetadata.entrySet().iterator();
 
-        while (entries.hasNext()) {
-            Map.Entry pair = (Map.Entry) entries.next();
-            Map values = (Map) pair.getValue();
+        for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
+            Map<String, String> values = (Map) pair.getValue();
             Attribute attribute = Attribute.factory(values);
             attributes.put(attribute.getIdentifier(), attribute);
 
         }
 
         return attributes;
-
     }
 
     /**
@@ -312,19 +322,18 @@ public class Fusion {
     /**
      * List the distributions available for a series member, uses the default catalog.
      * @param catalogName a String representing the identifier of the catalog to query.
-     * @param dataset a String representing the dataset identifier to downloand.
+     * @param dataset a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
      */
-    public Map listDistributions(String catalogName, String dataset, String seriesMember) throws Exception{
+    public Map<String, Distribution> listDistributions(String catalogName, String dataset, String seriesMember) throws Exception{
 
         HashMap<String, Distribution> distributions = new HashMap<>();
-        String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",ROOT_URL, catalogName,dataset, seriesMember);
+        String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
+                this.rootURL, catalogName,dataset, seriesMember);
         Map<String, Map> productMetadata = this.callForMap(url);
-        Iterator entries = productMetadata.entrySet().iterator();
 
-        while (entries.hasNext()) {
-            Map.Entry pair = (Map.Entry) entries.next();
-            Map values = (Map) pair.getValue();
+        for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
+            Map<String, String> values = (Map<String, String>) pair.getValue();
             Distribution distribution = Distribution.factory(values);
             distributions.put(distribution.getIdentifier(), distribution);
 
@@ -335,7 +344,7 @@ public class Fusion {
 
     /**
      * List the distributions available for a series member, uses the default catalog.
-     * @param dataset a String representing the dataset identifier to downloand.
+     * @param dataset a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
      */
     public Map listDistributions(String dataset, String seriesMember) throws Exception{
@@ -346,14 +355,14 @@ public class Fusion {
     /**
      * Download a single distribution to the local filesystem
      * @param catalogName a String representing the identifier of the catalog to download from
-     * @param dataset a String representing the dataset identifier to downloand.
+     * @param dataset a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @param path the absolute file path where the file should be written.
      */
     public int download(String catalogName, String dataset, String seriesMember, String distribution, String path) throws Exception{
 
-        String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",ROOT_URL, catalogName,dataset, seriesMember,distribution);
+        String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",this.rootURL, catalogName,dataset, seriesMember,distribution);
         Files.createDirectories(Paths.get(path));
         String filepath = String.format("%s/%s_%s_%s.%s", path, catalogName,dataset,seriesMember,distribution);
         this.api.callAPIFileDownload(url,filepath);
@@ -363,7 +372,7 @@ public class Fusion {
     /**
      * Download a single distribution to the local filesystem. By default will write to downloads folder.
      * @param catalogName a String representing the identifier of the catalog to download from
-     * @param dataset a String representing the dataset identifier to downloand.
+     * @param dataset a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
      */
@@ -376,7 +385,7 @@ public class Fusion {
      * Download multiple distribution to the local filesystem. By default will write to downloads folder.
      * Not implemented.
      * @param catalogName a String representing the identifier of the catalog to download from
-     * @param dataset a String representing the dataset identifier to downloand.
+     * @param dataset a String representing the dataset identifier to download.
      * @param seriesMembers a List of Strings representing the series member identifiers.
      * @param distribution a String representing the distribution identifier, this is the file extension.
      */
@@ -386,16 +395,37 @@ public class Fusion {
 
 
     /**
-    Upload a new dataset series member to a catalog.
-     @param catalogName a String representing the identifier of the catalog to upload into
-     @param dataset a String representing the dataset identifier to upload against.
-     @param seriesMember a String representing the series member identifier to add or replace
-     @param distribution a String representing the distribution identifier, this is the file extention.
+     * Upload a new dataset series member to a catalog.
+     * @param catalogName a String representing the identifier of the catalog to upload into
+     * @param dataset a String representing the dataset identifier to upload against.
+     * @param seriesMember a String representing the series member identifier to add or replace
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param filename a path to the file containing the data to upload
+     * @param fromDate the earliest date for which there is data in the distribution
+     * @param toDate the latest date for which there is data in the distribution
+     * @param createdDate the creation date for the distribution
      **/
-    public int upload(String catalogName, String dataset, String seriesMember, String distribution, String filename, String date) throws Exception {
+    public int upload(String catalogName, String dataset, String seriesMember, String distribution, String filename, Date fromDate, Date toDate, Date createdDate) throws Exception {
 
-        String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",ROOT_URL, catalogName,dataset, seriesMember,distribution);
-        return this.api.callAPIFileUpload(url, filename, date);
+        String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",this.rootURL, catalogName,dataset, seriesMember,distribution);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String strFromDate = dateFormat.format(fromDate);
+        String strToDate = dateFormat.format(toDate);
+        String strCreatedDate = dateFormat.format(createdDate);
+        return this.api.callAPIFileUpload(url, filename, strFromDate, strToDate, strCreatedDate );
+    }
+
+    /**
+     * Upload a new dataset series member to a catalog.
+     * @param catalogName a String representing the identifier of the catalog to upload into
+     * @param dataset a String representing the dataset identifier to upload against.
+     * @param seriesMember a String representing the series member identifier to add or replace
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param filename a path to the file containing the data to upload
+     * @param dataDate the earliest, latest, and created date are all the same.
+     **/
+    public int upload(String catalogName, String dataset, String seriesMember, String distribution, String filename, Date dataDate) throws Exception {
+        return this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate);
     }
 
 }

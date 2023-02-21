@@ -1,8 +1,9 @@
 package com.jpmorganchase.fusion;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.xml.bind.DatatypeConverter;
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -26,6 +27,7 @@ public class FusionAPIManager {
     private String bearerToken;
     private int tokenRefreshes = 0;
     private long bearerTokenExpiry;
+    private Proxy proxy;
 
     /**
      * Given a credentials file, returns a new API manager, this could be replaced by a singleton object.
@@ -43,13 +45,16 @@ public class FusionAPIManager {
      */
     private FusionAPIManager(FusionCredentials credentials){
         this.sessionCredentials = credentials;
+        if ( credentials.useProxy() ){
+            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(credentials.getProxyAddress(), credentials.getProxyPort()));
+        }
     }
 
     /**
      * Get an API access token from the OAuth server
      * @return the bearer token as a string
      */
-    private String getBearerToken() {
+    private String getBearerToken() throws IOException {
 
         String auth;
         String content;
@@ -63,7 +68,9 @@ public class FusionAPIManager {
 
             if(sessionCredentials.isGrantTypePassword()){
                 auth = sessionCredentials.getUsername() + ":" + sessionCredentials.getPassword();
-                content = String.format("grant_type=password&aud=%1s&client_id=%2s", sessionCredentials.getResource(), sessionCredentials.getResource());
+                content = String.format("grant_type=password&resource=%1$s&client_id=%2$s&username=%3$s&password=%4$s",
+                        sessionCredentials.getResource(), sessionCredentials.getClientID(),
+                        sessionCredentials.getUsername(), sessionCredentials.getPassword());
 
             }else{
                 auth = sessionCredentials.getClientID() + ":" + sessionCredentials.getClientSecret();
@@ -75,12 +82,19 @@ public class FusionAPIManager {
             String authURL = sessionCredentials.getAuthServerURL();
             BufferedReader reader = null;
             HttpsURLConnection connection = null;
+
             try {
                 URL url = new URL(authURL);
-                connection = (HttpsURLConnection) url.openConnection();
+                if (sessionCredentials.useProxy()){
+                    connection = (HttpsURLConnection) url.openConnection(proxy);
+                }else {
+                    connection = (HttpsURLConnection) url.openConnection();
+                }
                 connection.setRequestMethod("POST");
                 connection.setDoOutput(true);
-                connection.setRequestProperty("Authorization", "Basic " + authentication);
+                if(!sessionCredentials.isGrantTypePassword()) {
+                    connection.setRequestProperty("Authorization", "Basic " + authentication);
+                }
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 connection.setRequestProperty("Accept", "application/json");
                 PrintStream os = new PrintStream(connection.getOutputStream());
@@ -112,9 +126,6 @@ public class FusionAPIManager {
                     System.out.println("Number of token refreshes: "+ this.tokenRefreshes);
                 }
 
-            } catch (Exception e) {
-                System.out.println("Error : " + e.getMessage());
-                e.printStackTrace();
             } finally {
                 if (reader != null) {
                     try {
@@ -144,7 +155,13 @@ public class FusionAPIManager {
 
         URL url = new URL(apiPath);
 
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        HttpsURLConnection connection;
+        if (sessionCredentials.useProxy()){
+            connection = (HttpsURLConnection) url.openConnection(proxy);
+        }else {
+            connection = (HttpsURLConnection) url.openConnection();
+        }
+
         connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
         connection.setDoOutput(true);
         connection.setRequestMethod("GET");
@@ -174,7 +191,7 @@ public class FusionAPIManager {
      * @param downloadFolder the folder to save the download file
      * @param fileName the filename
      */
-    public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) {
+    public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) throws IOException  {
 
         bearerToken = this.getBearerToken();
 
@@ -182,7 +199,13 @@ public class FusionAPIManager {
 
             URL url = new URL(apiPath);
 
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            HttpsURLConnection connection;
+            if (sessionCredentials.useProxy()){
+                connection = (HttpsURLConnection) url.openConnection(proxy);
+            }else {
+                connection = (HttpsURLConnection) url.openConnection();
+            }
+
             connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
             connection.setDoOutput(true);
             connection.setRequestMethod("GET");
@@ -210,7 +233,7 @@ public class FusionAPIManager {
      * @param apiPath the URL of the API endpoint to call
      * @param fileName the filename to save into the default folder.
      */
-    public void callAPIFileDownload(String apiPath, String fileName) {
+    public void callAPIFileDownload(String apiPath, String fileName) throws IOException {
         this.callAPIFileDownload(apiPath, DEFAULT_FOLDER, fileName);
     }
 
@@ -218,37 +241,45 @@ public class FusionAPIManager {
      * Call the API upload endpoint to load a distribution
      * @param apiPath the API URL
      * @param fileName the path to the distribution on the local filesystem
-     * @param date the created date.
+     * @param fromDate the earliest date that data is contained in the upload (in form yyyy-MM-dd).
+     * @param toDate the latest date that data is contained in the upload (in form yyyy-MM-dd).
+     * @param createdDate the creation date for the data is contained in the upload (in form yyyy-MM-dd).
      * @return the HTTP status code - will return 200 if successful
      */
-    public int callAPIFileUpload(String apiPath, String fileName, String date) throws APICallException, IOException, NoSuchAlgorithmException {
+    public int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate) throws APICallException, IOException, NoSuchAlgorithmException {
 
         bearerToken = this.getBearerToken();
         int httpCode;
 
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(Files.readAllBytes(Paths.get(fileName)));
-        byte[] digest = md.digest();
-        String myChecksum = DatatypeConverter.printHexBinary(digest).toUpperCase();
+        String myChecksum = Base64.getEncoder().encodeToString(md.digest());
 
         URL url = new URL(apiPath);
 
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        HttpsURLConnection connection;
+        if (sessionCredentials.useProxy()){
+            connection = (HttpsURLConnection) url.openConnection(proxy);
+        }else {
+            connection = (HttpsURLConnection) url.openConnection();
+        }
 
         try{
             connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.setRequestProperty("accept", "*/*");
+            connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
             connection.setRequestProperty("Content-Type", "application/octet-stream");
-            connection.setRequestProperty("x-jpmc-distribution-from-date", date);
-            connection.setRequestProperty("x-jpmc-distribution-to-date", date);
-            connection.setRequestProperty("x-jpmc-distribution-created-date", date);
-            connection.setRequestProperty("Digest", myChecksum);
+            connection.setRequestProperty("x-jpmc-distribution-from-date", fromDate);
+            connection.setRequestProperty("x-jpmc-distribution-to-date", toDate);
+            connection.setRequestProperty("x-jpmc-distribution-created-date", createdDate);
+            connection.setRequestProperty("Digest", "md5="+myChecksum);
             PrintStream os = new PrintStream(connection.getOutputStream());
             Files.copy(new File(fileName).toPath(), os);
             os.close();
             httpCode = connection.getResponseCode();
+
             if (httpCode != 200) {
                 throw new APICallException(httpCode);
             }
