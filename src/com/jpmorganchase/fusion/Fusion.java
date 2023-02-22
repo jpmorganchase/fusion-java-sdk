@@ -1,7 +1,6 @@
 package com.jpmorganchase.fusion;
 
 import org.json.simple.parser.ParseException;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -114,8 +113,7 @@ public class Fusion {
         String url = this.rootURL.concat("catalogs/");
         Map<String, Map> catalogMetadata = this.callForMap(url);
         for (Map.Entry<String, Map> pair : catalogMetadata.entrySet()) {
-            Map<String, String> values = (Map) pair.getValue();
-            Catalog catalog = Catalog.factory(values);
+            Catalog catalog = Catalog.factory(pair.getValue());
             catalogs.put(catalog.getIdentifier(), catalog);
         }
 
@@ -147,8 +145,7 @@ public class Fusion {
         Map<String, Map> productMetadata = this.callForMap(url);
 
         for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
-            Map<String, String> values = (Map) pair.getValue();
-            DataProduct dataProduct = DataProduct.factory(values);
+            DataProduct dataProduct = DataProduct.factory(pair.getValue());
             products.put(dataProduct.getIdentifier(), dataProduct);
         }
 
@@ -188,8 +185,7 @@ public class Fusion {
         Map<String, Map> productMetadata = this.callForMap(url);
 
         for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
-            Map<String, String> values = (Map) pair.getValue();
-            Dataset dataset = Dataset.factory(values);
+            Dataset dataset = Dataset.factory(pair.getValue());
             datasets.put(dataset.getIdentifier(), dataset);
         }
 
@@ -247,8 +243,7 @@ public class Fusion {
         Map<String, Map> productMetadata = this.callForMap(url);
 
         for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
-            Map<String, String> values = (Map) pair.getValue();
-            DatasetSeries datasetSeriesMember = DatasetSeries.factory(values);
+            DatasetSeries datasetSeriesMember = DatasetSeries.factory(pair.getValue());
             datasetSeries.put(datasetSeriesMember.getIdentifier(), datasetSeriesMember);
         }
 
@@ -298,8 +293,7 @@ public class Fusion {
         Map<String, Map> productMetadata = this.callForMap(url);
 
         for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
-            Map<String, String> values = (Map) pair.getValue();
-            Attribute attribute = Attribute.factory(values);
+            Attribute attribute = Attribute.factory(pair.getValue());
             attributes.put(attribute.getIdentifier(), attribute);
         }
 
@@ -330,8 +324,7 @@ public class Fusion {
         Map<String, Map> productMetadata = this.callForMap(url);
 
         for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
-            Map<String, String> values = (Map<String, String>) pair.getValue();
-            Distribution distribution = Distribution.factory(values);
+            Distribution distribution = Distribution.factory(pair.getValue());
             distributions.put(distribution.getIdentifier(), distribution);
         }
 
