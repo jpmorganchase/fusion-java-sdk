@@ -15,13 +15,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Class that manages calls to the API
+ * Class that manages calls to the API. Intended to be called from multi-threaded code.
  */
 public class FusionAPIManager {
 
     private static final String DEFAULT_FOLDER = "downloads";
     private static final Pattern patternToken = Pattern.compile(".*\"access_token\"\\s*:\\s*\"([^\"]+)\".*");
     private static final Pattern patternExpiry = Pattern.compile(".*\"expires_in\"\\s*:\\s*([^\"]+)}.*");
+    private static FusionAPIManager apiManager;
 
     private final FusionCredentials sessionCredentials;
     private String bearerToken;
@@ -34,8 +35,11 @@ public class FusionAPIManager {
      * @param credentials an object holding API credentials
      * @return a new API session manager
      */
-    public static FusionAPIManager getAPIManager(FusionCredentials credentials){
-        return new FusionAPIManager(credentials);
+    public static synchronized FusionAPIManager getAPIManager(FusionCredentials credentials) {
+        if (apiManager == null){
+            apiManager = new FusionAPIManager(credentials);
+        }
+        return apiManager;
     }
 
     /**
@@ -54,7 +58,7 @@ public class FusionAPIManager {
      * Get an API access token from the OAuth server
      * @return the bearer token as a string
      */
-    private String getBearerToken() throws IOException {
+    private synchronized String getBearerToken() throws IOException {
 
         String auth;
         String content;
@@ -128,11 +132,7 @@ public class FusionAPIManager {
 
             } finally {
                 if (reader != null) {
-                    try {
                         reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
                 if (connection != null) {
                     connection.disconnect();
@@ -162,25 +162,34 @@ public class FusionAPIManager {
             connection = (HttpsURLConnection) url.openConnection();
         }
 
-        connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
-        connection.setDoOutput(true);
-        connection.setRequestMethod("GET");
-        reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        try{
+            connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
+            connection.setDoOutput(true);
+            connection.setRequestMethod("GET");
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-        //Check the HTTP response code
-        int httpCode = connection.getResponseCode();
-        if (httpCode != 200){
-            throw new APICallException(httpCode);
+            //Check the HTTP response code
+            int httpCode = connection.getResponseCode();
+
+            if (httpCode != 200){
+                throw new APICallException(httpCode);
+            }
+
+            StringWriter out = new StringWriter(connection.getContentLength() > 0 ? connection.getContentLength() : 2048);
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                out.append(line);
+            }
+
+            response = out.toString();
+
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
 
-        StringWriter out = new StringWriter(connection.getContentLength() > 0 ? connection.getContentLength() : 2048);
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            out.append(line);
-        }
-
-        response = out.toString();
         return response;
     }
 
@@ -194,17 +203,16 @@ public class FusionAPIManager {
     public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) throws IOException  {
 
         bearerToken = this.getBearerToken();
+        URL url = new URL(apiPath);
+        HttpsURLConnection connection;
+
+        if (sessionCredentials.useProxy()){
+            connection = (HttpsURLConnection) url.openConnection(proxy);
+        }else {
+            connection = (HttpsURLConnection) url.openConnection();
+        }
 
         try {
-
-            URL url = new URL(apiPath);
-
-            HttpsURLConnection connection;
-            if (sessionCredentials.useProxy()){
-                connection = (HttpsURLConnection) url.openConnection(proxy);
-            }else {
-                connection = (HttpsURLConnection) url.openConnection();
-            }
 
             connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
             connection.setDoOutput(true);
@@ -222,8 +230,10 @@ public class FusionAPIManager {
             fileOutput.close();
             input.close();
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
 
     }
@@ -266,7 +276,7 @@ public class FusionAPIManager {
 
         try{
             connection = (HttpsURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
+            connection.setRequestMethod("PUT");
             connection.setDoOutput(true);
             connection.setRequestProperty("accept", "*/*");
             connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
@@ -284,9 +294,7 @@ public class FusionAPIManager {
                 throw new APICallException(httpCode);
             }
 
-        }finally
-
-        {
+        }finally {
             if (connection != null) {
                 connection.disconnect();
             }
