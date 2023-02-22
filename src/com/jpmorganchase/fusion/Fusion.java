@@ -1,7 +1,8 @@
 package com.jpmorganchase.fusion;
 
-import sun.jvm.hotspot.ui.tree.RootTreeNodeAdapter;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -56,7 +57,7 @@ public class Fusion {
      * The constructor will read the API credentials from file and connect to the API
      * @param credentialsFile a path to a credentials file
      */
-    public Fusion(String credentialsFile){
+    public Fusion(String credentialsFile) throws IOException, ParseException {
         this(FusionCredentials.readCredentialsFile(credentialsFile), ROOT_URL);
         api = FusionAPIManager.getAPIManager(credentials);
     }
@@ -66,7 +67,7 @@ public class Fusion {
      * @param credentialsFile a path to a credentials file
      * @param rootURL override the API URL root
      */
-    public Fusion(String credentialsFile, String rootURL){
+    public Fusion(String credentialsFile, String rootURL) throws IOException, ParseException{
         this(FusionCredentials.readCredentialsFile(credentialsFile), rootURL);
         api = FusionAPIManager.getAPIManager(credentials);
     }
@@ -74,7 +75,7 @@ public class Fusion {
     /**
      * The constructor will read the API credentials from file and connect to the API
      */
-    public Fusion(){
+    public Fusion() throws IOException, ParseException {
         this(FusionCredentials.readCredentialsFile(DEFAULT_CREDENTIALS_FILE), ROOT_URL);
         api = FusionAPIManager.getAPIManager(credentials);
     }
@@ -87,7 +88,7 @@ public class Fusion {
     }
 
     /**
-     * Set the default catalog
+     * Set the default catalog. This allows the default context to be a specified catalog.
      * @param newDefaultCatalogName the identifier of the catalog to set as a the default
      */
     public void setDefaultCatalog(String newDefaultCatalogName){
@@ -116,8 +117,8 @@ public class Fusion {
             Map<String, String> values = (Map) pair.getValue();
             Catalog catalog = Catalog.factory(values);
             catalogs.put(catalog.getIdentifier(), catalog);
-
         }
+
         return catalogs;
 
     }
@@ -149,7 +150,6 @@ public class Fusion {
             Map<String, String> values = (Map) pair.getValue();
             DataProduct dataProduct = DataProduct.factory(values);
             products.put(dataProduct.getIdentifier(), dataProduct);
-
         }
 
         return products;
@@ -191,7 +191,6 @@ public class Fusion {
             Map<String, String> values = (Map) pair.getValue();
             Dataset dataset = Dataset.factory(values);
             datasets.put(dataset.getIdentifier(), dataset);
-
         }
 
         return datasets;
@@ -251,7 +250,6 @@ public class Fusion {
             Map<String, String> values = (Map) pair.getValue();
             DatasetSeries datasetSeriesMember = DatasetSeries.factory(values);
             datasetSeries.put(datasetSeriesMember.getIdentifier(), datasetSeriesMember);
-
         }
 
         return datasetSeries;
@@ -303,7 +301,6 @@ public class Fusion {
             Map<String, String> values = (Map) pair.getValue();
             Attribute attribute = Attribute.factory(values);
             attributes.put(attribute.getIdentifier(), attribute);
-
         }
 
         return attributes;
@@ -336,7 +333,6 @@ public class Fusion {
             Map<String, String> values = (Map<String, String>) pair.getValue();
             Distribution distribution = Distribution.factory(values);
             distributions.put(distribution.getIdentifier(), distribution);
-
         }
 
         return distributions;
