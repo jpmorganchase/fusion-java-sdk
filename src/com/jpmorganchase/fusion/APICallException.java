@@ -1,7 +1,7 @@
 package com.jpmorganchase.fusion;
 
 /**
- * A custom exception to provide useful information on the state of an API call
+ * A custom exception to provide useful information on the response of an API call
  */
 public class APICallException extends Exception{
 
@@ -36,6 +36,9 @@ public class APICallException extends Exception{
                  break;
              case 404:
                  errorMsg = "The requested resource does not exist.";
+                 break;
+             case 415:
+                 errorMsg = "Unsupported media type. Confirm the correct method is being invoked for the operation.";
                  break;
              case 500:
                  errorMsg = "Internal API error. There was an error processing the request.";
