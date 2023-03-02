@@ -1,0 +1,19 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/test/datasets/SAMPLE_DATATSET/"
+  },
+  "@id": "datasetseries/",
+  "description": "A list of available datasetseries of a dataset",
+  "identifier": "datasetseries",
+  "resources": [
+    {
+      "createdDate": "INVALID DATE FORMAT",
+      "fromDate": "INVALID DATE FORMAT",
+      "identifier": "20220318",
+      "toDate": "INVALID DATE FORMAT",
+      "@id": "20220318/"
+    }
+  ],
+  "title": "DatasetSeries"
+}

@@ -21,7 +21,8 @@ public class APIResponseParser {
 
     public APIResponseParser() {
         GsonBuilder gsonBuilder = new GsonBuilder();
-
+        //TODO: need to add a serializer as well
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateDeserializer());
         gson = gsonBuilder.create();
     }
 
