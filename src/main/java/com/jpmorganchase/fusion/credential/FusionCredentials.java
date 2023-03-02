@@ -1,15 +1,22 @@
-package com.jpmorganchase.fusion;
+package com.jpmorganchase.fusion.credential;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.net.URL;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * An object that holds credentials that can be used to authenticate.
  */
-public class FusionCredentials {
+public class FusionCredentials implements IFusionCredentials {
 
     //Constants definitions
     private static String NO_PROXY = "";
@@ -25,6 +32,14 @@ public class FusionCredentials {
     private String password;
     private boolean grantTypePassword = false;
     private boolean useProxy = false;
+
+
+    private String bearerToken;
+    private int tokenRefreshes = 0;
+    private long bearerTokenExpiry;
+    private Proxy proxy;
+    private static final Pattern patternToken = Pattern.compile(".*\"access_token\"\\s*:\\s*\"([^\"]+)\".*");
+    private static final Pattern patternExpiry = Pattern.compile(".*\"expires_in\"\\s*:\\s*([^\"]+)}.*");
 
     /**
      * Returns the URL of an authentication service providing an OIDC token
@@ -58,6 +73,9 @@ public class FusionCredentials {
         return this.resource;
     }
 
+    public FusionCredentials(){
+
+    }
 
     /**
      * Create a new object to hold credentials required to authenticate
@@ -223,7 +241,7 @@ public class FusionCredentials {
      * Reads saved credentials from the default path and filename
      * @return a credentials object
      */
-    public static FusionCredentials readCredentialsFile(){
+    public static IFusionCredentials readCredentialsFile(){
         return readCredentialsFile(DEFAULT_CREDENTIALS_FILE);
     }
 
@@ -274,5 +292,101 @@ public class FusionCredentials {
      */
     public int getProxyPort(){
         return this.proxyPort;
+    }
+
+    /**
+     * Get an API access token from the OAuth server
+     * @return the bearer token as a string
+     */
+    //TODO: Revisit synchronization
+    //TODO: Copied wholesale from FusionAPIManager for now, needs refactoring
+    @Override
+    public synchronized String getBearerToken() throws IOException {
+
+        String auth;
+        String content;
+
+        if(bearerToken == null) {
+
+            //Check if an obtained token has expired.
+            if (System.currentTimeMillis() < this.bearerTokenExpiry){
+                return this.bearerToken;
+            }
+
+            if(this.isGrantTypePassword()){
+                auth = this.getUsername() + ":" + this.getPassword();
+                content = String.format("grant_type=password&resource=%1$s&client_id=%2$s&username=%3$s&password=%4$s",
+                        this.getResource(), this.getClientID(),
+                        this.getUsername(), this.getPassword());
+
+            }else{
+                auth = this.getClientID() + ":" + this.getClientSecret();
+                content = String.format("grant_type=client_credentials&aud=%1s", this.getResource());
+
+            }
+
+            String authentication = Base64.getEncoder().encodeToString(auth.getBytes());
+            String authURL = this.getAuthServerURL();
+            BufferedReader reader = null;
+            HttpURLConnection connection = null;
+
+            try {
+                URL url = new URL(authURL);
+                if (this.useProxy()){
+                    connection = (HttpURLConnection) url.openConnection(proxy);
+                }else {
+                    connection = (HttpURLConnection) url.openConnection();
+                }
+                connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
+                if(!this.isGrantTypePassword()) {
+                    connection.setRequestProperty("Authorization", "Basic " + authentication);
+                }
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                connection.setRequestProperty("Accept", "application/json");
+                PrintStream os = new PrintStream(connection.getOutputStream());
+                os.print(content);
+                os.close();
+                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line;
+                StringWriter out = new StringWriter(connection.getContentLength() > 0 ? connection.getContentLength() : 2048);
+                while ((line = reader.readLine()) != null) {
+                    out.append(line);
+                }
+                String response = out.toString();
+
+                //Get the bearer token
+                Matcher matcher = patternToken.matcher(response);
+                if (matcher.matches() && matcher.groupCount() > 0) {
+                    this.bearerToken = matcher.group(1);
+                }
+
+                //Get the token expiry time
+                Matcher expiryMatcher = patternExpiry.matcher(response);
+                if (expiryMatcher.matches() && expiryMatcher.groupCount() > 0) {
+                    Calendar calendar = Calendar.getInstance();
+                    int seconds = Integer.parseInt(expiryMatcher.group(1));
+                    calendar.add(Calendar.SECOND, seconds-30);
+                    this.bearerTokenExpiry = calendar.getTimeInMillis();
+                    tokenRefreshes++;
+                    System.out.println("Token expires at: " + calendar.getTime());
+                    System.out.println("Number of token refreshes: "+ this.tokenRefreshes);
+                }
+
+            } finally {
+                if (reader != null) {
+                    reader.close();
+                }
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
+        }
+        return this.bearerToken;
+    }
+
+    //TODO:Remove?
+    public long getBearerTokenExpiry(){
+        return this.bearerTokenExpiry;
     }
 }

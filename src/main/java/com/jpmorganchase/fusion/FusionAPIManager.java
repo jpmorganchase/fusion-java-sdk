@@ -1,8 +1,10 @@
 package com.jpmorganchase.fusion;
 
+import com.jpmorganchase.fusion.credential.IFusionCredentials;
+
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.net.InetSocketAddress;
+import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.file.Files;
@@ -10,8 +12,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.Calendar;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -24,7 +24,7 @@ public class FusionAPIManager {
     private static final Pattern patternExpiry = Pattern.compile(".*\"expires_in\"\\s*:\\s*([^\"]+)}.*");
     private static FusionAPIManager apiManager;
 
-    private final FusionCredentials sessionCredentials;
+    private final IFusionCredentials sessionCredentials;
     private String bearerToken;
     private int tokenRefreshes = 0;
     private long bearerTokenExpiry;
@@ -35,10 +35,11 @@ public class FusionAPIManager {
      * @param credentials an object holding API credentials
      * @return a new API session manager
      */
-    public static synchronized FusionAPIManager getAPIManager(FusionCredentials credentials) {
-        if (apiManager == null){
+    public static synchronized FusionAPIManager getAPIManager(IFusionCredentials credentials) {
+        //TODO: REvisit this logic
+        //if (apiManager == null){
             apiManager = new FusionAPIManager(credentials);
-        }
+        //}
         return apiManager;
     }
 
@@ -47,100 +48,15 @@ public class FusionAPIManager {
      * Sets the bearer token
      * @param credentials a credentials file with OAuth parameters.
      */
-    private FusionAPIManager(FusionCredentials credentials){
+    private FusionAPIManager(IFusionCredentials credentials){
         this.sessionCredentials = credentials;
         if ( credentials.useProxy() ){
-            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(credentials.getProxyAddress(), credentials.getProxyPort()));
+            //TODO: implement
+            throw new RuntimeException("Proxy logic not working yet");
+            //proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(credentials.getProxyAddress(), credentials.getProxyPort()));
         }
     }
 
-    /**
-     * Get an API access token from the OAuth server
-     * @return the bearer token as a string
-     */
-    private synchronized String getBearerToken() throws IOException {
-
-        String auth;
-        String content;
-
-        if(bearerToken == null) {
-
-            //Check if an obtained token has expired.
-            if (System.currentTimeMillis() < this.bearerTokenExpiry){
-                return this.bearerToken;
-            }
-
-            if(sessionCredentials.isGrantTypePassword()){
-                auth = sessionCredentials.getUsername() + ":" + sessionCredentials.getPassword();
-                content = String.format("grant_type=password&resource=%1$s&client_id=%2$s&username=%3$s&password=%4$s",
-                        sessionCredentials.getResource(), sessionCredentials.getClientID(),
-                        sessionCredentials.getUsername(), sessionCredentials.getPassword());
-
-            }else{
-                auth = sessionCredentials.getClientID() + ":" + sessionCredentials.getClientSecret();
-                content = String.format("grant_type=client_credentials&aud=%1s", sessionCredentials.getResource());
-
-            }
-
-            String authentication = Base64.getEncoder().encodeToString(auth.getBytes());
-            String authURL = sessionCredentials.getAuthServerURL();
-            BufferedReader reader = null;
-            HttpsURLConnection connection = null;
-
-            try {
-                URL url = new URL(authURL);
-                if (sessionCredentials.useProxy()){
-                    connection = (HttpsURLConnection) url.openConnection(proxy);
-                }else {
-                    connection = (HttpsURLConnection) url.openConnection();
-                }
-                connection.setRequestMethod("POST");
-                connection.setDoOutput(true);
-                if(!sessionCredentials.isGrantTypePassword()) {
-                    connection.setRequestProperty("Authorization", "Basic " + authentication);
-                }
-                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                connection.setRequestProperty("Accept", "application/json");
-                PrintStream os = new PrintStream(connection.getOutputStream());
-                os.print(content);
-                os.close();
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                StringWriter out = new StringWriter(connection.getContentLength() > 0 ? connection.getContentLength() : 2048);
-                while ((line = reader.readLine()) != null) {
-                    out.append(line);
-                }
-                String response = out.toString();
-
-                //Get the bearer token
-                Matcher matcher = patternToken.matcher(response);
-                if (matcher.matches() && matcher.groupCount() > 0) {
-                    this.bearerToken = matcher.group(1);
-                }
-
-                //Get the token expiry time
-                Matcher expiryMatcher = patternExpiry.matcher(response);
-                if (expiryMatcher.matches() && expiryMatcher.groupCount() > 0) {
-                    Calendar calendar = Calendar.getInstance();
-                    int seconds = Integer.parseInt(expiryMatcher.group(1));
-                    calendar.add(Calendar.SECOND, seconds-30);
-                    this.bearerTokenExpiry = calendar.getTimeInMillis();
-                    tokenRefreshes++;
-                    System.out.println("Token expires at: " + calendar.getTime());
-                    System.out.println("Number of token refreshes: "+ this.tokenRefreshes);
-                }
-
-            } finally {
-                if (reader != null) {
-                        reader.close();
-                }
-                if (connection != null) {
-                    connection.disconnect();
-                }
-            }
-        }
-        return this.bearerToken;
-    }
 
     /**
      * Call the API with the path provided and return the JSON response.
@@ -148,25 +64,24 @@ public class FusionAPIManager {
      */
     public String callAPI(String apiPath) throws APICallException, IOException {
 
-        bearerToken = this.getBearerToken();
+        bearerToken = sessionCredentials.getBearerToken();
 
         BufferedReader reader;
         String response;
 
         URL url = new URL(apiPath);
 
-        HttpsURLConnection connection;
+        HttpURLConnection connection;
         if (sessionCredentials.useProxy()){
-            connection = (HttpsURLConnection) url.openConnection(proxy);
+            connection = (HttpURLConnection) url.openConnection(proxy);
         }else {
-            connection = (HttpsURLConnection) url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
         }
 
         try{
             connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
             connection.setDoOutput(true);
             connection.setRequestMethod("GET");
-            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
             //Check the HTTP response code
             int httpCode = connection.getResponseCode();
@@ -174,6 +89,10 @@ public class FusionAPIManager {
             if (httpCode != 200){
                 throw new APICallException(httpCode);
             }
+
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+
 
             StringWriter out = new StringWriter(connection.getContentLength() > 0 ? connection.getContentLength() : 2048);
 
@@ -202,7 +121,7 @@ public class FusionAPIManager {
      */
     public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) throws IOException  {
 
-        bearerToken = this.getBearerToken();
+        bearerToken = sessionCredentials.getBearerToken();
         URL url = new URL(apiPath);
         HttpsURLConnection connection;
 
@@ -258,7 +177,7 @@ public class FusionAPIManager {
      */
     public int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate) throws APICallException, IOException, NoSuchAlgorithmException {
 
-        bearerToken = this.getBearerToken();
+        bearerToken = sessionCredentials.getBearerToken();
         int httpCode;
 
         MessageDigest md = MessageDigest.getInstance("MD5");

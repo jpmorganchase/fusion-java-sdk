@@ -1,5 +1,6 @@
 package com.jpmorganchase.fusion;
 
+import com.jpmorganchase.fusion.credential.FusionCredentials;
 import com.jpmorganchase.fusion.model.*;
 import java.io.IOException;
 import java.nio.file.Files;
