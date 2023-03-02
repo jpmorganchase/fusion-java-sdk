@@ -12,7 +12,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.regex.Pattern;
 
 /**
  * Class that manages calls to the API. Intended to be called from multi-threaded code.
@@ -20,8 +19,6 @@ import java.util.regex.Pattern;
 public class FusionAPIManager {
 
     private static final String DEFAULT_FOLDER = "downloads";
-    private static final Pattern patternToken = Pattern.compile(".*\"access_token\"\\s*:\\s*\"([^\"]+)\".*");
-    private static final Pattern patternExpiry = Pattern.compile(".*\"expires_in\"\\s*:\\s*([^\"]+)}.*");
     private static FusionAPIManager apiManager;
 
     private final IFusionCredentials sessionCredentials;

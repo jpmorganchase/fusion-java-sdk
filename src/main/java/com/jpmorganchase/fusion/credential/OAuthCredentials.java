@@ -21,6 +21,7 @@ public abstract class OAuthCredentials implements IFusionCredentials{
         this.resource = resource;
         this.authServerUrl = new URL(authServerUrl);
         tokenRefreshes = 0;
+        bearerTokenExpiry = 0L;
     }
 
     @Override
@@ -95,6 +96,25 @@ public abstract class OAuthCredentials implements IFusionCredentials{
     protected abstract String getAuthHeader();
 
 
+    public String getClientId() {
+        return clientId;
+    }
+
+    public String getResource() {
+        return resource;
+    }
+
+    public URL getAuthServerUrl() {
+        return authServerUrl;
+    }
+
+    public long getBearerTokenExpiry() {
+        return bearerTokenExpiry;
+    }
+
+    public int getTokenRefreshes() {
+        return tokenRefreshes;
+    }
 
     @Override
     public boolean useProxy() {
