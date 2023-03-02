@@ -25,7 +25,7 @@ public class FusionApiManagerTest {
             .configureStaticDsl(true)
             .build();
 
-    private IFusionCredentials credentials;
+    private FusionCredentials credentials;
     private FusionAPIManager fusionAPIManager;
 
     private static final String tokenJson = "{\"access_token\":\"my-oauth-generated-token\",\"token_type\":\"bearer\",\"expires_in\":3600}";
@@ -110,19 +110,6 @@ public class FusionApiManagerTest {
                 .withHeader("Authorization", WireMock.equalTo("Bearer my-oauth-generated-token")));
 
         assertThat(response, is(equalTo("sample response")));
-    }
-
-    //TODO: Obviously points to a need for refactoring
-    private static final class TestFusionCredentials extends FusionCredentials {
-
-        public TestFusionCredentials(String aClientID, String aClientSecret, String aResource, String anAuthServerURL) {
-            super(aClientID, aClientSecret, aResource, anAuthServerURL);
-        }
-
-        @Override
-        public boolean useProxy() {
-            return false;
-        }
     }
 
 }

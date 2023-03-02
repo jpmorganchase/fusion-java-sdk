@@ -1,6 +1,6 @@
 package com.jpmorganchase.fusion;
 
-import com.jpmorganchase.fusion.credential.IFusionCredentials;
+import com.jpmorganchase.fusion.credential.FusionCredentials;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
@@ -21,7 +21,7 @@ public class FusionAPIManager {
     private static final String DEFAULT_FOLDER = "downloads";
     private static FusionAPIManager apiManager;
 
-    private final IFusionCredentials sessionCredentials;
+    private final FusionCredentials sessionCredentials;
     private String bearerToken;
     private int tokenRefreshes = 0;
     private long bearerTokenExpiry;
@@ -32,7 +32,7 @@ public class FusionAPIManager {
      * @param credentials an object holding API credentials
      * @return a new API session manager
      */
-    public static synchronized FusionAPIManager getAPIManager(IFusionCredentials credentials) {
+    public static synchronized FusionAPIManager getAPIManager(FusionCredentials credentials) {
         //TODO: REvisit this logic
         //if (apiManager == null){
             apiManager = new FusionAPIManager(credentials);
@@ -45,7 +45,7 @@ public class FusionAPIManager {
      * Sets the bearer token
      * @param credentials a credentials file with OAuth parameters.
      */
-    private FusionAPIManager(IFusionCredentials credentials){
+    private FusionAPIManager(FusionCredentials credentials){
         this.sessionCredentials = credentials;
         if ( credentials.useProxy() ){
             //TODO: implement

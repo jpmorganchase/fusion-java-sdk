@@ -2,7 +2,7 @@ package com.jpmorganchase.fusion;
 
 import com.jpmorganchase.fusion.credential.FusionCredentials;
 import com.jpmorganchase.fusion.model.*;
-import java.io.IOException;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -59,28 +59,31 @@ public class Fusion {
      * The constructor will read the API credentials from file and connect to the API
      * @param credentialsFile a path to a credentials file
      */
-    public Fusion(String credentialsFile) throws IOException {
+    //TODO: Reimplement this
+    /*public Fusion(String credentialsFile) throws IOException {
         this(FusionCredentials.readCredentialsFile(credentialsFile), ROOT_URL);
         api = FusionAPIManager.getAPIManager(credentials);
-    }
+    }*/
 
     /**
      * The constructor will read the API credentials from file and connect to the API
      * @param credentialsFile a path to a credentials file
      * @param rootURL override the API URL root
      */
-    public Fusion(String credentialsFile, String rootURL) throws IOException{
+    //TODO: Re-implement this
+    /*public Fusion(String credentialsFile, String rootURL) throws IOException{
         this(FusionCredentials.readCredentialsFile(credentialsFile), rootURL);
         api = FusionAPIManager.getAPIManager(credentials);
-    }
+    }*/
 
     /**
      * The constructor will read the API credentials from file and connect to the API
      */
-    public Fusion() throws IOException {
+    //TODO: Re-implement this
+    /*public Fusion() throws IOException {
         this(FusionCredentials.readCredentialsFile(DEFAULT_CREDENTIALS_FILE), ROOT_URL);
         api = FusionAPIManager.getAPIManager(credentials);
-    }
+    }*/
 
     /**
      * Get the default catalog identifier - this will be common unless overridden.

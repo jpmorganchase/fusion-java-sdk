@@ -4,10 +4,9 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Base64;
 import java.util.Calendar;
 
-public abstract class OAuthCredentials implements IFusionCredentials{
+public abstract class OAuthCredentials implements FusionCredentials {
 
     private final String clientId;
     private final String resource;
