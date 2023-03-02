@@ -1,5 +1,6 @@
 package com.jpmorganchase.fusion;
 
+import com.jpmorganchase.fusion.model.*;
 import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,6 +32,9 @@ public class Fusion {
      * Object members
      */
     private final FusionCredentials credentials;
+
+    //TODO: Allow for proper injection of this component
+    private final APIResponseParser responseParser = new APIResponseParser();
 
     /**
      * Constructor
@@ -108,17 +112,8 @@ public class Fusion {
      * Get a list of the catalogs available to the API account.
      */
     public Map<String, Catalog> listCatalogs() throws Exception {
-
-        HashMap<String, Catalog> catalogs = new HashMap<>();
-        String url = this.rootURL.concat("catalogs/");
-        Map<String, Map> catalogMetadata = this.callForMap(url);
-        for (Map.Entry<String, Map> pair : catalogMetadata.entrySet()) {
-            Catalog catalog = Catalog.factory(pair.getValue());
-            catalogs.put(catalog.getIdentifier(), catalog);
-        }
-
-        return catalogs;
-
+        String json = this.api.callAPI(rootURL.concat("catalogs/"));
+        return responseParser.parseCatalogResponse(json);
     }
 
     /**
@@ -139,18 +134,10 @@ public class Fusion {
      * @param idContains is true if only apply the filter to the identifier
      */
     public Map<String, DataProduct> listProducts(String catalogName, String contains, boolean idContains) throws Exception{
-
-        HashMap<String, DataProduct> products = new HashMap<>();
+        //TODO: unimplemented logic implied by the method parameters
         String url = String.format("%1scatalogs/%2s/products",this.rootURL, catalogName);
-        Map<String, Map> productMetadata = this.callForMap(url);
-
-        for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
-            DataProduct dataProduct = DataProduct.factory(pair.getValue());
-            products.put(dataProduct.getIdentifier(), dataProduct);
-        }
-
-        return products;
-
+        String json = this.api.callAPI(url);
+        return responseParser.parseDataProductResponse(json);
     }
 
     /**
@@ -178,19 +165,9 @@ public class Fusion {
      * @param idContains is true if only apply the filter to the identifier
      */
     public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) throws Exception{
-
-
-        HashMap<String, Dataset> datasets = new HashMap<>();
         String url = String.format("%1scatalogs/%2s/datasets",this.rootURL, catalogName);
-        Map<String, Map> productMetadata = this.callForMap(url);
-
-        for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
-            Dataset dataset = Dataset.factory(pair.getValue());
-            datasets.put(dataset.getIdentifier(), dataset);
-        }
-
-        return datasets;
-
+        String json = this.api.callAPI(url);
+        return responseParser.parseDatasetResponse(json);
     }
 
     /**
@@ -237,17 +214,9 @@ public class Fusion {
      * @param dataset a String representing the dataset identifier to query.
      */
     public Map<String, DatasetSeries> listDatasetMembers(String catalogName, String dataset) throws Exception{
-
-        HashMap<String, DatasetSeries> datasetSeries = new HashMap<>();
         String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries",this.rootURL, catalogName, dataset);
-        Map<String, Map> productMetadata = this.callForMap(url);
-
-        for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
-            DatasetSeries datasetSeriesMember = DatasetSeries.factory(pair.getValue());
-            datasetSeries.put(datasetSeriesMember.getIdentifier(), datasetSeriesMember);
-        }
-
-        return datasetSeries;
+        String json = this.api.callAPI(url);
+        return responseParser.parseDatasetSeriesResponse(json);
     }
 
     /**
@@ -287,17 +256,9 @@ public class Fusion {
      * @param dataset a String representing the dataset identifier to query.
      */
     public Map<String, Attribute> listAttributes(String catalogName, String dataset) throws Exception{
-
-        HashMap<String, Attribute> attributes = new HashMap<>();
         String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes",this.rootURL, catalogName,dataset);
-        Map<String, Map> productMetadata = this.callForMap(url);
-
-        for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
-            Attribute attribute = Attribute.factory(pair.getValue());
-            attributes.put(attribute.getIdentifier(), attribute);
-        }
-
-        return attributes;
+        String json = this.api.callAPI(url);
+        return responseParser.parseAttributeResponse(json);
     }
 
     /**
@@ -318,17 +279,10 @@ public class Fusion {
      */
     public Map<String, Distribution> listDistributions(String catalogName, String dataset, String seriesMember) throws Exception{
 
-        HashMap<String, Distribution> distributions = new HashMap<>();
         String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
                 this.rootURL, catalogName,dataset, seriesMember);
-        Map<String, Map> productMetadata = this.callForMap(url);
-
-        for (Map.Entry<String, Map> pair : productMetadata.entrySet()) {
-            Distribution distribution = Distribution.factory(pair.getValue());
-            distributions.put(distribution.getIdentifier(), distribution);
-        }
-
-        return distributions;
+        String json = this.api.callAPI(url);
+        return responseParser.parseDistributionResponse(json);
     }
 
     /**

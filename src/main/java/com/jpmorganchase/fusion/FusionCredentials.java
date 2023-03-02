@@ -109,9 +109,12 @@ public class FusionCredentials {
      * @param aClientSecret an OIDC client secret
      */
     public FusionCredentials(String aClientID, String aClientSecret){
-
-        this(aClientID, aClientSecret,"JPMC:URI:RS-93742-Fusion-PROD","https://authe.jpmorgan.com/as/token.oauth2", NO_PROXY,0);
-
+        //TODO: Constructors need to be restructured. ALso consider using Java standard proxy detection instead of custom logic?
+        this.clientID = aClientID;
+        this.clientSecret = aClientSecret;
+        this.resource = "JPMC:URI:RS-93742-Fusion-PROD";
+        this.authServerURL = "https://authe.jpmorgan.com/as/token.oauth2";
+        this.useProxy = false;
     }
 
     /**

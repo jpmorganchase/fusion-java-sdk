@@ -1,5 +1,9 @@
-package com.jpmorganchase.fusion;
+package com.jpmorganchase.fusion.model;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -10,6 +14,10 @@ import java.util.Map;
 /**
  * superclass of all entities contained in a catalog
  */
+@Getter
+@AllArgsConstructor //TODO: Deep copy the map?
+@ToString
+@EqualsAndHashCode
 public abstract class CatalogResource {
 
     private final String identifier;
@@ -47,35 +55,5 @@ public abstract class CatalogResource {
         }
 
         return table;
-    }
-
-    /**
-     * Constructor
-     * @param identifier the unique identifier for a new catalog entity
-     */
-    public CatalogResource(String identifier){
-        this.identifier = identifier;
-    }
-
-    /**
-     * Get the unique identifier
-     * @return identifier
-     */
-    public String getIdentifier(){
-        return this.identifier;
-    }
-
-    /**
-     * Returns non-core attributes, handles new metadata that may be added in time.
-     */
-    public Map<String, String> getVarArgs(){
-        return this.varArgs;
-    }
-
-    /**
-     * Adds non-core attributes, handles new metadata that may be added in time.
-     */
-    public void setVarArgs(Map<String, String> varArgs){
-        this.varArgs = varArgs;
     }
 }
