@@ -1,3 +1,5 @@
-# Default ignored files
-/shelf/
-/.idea/workspace.xml
+.idea
+**/*.iml
+**/target/
+**/localAuthCredential.json
+**/client_credentials.json
