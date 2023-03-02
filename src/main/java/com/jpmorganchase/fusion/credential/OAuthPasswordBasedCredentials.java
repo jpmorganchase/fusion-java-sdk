@@ -4,28 +4,31 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Base64;
 import java.util.Calendar;
 
-public abstract class OAuthCredentials implements IFusionCredentials{
+public class OAuthPasswordBasedCredentials implements IFusionCredentials{
 
     private final String clientId;
     private final String resource;
     private final URL authServerUrl;
+    private final String username;
+    private final String password;
     private String bearerToken;
     private long bearerTokenExpiry;
     private int tokenRefreshes;
 
-    public OAuthCredentials(String clientId, String resource, String authServerUrl) throws MalformedURLException {
+
+    public OAuthPasswordBasedCredentials(String clientId, String username, String password, String resource, String authServerUrl) throws MalformedURLException {
         this.clientId = clientId;
+        this.username = username;
         this.resource = resource;
+        this.password = password;
         this.authServerUrl = new URL(authServerUrl);
         tokenRefreshes = 0;
     }
 
     @Override
-    public final synchronized String getBearerToken() throws IOException {
-        String auth;
+    public synchronized String getBearerToken() throws IOException {
         String content;
 
         if(bearerToken == null) {
@@ -35,7 +38,9 @@ public abstract class OAuthCredentials implements IFusionCredentials{
                 return this.bearerToken;
             }
 
-            content = getPostBodyContent();
+            content = String.format("grant_type=password&resource=%1$s&client_id=%2$s&username=%3$s&password=%4$s",
+                    this.resource, this.clientId,
+                    this.username, this.password);
 
             BufferedReader reader = null;
             HttpURLConnection connection = null;
@@ -48,8 +53,6 @@ public abstract class OAuthCredentials implements IFusionCredentials{
                 }
                 connection.setRequestMethod("POST");
                 connection.setDoOutput(true);
-                if(requiresAuthHeader())
-                    connection.setRequestProperty("Authorization", getAuthHeader());
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 connection.setRequestProperty("Accept", "application/json");
                 PrintStream os = new PrintStream(connection.getOutputStream());
@@ -87,14 +90,6 @@ public abstract class OAuthCredentials implements IFusionCredentials{
         }
         return this.bearerToken;
     }
-
-    protected abstract String getPostBodyContent();
-
-    protected abstract boolean requiresAuthHeader();
-
-    protected abstract String getAuthHeader();
-
-
 
     @Override
     public boolean useProxy() {

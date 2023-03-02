@@ -3,10 +3,7 @@ package com.jpmorganchase.fusion;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
-import com.jpmorganchase.fusion.credential.FusionCredentials;
-import com.jpmorganchase.fusion.credential.IFusionCredentials;
-import com.jpmorganchase.fusion.credential.OAuthCredentials;
+import com.jpmorganchase.fusion.credential.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -68,7 +65,7 @@ public class FusionApiManagerTest {
     //TODO: Need tests around the expiry time logic
     @Test
     void successWithOAuthTokenRetrieval() throws Exception{
-        credentials = new OAuthCredentials("aClientID", "aClientSecret", "aResource", "http://localhost:8080/oAuth");
+        credentials = new OAuthSecretBasedCredentials("aClientID", "aClientSecret", "aResource", "http://localhost:8080/oAuth");
         fusionAPIManager = FusionAPIManager.getAPIManager(credentials);
 
         stubFor(post("/oAuth").willReturn(aResponse()
@@ -83,6 +80,31 @@ public class FusionApiManagerTest {
                 .withHeader("Accept", WireMock.equalTo("application/json"))
                 .withHeader("Content-Type", WireMock.equalTo("application/x-www-form-urlencoded"))
                 .withRequestBody(WireMock.equalTo("grant_type=client_credentials&aud=aResource")));
+
+        verify(getRequestedFor(urlEqualTo("/test"))
+                .withHeader("Authorization", WireMock.equalTo("Bearer my-oauth-generated-token")));
+
+        assertThat(response, is(equalTo("sample response")));
+    }
+
+    //TODO: This can be moved once we finish refactoring
+    //String aClientID, String username, String password, String aResource, String anAuthServerURL
+    @Test
+    void successWithOAuthPasswordBasedTokenRetrieval() throws Exception{
+        credentials = new OAuthPasswordBasedCredentials("aClientID", "aUsername", "aPassword", "aResource", "http://localhost:8080/oAuth");
+        fusionAPIManager = FusionAPIManager.getAPIManager(credentials);
+
+        stubFor(post("/oAuth").willReturn(aResponse()
+                .withStatus(HttpURLConnection.HTTP_OK)
+                .withBody(tokenJson)));
+        stubFor(get("/test").willReturn(aResponse().withBody("sample response")));
+
+        String response = fusionAPIManager.callAPI("http://localhost:8080/test");
+
+        verify(postRequestedFor(urlEqualTo("/oAuth"))
+                .withHeader("Accept", WireMock.equalTo("application/json"))
+                .withHeader("Content-Type", WireMock.equalTo("application/x-www-form-urlencoded"))
+                .withRequestBody(WireMock.equalTo("grant_type=password&resource=aResource&client_id=aClientID&username=aUsername&password=aPassword")));
 
         verify(getRequestedFor(urlEqualTo("/test"))
                 .withHeader("Authorization", WireMock.equalTo("Bearer my-oauth-generated-token")));

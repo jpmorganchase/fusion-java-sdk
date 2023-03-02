@@ -156,7 +156,16 @@ public class FusionCredentials implements IFusionCredentials {
         this.proxyAddress = proxyAddress;
         this.proxyPort = proxyPort;
         this.useProxy = true;
+    }
 
+    public FusionCredentials(String aClientID, String username, String password, String aResource, String anAuthServerURL){
+        this.clientID = aClientID;
+        this.username = username;
+        this.password = password;
+        this.resource = aResource;
+        this.authServerURL = anAuthServerURL;
+        this.useProxy = false;
+        this.grantTypePassword = true;
     }
 
     /**

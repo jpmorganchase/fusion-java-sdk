@@ -7,24 +7,26 @@ import java.net.URL;
 import java.util.Base64;
 import java.util.Calendar;
 
-public abstract class OAuthCredentials implements IFusionCredentials{
+public class OAuthSecretBasedCredentials implements IFusionCredentials{
 
     private final String clientId;
+    private final String clientSecret;
     private final String resource;
     private final URL authServerUrl;
     private String bearerToken;
     private long bearerTokenExpiry;
     private int tokenRefreshes;
 
-    public OAuthCredentials(String clientId, String resource, String authServerUrl) throws MalformedURLException {
+    public OAuthSecretBasedCredentials(String clientId, String clientSecret, String resource, String authServerUrl) throws MalformedURLException {
         this.clientId = clientId;
+        this.clientSecret = clientSecret;
         this.resource = resource;
         this.authServerUrl = new URL(authServerUrl);
         tokenRefreshes = 0;
     }
 
     @Override
-    public final synchronized String getBearerToken() throws IOException {
+    public synchronized String getBearerToken() throws IOException {
         String auth;
         String content;
 
@@ -35,7 +37,9 @@ public abstract class OAuthCredentials implements IFusionCredentials{
                 return this.bearerToken;
             }
 
-            content = getPostBodyContent();
+            auth = clientId + ":" + clientSecret;
+            content = String.format("grant_type=client_credentials&aud=%1s", resource);
+            String authentication = Base64.getEncoder().encodeToString(auth.getBytes());
 
             BufferedReader reader = null;
             HttpURLConnection connection = null;
@@ -48,8 +52,7 @@ public abstract class OAuthCredentials implements IFusionCredentials{
                 }
                 connection.setRequestMethod("POST");
                 connection.setDoOutput(true);
-                if(requiresAuthHeader())
-                    connection.setRequestProperty("Authorization", getAuthHeader());
+                connection.setRequestProperty("Authorization", "Basic " + authentication);
                 connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 connection.setRequestProperty("Accept", "application/json");
                 PrintStream os = new PrintStream(connection.getOutputStream());
@@ -87,14 +90,6 @@ public abstract class OAuthCredentials implements IFusionCredentials{
         }
         return this.bearerToken;
     }
-
-    protected abstract String getPostBodyContent();
-
-    protected abstract boolean requiresAuthHeader();
-
-    protected abstract String getAuthHeader();
-
-
 
     @Override
     public boolean useProxy() {
