@@ -1,13 +1,11 @@
 package com.jpmorganchase.fusion;
 
 import com.jpmorganchase.fusion.model.*;
-import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +58,7 @@ public class Fusion {
      * The constructor will read the API credentials from file and connect to the API
      * @param credentialsFile a path to a credentials file
      */
-    public Fusion(String credentialsFile) throws IOException, ParseException {
+    public Fusion(String credentialsFile) throws IOException {
         this(FusionCredentials.readCredentialsFile(credentialsFile), ROOT_URL);
         api = FusionAPIManager.getAPIManager(credentials);
     }
@@ -70,7 +68,7 @@ public class Fusion {
      * @param credentialsFile a path to a credentials file
      * @param rootURL override the API URL root
      */
-    public Fusion(String credentialsFile, String rootURL) throws IOException, ParseException{
+    public Fusion(String credentialsFile, String rootURL) throws IOException{
         this(FusionCredentials.readCredentialsFile(credentialsFile), rootURL);
         api = FusionAPIManager.getAPIManager(credentials);
     }
@@ -78,7 +76,7 @@ public class Fusion {
     /**
      * The constructor will read the API credentials from file and connect to the API
      */
-    public Fusion() throws IOException, ParseException {
+    public Fusion() throws IOException {
         this(FusionCredentials.readCredentialsFile(DEFAULT_CREDENTIALS_FILE), ROOT_URL);
         api = FusionAPIManager.getAPIManager(credentials);
     }
@@ -104,8 +102,10 @@ public class Fusion {
      * @return a map from the returned json object
      */
     private Map<String, Map> callForMap(String url) throws Exception{
-        String json = this.api.callAPI(url);
-        return CatalogResource.metadataAttributes(json);
+        /*String json = this.api.callAPI(url);
+        return CatalogResource.metadataAttributes(json);*/
+        //TODO: implement this behaviour
+        throw new RuntimeException("Not implemented yet");
     }
 
     /**

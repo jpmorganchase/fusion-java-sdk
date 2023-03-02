@@ -1,9 +1,10 @@
 package com.jpmorganchase.fusion;
 
-import java.io.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import java.io.*;
 
 /**
  * An object that holds credentials that can be used to authenticate.
