@@ -16,9 +16,8 @@ public class OAuthServerResponseTest {
             .tokenType("bearer")
             .build();
 
-
     @Test
-    void testCreationFromJson(){
+    void testCreationFromValidJson(){
         OAuthServerResponse response = OAuthServerResponse.fromJson(sampleJson);
         assertThat(response, is(equalTo(expectedResult)));
     }

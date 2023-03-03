@@ -31,6 +31,7 @@ public abstract class OAuthCredentials implements FusionCredentials {
         if(bearerToken == null) {
 
             //Check if an obtained token has expired.
+            //TODO: This should possibly be outside of concurrency Control - maybe we need an AtomicBoolean hasTokenExpired?
             if (System.currentTimeMillis() < this.bearerTokenExpiry){
                 return this.bearerToken;
             }

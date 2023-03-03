@@ -83,6 +83,7 @@ public class FusionAPIManager {
             //Check the HTTP response code
             int httpCode = connection.getResponseCode();
 
+            //TODO: Better response code handling?
             if (httpCode != 200){
                 throw new APICallException(httpCode);
             }
