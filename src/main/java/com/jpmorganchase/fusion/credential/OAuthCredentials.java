@@ -1,24 +1,30 @@
 package com.jpmorganchase.fusion.credential;
 
+import com.jpmorganchase.fusion.http.Client;
+import com.jpmorganchase.fusion.http.HttpResponse;
+import com.jpmorganchase.fusion.http.JdkClient;
+
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class OAuthCredentials implements FusionCredentials {
 
     private final String clientId;
     private final String resource;
-    private final URL authServerUrl;
+    private final String authServerUrl;
     private String bearerToken;
     private long bearerTokenExpiry;
     private int tokenRefreshes;
 
-    public OAuthCredentials(String clientId, String resource, String authServerUrl) throws MalformedURLException {
+    //TODO: Make injectable
+    private final Client httpClient = new JdkClient();
+
+    public OAuthCredentials(String clientId, String resource, String authServerUrl) {
         this.clientId = clientId;
         this.resource = resource;
-        this.authServerUrl = new URL(authServerUrl);
+        this.authServerUrl = authServerUrl;
         tokenRefreshes = 0;
         bearerTokenExpiry = 0L;
     }
@@ -28,65 +34,38 @@ public abstract class OAuthCredentials implements FusionCredentials {
         String auth;
         String content;
 
-        if(bearerToken == null) {
+        if (bearerToken == null) {
 
             //Check if an obtained token has expired.
             //TODO: This should possibly be outside of concurrency Control - maybe we need an AtomicBoolean hasTokenExpired?
-            if (System.currentTimeMillis() < this.bearerTokenExpiry){
+            if (System.currentTimeMillis() < this.bearerTokenExpiry) {
                 return this.bearerToken;
             }
 
-            content = getPostBodyContent();
+            Map<String, String> requestHeaders = new HashMap<>();
+            if (requiresAuthHeader())
+                requestHeaders.put("Authorization", getAuthHeader());
+            requestHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+            requestHeaders.put("Accept", "application/json");
 
-            BufferedReader reader = null;
-            HttpURLConnection connection = null;
+            HttpResponse<String> response = httpClient.post(authServerUrl, requestHeaders, getPostBodyContent());
 
-            try {
-                if (this.useProxy()){
-                    connection = (HttpURLConnection) authServerUrl.openConnection(null);//TODO: This needs fixed when proxy logic is done
-                }else {
-                    connection = (HttpURLConnection) authServerUrl.openConnection();
-                }
-                connection.setRequestMethod("POST");
-                connection.setDoOutput(true);
-                if(requiresAuthHeader())
-                    connection.setRequestProperty("Authorization", getAuthHeader());
-                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-                connection.setRequestProperty("Accept", "application/json");
-                PrintStream os = new PrintStream(connection.getOutputStream());
-                os.print(content);
-                os.close();
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                StringWriter out = new StringWriter(connection.getContentLength() > 0 ? connection.getContentLength() : 2048);
-                while ((line = reader.readLine()) != null) {
-                    out.append(line);
-                }
-                String response = out.toString();
+            //TODO: Error Handling?
+            //Get the bearer token
+            OAuthServerResponse oAuthServerResponse = OAuthServerResponse.fromJson(response.getBody());
+            this.bearerToken = oAuthServerResponse.getAccessToken();
 
-                //Get the bearer token
-                OAuthServerResponse oAuthServerResponse = OAuthServerResponse.fromJson(response);
-                this.bearerToken = oAuthServerResponse.getAccessToken();
+            //Get the token expiry time
+            Calendar calendar = Calendar.getInstance();
+            int seconds = oAuthServerResponse.getExpiresIn();
+            calendar.add(Calendar.SECOND, seconds - 30);
+            this.bearerTokenExpiry = calendar.getTimeInMillis();
+            tokenRefreshes++;
+            System.out.println("Token expires at: " + calendar.getTime());
+            System.out.println("Number of token refreshes: " + this.tokenRefreshes);
 
-                //Get the token expiry time
-                Calendar calendar = Calendar.getInstance();
-                int seconds = oAuthServerResponse.getExpiresIn();
-                calendar.add(Calendar.SECOND, seconds-30);
-                this.bearerTokenExpiry = calendar.getTimeInMillis();
-                tokenRefreshes++;
-                System.out.println("Token expires at: " + calendar.getTime());
-                System.out.println("Number of token refreshes: "+ this.tokenRefreshes);
-
-            } finally {
-                if (reader != null) {
-                    reader.close();
-                }
-                if (connection != null) {
-                    connection.disconnect();
-                }
-            }
         }
-        return this.bearerToken;
+        return bearerToken;
     }
 
     protected abstract String getPostBodyContent();
@@ -104,7 +83,7 @@ public abstract class OAuthCredentials implements FusionCredentials {
         return resource;
     }
 
-    public URL getAuthServerUrl() {
+    public String getAuthServerUrl() {
         return authServerUrl;
     }
 
