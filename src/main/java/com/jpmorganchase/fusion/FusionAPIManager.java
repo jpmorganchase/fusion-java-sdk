@@ -6,8 +6,6 @@ import com.jpmorganchase.fusion.http.HttpResponse;
 import com.jpmorganchase.fusion.http.JdkClient;
 
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
