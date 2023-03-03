@@ -11,11 +11,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -32,6 +29,11 @@ public class FusionApiManagerTest {
             .configureStaticDsl(true)
             .build();
 
+    @RegisterExtension
+    static WireMockExtension wiremockProxy = WireMockExtension.newInstance()
+            .options(wireMockConfig().port(8081).notifier(new ConsoleNotifier(true))) //TODO: Remove this fixed port and use the default of a random port
+            .build();
+
     private FusionCredentials credentials;
     private FusionAPIManager fusionAPIManager;
 
@@ -45,6 +47,7 @@ public class FusionApiManagerTest {
 
     @Test
     void successfulGetCall() throws Exception {
+        wiremockProxy.stubFor(get("/test").willReturn(aResponse().proxiedFrom("http://localhost:8080")));
         stubFor(get("/test").willReturn(aResponse().withBody("sample response")));
 
         String response = fusionAPIManager.callAPI("http://localhost:8080/test");

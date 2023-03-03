@@ -3,11 +3,22 @@ package com.jpmorganchase.fusion.http;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
 
 //TODO: Come back and implement Proxy logic
 public class JdkClient implements Client {
+
+    private final Proxy proxy;
+
+    public JdkClient(Proxy proxy) {
+        this.proxy = proxy;
+    }
+
+    public JdkClient() {
+        this.proxy = Proxy.NO_PROXY;
+    }
 
     @Override
     public HttpResponse<String> get(String path, Map<String, String> headers) {
@@ -157,7 +168,7 @@ public class JdkClient implements Client {
 
     private HttpURLConnection openConnection(URL url) {
         try {
-            return (HttpURLConnection) url.openConnection();
+            return (HttpURLConnection) url.openConnection(proxy);
         } catch (IOException e) {
             throw new ClientException("Error establishing HTTP connection", e);
         }
