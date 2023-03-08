@@ -35,8 +35,4 @@ public class OAuthSecretBasedCredentials extends OAuthCredentials{
         return "Basic " + Base64.getEncoder().encodeToString(auth.getBytes());
     }
 
-    @Override
-    public boolean useProxy() {
-        return false;
-    }
 }

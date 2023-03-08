@@ -38,8 +38,4 @@ public class OAuthPasswordBasedCredentials extends OAuthCredentials{
         return null;
     }
 
-    @Override
-    public boolean useProxy() {
-        return false;
-    }
 }

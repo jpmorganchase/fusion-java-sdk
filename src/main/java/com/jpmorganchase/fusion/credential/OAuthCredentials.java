@@ -104,8 +104,4 @@ public abstract class OAuthCredentials implements FusionCredentials {
         return tokenRefreshes;
     }
 
-    @Override
-    public boolean useProxy() {
-        return false;
-    }
 }
