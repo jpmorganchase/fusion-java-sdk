@@ -1,73 +1,79 @@
 package com.jpmorganchase.fusion;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import com.google.common.collect.Lists;
 import com.jpmorganchase.fusion.credential.*;
+import com.jpmorganchase.fusion.http.Client;
+import com.jpmorganchase.fusion.http.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class FusionApiManagerTest {
 
-    @RegisterExtension
-    static WireMockExtension wiremock = WireMockExtension.newInstance()
-            .options(wireMockConfig().port(8080).notifier(new ConsoleNotifier(true))) //TODO: Remove this fixed port and use the default of a random port
-            .configureStaticDsl(true)
-            .build();
-
-    @RegisterExtension
-    static WireMockExtension wiremockProxy = WireMockExtension.newInstance()
-            .options(wireMockConfig().port(8081).notifier(new ConsoleNotifier(true))) //TODO: Remove this fixed port and use the default of a random port
-            .build();
 
     private FusionCredentials credentials;
     private FusionAPIManager fusionAPIManager;
+    @Mock
+    private Client client;
 
     private static final String tokenJson = "{\"access_token\":\"my-oauth-generated-token\",\"token_type\":\"bearer\",\"expires_in\":3600}";
 
     @BeforeEach
     void setUp() {
         credentials = new BearerTokenCredentials("my-token");
-        fusionAPIManager = FusionAPIManager.getAPIManager(credentials);
+        fusionAPIManager = new FusionAPIManager(credentials, client);
     }
 
     @Test
     void successfulGetCall() throws Exception {
-        wiremockProxy.stubFor(get("/test").willReturn(aResponse().proxiedFrom("http://localhost:8080")));
-        stubFor(get("/test").willReturn(aResponse().withBody("sample response")));
+        Map<String, String> expectedHeaders = new HashMap<>();
+        expectedHeaders.put("Authorization", "Bearer my-token");
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                        .statusCode(200)
+                        .body("sample response")
+                        .build();
+        when(client.get("http://localhost:8080/test", expectedHeaders)).thenReturn(expectedHttpResponse);
 
         String response = fusionAPIManager.callAPI("http://localhost:8080/test");
 
-        verify(getRequestedFor(urlEqualTo("/test"))
-                .withHeader("Authorization", WireMock.equalTo("Bearer my-token")));
         assertThat(response, is(equalTo("sample response")));
     }
 
     @Test
     void failureForResourceNotFound() throws Exception {
-        stubFor(get("/test").willReturn(aResponse().withStatus(HttpURLConnection.HTTP_NOT_FOUND)));
+        Map<String, String> expectedHeaders = new HashMap<>();
+        expectedHeaders.put("Authorization", "Bearer my-token");
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                .statusCode(HttpURLConnection.HTTP_NOT_FOUND)
+                .build();
+        when(client.get("http://localhost:8080/test", expectedHeaders)).thenReturn(expectedHttpResponse);
 
         APICallException thrown = assertThrows(APICallException.class,
                 () -> fusionAPIManager.callAPI("http://localhost:8080/test"),
                 "Expected APICallException but none thrown"
         );
 
-        verify(getRequestedFor(urlEqualTo("/test"))
-                .withHeader("Authorization", WireMock.equalTo("Bearer my-token")));
         assertThat(thrown.getMessage(), is(equalTo("The requested resource does not exist.")));
     }
 
@@ -75,70 +81,90 @@ public class FusionApiManagerTest {
     //TODO: Need tests around the expiry time logic
     @Test
     void successWithOAuthTokenRetrieval() throws Exception {
-        credentials = new OAuthSecretBasedCredentials("aClientID", "aClientSecret", "aResource", "http://localhost:8080/oAuth");
-        fusionAPIManager = FusionAPIManager.getAPIManager(credentials);
+        credentials = new OAuthSecretBasedCredentials("aClientID", "aClientSecret", "aResource", "http://localhost:8080/oAuth", client);
+        fusionAPIManager = new FusionAPIManager(credentials, client);
 
-        stubFor(post("/oAuth").willReturn(aResponse()
-                .withStatus(HttpURLConnection.HTTP_OK)
-                .withBody(tokenJson)));
-        stubFor(get("/test").willReturn(aResponse().withBody("sample response")));
+        Map<String, String> expectedOAuthHeaders = new HashMap<>();
+        expectedOAuthHeaders.put("Authorization", "Basic YUNsaWVudElEOmFDbGllbnRTZWNyZXQ=");
+        expectedOAuthHeaders.put("Accept", "application/json");
+        expectedOAuthHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+
+        HttpResponse<String> oAuthResponse = HttpResponse.<String>builder()
+                .body(tokenJson)
+                .build();
+
+        Map<String, String> expectedRequestHeaders = new HashMap<>();
+        expectedRequestHeaders.put("Authorization", "Bearer my-oauth-generated-token");
+
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("sample response")
+                .build();
+
+        when(client.post("http://localhost:8080/oAuth", expectedOAuthHeaders, "grant_type=client_credentials&aud=aResource")).thenReturn(oAuthResponse);
+        when(client.get("http://localhost:8080/test", expectedRequestHeaders)).thenReturn(expectedHttpResponse);
+
 
         String response = fusionAPIManager.callAPI("http://localhost:8080/test");
-
-        verify(postRequestedFor(urlEqualTo("/oAuth"))
-                .withHeader("Authorization", WireMock.equalTo("Basic YUNsaWVudElEOmFDbGllbnRTZWNyZXQ="))
-                .withHeader("Accept", WireMock.equalTo("application/json"))
-                .withHeader("Content-Type", WireMock.equalTo("application/x-www-form-urlencoded"))
-                .withRequestBody(WireMock.equalTo("grant_type=client_credentials&aud=aResource")));
-
-        verify(getRequestedFor(urlEqualTo("/test"))
-                .withHeader("Authorization", WireMock.equalTo("Bearer my-oauth-generated-token")));
 
         assertThat(response, is(equalTo("sample response")));
     }
 
-    //TODO: This can be moved once we finish refactoring
-    //String aClientID, String username, String password, String aResource, String anAuthServerURL
+    //TODO: This can be moved once we finish refactoring (Can it? I wrote this comment a week ago and am now unconvinced)
+    //TODO: This method and the one above are duplicating code - refactor
     @Test
     void successWithOAuthPasswordBasedTokenRetrieval() throws Exception {
-        credentials = new OAuthPasswordBasedCredentials("aClientID", "aUsername", "aPassword", "aResource", "http://localhost:8080/oAuth");
-        fusionAPIManager = FusionAPIManager.getAPIManager(credentials);
+        credentials = new OAuthPasswordBasedCredentials("aClientID", "aUsername", "aPassword", "aResource", "http://localhost:8080/oAuth", client);
+        fusionAPIManager = new FusionAPIManager(credentials, client);
 
-        stubFor(post("/oAuth").willReturn(aResponse()
-                .withStatus(HttpURLConnection.HTTP_OK)
-                .withBody(tokenJson)));
-        stubFor(get("/test").willReturn(aResponse().withBody("sample response")));
+        Map<String, String> expectedOAuthHeaders = new HashMap<>();
+        expectedOAuthHeaders.put("Accept", "application/json");
+        expectedOAuthHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+
+        HttpResponse<String> oAuthResponse = HttpResponse.<String>builder()
+                .body(tokenJson)
+                .build();
+
+        Map<String, String> expectedRequestHeaders = new HashMap<>();
+        expectedRequestHeaders.put("Authorization", "Bearer my-oauth-generated-token");
+
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("sample response")
+                .build();
+
+        when(client.post("http://localhost:8080/oAuth", expectedOAuthHeaders,
+                "grant_type=password&resource=aResource&client_id=aClientID&username=aUsername&password=aPassword")).thenReturn(oAuthResponse);
+        when(client.get("http://localhost:8080/test", expectedRequestHeaders)).thenReturn(expectedHttpResponse);
+
 
         String response = fusionAPIManager.callAPI("http://localhost:8080/test");
-
-        verify(postRequestedFor(urlEqualTo("/oAuth"))
-                .withHeader("Accept", WireMock.equalTo("application/json"))
-                .withHeader("Content-Type", WireMock.equalTo("application/x-www-form-urlencoded"))
-                .withRequestBody(WireMock.equalTo("grant_type=password&resource=aResource&client_id=aClientID&username=aUsername&password=aPassword")));
-
-        verify(getRequestedFor(urlEqualTo("/test"))
-                .withHeader("Authorization", WireMock.equalTo("Bearer my-oauth-generated-token")));
 
         assertThat(response, is(equalTo("sample response")));
     }
 
     @Test
     void successfulFileDownload() throws Exception {
-        fusionAPIManager = FusionAPIManager.getAPIManager(credentials);
+        fusionAPIManager = new FusionAPIManager(credentials, client);
 
         File tempOutputFile = File.createTempFile("fusion-test-", ".csv");
 
+        Map<String, String> expectedRequestHeaders = new HashMap<>();
+        expectedRequestHeaders.put("Authorization", "Bearer my-token");
+
         byte[] serverResponse = new String("A,B,C\n1,2,3").getBytes();
-        stubFor(get("/test").willReturn(aResponse()
-                .withStatus(200)
-                .withHeader("Content-Type", "text/csv")
-                .withHeader("Content-Disposition", "attachment; filename=test-testFile.csv")
-                .withBody(serverResponse)));
+        Map<String, List<String>> responseHeaders = new HashMap<>();
+        responseHeaders.put("Content-Type", Lists.newArrayList("text/csv"));
+        responseHeaders.put("Content-Disposition", Lists.newArrayList("attachment; filename=test-testFile.csv"));
+        HttpResponse<InputStream> expectedHttpResponse = HttpResponse.<InputStream>builder()
+                .statusCode(200)
+                .body(new ByteArrayInputStream(serverResponse))
+                .headers(responseHeaders)
+                .build();
+        when(client.getInputStream("http://localhost:8080/test", expectedRequestHeaders)).thenReturn(expectedHttpResponse);
+
 
         fusionAPIManager.callAPIFileDownload("http://localhost:8080/test", tempOutputFile.getAbsolutePath());
-
-        verify(getRequestedFor(urlEqualTo("/test"))
-                .withHeader("Authorization", WireMock.equalTo("Bearer my-token")));
 
         byte[] outputBytes = new byte[(int) tempOutputFile.length()];
         try(FileInputStream fis = new FileInputStream(tempOutputFile)) {
@@ -149,25 +175,31 @@ public class FusionApiManagerTest {
         tempOutputFile.deleteOnExit();
     }
 
+    @Captor
+    ArgumentCaptor<InputStream> fileUploadInputStream;
+
     @Test
     void successfulFileUpload() throws Exception {
-        fusionAPIManager = FusionAPIManager.getAPIManager(credentials);
-        stubFor(put("/test").willReturn(aResponse().withStatus(200)));
+        fusionAPIManager = new FusionAPIManager(credentials, client);
+
+        Map<String, String> expectedRequestHeaders = new HashMap<>();
+        expectedRequestHeaders.put("accept", "*/*");
+        expectedRequestHeaders.put("Authorization", "Bearer my-token");
+        expectedRequestHeaders.put("Content-Type", "application/octet-stream");
+        expectedRequestHeaders.put("x-jpmc-distribution-from-date", "2023-03-01");
+        expectedRequestHeaders.put("x-jpmc-distribution-to-date", "2023-03-02");
+        expectedRequestHeaders.put("x-jpmc-distribution-created-date", "2023-03-03");
+        expectedRequestHeaders.put("Digest", "md5=SpmtmsY7xMV5dSZdQaLnpA==");
+        expectedRequestHeaders.put("Content-Length", "23");
+
+        when(client.put(any(), any(),any()))
+                .thenReturn(HttpResponse.<String>builder().statusCode(200).build());
+        //TODO: Now we need to validate the stub properly
+                //new ByteArrayInputStream("A,B,C\n1,2,3\n4,5,6\n7,8,9".getBytes())
 
         fusionAPIManager.callAPIFileUpload("http://localhost:8080/test",
                 getPathFromResource("upload-test.csv"),
                 "2023-03-01", "2023-03-02", "2023-03-03");
-
-        verify(putRequestedFor(urlEqualTo("/test"))
-                .withHeader("accept", WireMock.equalTo("*/*"))
-                .withHeader("Authorization", WireMock.equalTo("Bearer my-token"))
-                .withHeader("Content-Type", WireMock.equalTo("application/octet-stream"))
-                .withHeader("x-jpmc-distribution-from-date", WireMock.equalTo("2023-03-01"))
-                .withHeader("x-jpmc-distribution-to-date", WireMock.equalTo("2023-03-02"))
-                .withHeader("x-jpmc-distribution-created-date", WireMock.equalTo("2023-03-03"))
-                .withHeader("Digest", WireMock.equalTo("md5=SpmtmsY7xMV5dSZdQaLnpA=="))
-                .withHeader("Content-Length", WireMock.equalTo("23"))
-                .withRequestBody(WireMock.equalTo("A,B,C\n1,2,3\n4,5,6\n7,8,9")));
     }
 
     private static String getPathFromResource(String resourceName){

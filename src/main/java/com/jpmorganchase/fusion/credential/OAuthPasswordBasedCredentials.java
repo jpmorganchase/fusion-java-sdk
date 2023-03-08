@@ -1,5 +1,7 @@
 package com.jpmorganchase.fusion.credential;
 
+import com.jpmorganchase.fusion.http.Client;
+
 import java.net.MalformedURLException;
 
 public class OAuthPasswordBasedCredentials extends OAuthCredentials{
@@ -9,6 +11,12 @@ public class OAuthPasswordBasedCredentials extends OAuthCredentials{
 
     public OAuthPasswordBasedCredentials(String clientId, String username, String password, String resource, String authServerUrl) throws MalformedURLException {
         super(clientId, resource, authServerUrl);
+        this.username = username;
+        this.password = password;
+    }
+
+    public OAuthPasswordBasedCredentials(String clientId, String username, String password, String resource, String authServerUrl, Client client) throws MalformedURLException {
+        super(clientId, resource, authServerUrl, client);
         this.username = username;
         this.password = password;
     }

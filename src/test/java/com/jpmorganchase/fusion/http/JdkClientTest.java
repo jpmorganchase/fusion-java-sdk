@@ -3,6 +3,7 @@ package com.jpmorganchase.fusion.http;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -44,55 +45,75 @@ public class JdkClientTest {
     private static final Client httpClientWithProxy = new JdkClient(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", 8081)));
 
     @Test
-    void successfulGetCallWithNoHeaders() throws Exception {
-
+    void successfulGetCallWithNoHeaders() {
+        getMethodStub();
+        HttpResponse<String> response = executeGetRequest(Collections.emptyMap());
+        validateGetRequest(response);
+    }
+    
+    private static void getMethodStub(){
         stubFor(get("/test").willReturn(aResponse().withBody("sample response")));
+    }
 
-        HttpResponse<String> response = httpClient.get("http://localhost:8080/test", Collections.emptyMap());
+    private static void getMethodStub(int responseCode){
+        stubFor(get("/test").willReturn(aResponse().withStatus(responseCode)));
+    }
 
-        verify(getRequestedFor(urlEqualTo("/test")));
+    private HttpResponse<String> executeGetRequest(Map<String, String> headers){
+        return httpClient.get("http://localhost:8080/test", headers);
+    }
+
+    private void validateGetRequest(HttpResponse<String> response){
+        validateGetRequest(response, Collections.emptyMap());
+    }
+
+    private void validateGetRequest(HttpResponse<String> response, Map<String, String> expectedRequestHeaders){
+        if(expectedRequestHeaders.size()>0){
+            //Add headers to the stub expectation if we had any on the request
+            RequestPatternBuilder requestPatternBuilder = getRequestedFor(urlEqualTo("/test"));
+            for(Map.Entry<String, String> header : expectedRequestHeaders.entrySet()){
+                requestPatternBuilder.withHeader(header.getKey(), WireMock.equalTo(header.getValue()));
+            }
+            verify(requestPatternBuilder);
+        } else {
+            //otherwise just verify that the URL was invoked
+            verify(getRequestedFor(urlEqualTo("/test")));
+        }
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo("sample response")));
     }
 
     @Test
-    void successfulGetCallWithOneHeader() throws Exception {
+    void successfulGetCallWithOneHeader(){
 
-        stubFor(get("/test").willReturn(aResponse().withBody("sample response")));
+        getMethodStub();
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("header1", "value1");
-        HttpResponse<String> response = httpClient.get("http://localhost:8080/test", requestHeaders);
+        HttpResponse<String> response = executeGetRequest(requestHeaders);
 
-        verify(getRequestedFor(urlEqualTo("/test")).withHeader("header1", WireMock.equalTo("value1")));
-        assertThat(response.getStatusCode(), is(equalTo(200)));
-        assertThat(response.getBody(), is(equalTo("sample response")));
+        validateGetRequest(response, requestHeaders);
     }
 
     @Test
     void successfulGetCallWithManyHeaders() throws Exception {
 
-        stubFor(get("/test").willReturn(aResponse().withBody("sample response")));
+        getMethodStub();
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("header1", "value1");
         requestHeaders.put("header2", "value2");
         requestHeaders.put("header3", "value3");
-        HttpResponse<String> response = httpClient.get("http://localhost:8080/test", requestHeaders);
+        HttpResponse<String> response = executeGetRequest(requestHeaders);
 
-        verify(getRequestedFor(urlEqualTo("/test"))
-                .withHeader("header1", WireMock.equalTo("value1"))
-                .withHeader("header2", WireMock.equalTo("value2"))
-                .withHeader("header3", WireMock.equalTo("value3")));
-        assertThat(response.getStatusCode(), is(equalTo(200)));
-        assertThat(response.getBody(), is(equalTo("sample response")));
+        validateGetRequest(response, requestHeaders);
     }
 
     @Test
-    void getCallWith404Response() throws Exception {
-        stubFor(get("/test").willReturn(aResponse().withStatus(HttpURLConnection.HTTP_NOT_FOUND)));
+    void getCallWith404Response() {
+        getMethodStub(HttpURLConnection.HTTP_NOT_FOUND);
 
-        HttpResponse<String> response = httpClient.get("http://localhost:8080/test", Collections.emptyMap());
+        HttpResponse<String> response = executeGetRequest(Collections.emptyMap());
 
         verify(getRequestedFor(urlEqualTo("/test")));
         assertThat(response.getStatusCode(), is(equalTo(404)));
@@ -101,9 +122,9 @@ public class JdkClientTest {
 
     @Test
     void getCallWith500Response() throws Exception {
-        stubFor(get("/test").willReturn(aResponse().withStatus(HttpURLConnection.HTTP_INTERNAL_ERROR)));
+        getMethodStub(HttpURLConnection.HTTP_INTERNAL_ERROR);
 
-        HttpResponse<String> response = httpClient.get("http://localhost:8080/test", Collections.emptyMap());
+        HttpResponse<String> response = executeGetRequest(Collections.emptyMap());
 
         verify(getRequestedFor(urlEqualTo("/test")));
         assertThat(response.getStatusCode(), is(equalTo(500)));
@@ -117,7 +138,7 @@ public class JdkClientTest {
                 .withBody("sample response")
                 .withHeader("test-header-1", "header-1-value")));
 
-        HttpResponse<String> response = httpClient.get("http://localhost:8080/test", Collections.emptyMap());
+        HttpResponse<String> response = executeGetRequest(Collections.emptyMap());
 
         verify(getRequestedFor(urlEqualTo("/test")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
@@ -129,7 +150,7 @@ public class JdkClientTest {
     void getRequestRespectsConfiguredProxySettings() throws Exception {
 
         wiremockProxy.stubFor(get("/test").willReturn(aResponse().proxiedFrom("http://localhost:8080")));
-        stubFor(get("/test").willReturn(aResponse().withBody("sample response")));
+        getMethodStub();
 
         HttpResponse<String> response = httpClientWithProxy.get("http://localhost:8080/test", Collections.emptyMap());
 
@@ -340,7 +361,7 @@ public class JdkClientTest {
     @Test
     void successfulGetStreamCallWithNoHeaders() throws Exception {
 
-        stubFor(get("/test").willReturn(aResponse().withBody("sample response")));
+        getMethodStub();
 
         HttpResponse<InputStream> response = httpClient.getInputStream("http://localhost:8080/test", Collections.emptyMap());
 
@@ -366,7 +387,7 @@ public class JdkClientTest {
 
                 TODO
 
-                3. Refactor all these HTTP tests to remove duplication
+                3. Refactor all these HTTP tests to remove duplication -- IN PROGRESS
                 4. Go back and refactor all the FusionApiManager tests now that we don't need to execute them against Wiremock
                 5. Refactor of the JdkClient once all tests are in place - needs duplication removed and some clean-up
                 6. Start working on the user facing code next - e.g. Fusion.java (Builder? to allow for customisation of Credential type, Http client type and Proxy information)

@@ -18,8 +18,7 @@ public abstract class OAuthCredentials implements FusionCredentials {
     private long bearerTokenExpiry;
     private int tokenRefreshes;
 
-    //TODO: Make injectable
-    private final Client httpClient = new JdkClient();
+    private final Client httpClient;
 
     public OAuthCredentials(String clientId, String resource, String authServerUrl) {
         this.clientId = clientId;
@@ -27,6 +26,16 @@ public abstract class OAuthCredentials implements FusionCredentials {
         this.authServerUrl = authServerUrl;
         tokenRefreshes = 0;
         bearerTokenExpiry = 0L;
+        httpClient = new JdkClient();
+    }
+
+    public OAuthCredentials(String clientId, String resource, String authServerUrl, Client client) {
+        this.clientId = clientId;
+        this.resource = resource;
+        this.authServerUrl = authServerUrl;
+        tokenRefreshes = 0;
+        bearerTokenExpiry = 0L;
+        httpClient = client;
     }
 
     @Override

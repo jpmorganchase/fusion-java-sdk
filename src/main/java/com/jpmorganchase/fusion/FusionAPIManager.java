@@ -20,27 +20,8 @@ import java.util.Map;
 public class FusionAPIManager {
 
     private static final String DEFAULT_FOLDER = "downloads";
-    private static FusionAPIManager apiManager;
     private final FusionCredentials sessionCredentials;
-
-
-    //TODO: Make injectable
-    //private final Client httpClient = new JdkClient(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", 8081)));
-    private final Client httpClient = new JdkClient();
-
-    /**
-     * Given a credentials file, returns a new API manager, this could be replaced by a singleton object.
-     *
-     * @param credentials an object holding API credentials
-     * @return a new API session manager
-     */
-    public static synchronized FusionAPIManager getAPIManager(FusionCredentials credentials) {
-        //TODO: REvisit this logic
-        //if (apiManager == null){
-        apiManager = new FusionAPIManager(credentials);
-        //}
-        return apiManager;
-    }
+    private final Client httpClient;
 
     /**
      * Create a new FusionAPIManager object to handle connections to the API.
@@ -48,13 +29,14 @@ public class FusionAPIManager {
      *
      * @param credentials a credentials file with OAuth parameters.
      */
-    private FusionAPIManager(FusionCredentials credentials) {
+    public FusionAPIManager(FusionCredentials credentials) {
         this.sessionCredentials = credentials;
-        if (credentials.useProxy()) {
-            //TODO: implement
-            throw new RuntimeException("Proxy logic not working yet");
-            //proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(credentials.getProxyAddress(), credentials.getProxyPort()));
-        }
+        this.httpClient = new JdkClient();
+    }
+
+    public FusionAPIManager(FusionCredentials credentials, Client httpClient) {
+        this.sessionCredentials = credentials;
+        this.httpClient = httpClient;
     }
 
 

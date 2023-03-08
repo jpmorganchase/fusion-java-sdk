@@ -41,10 +41,9 @@ public class Fusion {
      * @param rootURL override the API URL root
      */
     public Fusion(FusionCredentials myCredentials, String rootURL){
-
         this.credentials = myCredentials;
         this.rootURL = rootURL;
-        api = FusionAPIManager.getAPIManager(this.credentials);
+        api = new FusionAPIManager(this.credentials);
     }
 
     /**
