@@ -378,26 +378,7 @@ public class JdkClientTest {
     @Test
     @Disabled
     void implementAllOtherTests(){
-        //leaving this here so that I dont forget what I was doing next week
-        /*
-                DONE
-
-                1. Finish tests for get requests (handling of response headers, requests through a proxy)
-                2. Add tests for PUT and POST in a similar fashion
-
-                TODO
-
-                3. Refactor all these HTTP tests to remove duplication -- IN PROGRESS
-                4. Go back and refactor all the FusionApiManager tests now that we don't need to execute them against Wiremock
-                5. Refactor of the JdkClient once all tests are in place - needs duplication removed and some clean-up
-                6. Start working on the user facing code next - e.g. Fusion.java (Builder? to allow for customisation of Credential type, Http client type and Proxy information)
-                7. Save and loading of credentials (use GSON), do we want an interface for this that the one Credential type that needs it can use?
-                8. Finish the tests for ApiResponseParser - need a set for each model class
-                9. Credential refactoring - concurrency etc
-                10. Logging
-                11. Mutation testing
-                12. Documentation
-         */
+        //See: TODO.scratch
         fail();
     }
 

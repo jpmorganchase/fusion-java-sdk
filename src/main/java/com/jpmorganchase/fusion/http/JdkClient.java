@@ -7,7 +7,6 @@ import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
 
-//TODO: Come back and implement Proxy logic
 public class JdkClient implements Client {
 
     private final Proxy proxy;
