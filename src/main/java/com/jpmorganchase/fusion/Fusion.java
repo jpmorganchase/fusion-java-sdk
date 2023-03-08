@@ -4,6 +4,10 @@ import com.jpmorganchase.fusion.credential.FusionCredentials;
 import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,46 +19,53 @@ import java.util.Map;
 /**
 * Class representing the Fusion API, providing methods that correspond to available API endpoints
  */
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Fusion {
 
-    /**
-     * Constants that define default values
+    /*
+        Public facing constant default values
      */
+    public static final String DEFAULT_ROOT_URL = "https://fusion-api.jpmorgan.com/fusion/v1/";
     public static final String DEFAULT_CATALOG = "common";
-    private static final String ROOT_URL = "https://fusion-api.jpmorgan.com/fusion/v1/";
+
     private static final String DEFAULT_CREDENTIALS_FILE = "config/client_credentials.json";
     private static final String DEFAULT_PATH = "downloads";
 
-    private FusionAPIManager api;
+    private IFusionAPIManager api;
+    @Builder.Default
     private String defaultCatalog = DEFAULT_CATALOG;
-    private final String rootURL;
+    @Builder.Default
+    private String rootURL = DEFAULT_ROOT_URL;
 
     /**
      * Object members
      */
-    private final FusionCredentials credentials;
+    private FusionCredentials credentials;
 
-    //TODO: Allow for proper injection of this component
-    private final APIResponseParser responseParser = new GsonAPIResponseParser();
+    @Builder.Default
+    private APIResponseParser responseParser = new GsonAPIResponseParser();
 
     /**
      * Constructor
      * @param myCredentials a populated credentials object
      * @param rootURL override the API URL root
      */
-    public Fusion(FusionCredentials myCredentials, String rootURL){
+    /*public Fusion(FusionCredentials myCredentials, String rootURL){
         this.credentials = myCredentials;
         this.rootURL = rootURL;
         api = new FusionAPIManager(this.credentials);
-    }
+    }*/
 
     /**
      * Constructor that uses the default base URL
      * @param myCredentials a populated credentials object
      */
-    public Fusion(FusionCredentials myCredentials){
-        this(myCredentials, ROOT_URL);
-    }
+   /* public Fusion(FusionCredentials myCredentials){
+        this(myCredentials, DEFAULT_ROOT_URL);
+    }*/
 
     /**
      * The constructor will read the API credentials from file and connect to the API
@@ -169,6 +180,7 @@ public class Fusion {
      * @param contains a search keyword.
      * @param idContains is true if only apply the filter to the identifier
      */
+    //TODO: Search parameters
     public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) throws Exception{
         String url = String.format("%1scatalogs/%2s/datasets",this.rootURL, catalogName);
         String json = this.api.callAPI(url);
@@ -375,5 +387,4 @@ public class Fusion {
     public int upload(String catalogName, String dataset, String seriesMember, String distribution, String filename, Date dataDate) throws Exception {
         return this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate);
     }
-
 }

@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Class that manages calls to the API. Intended to be called from multi-threaded code.
  */
-public class FusionAPIManager {
+public class FusionAPIManager implements IFusionAPIManager {
 
     private static final String DEFAULT_FOLDER = "downloads";
     private final FusionCredentials sessionCredentials;
@@ -45,6 +45,7 @@ public class FusionAPIManager {
      *
      * @param apiPath appended to the base URL
      */
+    @Override
     public String callAPI(String apiPath) throws APICallException, IOException {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + sessionCredentials.getBearerToken());
@@ -68,6 +69,7 @@ public class FusionAPIManager {
      * @param downloadFolder the folder to save the download file
      * @param fileName       the filename
      */
+    @Override
     public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) throws IOException, APICallException {
 
         Map<String, String> requestHeaders = new HashMap<>();
@@ -101,6 +103,7 @@ public class FusionAPIManager {
      * @param apiPath  the URL of the API endpoint to call
      * @param fileName the filename to save into the default folder.
      */
+    @Override
     public void callAPIFileDownload(String apiPath, String fileName) throws IOException, APICallException {
         this.callAPIFileDownload(apiPath, DEFAULT_FOLDER, fileName);
     }
@@ -116,6 +119,7 @@ public class FusionAPIManager {
      * @return the HTTP status code - will return 200 if successful
      */
     //TODO: Sort out error handling
+    @Override
     public int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate) throws APICallException, IOException, NoSuchAlgorithmException {
 
         InputStream fileInputStream = Files.newInputStream(new File(fileName).toPath());
