@@ -1,4 +1,4 @@
-package com.jpmorganchase.fusion;
+package com.jpmorganchase.fusion.parsing;
 
 import com.google.gson.JsonParseException;
 import com.jpmorganchase.fusion.model.DatasetSeries;
@@ -17,7 +17,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class APIResponseParserDatasetSeriesTest {
+public class GsonAPIResponseParserDatasetSeriesTest {
 
     private static final String datasetSeriesJson = loadTestResource("multiple-datasetseries-response.json");
     private static final String datasetSeriesWithDuplicatesJson = loadTestResource("duplicate-datasetseries-response.json");
@@ -48,7 +48,7 @@ public class APIResponseParserDatasetSeriesTest {
             .build();
 
 
-    private static final APIResponseParser responseParser = new APIResponseParser();
+    private static final APIResponseParser responseParser = new GsonAPIResponseParser();
 
 
     @Test
@@ -88,7 +88,7 @@ public class APIResponseParserDatasetSeriesTest {
 
     //TODO: This is duplicated - fix
     private static String loadTestResource(String resourceName) {
-        URL url = APIResponseParserDatasetSeriesTest.class.getResource(resourceName);
+        URL url = GsonAPIResponseParserDatasetSeriesTest.class.getResource(resourceName);
         try {
             Path path = Paths.get(url.toURI());
             return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);

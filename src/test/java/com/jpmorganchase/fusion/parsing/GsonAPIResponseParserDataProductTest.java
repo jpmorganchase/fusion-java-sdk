@@ -1,4 +1,4 @@
-package com.jpmorganchase.fusion;
+package com.jpmorganchase.fusion.parsing;
 
 import com.jpmorganchase.fusion.model.DataProduct;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-public class APIResponseParserDataProductTest {
+public class GsonAPIResponseParserDataProductTest {
 
     private static final String singleProductJson = loadTestResource("single-product-response.json");
     private static final String multipleProductJson = loadTestResource("multiple-product-response.json");
@@ -44,7 +44,7 @@ public class APIResponseParserDataProductTest {
             .title("Sample Data Product 3 Title")
             .build();
 
-    private static final APIResponseParser responseParser = new APIResponseParser();
+    private static final APIResponseParser responseParser = new GsonAPIResponseParser();
 
     @Test
     public void singleProductInResourcesParsesCorrectly() {
@@ -71,7 +71,7 @@ public class APIResponseParserDataProductTest {
     }
 
     private static String loadTestResource(String resourceName) {
-        URL url = APIResponseParser.class.getResource(resourceName);
+        URL url = GsonAPIResponseParser.class.getResource(resourceName);
         try {
             Path path = Paths.get(url.toURI());
             return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);

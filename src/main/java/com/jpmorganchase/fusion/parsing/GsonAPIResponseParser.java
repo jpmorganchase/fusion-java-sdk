@@ -1,4 +1,4 @@
-package com.jpmorganchase.fusion;
+package com.jpmorganchase.fusion.parsing;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
@@ -13,47 +13,54 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class APIResponseParser {
+public class GsonAPIResponseParser implements APIResponseParser {
 
     //TODO: Thread-safe??
 
     private final Gson gson;
 
-    public APIResponseParser() {
+    public GsonAPIResponseParser() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         //TODO: need to add a serializer as well
         gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateDeserializer());
         gson = gsonBuilder.create();
     }
 
-    public APIResponseParser(Gson gson) {
+    public GsonAPIResponseParser(Gson gson) {
         this.gson = gson;
     }
 
+    @Override
     public Map<String, Catalog> parseCatalogResponse(String json){
         return parseResourcesFromResponse(json, Catalog.class);
     }
 
+    @Override
     public Map<String, Dataset> parseDatasetResponse(String json){
         return parseResourcesFromResponse(json, Dataset.class);
     }
 
+    @Override
     public Map<String, Attribute> parseAttributeResponse(String json){
         return parseResourcesFromResponse(json, Attribute.class);
     }
 
+    @Override
     public Map<String, DataProduct> parseDataProductResponse(String json){
         return parseResourcesFromResponse(json, DataProduct.class);
     }
 
+    @Override
     public Map<String, DatasetSeries> parseDatasetSeriesResponse(String json){
         return parseResourcesFromResponse(json, DatasetSeries.class);
     }
 
+    @Override
     public Map<String, Distribution> parseDistributionResponse(String json){
         return parseResourcesFromResponse(json, Distribution.class);
     }
 
+    @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass){
         //TODO: handle varArgs
 

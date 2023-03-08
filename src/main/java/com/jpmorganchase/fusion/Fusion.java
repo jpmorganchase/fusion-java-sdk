@@ -2,6 +2,8 @@ package com.jpmorganchase.fusion;
 
 import com.jpmorganchase.fusion.credential.FusionCredentials;
 import com.jpmorganchase.fusion.model.*;
+import com.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
+import com.jpmorganchase.fusion.parsing.APIResponseParser;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -33,7 +35,7 @@ public class Fusion {
     private final FusionCredentials credentials;
 
     //TODO: Allow for proper injection of this component
-    private final APIResponseParser responseParser = new APIResponseParser();
+    private final APIResponseParser responseParser = new GsonAPIResponseParser();
 
     /**
      * Constructor

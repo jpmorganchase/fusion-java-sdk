@@ -1,4 +1,4 @@
-package com.jpmorganchase.fusion;
+package com.jpmorganchase.fusion.parsing;
 
 import com.jpmorganchase.fusion.model.Dataset;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-public class APIResponseParserDatasetTest {
+public class GsonAPIResponseParserDatasetTest {
 
     private static final String singleDatasetJson = loadTestResource("single-dataset-response.json");
     private static final String multipleDatasetJson = loadTestResource("multiple-dataset-response.json");
@@ -44,7 +44,7 @@ public class APIResponseParserDatasetTest {
             .title("Sample Dataset 3 | North America")
             .build();
 
-    private static final APIResponseParser responseParser = new APIResponseParser();
+    private static final APIResponseParser responseParser = new GsonAPIResponseParser();
 
     @Test
     public void singleDatasetInResourcesParsesCorrectly() {
@@ -71,7 +71,7 @@ public class APIResponseParserDatasetTest {
     }
 
     private static String loadTestResource(String resourceName) {
-        URL url = APIResponseParser.class.getResource(resourceName);
+        URL url = GsonAPIResponseParser.class.getResource(resourceName);
         try {
             Path path = Paths.get(url.toURI());
             return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);

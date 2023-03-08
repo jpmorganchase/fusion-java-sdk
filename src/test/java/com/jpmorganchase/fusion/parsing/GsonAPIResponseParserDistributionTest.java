@@ -1,4 +1,4 @@
-package com.jpmorganchase.fusion;
+package com.jpmorganchase.fusion.parsing;
 
 import com.jpmorganchase.fusion.model.Distribution;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-public class APIResponseParserDistributionTest {
+public class GsonAPIResponseParserDistributionTest {
 
     private static final String singleDistributionJson = loadTestResource("single-distribution-response.json");
     private static final String multipleDistributionJson = loadTestResource("multiple-distribution-response.json");
@@ -38,7 +38,7 @@ public class APIResponseParserDistributionTest {
             .title("Parquet")
             .build();
 
-    private static final APIResponseParser responseParser = new APIResponseParser();
+    private static final APIResponseParser responseParser = new GsonAPIResponseParser();
 
     @Test
     public void singleDistributionInResourcesParsesCorrectly() {
@@ -62,7 +62,7 @@ public class APIResponseParserDistributionTest {
     }
 
     private static String loadTestResource(String resourceName) {
-        URL url = APIResponseParser.class.getResource(resourceName);
+        URL url = GsonAPIResponseParser.class.getResource(resourceName);
         try {
             Path path = Paths.get(url.toURI());
             return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
