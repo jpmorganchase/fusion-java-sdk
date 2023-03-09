@@ -9,7 +9,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class OAuthCredentials implements FusionCredentials {
+public abstract class OAuthCredentials implements Credentials {
 
     private final String clientId;
     private final String resource;

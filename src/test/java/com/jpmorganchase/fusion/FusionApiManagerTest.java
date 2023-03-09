@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 public class FusionApiManagerTest {
 
 
-    private FusionCredentials credentials;
+    private Credentials credentials;
     private FusionAPIManager fusionAPIManager;
     @Mock
     private Client client;

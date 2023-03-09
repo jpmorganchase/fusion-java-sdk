@@ -1,6 +1,6 @@
 package com.jpmorganchase.fusion.api;
 
-import com.jpmorganchase.fusion.credential.FusionCredentials;
+import com.jpmorganchase.fusion.credential.Credentials;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.HttpResponse;
 import com.jpmorganchase.fusion.http.JdkClient;
@@ -20,7 +20,7 @@ import java.util.Map;
 public class FusionAPIManager implements APIManager {
 
     private static final String DEFAULT_FOLDER = "downloads";
-    private final FusionCredentials sessionCredentials;
+    private final Credentials sessionCredentials;
     private final Client httpClient;
 
     /**
@@ -29,12 +29,12 @@ public class FusionAPIManager implements APIManager {
      *
      * @param credentials a credentials file with OAuth parameters.
      */
-    public FusionAPIManager(FusionCredentials credentials) {
+    public FusionAPIManager(Credentials credentials) {
         this.sessionCredentials = credentials;
         this.httpClient = new JdkClient();
     }
 
-    public FusionAPIManager(FusionCredentials credentials, Client httpClient) {
+    public FusionAPIManager(Credentials credentials, Client httpClient) {
         this.sessionCredentials = credentials;
         this.httpClient = httpClient;
     }

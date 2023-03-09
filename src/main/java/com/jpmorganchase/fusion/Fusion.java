@@ -48,7 +48,7 @@ public class Fusion {
     private Client httpClient;
     private OAuthConfiguration oAuthConfiguration;
 
-    private FusionCredentials credentials;
+    private Credentials credentials;
 
     @Builder.Default
     private APIResponseParser responseParser = new GsonAPIResponseParser();
@@ -374,7 +374,7 @@ public class Fusion {
 
     public static class FusionBuilder {
         //Implementation of helper methods to allow for simpler instantiation. Note that Lombok will fill in the missing, standard builder methods
-        protected FusionCredentials credentials;
+        protected Credentials credentials;
         protected OAuthConfiguration oAuthConfiguration;
         protected Client client;
         protected String credentialFile;
