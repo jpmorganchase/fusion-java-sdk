@@ -1,6 +1,11 @@
 package com.jpmorganchase.fusion;
 
+import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import com.jpmorganchase.fusion.credential.FusionCredentials;
+import com.jpmorganchase.fusion.credential.OAuthPasswordBasedCredentials;
+import com.jpmorganchase.fusion.credential.OAuthSecretBasedCredentials;
+import com.jpmorganchase.fusion.http.Client;
+import com.jpmorganchase.fusion.http.JdkClient;
 import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
@@ -9,10 +14,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.SocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +48,8 @@ public class Fusion {
     private String defaultCatalog = DEFAULT_CATALOG;
     @Builder.Default
     private String rootURL = DEFAULT_ROOT_URL;
+    @Builder.Default
+    private Client httpClient = new JdkClient();
 
     /**
      * Object members
@@ -96,6 +107,7 @@ public class Fusion {
         this(FusionCredentials.readCredentialsFile(DEFAULT_CREDENTIALS_FILE), ROOT_URL);
         api = FusionAPIManager.getAPIManager(credentials);
     }*/
+
 
     /**
      * Get the default catalog identifier - this will be common unless overridden.
@@ -354,6 +366,9 @@ public class Fusion {
     }
 
 
+    //TODO: This is duplicated from LocalDateDeserializer, but might be ok?
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     /**
      * Upload a new dataset series member to a catalog.
      * @param catalogName a String representing the identifier of the catalog to upload into
@@ -365,13 +380,12 @@ public class Fusion {
      * @param toDate the latest date for which there is data in the distribution
      * @param createdDate the creation date for the distribution
      **/
-    public int upload(String catalogName, String dataset, String seriesMember, String distribution, String filename, Date fromDate, Date toDate, Date createdDate) throws Exception {
+    public int upload(String catalogName, String dataset, String seriesMember, String distribution, String filename, LocalDate fromDate, LocalDate toDate, LocalDate createdDate) throws Exception {
 
         String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",this.rootURL, catalogName,dataset, seriesMember,distribution);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String strFromDate = dateFormat.format(fromDate);
-        String strToDate = dateFormat.format(toDate);
-        String strCreatedDate = dateFormat.format(createdDate);
+        String strFromDate = fromDate.format(dateTimeFormatter);
+        String strToDate = toDate.format(dateTimeFormatter);
+        String strCreatedDate = createdDate.format(dateTimeFormatter);
         return this.api.callAPIFileUpload(url, filename, strFromDate, strToDate, strCreatedDate );
     }
 
@@ -384,7 +398,44 @@ public class Fusion {
      * @param filename a path to the file containing the data to upload
      * @param dataDate the earliest, latest, and created date are all the same.
      **/
-    public int upload(String catalogName, String dataset, String seriesMember, String distribution, String filename, Date dataDate) throws Exception {
+    public int upload(String catalogName, String dataset, String seriesMember, String distribution, String filename, LocalDate dataDate) throws Exception {
         return this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate);
+    }
+
+
+    public static class FusionBuilder {
+        //Implementation of helper methods to allow for simpler instantiation. Note that Lombok will fill in the missing, standard builder methods
+        private FusionCredentials credentials;
+        private IFusionAPIManager api;
+        private Client client;
+
+        public FusionBuilder bearerToken(String token){
+            this.credentials = new BearerTokenCredentials(token);
+            return this;
+        }
+
+        public FusionBuilder secretBasedCredentials(String clientId, String clientSecret, String resource, String authServerUrl){
+            try {
+                this.credentials = new OAuthSecretBasedCredentials(clientId, clientSecret, resource, authServerUrl);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e); //TODO: Fix error handling
+            }
+            return this;
+        }
+
+        public FusionBuilder passwordBasedCredentials(String clientId, String username, String password, String resource, String authServerUrl){
+            try {
+                this.credentials = new OAuthPasswordBasedCredentials(clientId, username, password, resource, authServerUrl);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e); //TODO: Fix error handling
+            }
+            return this;
+        }
+
+        public FusionBuilder proxy(String url, int port){
+            client = new JdkClient(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(url, port)));
+            api = new FusionAPIManager(credentials, client);
+            return this;
+        }
     }
 }

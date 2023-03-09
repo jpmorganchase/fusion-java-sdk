@@ -2,6 +2,8 @@ package com.jpmorganchase.fusion;
 
 import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import com.jpmorganchase.fusion.credential.FusionCredentials;
+import com.jpmorganchase.fusion.credential.OAuthPasswordBasedCredentials;
+import com.jpmorganchase.fusion.credential.OAuthSecretBasedCredentials;
 import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,6 +69,49 @@ public class FusionTest {
         assertThat(f.getDefaultCatalog(), is(equalTo("test")));
     }
 
+    @Test
+    public void constructWithBearerToken(){
+        Fusion f = Fusion.builder()
+                .bearerToken("my-token")
+                .build();
+        assertThat(f.getCredentials() instanceof BearerTokenCredentials, is(true));
+    }
+
+    @Test
+    public void constructWithSecretBasedCredentials(){
+        Fusion f = Fusion.builder()
+                .secretBasedCredentials("aClientId", "aSecret", "aResource", "https://oauth-api.domain.com")
+                .build();
+        assertThat(f.getCredentials() instanceof OAuthSecretBasedCredentials, is(true));
+        OAuthSecretBasedCredentials credentials = (OAuthSecretBasedCredentials) f.getCredentials();
+        assertThat(credentials.getClientId(), is(equalTo("aClientId")));
+        assertThat(credentials.getResource(), is(equalTo("aResource")));
+        assertThat(credentials.getAuthServerUrl(), is(equalTo("https://oauth-api.domain.com")));
+        //TODO: validate secret?
+    }
+
+    @Test
+    public void constructWithPasswordBasedCredentials(){
+        Fusion f = Fusion.builder()
+                .passwordBasedCredentials("aClientId", "aUsername", "aPassword", "aResource", "https://oauth-api.domain.com")
+                .build();
+        assertThat(f.getCredentials() instanceof OAuthPasswordBasedCredentials, is(true));
+        OAuthPasswordBasedCredentials credentials = (OAuthPasswordBasedCredentials) f.getCredentials();
+        assertThat(credentials.getClientId(), is(equalTo("aClientId")));
+        assertThat(credentials.getResource(), is(equalTo("aResource")));
+        assertThat(credentials.getAuthServerUrl(), is(equalTo("https://oauth-api.domain.com")));
+        //TODO: validate password?
+    }
+
+    @Test
+    public void constructWithProxy(){
+        Fusion f = Fusion.builder()
+                .bearerToken("my-token")
+                .proxy("http://myproxy.domain.com", 8080)
+                .build();
+        assertThat(f.getCredentials() instanceof BearerTokenCredentials, is(true));
+    }
+
     //TODO: Add interaction tests that do not use the default catalog
     @Test
     public void testListDatasetsInteraction() throws Exception{
@@ -80,6 +126,22 @@ public class FusionTest {
                 .thenReturn(stubResponse);
 
         Map<String, Dataset> actualResponse = f.listDatasets();
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testListProductsInteraction() throws Exception{
+        Fusion f = stubFusion();
+
+        Map<String, DataProduct> stubResponse = new HashMap<>();
+        stubResponse.put("first", DataProduct.builder().identifier("product1").build());
+
+        when(apiManager.callAPI(String.format("%1scatalogs/%2s/products",Fusion.DEFAULT_ROOT_URL, "common")))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseDataProductResponse("{\"key\":value}"))
+                .thenReturn(stubResponse);
+
+        Map<String, DataProduct> actualResponse = f.listProducts();
         assertThat(actualResponse, is(equalTo(stubResponse)));
     }
 
@@ -147,7 +209,7 @@ public class FusionTest {
     @Test
     public void testFileUploadInteraction() throws Exception{
         Fusion f = stubFusion();
-        Date d = new Date();
+        LocalDate d = LocalDate.of(2023, 3, 9);
 
         when(apiManager.callAPIFileUpload(
                 String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",Fusion.DEFAULT_ROOT_URL, "common","sample_dataset", "20230308","csv")
@@ -178,3 +240,4 @@ public class FusionTest {
         return stubResponse;
     }*/
 }
+
