@@ -282,7 +282,7 @@ public class Fusion {
      * List the attributes for a specified dataset, uses the default catalog.
      * @param dataset a String representing the dataset identifier to query.
      */
-    public Map listAttributes(String dataset) throws Exception{
+    public Map<String, Attribute> listAttributes(String dataset) throws Exception{
 
         return this.listAttributes(this.getDefaultCatalog(), dataset);
 
@@ -307,7 +307,7 @@ public class Fusion {
      * @param dataset a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
      */
-    public Map listDistributions(String dataset, String seriesMember) throws Exception{
+    public Map<String, Distribution> listDistributions(String dataset, String seriesMember) throws Exception{
 
         return this.listDistributions(this.getDefaultCatalog(), dataset, seriesMember);
     }
@@ -326,7 +326,7 @@ public class Fusion {
         Files.createDirectories(Paths.get(path));
         String filepath = String.format("%s/%s_%s_%s.%s", path, catalogName,dataset,seriesMember,distribution);
         this.api.callAPIFileDownload(url,filepath);
-        return 1;
+        return 1; //TODO: Change this behaviour
     }
 
     /**

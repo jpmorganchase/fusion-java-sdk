@@ -2,9 +2,7 @@ package com.jpmorganchase.fusion;
 
 import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import com.jpmorganchase.fusion.credential.FusionCredentials;
-import com.jpmorganchase.fusion.model.CatalogResource;
-import com.jpmorganchase.fusion.model.Dataset;
-import com.jpmorganchase.fusion.model.DatasetSeries;
+import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,6 +66,7 @@ public class FusionTest {
         assertThat(f.getDefaultCatalog(), is(equalTo("test")));
     }
 
+    //TODO: Add interaction tests that do not use the default catalog
     @Test
     public void testListDatasetsInteraction() throws Exception{
         Fusion f = stubFusion();
@@ -79,7 +79,7 @@ public class FusionTest {
         when(responseParser.parseDatasetResponse("{\"key\":value}"))
                 .thenReturn(stubResponse);
 
-        Map<String, Dataset> actualResponse = f.listDatasets("common");
+        Map<String, Dataset> actualResponse = f.listDatasets();
         assertThat(actualResponse, is(equalTo(stubResponse)));
     }
 
@@ -95,8 +95,68 @@ public class FusionTest {
         when(responseParser.parseDatasetSeriesResponse("{\"key\":value}"))
                 .thenReturn(stubResponse);
 
-        Map<String, DatasetSeries> actualResponse = f.listDatasetMembers("common", "sample_dataset");
+        Map<String, DatasetSeries> actualResponse = f.listDatasetMembers("sample_dataset");
         assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testAttributeInteraction() throws Exception{
+        Fusion f = stubFusion();
+
+        Map<String, Attribute> stubResponse = new HashMap<>();
+        stubResponse.put("first", Attribute.builder().identifier("attribute1").build());
+
+        when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets/%3s/attributes",Fusion.DEFAULT_ROOT_URL, "common","sample_dataset")))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseAttributeResponse("{\"key\":value}"))
+                .thenReturn(stubResponse);
+
+        Map<String, Attribute> actualResponse = f.listAttributes("sample_dataset");
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testDistributionInteraction() throws Exception{
+        Fusion f = stubFusion();
+
+        Map<String, Distribution> stubResponse = new HashMap<>();
+        stubResponse.put("first", Distribution.builder().identifier("attribute1").build());
+
+        when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
+                        Fusion.DEFAULT_ROOT_URL, "common","sample_dataset", "20230308")))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseDistributionResponse("{\"key\":value}"))
+                .thenReturn(stubResponse);
+
+        Map<String, Distribution> actualResponse = f.listDistributions("sample_dataset", "20230308");
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testFileDownloadInteraction() throws Exception{
+        Fusion f = stubFusion();
+
+        doNothing().when(apiManager).callAPIFileDownload(
+                String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s", Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
+                String.format("%s/%s_%s_%s.%s","/tmp", "common","sample_dataset", "20230308","csv"));
+
+        int result = f.download("common", "sample_dataset", "20230308", "csv", "/tmp");
+        assertThat(result, is(1));
+    }
+
+    @Test
+    public void testFileUploadInteraction() throws Exception{
+        Fusion f = stubFusion();
+        Date d = new Date();
+
+        when(apiManager.callAPIFileUpload(
+                String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",Fusion.DEFAULT_ROOT_URL, "common","sample_dataset", "20230308","csv")
+                , "/tmp/file.csv", "2023-03-09", "2023-03-09", "2023-03-09")) //TODO: get the dates
+                .thenReturn(1);
+
+        //TODO: test with different dates as well
+        int result = f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", d);
+        assertThat(result, is(1));
     }
 
     private Fusion stubFusion(){
