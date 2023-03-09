@@ -368,11 +368,14 @@ public class JdkClientTest {
         verify(getRequestedFor(urlEqualTo("/test")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
 
+        InputStream responseStream = response.getBody();
         String responseText = new BufferedReader(
-                new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))
+                new InputStreamReader(responseStream, StandardCharsets.UTF_8))
                 .lines()
                 .collect(Collectors.joining("\n"));
         assertThat(responseText, is(equalTo("sample response")));
+
+        //TODO: How do we test closure of the stream and connection? May need to make that inner class public
     }
 
     @Test
