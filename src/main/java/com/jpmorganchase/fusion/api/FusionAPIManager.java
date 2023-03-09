@@ -3,7 +3,7 @@ package com.jpmorganchase.fusion.api;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
-public interface IFusionAPIManager {
+public interface FusionAPIManager {
     String callAPI(String apiPath) throws APICallException, IOException;
 
     void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) throws IOException, APICallException;

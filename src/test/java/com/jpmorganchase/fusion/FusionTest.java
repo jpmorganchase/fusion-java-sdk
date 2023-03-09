@@ -1,6 +1,6 @@
 package com.jpmorganchase.fusion;
 
-import com.jpmorganchase.fusion.api.IFusionAPIManager;
+import com.jpmorganchase.fusion.api.FusionAPIManager;
 import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 public class FusionTest {
 
     @Mock
-    private IFusionAPIManager apiManager;
+    private FusionAPIManager apiManager;
 
     @Mock
     private APIResponseParser responseParser;

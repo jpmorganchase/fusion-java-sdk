@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Class that manages calls to the API. Intended to be called from multi-threaded code.
  */
-public class DefaultFusionAPIManager implements IFusionAPIManager {
+public class DefaultFusionAPIManager implements FusionAPIManager {
 
     private static final String DEFAULT_FOLDER = "downloads";
     private final FusionCredentials sessionCredentials;
