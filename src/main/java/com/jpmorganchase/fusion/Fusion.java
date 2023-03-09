@@ -8,14 +8,12 @@ import com.jpmorganchase.fusion.http.JdkClient;
 import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.io.FileReader;
+import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -29,8 +27,6 @@ import java.util.Map;
  */
 @Getter
 @Builder
-/*@NoArgsConstructor
-@AllArgsConstructor*/
 public class Fusion {
 
     /*
@@ -369,7 +365,7 @@ public class Fusion {
         return this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate);
     }
 
-    public static FusionBuilder builder(){
+    public static FusionBuilder builder() {
         return new CustomFusionBuilder();
     }
 
@@ -402,49 +398,50 @@ public class Fusion {
             return this;
         }
 
-        public FusionBuilder credentialFile(){
+        public FusionBuilder credentialFile() {
             return this.credentialFile(DEFAULT_CREDENTIALS_FILE);
         }
 
-        public FusionBuilder credentialFile(String credentialFile){
+        public FusionBuilder credentialFile(String credentialFile) {
             this.credentialFile = credentialFile;
             return this;
         }
     }
 
-    private static class CustomFusionBuilder extends FusionBuilder{
+    private static class CustomFusionBuilder extends FusionBuilder {
 
         @Override
         public Fusion build() {
 
-            if(client == null){
+            if (client == null) {
                 client = new JdkClient();
             }
 
-            if(credentialFile != null){
+            if (credentialFile != null) {
                 Gson gson = new GsonBuilder().create();
                 try {
                     FileReader fileReader = new FileReader(credentialFile);
                     oAuthConfiguration = gson.fromJson(fileReader, OAuthSecretBasedConfiguration.class);
                     fileReader.close();
-                } catch (Exception e) {
-                    throw new RuntimeException(e); //TODO: better error handling
+                } catch (IOException e) {
+                    throw new FusionInitialisationException(
+                            String.format("Failed to load credential file from path: %s", credentialFile), e);
                 }
             }
 
-            if(oAuthConfiguration != null){
-                try {
-                    if (oAuthConfiguration instanceof OAuthSecretBasedConfiguration) {
-                        credentials = new OAuthSecretBasedCredentials((OAuthSecretBasedConfiguration) oAuthConfiguration, client);
-                    } else if (oAuthConfiguration instanceof OAuthPasswordBasedConfiguration) {
-                        credentials = new OAuthPasswordBasedCredentials((OAuthPasswordBasedConfiguration) oAuthConfiguration, client);
-                    }
-                } catch (MalformedURLException e){
-                    throw new RuntimeException(e); //TODO: better error handling
+            if (oAuthConfiguration != null) {
+                if (oAuthConfiguration instanceof OAuthSecretBasedConfiguration) {
+                    credentials = new OAuthSecretBasedCredentials((OAuthSecretBasedConfiguration) oAuthConfiguration, client);
+                } else if (oAuthConfiguration instanceof OAuthPasswordBasedConfiguration) {
+                    credentials = new OAuthPasswordBasedCredentials((OAuthPasswordBasedConfiguration) oAuthConfiguration, client);
                 }
             }
 
-            if(api==null) {
+            if (credentials == null) {
+                throw new FusionInitialisationException("No Fusion credentials provided, cannot build Fusion instance");
+            }
+
+            if (api == null) {
                 api = new FusionAPIManager(credentials, client);
             }
 

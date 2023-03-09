@@ -9,19 +9,19 @@ public class OAuthPasswordBasedCredentials extends OAuthCredentials{
     private final String username;
     private final String password;
 
-    public OAuthPasswordBasedCredentials(String clientId, String username, String password, String resource, String authServerUrl) throws MalformedURLException {
+    public OAuthPasswordBasedCredentials(String clientId, String username, String password, String resource, String authServerUrl) {
         super(clientId, resource, authServerUrl);
         this.username = username;
         this.password = password;
     }
 
-    public OAuthPasswordBasedCredentials(String clientId, String username, String password, String resource, String authServerUrl, Client client) throws MalformedURLException {
+    public OAuthPasswordBasedCredentials(String clientId, String username, String password, String resource, String authServerUrl, Client client) {
         super(clientId, resource, authServerUrl, client);
         this.username = username;
         this.password = password;
     }
 
-    public OAuthPasswordBasedCredentials(OAuthPasswordBasedConfiguration config,  Client client) throws MalformedURLException {
+    public OAuthPasswordBasedCredentials(OAuthPasswordBasedConfiguration config,  Client client) {
         super(config.getClientId(), config.getResource(), config.getAuthServerUrl(), client);
         this.username = config.getUsername();
         this.password = config.getPassword();
@@ -44,4 +44,11 @@ public class OAuthPasswordBasedCredentials extends OAuthCredentials{
         return null;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }
