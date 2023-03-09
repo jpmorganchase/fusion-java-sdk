@@ -13,8 +13,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -31,8 +29,8 @@ import java.util.Map;
  */
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+/*@NoArgsConstructor
+@AllArgsConstructor*/
 public class Fusion {
 
     /*
@@ -52,64 +50,10 @@ public class Fusion {
     private Client httpClient;
     private OAuthConfiguration oAuthConfiguration;
 
-
-    /**
-     * Object members
-     */
     private FusionCredentials credentials;
 
     @Builder.Default
     private APIResponseParser responseParser = new GsonAPIResponseParser();
-
-    /**
-     * Constructor
-     * @param myCredentials a populated credentials object
-     * @param rootURL override the API URL root
-     */
-    /*public Fusion(FusionCredentials myCredentials, String rootURL){
-        this.credentials = myCredentials;
-        this.rootURL = rootURL;
-        api = new FusionAPIManager(this.credentials);
-    }*/
-
-    /**
-     * Constructor that uses the default base URL
-     * @param myCredentials a populated credentials object
-     */
-   /* public Fusion(FusionCredentials myCredentials){
-        this(myCredentials, DEFAULT_ROOT_URL);
-    }*/
-
-    /**
-     * The constructor will read the API credentials from file and connect to the API
-     * @param credentialsFile a path to a credentials file
-     */
-    //TODO: Reimplement this
-    /*public Fusion(String credentialsFile) throws IOException {
-        this(FusionCredentials.readCredentialsFile(credentialsFile), ROOT_URL);
-        api = FusionAPIManager.getAPIManager(credentials);
-    }*/
-
-    /**
-     * The constructor will read the API credentials from file and connect to the API
-     * @param credentialsFile a path to a credentials file
-     * @param rootURL override the API URL root
-     */
-    //TODO: Re-implement this
-    /*public Fusion(String credentialsFile, String rootURL) throws IOException{
-        this(FusionCredentials.readCredentialsFile(credentialsFile), rootURL);
-        api = FusionAPIManager.getAPIManager(credentials);
-    }*/
-
-    /**
-     * The constructor will read the API credentials from file and connect to the API
-     */
-    //TODO: Re-implement this
-    /*public Fusion() throws IOException {
-        this(FusionCredentials.readCredentialsFile(DEFAULT_CREDENTIALS_FILE), ROOT_URL);
-        api = FusionAPIManager.getAPIManager(credentials);
-    }*/
-
 
     /**
      * Get the default catalog identifier - this will be common unless overridden.
@@ -154,7 +98,6 @@ public class Fusion {
      * @param catalogName currently this will return only products and datasets
      */
     public Map catalogResources(String catalogName) throws Exception {
-
         String url = String.format("%1scatalogs/%2s", this.rootURL, catalogName);
         return this.callForMap(url);
     }
@@ -501,7 +444,9 @@ public class Fusion {
                 }
             }
 
-            api = new FusionAPIManager(credentials, client);
+            if(api==null) {
+                api = new FusionAPIManager(credentials, client);
+            }
 
             return super.build();
         }
