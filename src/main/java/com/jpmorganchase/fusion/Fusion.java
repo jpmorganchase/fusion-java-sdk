@@ -2,8 +2,8 @@ package com.jpmorganchase.fusion;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.jpmorganchase.fusion.api.DefaultFusionAPIManager;
 import com.jpmorganchase.fusion.api.FusionAPIManager;
+import com.jpmorganchase.fusion.api.APIManager;
 import com.jpmorganchase.fusion.credential.*;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.JdkClient;
@@ -40,7 +40,7 @@ public class Fusion {
     private static final String DEFAULT_CREDENTIALS_FILE = "config/client_credentials.json";
     private static final String DEFAULT_PATH = "downloads";
 
-    private FusionAPIManager api;
+    private APIManager api;
     @Builder.Default
     private String defaultCatalog = DEFAULT_CATALOG;
     @Builder.Default
@@ -378,7 +378,7 @@ public class Fusion {
         protected OAuthConfiguration oAuthConfiguration;
         protected Client client;
         protected String credentialFile;
-        protected FusionAPIManager api;
+        protected APIManager api;
 
         public FusionBuilder bearerToken(String token) {
             this.credentials = new BearerTokenCredentials(token);
@@ -444,7 +444,7 @@ public class Fusion {
             }
 
             if (api == null) {
-                api = new DefaultFusionAPIManager(credentials, client);
+                api = new FusionAPIManager(credentials, client);
             }
 
             return super.build();
