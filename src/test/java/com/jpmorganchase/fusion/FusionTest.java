@@ -1,27 +1,15 @@
 package com.jpmorganchase.fusion;
 
+import com.jpmorganchase.fusion.api.IFusionAPIManager;
 import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
-import com.jpmorganchase.fusion.credential.FusionCredentials;
-import com.jpmorganchase.fusion.credential.OAuthPasswordBasedCredentials;
-import com.jpmorganchase.fusion.credential.OAuthSecretBasedCredentials;
 import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
-import com.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 

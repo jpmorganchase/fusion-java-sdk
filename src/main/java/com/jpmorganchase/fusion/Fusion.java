@@ -2,6 +2,8 @@ package com.jpmorganchase.fusion;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jpmorganchase.fusion.api.DefaultFusionAPIManager;
+import com.jpmorganchase.fusion.api.IFusionAPIManager;
 import com.jpmorganchase.fusion.credential.*;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.JdkClient;
@@ -204,7 +206,7 @@ public class Fusion {
      *
      * @param dataset a String representing the dataset identifier to query.
      */
-    public Map listDatasetMembers(String dataset) throws Exception {
+    public Map<String, DatasetSeries> listDatasetMembers(String dataset) throws Exception {
 
         return this.listDatasetMembers(this.getDefaultCatalog(), dataset);
     }
@@ -442,7 +444,7 @@ public class Fusion {
             }
 
             if (api == null) {
-                api = new FusionAPIManager(credentials, client);
+                api = new DefaultFusionAPIManager(credentials, client);
             }
 
             return super.build();

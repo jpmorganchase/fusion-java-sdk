@@ -1,4 +1,4 @@
-package com.jpmorganchase.fusion;
+package com.jpmorganchase.fusion.api;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

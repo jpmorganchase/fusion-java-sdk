@@ -1,6 +1,8 @@
 package com.jpmorganchase.fusion;
 
 import com.google.common.collect.Lists;
+import com.jpmorganchase.fusion.api.APICallException;
+import com.jpmorganchase.fusion.api.DefaultFusionAPIManager;
 import com.jpmorganchase.fusion.credential.*;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.HttpResponse;
@@ -33,7 +35,7 @@ public class FusionApiManagerTest {
 
 
     private FusionCredentials credentials;
-    private FusionAPIManager fusionAPIManager;
+    private DefaultFusionAPIManager fusionAPIManager;
     @Mock
     private Client client;
 
@@ -42,7 +44,7 @@ public class FusionApiManagerTest {
     @BeforeEach
     void setUp() {
         credentials = new BearerTokenCredentials("my-token");
-        fusionAPIManager = new FusionAPIManager(credentials, client);
+        fusionAPIManager = new DefaultFusionAPIManager(credentials, client);
     }
 
     @Test
@@ -82,7 +84,7 @@ public class FusionApiManagerTest {
     @Test
     void successWithOAuthTokenRetrieval() throws Exception {
         credentials = new OAuthSecretBasedCredentials("aClientID", "aClientSecret", "aResource", "http://localhost:8080/oAuth", client);
-        fusionAPIManager = new FusionAPIManager(credentials, client);
+        fusionAPIManager = new DefaultFusionAPIManager(credentials, client);
 
         Map<String, String> expectedOAuthHeaders = new HashMap<>();
         expectedOAuthHeaders.put("Authorization", "Basic YUNsaWVudElEOmFDbGllbnRTZWNyZXQ=");
@@ -115,7 +117,7 @@ public class FusionApiManagerTest {
     @Test
     void successWithOAuthPasswordBasedTokenRetrieval() throws Exception {
         credentials = new OAuthPasswordBasedCredentials("aClientID", "aUsername", "aPassword", "aResource", "http://localhost:8080/oAuth", client);
-        fusionAPIManager = new FusionAPIManager(credentials, client);
+        fusionAPIManager = new DefaultFusionAPIManager(credentials, client);
 
         Map<String, String> expectedOAuthHeaders = new HashMap<>();
         expectedOAuthHeaders.put("Accept", "application/json");
@@ -145,7 +147,7 @@ public class FusionApiManagerTest {
 
     @Test
     void successfulFileDownload() throws Exception {
-        fusionAPIManager = new FusionAPIManager(credentials, client);
+        fusionAPIManager = new DefaultFusionAPIManager(credentials, client);
 
         File tempOutputFile = File.createTempFile("fusion-test-", ".csv");
 
@@ -180,7 +182,7 @@ public class FusionApiManagerTest {
 
     @Test
     void successfulFileUpload() throws Exception {
-        fusionAPIManager = new FusionAPIManager(credentials, client);
+        fusionAPIManager = new DefaultFusionAPIManager(credentials, client);
 
         Map<String, String> expectedRequestHeaders = new HashMap<>();
         expectedRequestHeaders.put("accept", "*/*");

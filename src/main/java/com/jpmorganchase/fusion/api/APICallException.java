@@ -1,4 +1,4 @@
-package com.jpmorganchase.fusion;
+package com.jpmorganchase.fusion.api;
 
 /**
  * A custom exception to provide useful information on the response of an API call
