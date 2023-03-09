@@ -21,6 +21,12 @@ public class OAuthPasswordBasedCredentials extends OAuthCredentials{
         this.password = password;
     }
 
+    public OAuthPasswordBasedCredentials(OAuthPasswordBasedConfiguration config,  Client client) throws MalformedURLException {
+        super(config.getClientId(), config.getResource(), config.getAuthServerUrl(), client);
+        this.username = config.getUsername();
+        this.password = config.getPassword();
+    }
+
     @Override
     protected String getPostBodyContent() {
         return String.format("grant_type=password&resource=%1$s&client_id=%2$s&username=%3$s&password=%4$s",

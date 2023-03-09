@@ -19,6 +19,11 @@ public class OAuthSecretBasedCredentials extends OAuthCredentials{
         this.clientSecret = clientSecret;
     }
 
+    public OAuthSecretBasedCredentials(OAuthSecretBasedConfiguration config, Client client) throws MalformedURLException {
+        super(config.getClientId(), config.getResource(), config.getAuthServerUrl(), client);
+        this.clientSecret = config.getClientSecret();
+    }
+
     @Override
     protected String getPostBodyContent() {
         return String.format("grant_type=client_credentials&aud=%1s", getResource());

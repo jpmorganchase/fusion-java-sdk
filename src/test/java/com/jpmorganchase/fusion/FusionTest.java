@@ -6,12 +6,19 @@ import com.jpmorganchase.fusion.credential.OAuthPasswordBasedCredentials;
 import com.jpmorganchase.fusion.credential.OAuthSecretBasedCredentials;
 import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
+import com.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
@@ -101,6 +108,36 @@ public class FusionTest {
         assertThat(credentials.getResource(), is(equalTo("aResource")));
         assertThat(credentials.getAuthServerUrl(), is(equalTo("https://oauth-api.domain.com")));
         //TODO: validate password?
+    }
+
+    @Test
+    public void constructWithCredentialFile(){
+        URL url = FusionTest.class.getResource("test-user-credential.json");
+        Path path = null;
+        try {
+            path = Paths.get(url.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        Fusion f = Fusion.builder()
+                .credentialFile(path.toAbsolutePath().toString())
+                .build();
+        assertThat(f.getCredentials() instanceof OAuthSecretBasedCredentials, is(true));
+        OAuthSecretBasedCredentials credentials = (OAuthSecretBasedCredentials) f.getCredentials();
+        assertThat(credentials.getClientId(), is(equalTo("aClientId")));
+        assertThat(credentials.getResource(), is(equalTo("JPMC:URI:RS-12345-App-ENV")));
+        assertThat(credentials.getAuthServerUrl(), is(equalTo("https://authserver.domain.com/as/token.oauth2")));
+        //TODO: validate secret?
+    }
+
+    private static String loadTestResource(String resourceName) {
+        URL url = GsonAPIResponseParser.class.getResource(resourceName);
+        try {
+            Path path = Paths.get(url.toURI());
+            return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load test data", e);
+        }
     }
 
     @Test
