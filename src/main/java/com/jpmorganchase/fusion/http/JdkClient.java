@@ -31,7 +31,6 @@ public class JdkClient implements Client {
         HttpURLConnection connection = openConnection(url);
 
         headers.forEach(connection::setRequestProperty);
-        connection.setDoOutput(true);
         int httpCode;
 
         httpCode = executeRequest(connection, "GET");
