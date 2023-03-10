@@ -10,6 +10,8 @@ import lombok.Value;
 @Builder
 public class OAuthServerResponse {
 
+    private static final Gson gson = new GsonBuilder().create();
+
     @SerializedName("access_token")
     String accessToken;
     @SerializedName("token_type")
@@ -19,9 +21,7 @@ public class OAuthServerResponse {
     @SerializedName("id_token")
     String idToken;
 
-    //TODO: Move to another class? Figure out what to do to stop creating new Gson objects all the time (thread-safe to be a static?)
     public static OAuthServerResponse fromJson(String json){
-        Gson gson = new GsonBuilder().create();
         return gson.fromJson(json, OAuthServerResponse.class);
     }
 }

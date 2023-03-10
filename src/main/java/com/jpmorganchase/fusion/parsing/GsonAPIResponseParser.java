@@ -20,7 +20,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    //TODO: Thread-safe??
     private final Gson gson;
 
     public GsonAPIResponseParser() {
