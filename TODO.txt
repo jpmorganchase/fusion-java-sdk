@@ -4,8 +4,9 @@
                 2. Add tests for PUT and POST in a similar fashion
                 4. Go back and refactor all the FusionApiManager tests now that we don't need to execute them against Wiremock
                 8. Finish the tests for ApiResponseParser - need a set for each model class
-                13. Move FUsion Builder tests into their own class and add a bunch of cases
+                13. Move Fusion Builder tests into their own class and add a bunch of cases
                 11. Mutation testing
+                10. Logging
 
                 TODO
 
@@ -23,13 +24,19 @@
                 9. Credential refactoring - concurrency etc
                         -- need to write tests first and then separate out the logic in FUsionAPIManagerTest that is really testing these classes
 
-                10. Logging
-                    -- IN PROGRESS
-
                 12. Documentation
 
                 13. Review all exception handling
 
                 14. E2E Integration Tests
 
+                15. Review all naming conventions
+
+                16. Builder validation and error handling - null values passed in etc
+
+                17. Add additional logging
+
+                18. Optional Micrometer support
+
+                19. Make Fusion closeable and cascade the calls down
          */
