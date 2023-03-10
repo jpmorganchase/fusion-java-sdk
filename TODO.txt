@@ -10,7 +10,7 @@
 
                 TODO
 
-                3. Refactor all the HTTP tests to remove duplication -- IN PROGRESS
+                ==> 3. Refactor all the HTTP tests to remove duplication -- IN PROGRESS
 
                 5. Refactor of the JdkClient once all tests are in place - needs duplication removed and some clean-up
 
