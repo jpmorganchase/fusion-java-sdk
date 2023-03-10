@@ -1,7 +1,7 @@
 package com.jpmorganchase.fusion.http;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.common.ConsoleNotifier;
+import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import org.junit.jupiter.api.Disabled;
@@ -31,13 +31,13 @@ public class JdkClientTest {
 
     @RegisterExtension
     static WireMockExtension wiremock = WireMockExtension.newInstance()
-            .options(wireMockConfig().port(8080).notifier(new ConsoleNotifier(true))) //TODO: Remove this fixed port and use the default of a random port
+            .options(wireMockConfig().port(8080).notifier(new Slf4jNotifier(true))) //TODO: Remove this fixed port and use the default of a random port
             .configureStaticDsl(true)
             .build();
 
     @RegisterExtension
     static WireMockExtension wiremockProxy = WireMockExtension.newInstance()
-            .options(wireMockConfig().port(8081).notifier(new ConsoleNotifier(true))) //TODO: Remove this fixed port and use the default of a random port
+            .options(wireMockConfig().port(8081).notifier(new Slf4jNotifier(true))) //TODO: Remove this fixed port and use the default of a random port
             .build();
 
 
@@ -376,13 +376,6 @@ public class JdkClientTest {
         assertThat(responseText, is(equalTo("sample response")));
 
         //TODO: How do we test closure of the stream and connection? May need to make that inner class public
-    }
-
-    @Test
-    @Disabled
-    void implementAllOtherTests(){
-        //See: TODO.scratch
-        fail();
     }
 
 }

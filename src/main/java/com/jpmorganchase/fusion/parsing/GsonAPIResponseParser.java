@@ -3,7 +3,10 @@ package com.jpmorganchase.fusion.parsing;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.jpmorganchase.fusion.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -15,8 +18,9 @@ import java.util.stream.Collectors;
 
 public class GsonAPIResponseParser implements APIResponseParser {
 
-    //TODO: Thread-safe??
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+    //TODO: Thread-safe??
     private final Gson gson;
 
     public GsonAPIResponseParser() {
@@ -73,7 +77,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
                 .collect(Collectors.toMap(T::getIdentifier, Function.identity(),
                         //resolve any duplicate keys, for now jsut skip the dups
                         (r1, r2) -> {
-                            System.err.println("Duplicate key found, ignoring "+ r2); //TODO: Different error handling? (also logging)
+                            logger.atWarn().setMessage("Duplicate key '{}' found, will be ignored").addArgument(r2.getIdentifier()).log(); //TODO: Different error handling?
                             return r1;
                         }));
     }

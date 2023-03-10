@@ -3,13 +3,18 @@ package com.jpmorganchase.fusion.credential;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.HttpResponse;
 import com.jpmorganchase.fusion.http.JdkClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.lang.invoke.MethodHandles;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class OAuthCredentials implements Credentials {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final String clientId;
     private final String resource;
@@ -70,9 +75,8 @@ public abstract class OAuthCredentials implements Credentials {
             calendar.add(Calendar.SECOND, seconds - 30);
             this.bearerTokenExpiry = calendar.getTimeInMillis();
             tokenRefreshes++;
-            System.out.println("Token expires at: " + calendar.getTime());
-            System.out.println("Number of token refreshes: " + this.tokenRefreshes);
-
+            logger.atInfo().setMessage("Token expires at: {}").addArgument(calendar.getTime()).log();
+            logger.atInfo().setMessage("Number of token refreshes: {}").addArgument(this.tokenRefreshes).log();
         }
         return bearerToken;
     }

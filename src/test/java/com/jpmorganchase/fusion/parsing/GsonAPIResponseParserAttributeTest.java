@@ -18,6 +18,7 @@ public class GsonAPIResponseParserAttributeTest {
 
     private static final String singleAttributeJson = loadTestResource("single-attribute-response.json");
     private static final String multipleAttributeJson = loadTestResource("multiple-attribute-response.json");
+    private static final String duplicateAttributeJson = loadTestResource("duplicate-attribute-response.json");
 
     //TODO: Need to map out all the fields
     private static final Attribute testAttribute = Attribute.builder()
@@ -61,6 +62,21 @@ public class GsonAPIResponseParserAttributeTest {
     @Test
     public void multipleCatalogsInResourcesParseCorrectly() {
         Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(multipleAttributeJson);
+        assertThat(attributeMap.size(), is(3));
+
+        Attribute testAttributeResponse = attributeMap.get("name");
+        assertThat(testAttributeResponse, is(equalTo(testAttribute)));
+
+        Attribute testAttributeResponse2 = attributeMap.get("currency");
+        assertThat(testAttributeResponse2, is(equalTo(testAttribute2)));
+
+        Attribute testAttributeResponse3 = attributeMap.get("term");
+        assertThat(testAttributeResponse3, is(equalTo(testAttribute3)));
+    }
+
+    @Test
+    public void duplicateAttributesAreIgnored() {
+        Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(duplicateAttributeJson);
         assertThat(attributeMap.size(), is(3));
 
         Attribute testAttributeResponse = attributeMap.get("name");
