@@ -6,9 +6,13 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
+import java.util.function.Function;
 
 public class JdkClient implements Client {
 
+    public static final String METHOD_GET = "GET";
+    public static final String METHOD_POST = "POST";
+    public static final String METHOD_PUT = "PUT";
     private final Proxy proxy;
 
     public JdkClient(Proxy proxy) {
@@ -21,97 +25,28 @@ public class JdkClient implements Client {
 
     @Override
     public HttpResponse<String> get(String path, Map<String, String> headers) {
-        return executeMethod("GET", path, headers);
+        return executeMethod(METHOD_GET, path, headers);
     }
 
-    //TODO:Refactor to make common with the String handling code
     @Override
     public HttpResponse<InputStream> getInputStream(String path, Map<String, String> headers) {
-        URL url = parseUrl(path);
-        HttpURLConnection connection = openConnection(url);
-
-        headers.forEach(connection::setRequestProperty);
-        int httpCode;
-
-        httpCode = executeRequest(connection, "GET");
-
-        //TODO: Also handle error case - see logic in regular GET
-        InputStream responseStream = new HttpConnectionInputStream(connection);
-
-        return HttpResponse.<InputStream>builder()
-                .body(responseStream)
-                .headers(connection.getHeaderFields())
-                .statusCode(httpCode)
-                .build();
-    }
-
-    private static final class HttpConnectionInputStream extends InputStream {
-
-        private final HttpURLConnection connection;
-
-        public HttpConnectionInputStream(HttpURLConnection connection) {
-            this.connection = connection;
-        }
-
-        @Override
-        public int read() throws IOException {
-            return connection.getInputStream().read();
-        }
-
-        @Override
-        public void close() throws IOException {
-            connection.getInputStream().close();
-            connection.disconnect();
-        }
+        return executeMethod(METHOD_GET, path, headers, null, false, HttpConnectionInputStream::new);
     }
 
     @Override
     public HttpResponse<String> post(String path, Map<String, String> headers, String body) {
-        return executeMethod("POST", path, headers, body);
+        if (body == null) {
+            throw new ClientException("No request body specified for POST operation");
+        }
+        return executeMethod(METHOD_POST, path, headers, body);
     }
 
-    //TODO: Refactor for common code
     @Override
     public HttpResponse<String> put(String path, Map<String, String> headers, InputStream body) {
-        URL url = parseUrl(path);
-        HttpURLConnection connection = openConnection(url);
-
-        try {
-            headers.forEach(connection::setRequestProperty);
-            connection.setDoOutput(true);
-            int httpCode;
-
-            if (body != null) {
-                try {
-                    connection.setRequestMethod("PUT");
-                    OutputStream os = connection.getOutputStream();
-                    byte[] buf = new byte[8192];
-                    int length;
-                    while(( length = body.read(buf)) != -1){
-                        os.write(buf, 0, length);
-                    }
-                    httpCode = connection.getResponseCode();
-                    //TODO: Close stuff?
-                } catch (IOException e) {
-                    throw new ClientException("Failed to send request data", e);
-                }
-            } else {
-                throw new ClientException("No request body specified for PUT operation");
-            }
-
-            String response = getResponseBody(connection, httpCode);
-
-            return HttpResponse.<String>builder()
-                    .body(response)
-                    .headers(connection.getHeaderFields())
-                    .statusCode(httpCode)
-                    .build();
-
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+        if (body == null) {
+            throw new ClientException("No request body specified for PUT operation");
         }
+        return executeMethod(METHOD_PUT, path, headers, body, true, this::getResponseBody);
     }
 
     private HttpResponse<String> executeMethod(String method, String path, Map<String, String> headers) {
@@ -119,38 +54,30 @@ public class JdkClient implements Client {
     }
 
     private HttpResponse<String> executeMethod(String method, String path, Map<String, String> headers, String body) {
+        InputStream bodyAsStream = body != null ? new ByteArrayInputStream(body.getBytes()) : null;
+        return executeMethod(method, path, headers, bodyAsStream, true, this::getResponseBody);
+    }
+
+    private <T> HttpResponse<T> executeMethod(String method, String path, Map<String, String> headers, InputStream body, boolean closeConnection, Function<HttpURLConnection, T> resultMapper) {
         URL url = parseUrl(path);
         HttpURLConnection connection = openConnection(url);
-
+        headers.forEach(connection::setRequestProperty);
 
         try {
-            headers.forEach(connection::setRequestProperty);
-            connection.setDoOutput(true);
             int httpCode;
-
             if (body != null) {
-                try {
-                    connection.setRequestMethod(method);
-                    PrintStream os = new PrintStream(connection.getOutputStream());
-                    os.print(body);
-                    httpCode = connection.getResponseCode();
-                } catch (IOException e) {
-                    throw new ClientException("Failed to send request data", e);
-                }
+                httpCode = executeRequestWithBody(connection, method, body);
             } else {
                 httpCode = executeRequest(connection, method);
             }
 
-            String response = getResponseBody(connection, httpCode);
-
-            return HttpResponse.<String>builder()
-                    .body(response)
+            return HttpResponse.<T>builder()
+                    .body(resultMapper.apply(connection))
                     .headers(connection.getHeaderFields())
                     .statusCode(httpCode)
                     .build();
-
         } finally {
-            if (connection != null) {
+            if (closeConnection) {
                 connection.disconnect();
             }
         }
@@ -172,20 +99,8 @@ public class JdkClient implements Client {
         }
     }
 
-    //TODO: Refactor this code to clean it up
-    private String getResponseBody(HttpURLConnection connection, int httpCode) {
-        BufferedReader reader;
-        if (100 <= httpCode && httpCode <= 399) {
-            try {
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            } catch (IOException e) {
-                throw new ClientException("Failed to get InputStream from response", e);
-            }
-        } else {
-            //TODO: need to handle null case?
-            reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-        }
-
+    private String getResponseBody(HttpURLConnection connection) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(getResponseStream(connection)));
         StringWriter out = new StringWriter(connection.getContentLength() > 0 ? connection.getContentLength() : 2048);
 
         try {
@@ -193,13 +108,25 @@ public class JdkClient implements Client {
             while ((line = reader.readLine()) != null) {
                 out.append(line);
             }
+            reader.close();
         } catch (IOException e) {
             throw new ClientException("Failed to read data from response", e);
         }
-
-        //TODO: Close the BufferedReader?
-
         return out.toString();
+    }
+
+    private InputStream getResponseStream(HttpURLConnection connection) {
+        try {
+            int httpCode = connection.getResponseCode();
+            if (100 <= httpCode && httpCode <= 399) {
+                return connection.getInputStream();
+            } else {
+                //TODO: need to handle null case?
+                return connection.getErrorStream();
+            }
+        } catch (IOException e) {
+            throw new ClientException("Failed to get InputStream from response", e);
+        }
     }
 
     private int executeRequest(HttpURLConnection connection, String httpMethod) {
@@ -208,6 +135,23 @@ public class JdkClient implements Client {
             return connection.getResponseCode();
         } catch (IOException e) {
             throw new ClientException("Error performing HTTP operation", e);
+        }
+    }
+
+    private int executeRequestWithBody(HttpURLConnection connection, String method, InputStream body){
+        try {
+            connection.setDoOutput(true);
+            connection.setRequestMethod(method);
+            OutputStream os = connection.getOutputStream();
+            byte[] buf = new byte[8192];
+            int length;
+            while ((length = body.read(buf)) != -1) {
+                os.write(buf, 0, length);
+            }
+            body.close();
+            return connection.getResponseCode();
+        } catch (IOException e) {
+            throw new ClientException("Failed to send request data", e);
         }
     }
 }
