@@ -1,16 +1,12 @@
 package com.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.time.LocalDate;
+import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.Map;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -20,11 +16,18 @@ public class DatasetSeries extends CatalogResource {
     LocalDate fromDate;
     LocalDate toDate;
     LocalDate createdDate;
+
     @SerializedName(value = "@id")
     String linkedEntity;
 
     @Builder
-    public DatasetSeries(String identifier, Map<String, String> varArgs, LocalDate fromDate, LocalDate toDate, LocalDate createdDate, String linkedEntity) {
+    public DatasetSeries(
+            String identifier,
+            Map<String, String> varArgs,
+            LocalDate fromDate,
+            LocalDate toDate,
+            LocalDate createdDate,
+            String linkedEntity) {
         super(identifier, varArgs);
         this.fromDate = fromDate;
         this.toDate = toDate;

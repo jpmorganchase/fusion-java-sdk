@@ -1,7 +1,6 @@
 package com.jpmorganchase.fusion.credential;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;

@@ -3,18 +3,18 @@ package com.jpmorganchase.fusion.credential;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.HttpResponse;
 import com.jpmorganchase.fusion.http.JdkClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.lang.invoke.MethodHandles;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class OAuthCredentials implements Credentials {
 
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger =
+            LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final String clientId;
     private final String resource;
@@ -50,33 +50,39 @@ public abstract class OAuthCredentials implements Credentials {
 
         if (bearerToken == null) {
 
-            //Check if an obtained token has expired.
-            //TODO: This should possibly be outside of concurrency Control - maybe we need an AtomicBoolean hasTokenExpired?
+            // Check if an obtained token has expired.
+            // TODO: This should possibly be outside of concurrency Control - maybe we need an AtomicBoolean
+            // hasTokenExpired?
             if (System.currentTimeMillis() < this.bearerTokenExpiry) {
                 return this.bearerToken;
             }
 
             Map<String, String> requestHeaders = new HashMap<>();
-            if (requiresAuthHeader())
-                requestHeaders.put("Authorization", getAuthHeader());
+            if (requiresAuthHeader()) requestHeaders.put("Authorization", getAuthHeader());
             requestHeaders.put("Content-Type", "application/x-www-form-urlencoded");
             requestHeaders.put("Accept", "application/json");
 
             HttpResponse<String> response = httpClient.post(authServerUrl, requestHeaders, getPostBodyContent());
 
-            //TODO: Error Handling?
-            //Get the bearer token
+            // TODO: Error Handling?
+            // Get the bearer token
             OAuthServerResponse oAuthServerResponse = OAuthServerResponse.fromJson(response.getBody());
             this.bearerToken = oAuthServerResponse.getAccessToken();
 
-            //Get the token expiry time
+            // Get the token expiry time
             Calendar calendar = Calendar.getInstance();
             int seconds = oAuthServerResponse.getExpiresIn();
             calendar.add(Calendar.SECOND, seconds - 30);
             this.bearerTokenExpiry = calendar.getTimeInMillis();
             tokenRefreshes++;
-            logger.atInfo().setMessage("Token expires at: {}").addArgument(calendar.getTime()).log();
-            logger.atInfo().setMessage("Number of token refreshes: {}").addArgument(this.tokenRefreshes).log();
+            logger.atInfo()
+                    .setMessage("Token expires at: {}")
+                    .addArgument(calendar.getTime())
+                    .log();
+            logger.atInfo()
+                    .setMessage("Number of token refreshes: {}")
+                    .addArgument(this.tokenRefreshes)
+                    .log();
         }
         return bearerToken;
     }
@@ -86,7 +92,6 @@ public abstract class OAuthCredentials implements Credentials {
     protected abstract boolean requiresAuthHeader();
 
     protected abstract String getAuthHeader();
-
 
     public String getClientId() {
         return clientId;
@@ -107,5 +112,4 @@ public abstract class OAuthCredentials implements Credentials {
     public int getTokenRefreshes() {
         return tokenRefreshes;
     }
-
 }

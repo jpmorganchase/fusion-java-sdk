@@ -1,25 +1,24 @@
 package com.jpmorganchase.fusion.parsing;
 
-import com.jpmorganchase.fusion.model.Distribution;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
+import com.jpmorganchase.fusion.model.Distribution;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import org.junit.jupiter.api.Test;
 
 public class GsonAPIResponseParserDistributionTest {
 
     private static final String singleDistributionJson = loadTestResource("single-distribution-response.json");
     private static final String multipleDistributionJson = loadTestResource("multiple-distribution-response.json");
 
-    //TODO: Need to map out all the fields
+    // TODO: Need to map out all the fields
     private static final Distribution testDistribution = Distribution.builder()
             .identifier("csv")
             .description("Snapshot data will be in a tabular, comma separated format.")

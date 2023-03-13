@@ -1,30 +1,28 @@
 package com.jpmorganchase.fusion;
 
-import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
-import com.jpmorganchase.fusion.credential.OAuthPasswordBasedCredentials;
-import com.jpmorganchase.fusion.credential.OAuthSecretBasedCredentials;
-import org.junit.jupiter.api.Test;
-
-import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class FusionBuilderTest {
+import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
+import com.jpmorganchase.fusion.credential.OAuthPasswordBasedCredentials;
+import com.jpmorganchase.fusion.credential.OAuthSecretBasedCredentials;
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.junit.jupiter.api.Test;
 
+public class FusionBuilderTest {
 
     @Test
     public void constructionWithNoCredentialsThrowsException() {
-        FusionInitialisationException thrown = assertThrows(FusionInitialisationException.class,
+        FusionInitialisationException thrown = assertThrows(
+                FusionInitialisationException.class,
                 () -> Fusion.builder().build(),
-                "Expected FusionInitialisationException but none thrown"
-        );
+                "Expected FusionInitialisationException but none thrown");
         assertThat(thrown.getMessage(), is(equalTo("No Fusion credentials provided, cannot build Fusion instance")));
     }
 
@@ -54,7 +52,7 @@ public class FusionBuilderTest {
         assertThat(f.getDefaultCatalog(), is(equalTo(Fusion.DEFAULT_CATALOG)));
     }
 
-    //TODO: A better test is probably to make sure that it gets passed down to the next layer?
+    // TODO: A better test is probably to make sure that it gets passed down to the next layer?
     @Test
     public void constructionWithCatalogUsesCorrectDefaultCatalog() {
         Fusion f = Fusion.builder()
@@ -66,9 +64,7 @@ public class FusionBuilderTest {
 
     @Test
     public void constructWithBearerToken() {
-        Fusion f = Fusion.builder()
-                .bearerToken("my-token")
-                .build();
+        Fusion f = Fusion.builder().bearerToken("my-token").build();
         assertThat(f.getCredentials() instanceof BearerTokenCredentials, is(true));
     }
 
@@ -88,7 +84,8 @@ public class FusionBuilderTest {
     @Test
     public void constructWithPasswordBasedCredentials() {
         Fusion f = Fusion.builder()
-                .passwordBasedCredentials("aClientId", "aUsername", "aPassword", "aResource", "https://oauth-api.domain.com")
+                .passwordBasedCredentials(
+                        "aClientId", "aUsername", "aPassword", "aResource", "https://oauth-api.domain.com")
                 .build();
         assertThat(f.getCredentials() instanceof OAuthPasswordBasedCredentials, is(true));
         OAuthPasswordBasedCredentials credentials = (OAuthPasswordBasedCredentials) f.getCredentials();
@@ -121,14 +118,12 @@ public class FusionBuilderTest {
 
     @Test
     public void constructWithInvalidCredentialFileThrowsException() {
-        FusionInitialisationException thrown = assertThrows(FusionInitialisationException.class,
+        FusionInitialisationException thrown = assertThrows(
+                FusionInitialisationException.class,
                 () -> {
-                    Fusion.builder()
-                            .credentialFile("/not/a/valid/file/path")
-                            .build();
+                    Fusion.builder().credentialFile("/not/a/valid/file/path").build();
                 },
-                "Expected FusionInitialisationException but none thrown"
-        );
+                "Expected FusionInitialisationException but none thrown");
         assertThat(thrown.getCause().getClass(), is(equalTo(FileNotFoundException.class)));
     }
 
@@ -139,8 +134,6 @@ public class FusionBuilderTest {
                 .proxy("http://myproxy.domain.com", 8080)
                 .build();
         assertThat(f.getCredentials() instanceof BearerTokenCredentials, is(true));
-        //TODO: this is somewhat useless unless we can validate that the proxy was actually configured
+        // TODO: this is somewhat useless unless we can validate that the proxy was actually configured
     }
-
 }
-

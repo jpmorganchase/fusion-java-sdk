@@ -14,14 +14,17 @@ public class OAuthServerResponse {
 
     @SerializedName("access_token")
     String accessToken;
+
     @SerializedName("token_type")
     String tokenType;
+
     @SerializedName("expires_in")
     int expiresIn;
+
     @SerializedName("id_token")
     String idToken;
 
-    public static OAuthServerResponse fromJson(String json){
+    public static OAuthServerResponse fromJson(String json) {
         return gson.fromJson(json, OAuthServerResponse.class);
     }
 }

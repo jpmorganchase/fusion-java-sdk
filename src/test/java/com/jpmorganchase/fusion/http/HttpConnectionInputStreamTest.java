@@ -1,16 +1,15 @@
 package com.jpmorganchase.fusion.http;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.*;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class HttpConnectionInputStreamTest {
@@ -22,7 +21,7 @@ public class HttpConnectionInputStreamTest {
     InputStream underlyingStream;
 
     @Test
-    public void readDelegatesCallsToTheConnection() throws Exception{
+    public void readDelegatesCallsToTheConnection() throws Exception {
         HttpConnectionInputStream stream = new HttpConnectionInputStream(connection);
 
         when(connection.getInputStream()).thenReturn(underlyingStream);
@@ -35,7 +34,7 @@ public class HttpConnectionInputStreamTest {
     }
 
     @Test
-    public void closeDelegatesCallsToTheConnection() throws Exception{
+    public void closeDelegatesCallsToTheConnection() throws Exception {
         HttpConnectionInputStream stream = new HttpConnectionInputStream(connection);
 
         when(connection.getInputStream()).thenReturn(underlyingStream);

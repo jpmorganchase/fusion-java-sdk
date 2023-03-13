@@ -5,10 +5,12 @@ import java.util.Map;
 
 public interface Client {
 
-    //TODO: Document exceptions
+    // TODO: Document exceptions
     HttpResponse<String> get(String path, Map<String, String> headers);
-    HttpResponse<InputStream> getInputStream(String path, Map<String, String> headers);
-    HttpResponse<String> post(String path, Map<String, String> headers, String body);
-    HttpResponse<String> put(String path, Map<String, String> headers, InputStream body);
 
+    HttpResponse<InputStream> getInputStream(String path, Map<String, String> headers);
+
+    HttpResponse<String> post(String path, Map<String, String> headers, String body);
+
+    HttpResponse<String> put(String path, Map<String, String> headers, InputStream body);
 }

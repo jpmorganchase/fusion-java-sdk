@@ -1,7 +1,6 @@
 package com.jpmorganchase.fusion.parsing;
 
 import com.jpmorganchase.fusion.model.*;
-
 import java.util.Map;
 
 public interface APIResponseParser {

@@ -1,6 +1,6 @@
 package com.jpmorganchase.fusion.http;
 
-public class ClientException extends RuntimeException{
+public class ClientException extends RuntimeException {
 
     public ClientException(String s) {
         super(s);

@@ -11,8 +11,11 @@ public class OAuthConfiguration {
 
     @SerializedName("client_id")
     private final String clientId;
+
     private final String resource;
+
     @SerializedName("auth_url")
     private final String authServerUrl;
+
     private String bearerToken;
 }

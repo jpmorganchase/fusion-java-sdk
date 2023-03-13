@@ -1,12 +1,10 @@
 package com.jpmorganchase.fusion.http;
 
-
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
-
 import java.util.Map;
 import java.util.function.Function;
 
@@ -60,7 +58,13 @@ public class JdkClient implements Client {
         return executeMethod(method, path, headers, bodyAsStream, true, this::getResponseBody);
     }
 
-    private <T> HttpResponse<T> executeMethod(String method, String path, Map<String, String> headers, InputStream body, boolean closeConnection, Function<HttpURLConnection, T> resultMapper) {
+    private <T> HttpResponse<T> executeMethod(
+            String method,
+            String path,
+            Map<String, String> headers,
+            InputStream body,
+            boolean closeConnection,
+            Function<HttpURLConnection, T> resultMapper) {
         URL url = parseUrl(path);
         HttpURLConnection connection = openConnection(url);
         headers.forEach(connection::setRequestProperty);
@@ -123,7 +127,7 @@ public class JdkClient implements Client {
             if (100 <= httpCode && httpCode <= 399) {
                 return connection.getInputStream();
             } else {
-                //TODO: need to handle null case?
+                // TODO: need to handle null case?
                 return connection.getErrorStream();
             }
         } catch (IOException e) {

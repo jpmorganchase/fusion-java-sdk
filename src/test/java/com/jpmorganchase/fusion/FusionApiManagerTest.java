@@ -1,19 +1,17 @@
 package com.jpmorganchase.fusion;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
+
 import com.google.common.collect.Lists;
 import com.jpmorganchase.fusion.api.APICallException;
 import com.jpmorganchase.fusion.api.FusionAPIManager;
 import com.jpmorganchase.fusion.credential.*;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.HttpResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,24 +21,25 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class FusionApiManagerTest {
 
-
     private Credentials credentials;
     private FusionAPIManager fusionAPIManager;
+
     @Mock
     private Client client;
 
-    private static final String tokenJson = "{\"access_token\":\"my-oauth-generated-token\",\"token_type\":\"bearer\",\"expires_in\":3600}";
+    private static final String tokenJson =
+            "{\"access_token\":\"my-oauth-generated-token\",\"token_type\":\"bearer\",\"expires_in\":3600}";
 
     @BeforeEach
     void setUp() {
@@ -53,9 +52,9 @@ public class FusionApiManagerTest {
         Map<String, String> expectedHeaders = new HashMap<>();
         expectedHeaders.put("Authorization", "Bearer my-token");
         HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
-                        .statusCode(200)
-                        .body("sample response")
-                        .build();
+                .statusCode(200)
+                .body("sample response")
+                .build();
         when(client.get("http://localhost:8080/test", expectedHeaders)).thenReturn(expectedHttpResponse);
 
         String response = fusionAPIManager.callAPI("http://localhost:8080/test");
@@ -72,19 +71,20 @@ public class FusionApiManagerTest {
                 .build();
         when(client.get("http://localhost:8080/test", expectedHeaders)).thenReturn(expectedHttpResponse);
 
-        APICallException thrown = assertThrows(APICallException.class,
+        APICallException thrown = assertThrows(
+                APICallException.class,
                 () -> fusionAPIManager.callAPI("http://localhost:8080/test"),
-                "Expected APICallException but none thrown"
-        );
+                "Expected APICallException but none thrown");
 
         assertThat(thrown.getMessage(), is(equalTo("The requested resource does not exist.")));
     }
 
-    //TODO: This can be moved once we finish refactoring
-    //TODO: Need tests around the expiry time logic
+    // TODO: This can be moved once we finish refactoring
+    // TODO: Need tests around the expiry time logic
     @Test
     void successWithOAuthTokenRetrieval() throws Exception {
-        credentials = new OAuthSecretBasedCredentials("aClientID", "aClientSecret", "aResource", "http://localhost:8080/oAuth", client);
+        credentials = new OAuthSecretBasedCredentials(
+                "aClientID", "aClientSecret", "aResource", "http://localhost:8080/oAuth", client);
         fusionAPIManager = new FusionAPIManager(credentials, client);
 
         Map<String, String> expectedOAuthHeaders = new HashMap<>();
@@ -92,9 +92,8 @@ public class FusionApiManagerTest {
         expectedOAuthHeaders.put("Accept", "application/json");
         expectedOAuthHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 
-        HttpResponse<String> oAuthResponse = HttpResponse.<String>builder()
-                .body(tokenJson)
-                .build();
+        HttpResponse<String> oAuthResponse =
+                HttpResponse.<String>builder().body(tokenJson).build();
 
         Map<String, String> expectedRequestHeaders = new HashMap<>();
         expectedRequestHeaders.put("Authorization", "Bearer my-oauth-generated-token");
@@ -104,29 +103,33 @@ public class FusionApiManagerTest {
                 .body("sample response")
                 .build();
 
-        when(client.post("http://localhost:8080/oAuth", expectedOAuthHeaders, "grant_type=client_credentials&aud=aResource")).thenReturn(oAuthResponse);
+        when(client.post(
+                        "http://localhost:8080/oAuth",
+                        expectedOAuthHeaders,
+                        "grant_type=client_credentials&aud=aResource"))
+                .thenReturn(oAuthResponse);
         when(client.get("http://localhost:8080/test", expectedRequestHeaders)).thenReturn(expectedHttpResponse);
-
 
         String response = fusionAPIManager.callAPI("http://localhost:8080/test");
 
         assertThat(response, is(equalTo("sample response")));
     }
 
-    //TODO: This can be moved once we finish refactoring (Can it? I wrote this comment a week ago and am now unconvinced)
-    //TODO: This method and the one above are duplicating code - refactor
+    // TODO: This can be moved once we finish refactoring (Can it? I wrote this comment a week ago and am now
+    // unconvinced)
+    // TODO: This method and the one above are duplicating code - refactor
     @Test
     void successWithOAuthPasswordBasedTokenRetrieval() throws Exception {
-        credentials = new OAuthPasswordBasedCredentials("aClientID", "aUsername", "aPassword", "aResource", "http://localhost:8080/oAuth", client);
+        credentials = new OAuthPasswordBasedCredentials(
+                "aClientID", "aUsername", "aPassword", "aResource", "http://localhost:8080/oAuth", client);
         fusionAPIManager = new FusionAPIManager(credentials, client);
 
         Map<String, String> expectedOAuthHeaders = new HashMap<>();
         expectedOAuthHeaders.put("Accept", "application/json");
         expectedOAuthHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 
-        HttpResponse<String> oAuthResponse = HttpResponse.<String>builder()
-                .body(tokenJson)
-                .build();
+        HttpResponse<String> oAuthResponse =
+                HttpResponse.<String>builder().body(tokenJson).build();
 
         Map<String, String> expectedRequestHeaders = new HashMap<>();
         expectedRequestHeaders.put("Authorization", "Bearer my-oauth-generated-token");
@@ -136,10 +139,12 @@ public class FusionApiManagerTest {
                 .body("sample response")
                 .build();
 
-        when(client.post("http://localhost:8080/oAuth", expectedOAuthHeaders,
-                "grant_type=password&resource=aResource&client_id=aClientID&username=aUsername&password=aPassword")).thenReturn(oAuthResponse);
+        when(client.post(
+                        "http://localhost:8080/oAuth",
+                        expectedOAuthHeaders,
+                        "grant_type=password&resource=aResource&client_id=aClientID&username=aUsername&password=aPassword"))
+                .thenReturn(oAuthResponse);
         when(client.get("http://localhost:8080/test", expectedRequestHeaders)).thenReturn(expectedHttpResponse);
-
 
         String response = fusionAPIManager.callAPI("http://localhost:8080/test");
 
@@ -164,13 +169,13 @@ public class FusionApiManagerTest {
                 .body(new ByteArrayInputStream(serverResponse))
                 .headers(responseHeaders)
                 .build();
-        when(client.getInputStream("http://localhost:8080/test", expectedRequestHeaders)).thenReturn(expectedHttpResponse);
-
+        when(client.getInputStream("http://localhost:8080/test", expectedRequestHeaders))
+                .thenReturn(expectedHttpResponse);
 
         fusionAPIManager.callAPIFileDownload("http://localhost:8080/test", tempOutputFile.getAbsolutePath());
 
         byte[] outputBytes = new byte[(int) tempOutputFile.length()];
-        try(FileInputStream fis = new FileInputStream(tempOutputFile)) {
+        try (FileInputStream fis = new FileInputStream(tempOutputFile)) {
             fis.read(outputBytes);
         }
 
@@ -194,8 +199,8 @@ public class FusionApiManagerTest {
                 .body(new ByteArrayInputStream(serverResponse))
                 .headers(responseHeaders)
                 .build();
-        when(client.getInputStream("http://localhost:8080/test", expectedRequestHeaders)).thenReturn(expectedHttpResponse);
-
+        when(client.getInputStream("http://localhost:8080/test", expectedRequestHeaders))
+                .thenReturn(expectedHttpResponse);
 
         InputStream responseStream = fusionAPIManager.callAPIFileDownload("http://localhost:8080/test");
 
@@ -222,14 +227,17 @@ public class FusionApiManagerTest {
         expectedRequestHeaders.put("Digest", "md5=SpmtmsY7xMV5dSZdQaLnpA==");
         expectedRequestHeaders.put("Content-Length", "23");
 
-        when(client.put(any(), any(),any()))
+        when(client.put(any(), any(), any()))
                 .thenReturn(HttpResponse.<String>builder().statusCode(200).build());
-        //TODO: Now we need to validate the stub properly
-                //new ByteArrayInputStream("A,B,C\n1,2,3\n4,5,6\n7,8,9".getBytes())
+        // TODO: Now we need to validate the stub properly
+        // new ByteArrayInputStream("A,B,C\n1,2,3\n4,5,6\n7,8,9".getBytes())
 
-        fusionAPIManager.callAPIFileUpload("http://localhost:8080/test",
+        fusionAPIManager.callAPIFileUpload(
+                "http://localhost:8080/test",
                 getPathFromResource("upload-test.csv"),
-                "2023-03-01", "2023-03-02", "2023-03-03");
+                "2023-03-01",
+                "2023-03-02",
+                "2023-03-03");
     }
 
     @Test
@@ -246,17 +254,20 @@ public class FusionApiManagerTest {
         expectedRequestHeaders.put("Digest", "md5=SpmtmsY7xMV5dSZdQaLnpA==");
         expectedRequestHeaders.put("Content-Length", "23");
 
-        when(client.put(any(), any(),any()))
+        when(client.put(any(), any(), any()))
                 .thenReturn(HttpResponse.<String>builder().statusCode(200).build());
-        //TODO: Now we need to validate the stub properly
-        //new ByteArrayInputStream("A,B,C\n1,2,3\n4,5,6\n7,8,9".getBytes())
+        // TODO: Now we need to validate the stub properly
+        // new ByteArrayInputStream("A,B,C\n1,2,3\n4,5,6\n7,8,9".getBytes())
 
-        fusionAPIManager.callAPIFileUpload("http://localhost:8080/test",
+        fusionAPIManager.callAPIFileUpload(
+                "http://localhost:8080/test",
                 Files.newInputStream(Paths.get(getPathFromResource("upload-test.csv"))),
-                "2023-03-01", "2023-03-02", "2023-03-03");
+                "2023-03-01",
+                "2023-03-02",
+                "2023-03-03");
     }
 
-    private static String getPathFromResource(String resourceName){
+    private static String getPathFromResource(String resourceName) {
         URL url = FusionApiManagerTest.class.getResource(resourceName);
         try {
             Path path = Paths.get(url.toURI());
@@ -265,5 +276,4 @@ public class FusionApiManagerTest {
             throw new RuntimeException("Failed to locate test data", e);
         }
     }
-
 }

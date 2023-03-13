@@ -1,25 +1,24 @@
 package com.jpmorganchase.fusion.parsing;
 
-import com.jpmorganchase.fusion.model.Dataset;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
+import com.jpmorganchase.fusion.model.Dataset;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import org.junit.jupiter.api.Test;
 
 public class GsonAPIResponseParserDatasetTest {
 
     private static final String singleDatasetJson = loadTestResource("single-dataset-response.json");
     private static final String multipleDatasetJson = loadTestResource("multiple-dataset-response.json");
 
-    //TODO: Need to map out all the fields
+    // TODO: Need to map out all the fields
     private static final Dataset testDataset = Dataset.builder()
             .identifier("SD0001")
             .description("Sample dataset description 1")

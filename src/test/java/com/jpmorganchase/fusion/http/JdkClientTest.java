@@ -1,30 +1,28 @@
 package com.jpmorganchase.fusion.http;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
-
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.emptyString;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class JdkClientTest {
 
@@ -42,7 +40,6 @@ public class JdkClientTest {
     private static final Client httpClient = new JdkClient();
     private static Client httpClientWithProxy;
 
-
     private static final String SAMPLE_RESPONSE_BODY = "sample response";
     private static final String BASE_PATH = "/test";
     private static String BASE_URL;
@@ -58,7 +55,8 @@ public class JdkClientTest {
         API_URL = String.format("%s%s", BASE_URL, BASE_PATH);
 
         URL proxyUrl = new URL(wiremockProxy.getRuntimeInfo().getHttpBaseUrl());
-        httpClientWithProxy = new JdkClient(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyUrl.getHost(), wiremockProxy.getPort())));
+        httpClientWithProxy = new JdkClient(
+                new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyUrl.getHost(), wiremockProxy.getPort())));
 
         SINGLE_REQUEST_HEADER = new HashMap<>();
         SINGLE_REQUEST_HEADER.put("header1", "value1");
@@ -100,33 +98,50 @@ public class JdkClientTest {
     }
 
     private void validateGetRequest(HttpResponse<String> response) {
-        validateGetRequest(response, NO_REQUEST_HEADERS, SAMPLE_RESPONSE_BODY, HttpURLConnection.HTTP_OK, Collections.emptyMap());
+        validateGetRequest(
+                response, NO_REQUEST_HEADERS, SAMPLE_RESPONSE_BODY, HttpURLConnection.HTTP_OK, Collections.emptyMap());
     }
 
     private void validateGetRequest(HttpResponse<String> response, Map<String, String> expectedRequestHeaders) {
-        validateGetRequest(response, expectedRequestHeaders, SAMPLE_RESPONSE_BODY, HttpURLConnection.HTTP_OK, Collections.emptyMap());
+        validateGetRequest(
+                response,
+                expectedRequestHeaders,
+                SAMPLE_RESPONSE_BODY,
+                HttpURLConnection.HTTP_OK,
+                Collections.emptyMap());
     }
 
-    private void validateGetRequest(HttpResponse<String> response, Map<String, String> expectedRequestHeaders, String expectedResponseBody, int expectedResponseCode) {
-        validateGetRequest(response, expectedRequestHeaders, expectedResponseBody, expectedResponseCode, Collections.emptyMap());
+    private void validateGetRequest(
+            HttpResponse<String> response,
+            Map<String, String> expectedRequestHeaders,
+            String expectedResponseBody,
+            int expectedResponseCode) {
+        validateGetRequest(
+                response, expectedRequestHeaders, expectedResponseBody, expectedResponseCode, Collections.emptyMap());
     }
 
-    private void validateGetRequest(HttpResponse<String> response, Map<String, String> expectedRequestHeaders, String expectedResponseBody, int expectedResponseCode, Map<String, String> expectedResponseHeaders) {
+    private void validateGetRequest(
+            HttpResponse<String> response,
+            Map<String, String> expectedRequestHeaders,
+            String expectedResponseBody,
+            int expectedResponseCode,
+            Map<String, String> expectedResponseHeaders) {
         if (expectedRequestHeaders.size() > 0) {
-            //Add headers to the stub expectation if we had any on the request
+            // Add headers to the stub expectation if we had any on the request
             RequestPatternBuilder requestPatternBuilder = getRequestedFor(urlEqualTo(BASE_PATH));
             for (Map.Entry<String, String> header : expectedRequestHeaders.entrySet()) {
                 requestPatternBuilder.withHeader(header.getKey(), WireMock.equalTo(header.getValue()));
             }
             verify(requestPatternBuilder);
         } else {
-            //otherwise just verify that the URL was invoked
+            // otherwise just verify that the URL was invoked
             verify(getRequestedFor(urlEqualTo(BASE_PATH)));
         }
         assertThat(response.getStatusCode(), is(equalTo(expectedResponseCode)));
         assertThat(response.getBody(), is(equalTo(expectedResponseBody)));
 
-        expectedResponseHeaders.forEach((key, value) -> assertThat(response.getHeaders().get(key).get(0), is(equalTo(value))));
+        expectedResponseHeaders.forEach(
+                (key, value) -> assertThat(response.getHeaders().get(key).get(0), is(equalTo(value))));
     }
 
     @Test
@@ -172,7 +187,8 @@ public class JdkClientTest {
 
         HttpResponse<String> response = executeGetRequest(NO_REQUEST_HEADERS);
 
-        validateGetRequest(response, NO_REQUEST_HEADERS, SAMPLE_RESPONSE_BODY, HttpURLConnection.HTTP_OK, SINGLE_RESPONSE_HEADER);
+        validateGetRequest(
+                response, NO_REQUEST_HEADERS, SAMPLE_RESPONSE_BODY, HttpURLConnection.HTTP_OK, SINGLE_RESPONSE_HEADER);
     }
 
     @Test
@@ -260,9 +276,8 @@ public class JdkClientTest {
     @Test
     void correctHandlingOfResponseHeaderOnPostRequest() throws Exception {
 
-        stubFor(post(BASE_PATH).willReturn(aResponse()
-                .withBody(SAMPLE_RESPONSE_BODY)
-                .withHeader("test-header-1", "header-1-value")));
+        stubFor(post(BASE_PATH)
+                .willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY).withHeader("test-header-1", "header-1-value")));
 
         HttpResponse<String> response = httpClient.post(API_URL, Collections.emptyMap(), "sample post body");
 
@@ -291,7 +306,8 @@ public class JdkClientTest {
 
         stubFor(put(BASE_PATH).willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY)));
 
-        HttpResponse<String> response = httpClient.put(API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
+        HttpResponse<String> response = httpClient.put(
+                API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
 
         verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
@@ -303,8 +319,8 @@ public class JdkClientTest {
 
         stubFor(put(BASE_PATH).willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY)));
 
-        HttpResponse<String> response = httpClient.put(API_URL, Collections.emptyMap(),
-                new ByteArrayInputStream("sample post body".getBytes()));
+        HttpResponse<String> response = httpClient.put(
+                API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
 
         verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
@@ -318,7 +334,8 @@ public class JdkClientTest {
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("header1", "value1");
-        HttpResponse<String> response = httpClient.put(API_URL, requestHeaders, new ByteArrayInputStream("sample post body".getBytes()));
+        HttpResponse<String> response =
+                httpClient.put(API_URL, requestHeaders, new ByteArrayInputStream("sample post body".getBytes()));
 
         verify(putRequestedFor(urlEqualTo(BASE_PATH))
                 .withRequestBody(WireMock.equalTo("sample post body"))
@@ -336,7 +353,8 @@ public class JdkClientTest {
         requestHeaders.put("header1", "value1");
         requestHeaders.put("header2", "value2");
         requestHeaders.put("header3", "value3");
-        HttpResponse<String> response = httpClient.put(API_URL, requestHeaders, new ByteArrayInputStream("sample post body".getBytes()));
+        HttpResponse<String> response =
+                httpClient.put(API_URL, requestHeaders, new ByteArrayInputStream("sample post body".getBytes()));
 
         verify(putRequestedFor(urlEqualTo(BASE_PATH))
                 .withRequestBody(WireMock.equalTo("sample post body"))
@@ -351,7 +369,8 @@ public class JdkClientTest {
     void putCallWith404Response() throws Exception {
         stubFor(put(BASE_PATH).willReturn(aResponse().withStatus(HttpURLConnection.HTTP_NOT_FOUND)));
 
-        HttpResponse<String> response = httpClient.put(API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
+        HttpResponse<String> response = httpClient.put(
+                API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
 
         verify(putRequestedFor(urlEqualTo(BASE_PATH)));
         assertThat(response.getStatusCode(), is(equalTo(404)));
@@ -362,7 +381,8 @@ public class JdkClientTest {
     void putCallWith500Response() throws Exception {
         stubFor(put(BASE_PATH).willReturn(aResponse().withStatus(HttpURLConnection.HTTP_INTERNAL_ERROR)));
 
-        HttpResponse<String> response = httpClient.put(API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
+        HttpResponse<String> response = httpClient.put(
+                API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
 
         verify(putRequestedFor(urlEqualTo(BASE_PATH)));
         assertThat(response.getStatusCode(), is(equalTo(500)));
@@ -372,11 +392,11 @@ public class JdkClientTest {
     @Test
     void correctHandlingOfResponseHeaderOnPutRequest() throws Exception {
 
-        stubFor(put(BASE_PATH).willReturn(aResponse()
-                .withBody(SAMPLE_RESPONSE_BODY)
-                .withHeader("test-header-1", "header-1-value")));
+        stubFor(put(BASE_PATH)
+                .willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY).withHeader("test-header-1", "header-1-value")));
 
-        HttpResponse<String> response = httpClient.put(API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
+        HttpResponse<String> response = httpClient.put(
+                API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
 
         verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
@@ -390,7 +410,8 @@ public class JdkClientTest {
         wiremockProxy.stubFor(put(BASE_PATH).willReturn(aResponse().proxiedFrom(BASE_URL)));
         stubFor(put(BASE_PATH).willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY)));
 
-        HttpResponse<String> response = httpClientWithProxy.put(API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
+        HttpResponse<String> response = httpClientWithProxy.put(
+                API_URL, Collections.emptyMap(), new ByteArrayInputStream("sample post body".getBytes()));
 
         wiremockProxy.verify(putRequestedFor(urlEqualTo(BASE_PATH)));
         verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
@@ -400,10 +421,10 @@ public class JdkClientTest {
 
     @Test
     void noRequestBodyForPutRequestResultsInException() {
-        ClientException thrown = assertThrows(ClientException.class,
+        ClientException thrown = assertThrows(
+                ClientException.class,
                 () -> httpClient.put(API_URL, Collections.emptyMap(), null),
-                "Expected ClientException but none thrown"
-        );
+                "Expected ClientException but none thrown");
         assertThat(thrown.getMessage(), is(equalTo("No request body specified for PUT operation")));
     }
 
@@ -418,13 +439,12 @@ public class JdkClientTest {
         assertThat(response.getStatusCode(), is(equalTo(200)));
 
         InputStream responseStream = response.getBody();
-        String responseText = new BufferedReader(
-                new InputStreamReader(responseStream, StandardCharsets.UTF_8))
+        String responseText = new BufferedReader(new InputStreamReader(responseStream, StandardCharsets.UTF_8))
                 .lines()
                 .collect(Collectors.joining("\n"));
         assertThat(responseText, is(equalTo(SAMPLE_RESPONSE_BODY)));
 
-        //TODO: How do we test closure of the stream and connection? May need to make that inner class public
+        // TODO: How do we test closure of the stream and connection? May need to make that inner class public
     }
 
     @Test
@@ -446,13 +466,11 @@ public class JdkClientTest {
         assertThat(response.getStatusCode(), is(equalTo(200)));
 
         InputStream responseStream = response.getBody();
-        String responseText = new BufferedReader(
-                new InputStreamReader(responseStream, StandardCharsets.UTF_8))
+        String responseText = new BufferedReader(new InputStreamReader(responseStream, StandardCharsets.UTF_8))
                 .lines()
                 .collect(Collectors.joining("\n"));
         assertThat(responseText, is(equalTo(SAMPLE_RESPONSE_BODY)));
 
-        //TODO: How do we test closure of the stream and connection? May need to make that inner class public
+        // TODO: How do we test closure of the stream and connection? May need to make that inner class public
     }
-
 }

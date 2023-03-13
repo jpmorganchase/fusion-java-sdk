@@ -1,6 +1,6 @@
 package com.jpmorganchase.fusion;
 
-public class FusionInitialisationException extends RuntimeException{
+public class FusionInitialisationException extends RuntimeException {
 
     public FusionInitialisationException(String s) {
         super(s);

@@ -2,17 +2,14 @@ package com.jpmorganchase.fusion;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.jpmorganchase.fusion.api.FusionAPIManager;
 import com.jpmorganchase.fusion.api.APIManager;
+import com.jpmorganchase.fusion.api.FusionAPIManager;
 import com.jpmorganchase.fusion.credential.*;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.JdkClient;
 import com.jpmorganchase.fusion.model.*;
-import com.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
-import lombok.Builder;
-import lombok.Getter;
-
+import com.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +21,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * Class representing the Fusion API, providing methods that correspond to available API endpoints
@@ -33,8 +32,8 @@ import java.util.Map;
 public class Fusion {
 
     /*
-        Public facing constant default values
-     */
+       Public facing constant default values
+    */
     public static final String DEFAULT_ROOT_URL = "https://fusion-api.jpmorgan.com/fusion/v1/";
     public static final String DEFAULT_CATALOG = "common";
 
@@ -42,10 +41,13 @@ public class Fusion {
     private static final String DEFAULT_PATH = "downloads";
 
     private APIManager api;
+
     @Builder.Default
     private String defaultCatalog = DEFAULT_CATALOG;
+
     @Builder.Default
     private String rootURL = DEFAULT_ROOT_URL;
+
     private Client httpClient;
     private OAuthConfiguration oAuthConfiguration;
 
@@ -79,7 +81,7 @@ public class Fusion {
     private Map<String, Map> callForMap(String url) throws Exception {
         /*String json = this.api.callAPI(url);
         return CatalogResource.metadataAttributes(json);*/
-        //TODO: implement this behaviour
+        // TODO: implement this behaviour
         throw new RuntimeException("Not implemented yet");
     }
 
@@ -101,7 +103,6 @@ public class Fusion {
         return this.callForMap(url);
     }
 
-
     /**
      * Get a list of the data products in the default catalog
      *
@@ -109,8 +110,9 @@ public class Fusion {
      * @param contains    a search keyword.
      * @param idContains  is true if only apply the filter to the identifier
      */
-    public Map<String, DataProduct> listProducts(String catalogName, String contains, boolean idContains) throws Exception {
-        //TODO: unimplemented logic implied by the method parameters
+    public Map<String, DataProduct> listProducts(String catalogName, String contains, boolean idContains)
+            throws Exception {
+        // TODO: unimplemented logic implied by the method parameters
         String url = String.format("%1scatalogs/%2s/products", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
         return responseParser.parseDataProductResponse(json);
@@ -124,7 +126,6 @@ public class Fusion {
     public Map<String, DataProduct> listProducts(String catalogName) throws Exception {
 
         return listProducts(catalogName, null, false);
-
     }
 
     /**
@@ -134,7 +135,6 @@ public class Fusion {
         return listProducts(this.getDefaultCatalog(), null, false);
     }
 
-
     /**
      * Get a filtered list of the datasets in the specified catalog
      *
@@ -142,7 +142,7 @@ public class Fusion {
      * @param contains    a search keyword.
      * @param idContains  is true if only apply the filter to the identifier
      */
-    //TODO: Search parameters
+    // TODO: Search parameters
     public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) throws Exception {
         String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
@@ -164,7 +164,6 @@ public class Fusion {
     public Map<String, Dataset> listDatasets() throws Exception {
         return listDatasets(this.getDefaultCatalog(), null, false);
     }
-
 
     /**
      * Get the available resources for a dataset, in the specified catalog
@@ -221,7 +220,8 @@ public class Fusion {
      */
     public Map datasetMemberResources(String catalogName, String dataset, String seriesMember) throws Exception {
 
-        String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries/%4s", this.rootURL, catalogName, dataset, seriesMember);
+        String url = String.format(
+                "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s", this.rootURL, catalogName, dataset, seriesMember);
         return this.callForMap(url);
     }
 
@@ -256,7 +256,6 @@ public class Fusion {
     public Map<String, Attribute> listAttributes(String dataset) throws Exception {
 
         return this.listAttributes(this.getDefaultCatalog(), dataset);
-
     }
 
     /**
@@ -266,9 +265,11 @@ public class Fusion {
      * @param dataset      a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
      */
-    public Map<String, Distribution> listDistributions(String catalogName, String dataset, String seriesMember) throws Exception {
+    public Map<String, Distribution> listDistributions(String catalogName, String dataset, String seriesMember)
+            throws Exception {
 
-        String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
+        String url = String.format(
+                "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
                 this.rootURL, catalogName, dataset, seriesMember);
         String json = this.api.callAPI(url);
         return responseParser.parseDistributionResponse(json);
@@ -294,13 +295,16 @@ public class Fusion {
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @param path         the absolute file path where the file should be written.
      */
-    public int download(String catalogName, String dataset, String seriesMember, String distribution, String path) throws Exception {
+    public int download(String catalogName, String dataset, String seriesMember, String distribution, String path)
+            throws Exception {
 
-        String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s", this.rootURL, catalogName, dataset, seriesMember, distribution);
+        String url = String.format(
+                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                this.rootURL, catalogName, dataset, seriesMember, distribution);
         Files.createDirectories(Paths.get(path));
         String filepath = String.format("%s/%s_%s_%s.%s", path, catalogName, dataset, seriesMember, distribution);
         this.api.callAPIFileDownload(url, filepath);
-        return 1; //TODO: Change this behaviour
+        return 1; // TODO: Change this behaviour
     }
 
     /**
@@ -337,13 +341,15 @@ public class Fusion {
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
      */
-    public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution) throws Exception {
-        String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s", this.rootURL, catalogName, dataset, seriesMember, distribution);
+    public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution)
+            throws Exception {
+        String url = String.format(
+                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                this.rootURL, catalogName, dataset, seriesMember, distribution);
         return this.api.callAPIFileDownload(url);
     }
 
-
-    //TODO: This is duplicated from LocalDateDeserializer, but might be ok?
+    // TODO: This is duplicated from LocalDateDeserializer, but might be ok?
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
@@ -358,9 +364,20 @@ public class Fusion {
      * @param toDate       the latest date for which there is data in the distribution
      * @param createdDate  the creation date for the distribution
      **/
-    public int upload(String catalogName, String dataset, String seriesMember, String distribution, String filename, LocalDate fromDate, LocalDate toDate, LocalDate createdDate) throws Exception {
+    public int upload(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            String filename,
+            LocalDate fromDate,
+            LocalDate toDate,
+            LocalDate createdDate)
+            throws Exception {
 
-        String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s", this.rootURL, catalogName, dataset, seriesMember, distribution);
+        String url = String.format(
+                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                this.rootURL, catalogName, dataset, seriesMember, distribution);
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
@@ -377,7 +394,14 @@ public class Fusion {
      * @param filename     a path to the file containing the data to upload
      * @param dataDate     the earliest, latest, and created date are all the same.
      **/
-    public int upload(String catalogName, String dataset, String seriesMember, String distribution, String filename, LocalDate dataDate) throws Exception {
+    public int upload(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            String filename,
+            LocalDate dataDate)
+            throws Exception {
         return this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate);
     }
 
@@ -393,9 +417,20 @@ public class Fusion {
      * @param toDate       the latest date for which there is data in the distribution
      * @param createdDate  the creation date for the distribution
      **/
-    public int upload(String catalogName, String dataset, String seriesMember, String distribution, InputStream data, LocalDate fromDate, LocalDate toDate, LocalDate createdDate) throws Exception {
+    public int upload(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            InputStream data,
+            LocalDate fromDate,
+            LocalDate toDate,
+            LocalDate createdDate)
+            throws Exception {
 
-        String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s", this.rootURL, catalogName, dataset, seriesMember, distribution);
+        String url = String.format(
+                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                this.rootURL, catalogName, dataset, seriesMember, distribution);
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
@@ -406,9 +441,9 @@ public class Fusion {
         return new CustomFusionBuilder();
     }
 
-
     public static class FusionBuilder {
-        //Implementation of helper methods to allow for simpler instantiation. Note that Lombok will fill in the missing, standard builder methods
+        // Implementation of helper methods to allow for simpler instantiation. Note that Lombok will fill in the
+        // missing, standard builder methods
         protected Credentials credentials;
         protected OAuthConfiguration oAuthConfiguration;
         protected Client client;
@@ -420,13 +455,17 @@ public class Fusion {
             return this;
         }
 
-        public FusionBuilder secretBasedCredentials(String clientId, String clientSecret, String resource, String authServerUrl) {
-            this.oAuthConfiguration = new OAuthSecretBasedConfiguration(clientId, resource, authServerUrl, clientSecret);
+        public FusionBuilder secretBasedCredentials(
+                String clientId, String clientSecret, String resource, String authServerUrl) {
+            this.oAuthConfiguration =
+                    new OAuthSecretBasedConfiguration(clientId, resource, authServerUrl, clientSecret);
             return this;
         }
 
-        public FusionBuilder passwordBasedCredentials(String clientId, String username, String password, String resource, String authServerUrl) {
-            this.oAuthConfiguration = new OAuthPasswordBasedConfiguration(clientId, resource, authServerUrl, username, password);
+        public FusionBuilder passwordBasedCredentials(
+                String clientId, String username, String password, String resource, String authServerUrl) {
+            this.oAuthConfiguration =
+                    new OAuthPasswordBasedConfiguration(clientId, resource, authServerUrl, username, password);
             return this;
         }
 
@@ -468,9 +507,11 @@ public class Fusion {
 
             if (oAuthConfiguration != null) {
                 if (oAuthConfiguration instanceof OAuthSecretBasedConfiguration) {
-                    credentials = new OAuthSecretBasedCredentials((OAuthSecretBasedConfiguration) oAuthConfiguration, client);
+                    credentials =
+                            new OAuthSecretBasedCredentials((OAuthSecretBasedConfiguration) oAuthConfiguration, client);
                 } else if (oAuthConfiguration instanceof OAuthPasswordBasedConfiguration) {
-                    credentials = new OAuthPasswordBasedCredentials((OAuthPasswordBasedConfiguration) oAuthConfiguration, client);
+                    credentials = new OAuthPasswordBasedCredentials(
+                            (OAuthPasswordBasedConfiguration) oAuthConfiguration, client);
                 }
             }
 

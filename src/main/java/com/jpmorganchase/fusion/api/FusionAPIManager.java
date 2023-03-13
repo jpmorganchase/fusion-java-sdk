@@ -4,7 +4,6 @@ import com.jpmorganchase.fusion.credential.Credentials;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.HttpResponse;
 import com.jpmorganchase.fusion.http.JdkClient;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.security.DigestInputStream;
@@ -39,7 +38,6 @@ public class FusionAPIManager implements APIManager {
         this.httpClient = httpClient;
     }
 
-
     /**
      * Call the API with the path provided and return the JSON response.
      *
@@ -53,14 +51,13 @@ public class FusionAPIManager implements APIManager {
         HttpResponse<String> response = httpClient.get(apiPath, requestHeaders);
 
         int httpCode = response.getStatusCode();
-        //TODO: Better response code handling?
+        // TODO: Better response code handling?
         if (response.getStatusCode() != 200) {
             throw new APICallException(httpCode);
         }
 
         return response.getBody();
     }
-
 
     /**
      * Calls the API to retrieve file data and saves to disk
@@ -70,7 +67,8 @@ public class FusionAPIManager implements APIManager {
      * @param fileName       the filename
      */
     @Override
-    public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) throws IOException, APICallException {
+    public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName)
+            throws IOException, APICallException {
 
         BufferedInputStream input = new BufferedInputStream(callAPIFileDownload(apiPath));
         FileOutputStream fileOutput = new FileOutputStream(fileName);
@@ -83,7 +81,6 @@ public class FusionAPIManager implements APIManager {
 
         fileOutput.close();
         input.close();
-
     }
 
     /**
@@ -129,9 +126,10 @@ public class FusionAPIManager implements APIManager {
      * @param createdDate the creation date for the data is contained in the upload (in form yyyy-MM-dd).
      * @return the HTTP status code - will return 200 if successful
      */
-    //TODO: Sort out error handling
+    // TODO: Sort out error handling
     @Override
-    public int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate) throws APICallException, IOException, NoSuchAlgorithmException {
+    public int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate)
+            throws APICallException, IOException, NoSuchAlgorithmException {
 
         InputStream fileInputStream = Files.newInputStream(new File(fileName).toPath());
 
@@ -148,10 +146,12 @@ public class FusionAPIManager implements APIManager {
      * @param createdDate the creation date for the data is contained in the upload (in form yyyy-MM-dd).
      * @return the HTTP status code - will return 200 if successful
      */
-    //TODO: Sort out error handling
-    //TODO: in the file case we probably dont want to do it like this - just read the file to calculate the digest and then pass down the FileInputStream
+    // TODO: Sort out error handling
+    // TODO: in the file case we probably dont want to do it like this - just read the file to calculate the digest and
+    // then pass down the FileInputStream
     @Override
-    public int callAPIFileUpload(String apiPath, InputStream data, String fromDate, String toDate, String createdDate) throws APICallException, IOException, NoSuchAlgorithmException {
+    public int callAPIFileUpload(String apiPath, InputStream data, String fromDate, String toDate, String createdDate)
+            throws APICallException, IOException, NoSuchAlgorithmException {
 
         DigestInputStream dis = new DigestInputStream(data, MessageDigest.getInstance("MD5"));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -161,7 +161,8 @@ public class FusionAPIManager implements APIManager {
             baos.write(buf, 0, length);
         }
 
-        String myChecksum = Base64.getEncoder().encodeToString(dis.getMessageDigest().digest());
+        String myChecksum =
+                Base64.getEncoder().encodeToString(dis.getMessageDigest().digest());
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("accept", "*/*");
@@ -172,10 +173,10 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("x-jpmc-distribution-created-date", createdDate);
         requestHeaders.put("Digest", "md5=" + myChecksum);
 
-        HttpResponse<String> response = httpClient.put(apiPath, requestHeaders, new ByteArrayInputStream(baos.toByteArray()));
-        //TODO: Close stuff?
+        HttpResponse<String> response =
+                httpClient.put(apiPath, requestHeaders, new ByteArrayInputStream(baos.toByteArray()));
+        // TODO: Close stuff?
 
         return response.getStatusCode();
     }
-
 }

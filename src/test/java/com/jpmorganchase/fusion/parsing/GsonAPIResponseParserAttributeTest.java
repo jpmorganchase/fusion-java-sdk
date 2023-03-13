@@ -1,18 +1,17 @@
 package com.jpmorganchase.fusion.parsing;
 
-import com.jpmorganchase.fusion.model.Attribute;
-import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
+import com.jpmorganchase.fusion.model.Attribute;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import org.junit.jupiter.api.Test;
 
 public class GsonAPIResponseParserAttributeTest {
 
@@ -20,7 +19,7 @@ public class GsonAPIResponseParserAttributeTest {
     private static final String multipleAttributeJson = loadTestResource("multiple-attribute-response.json");
     private static final String duplicateAttributeJson = loadTestResource("duplicate-attribute-response.json");
 
-    //TODO: Need to map out all the fields
+    // TODO: Need to map out all the fields
     private static final Attribute testAttribute = Attribute.builder()
             .identifier("name")
             .key(true)
