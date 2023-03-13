@@ -1,10 +1,12 @@
 package com.jpmorganchase.fusion.http;
 
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+
 import java.util.Map;
 import java.util.function.Function;
 
@@ -138,7 +140,7 @@ public class JdkClient implements Client {
         }
     }
 
-    private int executeRequestWithBody(HttpURLConnection connection, String method, InputStream body){
+    private int executeRequestWithBody(HttpURLConnection connection, String method, InputStream body) {
         try {
             connection.setDoOutput(true);
             connection.setRequestMethod(method);

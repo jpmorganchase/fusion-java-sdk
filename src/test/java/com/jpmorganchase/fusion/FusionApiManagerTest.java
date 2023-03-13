@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -228,6 +229,30 @@ public class FusionApiManagerTest {
 
         fusionAPIManager.callAPIFileUpload("http://localhost:8080/test",
                 getPathFromResource("upload-test.csv"),
+                "2023-03-01", "2023-03-02", "2023-03-03");
+    }
+
+    @Test
+    void successfulFileUploadWithStream() throws Exception {
+        fusionAPIManager = new FusionAPIManager(credentials, client);
+
+        Map<String, String> expectedRequestHeaders = new HashMap<>();
+        expectedRequestHeaders.put("accept", "*/*");
+        expectedRequestHeaders.put("Authorization", "Bearer my-token");
+        expectedRequestHeaders.put("Content-Type", "application/octet-stream");
+        expectedRequestHeaders.put("x-jpmc-distribution-from-date", "2023-03-01");
+        expectedRequestHeaders.put("x-jpmc-distribution-to-date", "2023-03-02");
+        expectedRequestHeaders.put("x-jpmc-distribution-created-date", "2023-03-03");
+        expectedRequestHeaders.put("Digest", "md5=SpmtmsY7xMV5dSZdQaLnpA==");
+        expectedRequestHeaders.put("Content-Length", "23");
+
+        when(client.put(any(), any(),any()))
+                .thenReturn(HttpResponse.<String>builder().statusCode(200).build());
+        //TODO: Now we need to validate the stub properly
+        //new ByteArrayInputStream("A,B,C\n1,2,3\n4,5,6\n7,8,9".getBytes())
+
+        fusionAPIManager.callAPIFileUpload("http://localhost:8080/test",
+                Files.newInputStream(Paths.get(getPathFromResource("upload-test.csv"))),
                 "2023-03-01", "2023-03-02", "2023-03-03");
     }
 

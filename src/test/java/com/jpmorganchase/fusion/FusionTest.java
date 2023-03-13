@@ -9,9 +9,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -126,10 +132,17 @@ public class FusionTest {
     public void testFileDownloadAsStreamInteraction() throws Exception{
         Fusion f = stubFusion();
 
-        doNothing().when(apiManager).callAPIFileDownload(String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s", Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"));
 
-        int result = f.download("common", "sample_dataset", "20230308", "csv", "/tmp");
-        assertThat(result, is(1));
+        when(apiManager.callAPIFileDownload(String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s", Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(new ByteArrayInputStream("A,B,C\nD,E,F".getBytes()));
+
+        InputStream response = f.downloadStream("common", "sample_dataset", "20230308", "csv");
+
+        String responseText = new BufferedReader(
+                new InputStreamReader(response, StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
+        assertThat(responseText, is(equalTo("A,B,C\nD,E,F")));
     }
 
     @Test
@@ -146,6 +159,23 @@ public class FusionTest {
         int result = f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", d);
         assertThat(result, is(1));
     }
+
+    @Test
+    public void testFileUploadAsStreamInteraction() throws Exception{
+        Fusion f = stubFusion();
+        LocalDate d = LocalDate.of(2023, 3, 9);
+
+        InputStream requestBodyStream = new ByteArrayInputStream("A,B,C\nD,E,F".getBytes());
+        when(apiManager.callAPIFileUpload(
+                String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",Fusion.DEFAULT_ROOT_URL, "common","sample_dataset", "20230308","csv")
+                , requestBodyStream, "2023-03-09", "2023-03-09", "2023-03-09")) //TODO: get the dates
+                .thenReturn(1);
+
+        //TODO: need a single data method for this as well
+        int result = f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, d, d);
+        assertThat(result, is(1));
+    }
+
 
     private Fusion stubFusion(){
         return Fusion.builder()

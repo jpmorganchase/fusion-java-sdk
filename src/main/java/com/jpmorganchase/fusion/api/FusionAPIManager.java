@@ -7,7 +7,7 @@ import com.jpmorganchase.fusion.http.JdkClient;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -135,9 +135,33 @@ public class FusionAPIManager implements APIManager {
 
         InputStream fileInputStream = Files.newInputStream(new File(fileName).toPath());
 
-        MessageDigest md = MessageDigest.getInstance("MD5");
-        md.update(Files.readAllBytes(Paths.get(fileName)));
-        String myChecksum = Base64.getEncoder().encodeToString(md.digest());
+        return callAPIFileUpload(apiPath, fileInputStream, fromDate, toDate, createdDate);
+    }
+
+    /**
+     * Call the API upload endpoint to load a distribution
+     *
+     * @param apiPath     the API URL
+     * @param data        InputStream for the data to be uploaded
+     * @param fromDate    the earliest date that data is contained in the upload (in form yyyy-MM-dd).
+     * @param toDate      the latest date that data is contained in the upload (in form yyyy-MM-dd).
+     * @param createdDate the creation date for the data is contained in the upload (in form yyyy-MM-dd).
+     * @return the HTTP status code - will return 200 if successful
+     */
+    //TODO: Sort out error handling
+    //TODO: in the file case we probably dont want to do it like this - just read the file to calculate the digest and then pass down the FileInputStream
+    @Override
+    public int callAPIFileUpload(String apiPath, InputStream data, String fromDate, String toDate, String createdDate) throws APICallException, IOException, NoSuchAlgorithmException {
+
+        DigestInputStream dis = new DigestInputStream(data, MessageDigest.getInstance("MD5"));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int length;
+        while ((length = dis.read(buf)) != -1) {
+            baos.write(buf, 0, length);
+        }
+
+        String myChecksum = Base64.getEncoder().encodeToString(dis.getMessageDigest().digest());
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("accept", "*/*");
@@ -148,9 +172,10 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("x-jpmc-distribution-created-date", createdDate);
         requestHeaders.put("Digest", "md5=" + myChecksum);
 
-        HttpResponse<String> response = httpClient.put(apiPath, requestHeaders, fileInputStream);
+        HttpResponse<String> response = httpClient.put(apiPath, requestHeaders, new ByteArrayInputStream(baos.toByteArray()));
         //TODO: Close stuff?
 
         return response.getStatusCode();
     }
+
 }

@@ -299,6 +299,19 @@ public class JdkClientTest {
     }
 
     @Test
+    void successfulPutCallFromStream() throws Exception {
+
+        stubFor(put(BASE_PATH).willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY)));
+
+        HttpResponse<String> response = httpClient.put(API_URL, Collections.emptyMap(),
+                new ByteArrayInputStream("sample post body".getBytes()));
+
+        verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
+        assertThat(response.getStatusCode(), is(equalTo(200)));
+        assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+    }
+
+    @Test
     void successfulPutCallWithOneHeader() throws Exception {
 
         stubFor(put(BASE_PATH).willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY)));

@@ -381,6 +381,27 @@ public class Fusion {
         return this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate);
     }
 
+    /**
+     * Upload a new dataset series member to a catalog.
+     *
+     * @param catalogName  a String representing the identifier of the catalog to upload into
+     * @param dataset      a String representing the dataset identifier to upload against.
+     * @param seriesMember a String representing the series member identifier to add or replace
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param data     am InputStream of the data to be uploaded
+     * @param fromDate     the earliest date for which there is data in the distribution
+     * @param toDate       the latest date for which there is data in the distribution
+     * @param createdDate  the creation date for the distribution
+     **/
+    public int upload(String catalogName, String dataset, String seriesMember, String distribution, InputStream data, LocalDate fromDate, LocalDate toDate, LocalDate createdDate) throws Exception {
+
+        String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s", this.rootURL, catalogName, dataset, seriesMember, distribution);
+        String strFromDate = fromDate.format(dateTimeFormatter);
+        String strToDate = toDate.format(dateTimeFormatter);
+        String strCreatedDate = createdDate.format(dateTimeFormatter);
+        return this.api.callAPIFileUpload(url, data, strFromDate, strToDate, strCreatedDate);
+    }
+
     public static FusionBuilder builder() {
         return new CustomFusionBuilder();
     }

@@ -15,4 +15,6 @@ public interface APIManager {
 
     //TODO: Sort out error handling
     int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate) throws APICallException, IOException, NoSuchAlgorithmException;
+
+    int callAPIFileUpload(String apiPath, InputStream data, String fromDate, String toDate, String createdDate) throws APICallException, IOException, NoSuchAlgorithmException;
 }
