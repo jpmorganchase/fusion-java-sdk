@@ -72,18 +72,7 @@ public class FusionAPIManager implements APIManager {
     @Override
     public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) throws IOException, APICallException {
 
-        Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("Authorization", "Bearer " + sessionCredentials.getBearerToken());
-
-        HttpResponse<InputStream> response = httpClient.getInputStream(apiPath, requestHeaders);
-
-        int httpCode = response.getStatusCode();
-        // TODO: Better response code handling?
-        if (response.getStatusCode() != 200) {
-            throw new APICallException(httpCode);
-        }
-
-        BufferedInputStream input = new BufferedInputStream(response.getBody());
+        BufferedInputStream input = new BufferedInputStream(callAPIFileDownload(apiPath));
         FileOutputStream fileOutput = new FileOutputStream(fileName);
 
         byte[] buf = new byte[1024];
@@ -106,6 +95,28 @@ public class FusionAPIManager implements APIManager {
     @Override
     public void callAPIFileDownload(String apiPath, String fileName) throws IOException, APICallException {
         this.callAPIFileDownload(apiPath, DEFAULT_FOLDER, fileName);
+    }
+
+    /**
+     * Calls the API to retrieve file data and returns as an InputStream
+     *
+     * @param apiPath        the URL of the API endpoint to call
+     */
+    @Override
+    public InputStream callAPIFileDownload(String apiPath) throws IOException, APICallException {
+
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + sessionCredentials.getBearerToken());
+
+        HttpResponse<InputStream> response = httpClient.getInputStream(apiPath, requestHeaders);
+
+        int httpCode = response.getStatusCode();
+        // TODO: Better response code handling?
+        if (response.getStatusCode() != 200) {
+            throw new APICallException(httpCode);
+        }
+
+        return response.getBody();
     }
 
     /**

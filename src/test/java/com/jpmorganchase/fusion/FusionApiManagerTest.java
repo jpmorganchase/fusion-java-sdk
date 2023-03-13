@@ -177,6 +177,33 @@ public class FusionApiManagerTest {
         tempOutputFile.deleteOnExit();
     }
 
+    @Test
+    void successfulFileDownloadAsStream() throws Exception {
+        fusionAPIManager = new FusionAPIManager(credentials, client);
+
+        Map<String, String> expectedRequestHeaders = new HashMap<>();
+        expectedRequestHeaders.put("Authorization", "Bearer my-token");
+
+        byte[] serverResponse = new String("A,B,C\n1,2,3").getBytes();
+        Map<String, List<String>> responseHeaders = new HashMap<>();
+        responseHeaders.put("Content-Type", Lists.newArrayList("text/csv"));
+        responseHeaders.put("Content-Disposition", Lists.newArrayList("attachment; filename=test-testFile.csv"));
+        HttpResponse<InputStream> expectedHttpResponse = HttpResponse.<InputStream>builder()
+                .statusCode(200)
+                .body(new ByteArrayInputStream(serverResponse))
+                .headers(responseHeaders)
+                .build();
+        when(client.getInputStream("http://localhost:8080/test", expectedRequestHeaders)).thenReturn(expectedHttpResponse);
+
+
+        InputStream responseStream = fusionAPIManager.callAPIFileDownload("http://localhost:8080/test");
+
+        byte[] outputBytes = new byte[(int) serverResponse.length];
+        responseStream.read(outputBytes);
+
+        assertThat(outputBytes, is(equalTo(serverResponse)));
+    }
+
     @Captor
     ArgumentCaptor<InputStream> fileUploadInputStream;
 

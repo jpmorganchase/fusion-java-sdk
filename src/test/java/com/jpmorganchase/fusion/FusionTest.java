@@ -123,6 +123,16 @@ public class FusionTest {
     }
 
     @Test
+    public void testFileDownloadAsStreamInteraction() throws Exception{
+        Fusion f = stubFusion();
+
+        doNothing().when(apiManager).callAPIFileDownload(String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s", Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"));
+
+        int result = f.download("common", "sample_dataset", "20230308", "csv", "/tmp");
+        assertThat(result, is(1));
+    }
+
+    @Test
     public void testFileUploadInteraction() throws Exception{
         Fusion f = stubFusion();
         LocalDate d = LocalDate.of(2023, 3, 9);

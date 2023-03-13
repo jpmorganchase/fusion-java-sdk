@@ -15,6 +15,7 @@ import lombok.Getter;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.nio.file.Files;
@@ -326,6 +327,19 @@ public class Fusion {
      */
     public int download(String catalogName, String dataset, List<String> seriesMembers, String distribution) {
         return 0;
+    }
+
+    /**
+     * Download a single distribution and return the data as an InputStream
+     *
+     * @param catalogName  a String representing the identifier of the catalog to download from
+     * @param dataset      a String representing the dataset identifier to download.
+     * @param seriesMember a String representing the series member identifier.
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     */
+    public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution) throws Exception {
+        String url = String.format("%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s", this.rootURL, catalogName, dataset, seriesMember, distribution);
+        return this.api.callAPIFileDownload(url);
     }
 
 
