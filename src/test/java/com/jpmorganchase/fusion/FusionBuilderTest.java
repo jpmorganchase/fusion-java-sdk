@@ -8,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import com.jpmorganchase.fusion.credential.OAuthPasswordBasedCredentials;
 import com.jpmorganchase.fusion.credential.OAuthSecretBasedCredentials;
-import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
@@ -124,7 +124,7 @@ public class FusionBuilderTest {
                     Fusion.builder().credentialFile("/not/a/valid/file/path").build();
                 },
                 "Expected FusionInitialisationException but none thrown");
-        assertThat(thrown.getCause().getClass(), is(equalTo(FileNotFoundException.class)));
+        assertThat(thrown.getCause().getClass(), is(equalTo(NoSuchFileException.class)));
     }
 
     @Test
