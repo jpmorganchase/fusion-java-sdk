@@ -10,11 +10,10 @@ import com.jpmorganchase.fusion.http.JdkClient;
 import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
 import com.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -496,7 +495,9 @@ public class Fusion {
             if (credentialFile != null) {
                 Gson gson = new GsonBuilder().create();
                 try {
-                    FileReader fileReader = new FileReader(credentialFile);
+                    // Java 8 doesn't allow specification of the charset if we use a FileReader
+                    InputStreamReader fileReader = new InputStreamReader(
+                            Files.newInputStream(Paths.get(credentialFile)), StandardCharsets.UTF_8);
                     oAuthConfiguration = gson.fromJson(fileReader, OAuthSecretBasedConfiguration.class);
                     fileReader.close();
                 } catch (IOException e) {
