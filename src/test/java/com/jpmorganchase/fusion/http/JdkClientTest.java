@@ -429,6 +429,24 @@ public class JdkClientTest {
     }
 
     @Test
+    void noRequestBodyForPostRequestResultsInException() {
+        ClientException thrown = assertThrows(
+                ClientException.class,
+                () -> httpClient.post(API_URL, Collections.emptyMap(), null),
+                "Expected ClientException but none thrown");
+        assertThat(thrown.getMessage(), is(equalTo("No request body specified for POST operation")));
+    }
+
+    @Test
+    void invalidPathResultsInException() {
+        ClientException thrown = assertThrows(
+                ClientException.class,
+                () -> httpClient.post("not/a/valid/url", Collections.emptyMap(), "test"),
+                "Expected ClientException but none thrown");
+        assertThat(thrown.getMessage(), is(equalTo("Malformed URL path received")));
+    }
+
+    @Test
     void successfulGetStreamCallWithNoHeaders() throws Exception {
 
         getMethodStub();
