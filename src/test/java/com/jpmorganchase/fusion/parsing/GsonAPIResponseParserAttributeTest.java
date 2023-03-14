@@ -88,6 +88,51 @@ public class GsonAPIResponseParserAttributeTest {
         assertThat(testAttributeResponse3, is(equalTo(testAttribute3)));
     }
 
+    @Test
+    public void untypedParsingReturnsCorrectly() {
+        Map<String, Map<String, Object>> attributeMap = responseParser.parseResourcesUntyped(multipleAttributeJson);
+        assertThat(attributeMap.size(), is(3));
+
+        Map<String, Object> testAttributeResponse = attributeMap.get("name");
+        assertThat(testAttributeResponse.size(), is(10));
+        assertThat(testAttributeResponse.get("id"), is(equalTo(1.0)));
+        assertThat(testAttributeResponse.get("source"), is(equalTo("Source System 1")));
+        assertThat(testAttributeResponse.get("term"), is(equalTo("bizterm1")));
+        assertThat(testAttributeResponse.get("dataType"), is(equalTo(testAttribute.getDataType())));
+        assertThat(testAttributeResponse.get("description"), is(equalTo(testAttribute.getDescription())));
+        assertThat(testAttributeResponse.get("identifier"), is(equalTo(testAttribute.getIdentifier())));
+        assertThat(testAttributeResponse.get("index"), is(equalTo(0.0)));
+        assertThat(testAttributeResponse.get("isDatasetKey"), is(equalTo(testAttribute.isKey())));
+        assertThat(testAttributeResponse.get("sourceFieldId"), is(equalTo("src_name")));
+        assertThat(testAttributeResponse.get("title"), is(equalTo(testAttribute.getTitle())));
+
+        Map<String, Object> testAttributeResponse2 = attributeMap.get("currency");
+        assertThat(testAttributeResponse2.size(), is(10));
+        assertThat(testAttributeResponse2.get("id"), is(equalTo(2.0)));
+        assertThat(testAttributeResponse2.get("source"), is(equalTo("Source System 1")));
+        assertThat(testAttributeResponse2.get("term"), is(equalTo("bizterm1")));
+        assertThat(testAttributeResponse2.get("dataType"), is(equalTo(testAttribute2.getDataType())));
+        assertThat(testAttributeResponse2.get("description"), is(equalTo(testAttribute2.getDescription())));
+        assertThat(testAttributeResponse2.get("identifier"), is(equalTo(testAttribute2.getIdentifier())));
+        assertThat(testAttributeResponse2.get("index"), is(equalTo(1.0)));
+        assertThat(testAttributeResponse2.get("isDatasetKey"), is(equalTo(testAttribute2.isKey())));
+        assertThat(testAttributeResponse2.get("sourceFieldId"), is(equalTo("")));
+        assertThat(testAttributeResponse2.get("title"), is(equalTo(testAttribute2.getTitle())));
+
+        Map<String, Object> testAttributeResponse3 = attributeMap.get("term");
+        assertThat(testAttributeResponse3.size(), is(10));
+        assertThat(testAttributeResponse3.get("id"), is(equalTo(3.0)));
+        assertThat(testAttributeResponse3.get("source"), is(equalTo("Source System 1")));
+        assertThat(testAttributeResponse3.get("term"), is(equalTo("bizterm1")));
+        assertThat(testAttributeResponse3.get("dataType"), is(equalTo(testAttribute3.getDataType())));
+        assertThat(testAttributeResponse3.get("description"), is(equalTo(testAttribute3.getDescription())));
+        assertThat(testAttributeResponse3.get("identifier"), is(equalTo(testAttribute3.getIdentifier())));
+        assertThat(testAttributeResponse3.get("index"), is(equalTo(2.0)));
+        assertThat(testAttributeResponse3.get("isDatasetKey"), is(equalTo(testAttribute3.isKey())));
+        assertThat(testAttributeResponse3.get("sourceFieldId"), is(equalTo("")));
+        assertThat(testAttributeResponse3.get("title"), is(equalTo(testAttribute3.getTitle())));
+    }
+
     private static String loadTestResource(String resourceName) {
         URL url = GsonAPIResponseParser.class.getResource(resourceName);
         try {

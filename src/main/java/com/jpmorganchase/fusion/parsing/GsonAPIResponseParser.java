@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -67,9 +68,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
     public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass) {
         // TODO: handle varArgs
 
-        JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
-        JsonArray resources =
-                obj.getAsJsonArray("resources"); // TODO: what if this deosn't exist / is empty? write a test
+        JsonArray resources = getResources(json);
 
         Type listType = TypeToken.getParameterized(List.class, resourceClass).getType();
         List<T> resourceList = gson.fromJson(resources, listType);
@@ -85,6 +84,32 @@ public class GsonAPIResponseParser implements APIResponseParser {
                                     .log(); // TODO: Different error handling?
                             return r1;
                         }));
+    }
+
+    // TODO: Refactor after tests are finished
+    @Override
+    public Map<String, Map<String, Object>> parseResourcesUntyped(String json) {
+        Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+        Map<String, Object> responseMap = gson.fromJson(json, mapType);
+
+        Object resources = responseMap.get("resources");
+        if (resources instanceof List) {
+            List<Object> resourceList = (List<Object>) resources;
+            Map<String, Map<String, Object>> resourcesMap = new HashMap<>();
+            resourceList.stream().forEach((o -> {
+                Map<String, Object> resource = (Map<String, Object>) o;
+                String identifier = (String) resource.get("identifier");
+                resourcesMap.put(identifier, (Map<String, Object>) o);
+            }));
+            return resourcesMap;
+        } else {
+            throw new RuntimeException("Could not find resources array in JSON"); // TODO: Better error handling
+        }
+    }
+
+    private JsonArray getResources(String json) {
+        JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+        return obj.getAsJsonArray("resources"); // TODO: what if this deosn't exist / is empty? write a test
     }
 
     // TODO: Consider making this public to allow for reuse in the case where a user wants to specify their own instance

@@ -10,13 +10,15 @@
                 5. Refactor of the JdkClient once all tests are in place - needs duplication removed and some clean-up
                 6. Start working on the user facing code - e.g. Fusion.java (Builder? to allow for customisation of Credential type, Http client type and Proxy information)
                 6.5     Need stream based methods for the file interactions
-                6.6 Refactor the Fusion tests - too much duplication (but keep it simple and readable)
+
 
 
                 TODO
 
                 ==> 3. Refactor all the HTTP tests to remove duplication -- IN PROGRESS
                         ON HOLD - is this refactoring actually making the code easier to read? It's reducing duplication, but .... (Compare GET which is refactored, to PUT or POST which is not)
+
+                6.6 Refactor the Fusion tests - too much duplication (but keep it simple and readable)
 
                 7. Save and loading of credentials (use GSON), do we want an interface for this that the one Credential type that needs it can use?
                         -- Loading is done via the builder, saving to be added
@@ -41,4 +43,6 @@
                 19. Make Fusion closeable and cascade the calls down
 
                 20. Sonatype Lift for security review?
+
+                21. Make sure we're using nio packages everywhere
          */

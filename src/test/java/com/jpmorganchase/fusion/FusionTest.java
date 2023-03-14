@@ -98,6 +98,26 @@ public class FusionTest {
     }
 
     @Test
+    public void testAttributeInteractionUntyped() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, Map<String, Object>> stubResponse = new HashMap<>();
+        Map<String, Object> attribute1 = new HashMap<>();
+        attribute1.put(
+                "attribute1", Attribute.builder().identifier("attribute1").build());
+        stubResponse.put("attribute1", attribute1);
+
+        when(apiManager.callAPI(String.format(
+                        "%1scatalogs/%2s/datasets/%3s/attributes",
+                        Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset")))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
+
+        Map<String, Map<String, Object>> actualResponse = f.attributeResources("common", "sample_dataset");
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
     public void testDistributionInteraction() throws Exception {
         Fusion f = stubFusion();
 

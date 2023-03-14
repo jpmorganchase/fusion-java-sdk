@@ -17,4 +17,6 @@ public interface APIResponseParser {
     Map<String, Distribution> parseDistributionResponse(String json);
 
     <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass);
+
+    Map<String, Map<String, Object>> parseResourcesUntyped(String json);
 }

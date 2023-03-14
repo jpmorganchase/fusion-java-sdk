@@ -77,11 +77,9 @@ public class Fusion {
      * @param url the API url to call
      * @return a map from the returned json object
      */
-    private Map<String, Map> callForMap(String url) throws Exception {
-        /*String json = this.api.callAPI(url);
-        return CatalogResource.metadataAttributes(json);*/
-        // TODO: implement this behaviour
-        throw new RuntimeException("Not implemented yet");
+    private Map<String, Map<String, Object>> callForMap(String url) throws Exception {
+        String json = this.api.callAPI(url);
+        return responseParser.parseResourcesUntyped(json);
     }
 
     /**
@@ -255,6 +253,11 @@ public class Fusion {
     public Map<String, Attribute> listAttributes(String dataset) throws Exception {
 
         return this.listAttributes(this.getDefaultCatalog(), dataset);
+    }
+
+    public Map<String, Map<String, Object>> attributeResources(String catalogName, String dataset) throws Exception {
+        String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes", this.rootURL, catalogName, dataset);
+        return this.callForMap(url);
     }
 
     /**
