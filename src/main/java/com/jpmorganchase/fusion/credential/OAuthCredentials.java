@@ -47,7 +47,7 @@ public abstract class OAuthCredentials implements Credentials {
     }
 
     @Override
-    public final synchronized String getBearerToken() throws IOException {
+    public final synchronized String getBearerToken() {
 
         if (hasTokenExpired()) {
 

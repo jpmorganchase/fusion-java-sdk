@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.SneakyThrows;
 
 /**
  * Class that manages calls to the API. Intended to be called from multi-threaded code.
@@ -44,7 +45,7 @@ public class FusionAPIManager implements APIManager {
      * @param apiPath appended to the base URL
      */
     @Override
-    public String callAPI(String apiPath) throws APICallException, IOException {
+    public String callAPI(String apiPath) throws APICallException {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + sessionCredentials.getBearerToken());
 
@@ -89,7 +90,7 @@ public class FusionAPIManager implements APIManager {
      * @param fileName the filename to save into the default folder.
      */
     @Override
-    public void callAPIFileDownload(String apiPath, String fileName) throws IOException, APICallException {
+    public void callAPIFileDownload(String apiPath, String fileName) throws APICallException {
         this.callAPIFileDownload(apiPath, DEFAULT_FOLDER, fileName);
     }
 
@@ -99,19 +100,13 @@ public class FusionAPIManager implements APIManager {
      * @param apiPath the URL of the API endpoint to call
      */
     @Override
-    public InputStream callAPIFileDownload(String apiPath) throws IOException, APICallException {
-
+    public InputStream callAPIFileDownload(String apiPath) throws APICallException {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + sessionCredentials.getBearerToken());
 
         HttpResponse<InputStream> response = httpClient.getInputStream(apiPath, requestHeaders);
 
-        int httpCode = response.getStatusCode();
-        // TODO: Better response code handling?
-        if (response.getStatusCode() != 200) {
-            throw new APICallException(httpCode);
-        }
-
+        checkResponseStatus(response);
         return response.getBody();
     }
 
@@ -128,9 +123,15 @@ public class FusionAPIManager implements APIManager {
     // TODO: Sort out error handling
     @Override
     public int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate)
-            throws APICallException, IOException, NoSuchAlgorithmException {
+            throws APICallException {
 
-        InputStream fileInputStream = Files.newInputStream(new File(fileName).toPath());
+        InputStream fileInputStream;
+        try {
+            fileInputStream = Files.newInputStream(new File(fileName).toPath());
+        } catch (IOException e) {
+            throw new ApiInputValidationException(
+                    String.format("File does not exist at supplied input location: %s", fileName), e);
+        }
 
         return callAPIFileUpload(apiPath, fileInputStream, fromDate, toDate, createdDate);
     }
@@ -148,15 +149,21 @@ public class FusionAPIManager implements APIManager {
     // TODO: Sort out error handling
     // TODO: in the file case we probably dont want to do it like this - just read the file to calculate the digest and
     // then pass down the FileInputStream
+    @SneakyThrows(NoSuchAlgorithmException.class)
     @Override
     public int callAPIFileUpload(String apiPath, InputStream data, String fromDate, String toDate, String createdDate)
-            throws APICallException, IOException, NoSuchAlgorithmException {
+            throws APICallException {
 
         DigestInputStream dis = new DigestInputStream(data, MessageDigest.getInstance("MD5"));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buf = new byte[8192];
         int length;
-        while ((length = dis.read(buf)) != -1) {
+        while (true) {
+            try {
+                if ((length = dis.read(buf)) == -1) break;
+            } catch (IOException e) {
+                throw new ApiInputValidationException("Failed to read data from input", e);
+            }
             baos.write(buf, 0, length);
         }
 
@@ -174,8 +181,17 @@ public class FusionAPIManager implements APIManager {
 
         HttpResponse<String> response =
                 httpClient.put(apiPath, requestHeaders, new ByteArrayInputStream(baos.toByteArray()));
-        // TODO: Close stuff?
+
+        checkResponseStatus(response);
 
         return response.getStatusCode();
+    }
+
+    // TODO: Better error handling here
+    private <T> void checkResponseStatus(HttpResponse<T> response) throws APICallException {
+        int httpCode = response.getStatusCode();
+        if (httpCode != 200) {
+            throw new APICallException(httpCode);
+        }
     }
 }

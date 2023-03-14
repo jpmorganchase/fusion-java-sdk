@@ -1,23 +1,19 @@
 package com.jpmorganchase.fusion.api;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.security.NoSuchAlgorithmException;
 
 public interface APIManager {
-    String callAPI(String apiPath) throws APICallException, IOException;
+    String callAPI(String apiPath) throws APICallException;
 
-    void callAPIFileDownload(String apiPath, String downloadFolder, String fileName)
-            throws IOException, APICallException;
+    void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) throws APICallException;
 
-    void callAPIFileDownload(String apiPath, String fileName) throws IOException, APICallException;
+    void callAPIFileDownload(String apiPath, String fileName) throws APICallException;
 
-    InputStream callAPIFileDownload(String apiPath) throws IOException, APICallException;
+    InputStream callAPIFileDownload(String apiPath) throws APICallException;
 
-    // TODO: Sort out error handling
     int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate)
-            throws APICallException, IOException, NoSuchAlgorithmException;
+            throws APICallException;
 
     int callAPIFileUpload(String apiPath, InputStream data, String fromDate, String toDate, String createdDate)
-            throws APICallException, IOException, NoSuchAlgorithmException;
+            throws APICallException;
 }
