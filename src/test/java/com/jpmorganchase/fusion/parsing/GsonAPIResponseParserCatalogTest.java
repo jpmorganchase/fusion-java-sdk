@@ -3,6 +3,7 @@ package com.jpmorganchase.fusion.parsing;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.jpmorganchase.fusion.model.Catalog;
 import java.net.URL;
@@ -17,6 +18,8 @@ public class GsonAPIResponseParserCatalogTest {
 
     private static final String singleCatalogJson = loadTestResource("single-catalog-response.json");
     private static final String multipleCatalogJson = loadTestResource("multiple-catalog-response.json");
+    private static final String invalidCatalogJson = loadTestResource("invalid-catalog-response.json");
+    private static final String noResourcesCatalogJson = loadTestResource("no-resources-catalog-response.json");
 
     private static final Catalog testCatalog = Catalog.builder()
             .identifier("test")
@@ -63,6 +66,38 @@ public class GsonAPIResponseParserCatalogTest {
 
         Catalog testCatalogResponse3 = catalogMap.get("test3");
         assertThat(testCatalogResponse3, is(equalTo(testCatalog3)));
+    }
+
+    @Test
+    public void missingResourcesSectionInResponseCausesCorrectException() {
+        ParsingException thrown =
+                assertThrows(ParsingException.class, () -> responseParser.parseCatalogResponse(invalidCatalogJson));
+
+        assertThat(thrown.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+    }
+
+    @Test
+    public void emptyResourcesSectionInResponseCausesCorrectException() {
+        ParsingException thrown =
+                assertThrows(ParsingException.class, () -> responseParser.parseCatalogResponse(noResourcesCatalogJson));
+
+        assertThat(thrown.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+    }
+
+    @Test
+    public void missingResourcesSectionInResponseCausesCorrectExceptionForUntypedData() {
+        ParsingException thrown =
+                assertThrows(ParsingException.class, () -> responseParser.parseResourcesUntyped(invalidCatalogJson));
+
+        assertThat(thrown.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+    }
+
+    @Test
+    public void emptyResourcesSectionInResponseCausesCorrectExceptionForUntypedData() {
+        ParsingException thrown = assertThrows(
+                ParsingException.class, () -> responseParser.parseResourcesUntyped(noResourcesCatalogJson));
+
+        assertThat(thrown.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
     }
 
     private static String loadTestResource(String resourceName) {

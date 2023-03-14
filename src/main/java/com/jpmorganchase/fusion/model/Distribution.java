@@ -42,6 +42,7 @@ public class Distribution extends CatalogResource {
     }
 
     public static class DistributionBuilder {
+        @SuppressWarnings("FieldCanBeLocal")
         private Map<String, String> varArgs;
 
         public DistributionBuilder varArgs(Map<String, String> varArgs) {

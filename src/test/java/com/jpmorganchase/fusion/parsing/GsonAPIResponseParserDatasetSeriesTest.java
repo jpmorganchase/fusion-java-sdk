@@ -1,11 +1,8 @@
 package com.jpmorganchase.fusion.parsing;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.Matchers.*;
 
-import com.google.gson.JsonParseException;
 import com.jpmorganchase.fusion.model.DatasetSeries;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -75,14 +72,14 @@ public class GsonAPIResponseParserDatasetSeriesTest {
         assertThat(testDatasetSeriesResponse, is(equalTo(member1)));
     }
 
-    // TODO: As per comments in the class itself, this failure logic should be revisited
     @Test
-    public void invalidDateFormatResultsInParserException() {
-        JsonParseException thrown = assertThrows(
-                JsonParseException.class,
-                () -> responseParser.parseDatasetSeriesResponse(datasetSeriesWithInvalidDatesJson),
-                "Expected a parsing exception for invalid dates, but it didn't throw");
-        assertThat(thrown.getMessage(), is(equalTo("Failed to deserialize date field with value INVALID DATE FORMAT")));
+    public void invalidDateFormatResultsInDatesNotPopulated() {
+        Map<String, DatasetSeries> datasetSeriesMap =
+                responseParser.parseDatasetSeriesResponse(datasetSeriesWithInvalidDatesJson);
+        assertThat(datasetSeriesMap.size(), is(1));
+        assertThat(datasetSeriesMap.get("20220318").getCreatedDate(), nullValue());
+        assertThat(datasetSeriesMap.get("20220318").getFromDate(), nullValue());
+        assertThat(datasetSeriesMap.get("20220318").getToDate(), nullValue());
     }
 
     // TODO: This is duplicated - fix

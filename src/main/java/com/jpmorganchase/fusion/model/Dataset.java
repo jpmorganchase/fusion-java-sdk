@@ -39,6 +39,7 @@ public class Dataset extends CatalogResource {
     }
 
     public static class DatasetBuilder {
+        @SuppressWarnings("FieldCanBeLocal")
         private Map<String, String> varArgs;
 
         public DatasetBuilder varArgs(Map<String, String> varArgs) {

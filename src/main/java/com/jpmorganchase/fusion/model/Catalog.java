@@ -32,6 +32,7 @@ public class Catalog extends CatalogResource {
     }
 
     public static class CatalogBuilder {
+        @SuppressWarnings("FieldCanBeLocal")
         private Map<String, String> varArgs;
 
         public CatalogBuilder varArgs(Map<String, String> varArgs) {

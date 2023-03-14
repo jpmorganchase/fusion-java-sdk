@@ -39,6 +39,7 @@ public class DataProduct extends CatalogResource {
     }
 
     public static class DataProductBuilder {
+        @SuppressWarnings("FieldCanBeLocal")
         private Map<String, String> varArgs;
 
         public DataProductBuilder varArgs(Map<String, String> varArgs) {

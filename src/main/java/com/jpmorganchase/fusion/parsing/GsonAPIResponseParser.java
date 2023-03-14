@@ -25,7 +25,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     public GsonAPIResponseParser() {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        // TODO: need to add a serializer as well
+        // TODO: need to add a serializer as well once we get to update operations
         gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateDeserializer());
         gson = gsonBuilder.create();
     }
@@ -81,7 +81,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
                             logger.atWarn()
                                     .setMessage("Duplicate key '{}' found, will be ignored")
                                     .addArgument(r2.getIdentifier())
-                                    .log(); // TODO: Different error handling?
+                                    .log();
                             return r1;
                         }));
     }
@@ -95,6 +95,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
         Object resources = responseMap.get("resources");
         if (resources instanceof List) {
             List<Object> resourceList = (List<Object>) resources;
+            if (resourceList.size() == 0) throw generateNoResourceException();
             Map<String, Map<String, Object>> resourcesMap = new HashMap<>();
             resourceList.stream().forEach((o -> {
                 Map<String, Object> resource = (Map<String, Object>) o;
@@ -103,17 +104,25 @@ public class GsonAPIResponseParser implements APIResponseParser {
             }));
             return resourcesMap;
         } else {
-            throw new RuntimeException("Could not find resources array in JSON"); // TODO: Better error handling
+            throw generateNoResourceException();
         }
     }
 
     private JsonArray getResources(String json) {
         JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
-        return obj.getAsJsonArray("resources"); // TODO: what if this deosn't exist / is empty? write a test
+        JsonArray array = obj.getAsJsonArray("resources");
+        if (array == null || array.size() == 0) {
+            throw generateNoResourceException();
+        }
+        return array;
     }
 
-    // TODO: Consider making this public to allow for reuse in the case where a user wants to specify their own instance
-    // of Gson
+    private ParsingException generateNoResourceException() {
+        String message = "Failed to parse resources from JSON, none found";
+        logger.error(message);
+        return new ParsingException(message);
+    }
+
     private static final class LocalDateDeserializer implements JsonDeserializer<LocalDate> {
 
         private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -125,10 +134,9 @@ public class GsonAPIResponseParser implements APIResponseParser {
             try {
                 return LocalDate.parse(jsonElement.getAsString(), dateTimeFormatter);
             } catch (DateTimeParseException e) {
-                // TODO: We need sensible default behaviour here (logging for sure, but also do we want to just empty
-                // the field instead of failing?)
-                throw new JsonParseException(
-                        "Failed to deserialize date field with value " + jsonElement.getAsString(), e);
+                String message = "Failed to deserialize date field with value " + jsonElement.getAsString();
+                logger.warn(message);
+                return null;
             }
         }
     }
