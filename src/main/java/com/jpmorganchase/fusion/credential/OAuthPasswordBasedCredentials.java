@@ -21,6 +21,19 @@ public class OAuthPasswordBasedCredentials extends OAuthCredentials {
         this.password = password;
     }
 
+    public OAuthPasswordBasedCredentials(
+            String clientId,
+            String username,
+            String password,
+            String resource,
+            String authServerUrl,
+            Client client,
+            TimeProvider timeProvider) {
+        super(clientId, resource, authServerUrl, client, timeProvider);
+        this.username = username;
+        this.password = password;
+    }
+
     public OAuthPasswordBasedCredentials(OAuthPasswordBasedConfiguration config, Client client) {
         super(config.getClientId(), config.getResource(), config.getAuthServerUrl(), client);
         this.username = config.getUsername();

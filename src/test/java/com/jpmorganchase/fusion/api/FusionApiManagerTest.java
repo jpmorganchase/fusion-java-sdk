@@ -22,8 +22,6 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -75,78 +73,6 @@ public class FusionApiManagerTest {
                 "Expected APICallException but none thrown");
 
         assertThat(thrown.getMessage(), is(equalTo("The requested resource does not exist.")));
-    }
-
-    // TODO: This can be moved once we finish refactoring
-    // TODO: Need tests around the expiry time logic
-    @Test
-    void successWithOAuthTokenRetrieval() throws Exception {
-        credentials = new OAuthSecretBasedCredentials(
-                "aClientID", "aClientSecret", "aResource", "http://localhost:8080/oAuth", client);
-        fusionAPIManager = new FusionAPIManager(credentials, client);
-
-        Map<String, String> expectedOAuthHeaders = new HashMap<>();
-        expectedOAuthHeaders.put("Authorization", "Basic YUNsaWVudElEOmFDbGllbnRTZWNyZXQ=");
-        expectedOAuthHeaders.put("Accept", "application/json");
-        expectedOAuthHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-
-        HttpResponse<String> oAuthResponse =
-                HttpResponse.<String>builder().body(tokenJson).build();
-
-        Map<String, String> expectedRequestHeaders = new HashMap<>();
-        expectedRequestHeaders.put("Authorization", "Bearer my-oauth-generated-token");
-
-        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
-                .statusCode(200)
-                .body("sample response")
-                .build();
-
-        when(client.post(
-                        "http://localhost:8080/oAuth",
-                        expectedOAuthHeaders,
-                        "grant_type=client_credentials&aud=aResource"))
-                .thenReturn(oAuthResponse);
-        when(client.get("http://localhost:8080/test", expectedRequestHeaders)).thenReturn(expectedHttpResponse);
-
-        String response = fusionAPIManager.callAPI("http://localhost:8080/test");
-
-        assertThat(response, is(equalTo("sample response")));
-    }
-
-    // TODO: This can be moved once we finish refactoring (Can it? I wrote this comment a week ago and am now
-    // unconvinced)
-    // TODO: This method and the one above are duplicating code - refactor
-    @Test
-    void successWithOAuthPasswordBasedTokenRetrieval() throws Exception {
-        credentials = new OAuthPasswordBasedCredentials(
-                "aClientID", "aUsername", "aPassword", "aResource", "http://localhost:8080/oAuth", client);
-        fusionAPIManager = new FusionAPIManager(credentials, client);
-
-        Map<String, String> expectedOAuthHeaders = new HashMap<>();
-        expectedOAuthHeaders.put("Accept", "application/json");
-        expectedOAuthHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-
-        HttpResponse<String> oAuthResponse =
-                HttpResponse.<String>builder().body(tokenJson).build();
-
-        Map<String, String> expectedRequestHeaders = new HashMap<>();
-        expectedRequestHeaders.put("Authorization", "Bearer my-oauth-generated-token");
-
-        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
-                .statusCode(200)
-                .body("sample response")
-                .build();
-
-        when(client.post(
-                        "http://localhost:8080/oAuth",
-                        expectedOAuthHeaders,
-                        "grant_type=password&resource=aResource&client_id=aClientID&username=aUsername&password=aPassword"))
-                .thenReturn(oAuthResponse);
-        when(client.get("http://localhost:8080/test", expectedRequestHeaders)).thenReturn(expectedHttpResponse);
-
-        String response = fusionAPIManager.callAPI("http://localhost:8080/test");
-
-        assertThat(response, is(equalTo("sample response")));
     }
 
     @Test
@@ -207,9 +133,6 @@ public class FusionApiManagerTest {
 
         assertThat(outputBytes, is(equalTo(serverResponse)));
     }
-
-    @Captor
-    ArgumentCaptor<InputStream> fileUploadInputStream;
 
     @Test
     void successfulFileUpload() throws Exception {

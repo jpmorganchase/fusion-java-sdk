@@ -18,6 +18,17 @@ public class OAuthSecretBasedCredentials extends OAuthCredentials {
         this.clientSecret = clientSecret;
     }
 
+    public OAuthSecretBasedCredentials(
+            String clientId,
+            String clientSecret,
+            String resource,
+            String authServerUrl,
+            Client client,
+            TimeProvider timeProvider) {
+        super(clientId, resource, authServerUrl, client, timeProvider);
+        this.clientSecret = clientSecret;
+    }
+
     public OAuthSecretBasedCredentials(OAuthSecretBasedConfiguration config, Client client) {
         super(config.getClientId(), config.getResource(), config.getAuthServerUrl(), client);
         this.clientSecret = config.getClientSecret();

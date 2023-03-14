@@ -25,40 +25,36 @@ public abstract class OAuthCredentials implements Credentials {
 
     private final Client httpClient;
 
+    private final TimeProvider timeProvider;
+
     public OAuthCredentials(String clientId, String resource, String authServerUrl) {
-        this.clientId = clientId;
-        this.resource = resource;
-        this.authServerUrl = authServerUrl;
-        tokenRefreshes = 0;
-        bearerTokenExpiry = 0L;
-        httpClient = new JdkClient();
+        this(clientId, resource, authServerUrl, new JdkClient());
     }
 
     public OAuthCredentials(String clientId, String resource, String authServerUrl, Client client) {
+        this(clientId, resource, authServerUrl, client, new SystemTimeProvider());
+    }
+
+    public OAuthCredentials(
+            String clientId, String resource, String authServerUrl, Client client, TimeProvider timeProvider) {
         this.clientId = clientId;
         this.resource = resource;
         this.authServerUrl = authServerUrl;
         tokenRefreshes = 0;
         bearerTokenExpiry = 0L;
         httpClient = client;
+        this.timeProvider = timeProvider;
     }
 
     @Override
     public final synchronized String getBearerToken() throws IOException {
-        String auth;
-        String content;
 
-        if (bearerToken == null) {
-
-            // Check if an obtained token has expired.
-            // TODO: This should possibly be outside of concurrency Control - maybe we need an AtomicBoolean
-            // hasTokenExpired?
-            if (System.currentTimeMillis() < this.bearerTokenExpiry) {
-                return this.bearerToken;
-            }
+        if (hasTokenExpired()) {
 
             Map<String, String> requestHeaders = new HashMap<>();
-            if (requiresAuthHeader()) requestHeaders.put("Authorization", getAuthHeader());
+            if (requiresAuthHeader()) {
+                requestHeaders.put("Authorization", getAuthHeader());
+            }
             requestHeaders.put("Content-Type", "application/x-www-form-urlencoded");
             requestHeaders.put("Accept", "application/json");
 
@@ -71,6 +67,7 @@ public abstract class OAuthCredentials implements Credentials {
 
             // Get the token expiry time
             Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(timeProvider.currentTimeMillis());
             int seconds = oAuthServerResponse.getExpiresIn();
             calendar.add(Calendar.SECOND, seconds - 30);
             this.bearerTokenExpiry = calendar.getTimeInMillis();
@@ -85,6 +82,10 @@ public abstract class OAuthCredentials implements Credentials {
                     .log();
         }
         return bearerToken;
+    }
+
+    private boolean hasTokenExpired() {
+        return bearerTokenExpiry < timeProvider.currentTimeMillis();
     }
 
     protected abstract String getPostBodyContent();
