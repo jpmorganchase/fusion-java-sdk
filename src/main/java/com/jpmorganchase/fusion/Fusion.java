@@ -71,11 +71,10 @@ public class Fusion {
     }
 
     public void updateBearerToken(String token) {
-        if (credentials instanceof BearerTokenCredentials) {
-            this.credentials = new BearerTokenCredentials(token);
+        if (this.api instanceof FusionAPIManager) {
+            ((FusionAPIManager) this.api).updateBearerToken(token);
         } else {
-            throw new RuntimeException(
-                    "Cannot update credentials for this type"); // TODO: Better message, better error handling
+            throw new RuntimeException("Bearer token update not supported"); // TODO: Better design?
         }
     }
 

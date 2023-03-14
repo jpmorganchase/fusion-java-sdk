@@ -1,5 +1,6 @@
 package com.jpmorganchase.fusion.api;
 
+import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import com.jpmorganchase.fusion.credential.Credentials;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.HttpResponse;
@@ -20,7 +21,7 @@ import lombok.SneakyThrows;
 public class FusionAPIManager implements APIManager {
 
     private static final String DEFAULT_FOLDER = "downloads";
-    private final Credentials sessionCredentials;
+    private Credentials sessionCredentials;
     private final Client httpClient;
 
     /**
@@ -37,6 +38,16 @@ public class FusionAPIManager implements APIManager {
     public FusionAPIManager(Credentials credentials, Client httpClient) {
         this.sessionCredentials = credentials;
         this.httpClient = httpClient;
+    }
+
+    public void updateBearerToken(String token) {
+        if (sessionCredentials instanceof BearerTokenCredentials) {
+            this.sessionCredentials = new BearerTokenCredentials(token);
+        } else {
+            throw new RuntimeException(
+                    "Cannot update bearer token for credentials of this type"); // TODO: Better message, better error
+            // handling
+        }
     }
 
     /**

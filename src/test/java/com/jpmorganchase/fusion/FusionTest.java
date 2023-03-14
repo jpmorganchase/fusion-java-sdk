@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 
 import com.jpmorganchase.fusion.api.APIManager;
 import com.jpmorganchase.fusion.credential.BearerTokenCredentials;
+import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
 import java.io.BufferedReader;
@@ -31,6 +32,9 @@ public class FusionTest {
 
     @Mock
     private APIResponseParser responseParser;
+
+    @Mock
+    private Client httpClient;
 
     // TODO: Add interaction tests that do not use the default catalog
     @Test
@@ -207,6 +211,15 @@ public class FusionTest {
         // TODO: need a single data method for this as well
         int result = f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, d, d);
         assertThat(result, is(1));
+    }
+
+    @Test
+    public void updatingDefaultCatalogWorksCorrectly() {
+        Fusion f = Fusion.builder()
+                .credentials(new BearerTokenCredentials("my token"))
+                .build();
+        f.setDefaultCatalog("new catalog");
+        assertThat(f.getDefaultCatalog(), is(equalTo("new catalog")));
     }
 
     private Fusion stubFusion() {
