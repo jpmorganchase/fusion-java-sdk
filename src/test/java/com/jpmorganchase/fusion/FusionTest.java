@@ -36,35 +36,68 @@ public class FusionTest {
     @Mock
     private Client httpClient;
 
-    // TODO: Add interaction tests that do not use the default catalog
     @Test
     public void testListDatasetsInteraction() throws Exception {
         Fusion f = stubFusion();
 
-        Map<String, Dataset> stubResponse = new HashMap<>();
-        stubResponse.put("first", Dataset.builder().identifier("dataset1").build());
-
-        when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets", Fusion.DEFAULT_ROOT_URL, "common")))
-                .thenReturn("{\"key\":value}");
-        when(responseParser.parseDatasetResponse("{\"key\":value}")).thenReturn(stubResponse);
+        Map<String, Dataset> stubResponse = setupDatasetTest("common");
 
         Map<String, Dataset> actualResponse = f.listDatasets();
         assertThat(actualResponse, is(equalTo(stubResponse)));
     }
 
     @Test
+    public void testListDatasetsInteractionWithNonDefaultCatalog() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, Dataset> stubResponse = setupDatasetTest("other-catalog");
+
+        Map<String, Dataset> actualResponse = f.listDatasets("other-catalog");
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    private Map<String, Dataset> setupDatasetTest(String catalog) throws Exception {
+
+        Map<String, Dataset> stubResponse = new HashMap<>();
+        stubResponse.put("first", Dataset.builder().identifier("dataset1").build());
+
+        when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets", Fusion.DEFAULT_ROOT_URL, catalog)))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseDatasetResponse("{\"key\":value}")).thenReturn(stubResponse);
+
+        return stubResponse;
+    }
+
+    @Test
     public void testListProductsInteraction() throws Exception {
         Fusion f = stubFusion();
+
+        Map<String, DataProduct> stubResponse = setupProductTest("common");
+
+        Map<String, DataProduct> actualResponse = f.listProducts();
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testListProductsInteractionWithNonDefaultCatalog() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, DataProduct> stubResponse = setupProductTest("other-catalog");
+
+        Map<String, DataProduct> actualResponse = f.listProducts("other-catalog");
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    private Map<String, DataProduct> setupProductTest(String catalog) throws Exception {
 
         Map<String, DataProduct> stubResponse = new HashMap<>();
         stubResponse.put("first", DataProduct.builder().identifier("product1").build());
 
-        when(apiManager.callAPI(String.format("%1scatalogs/%2s/products", Fusion.DEFAULT_ROOT_URL, "common")))
+        when(apiManager.callAPI(String.format("%1scatalogs/%2s/products", Fusion.DEFAULT_ROOT_URL, catalog)))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseDataProductResponse("{\"key\":value}")).thenReturn(stubResponse);
 
-        Map<String, DataProduct> actualResponse = f.listProducts();
-        assertThat(actualResponse, is(equalTo(stubResponse)));
+        return stubResponse;
     }
 
     @Test
@@ -228,6 +261,38 @@ public class FusionTest {
                 .api(apiManager)
                 .responseParser(responseParser)
                 .build();
+    }
+
+    @Test
+    public void testListCatalogsInteraction() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, Catalog> stubResponse = new HashMap<>();
+        stubResponse.put("first", Catalog.builder().identifier("catalog1").build());
+
+        when(apiManager.callAPI(String.format("%1scatalogs/", Fusion.DEFAULT_ROOT_URL)))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseCatalogResponse("{\"key\":value}")).thenReturn(stubResponse);
+
+        Map<String, Catalog> actualResponse = f.listCatalogs();
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testCatalogInteractionUntyped() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, Map<String, Object>> stubResponse = new HashMap<>();
+        Map<String, Object> catalog1 = new HashMap<>();
+        catalog1.put("catalog1", Catalog.builder().identifier("catalog1").build());
+        stubResponse.put("catalog1", catalog1);
+
+        when(apiManager.callAPI(String.format("%1scatalogs/common", Fusion.DEFAULT_ROOT_URL)))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
+
+        Map<String, Map<String, Object>> actualResponse = f.catalogResources("common");
+        assertThat(actualResponse, is(equalTo(stubResponse)));
     }
 
     // TODO: Can we get this to work?

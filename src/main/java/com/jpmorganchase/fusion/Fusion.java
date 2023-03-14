@@ -102,7 +102,7 @@ public class Fusion {
      *
      * @param catalogName currently this will return only products and datasets
      */
-    public Map catalogResources(String catalogName) throws Exception {
+    public Map<String, Map<String, Object>> catalogResources(String catalogName) throws Exception {
         String url = String.format("%1scatalogs/%2s", this.rootURL, catalogName);
         return this.callForMap(url);
     }
