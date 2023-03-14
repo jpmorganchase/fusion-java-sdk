@@ -71,6 +71,15 @@ public class Fusion {
         this.defaultCatalog = newDefaultCatalogName;
     }
 
+    public void updateBearerToken(String token) {
+        if (credentials instanceof BearerTokenCredentials) {
+            this.credentials = new BearerTokenCredentials(token);
+        } else {
+            throw new RuntimeException(
+                    "Cannot update credentials for this type"); // TODO: Better message, better error handling
+        }
+    }
+
     /**
      * Call the API and returns a data table structure containing the results of the API call in tabular form
      *
@@ -414,7 +423,7 @@ public class Fusion {
      * @param dataset      a String representing the dataset identifier to upload against.
      * @param seriesMember a String representing the series member identifier to add or replace
      * @param distribution a String representing the distribution identifier, this is the file extension.
-     * @param data     am InputStream of the data to be uploaded
+     * @param data         am InputStream of the data to be uploaded
      * @param fromDate     the earliest date for which there is data in the distribution
      * @param toDate       the latest date for which there is data in the distribution
      * @param createdDate  the creation date for the distribution
