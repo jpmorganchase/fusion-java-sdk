@@ -30,4 +30,13 @@ public class Catalog extends CatalogResource {
         this.linkedEntity = linkedEntity;
         this.title = title;
     }
+
+    public static class CatalogBuilder {
+        private Map<String, String> varArgs;
+
+        public CatalogBuilder varArgs(Map<String, String> varArgs) {
+            this.varArgs = copyMap(varArgs);
+            return this;
+        }
+    }
 }

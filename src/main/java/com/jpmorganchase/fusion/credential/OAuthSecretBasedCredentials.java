@@ -1,6 +1,7 @@
 package com.jpmorganchase.fusion.credential;
 
 import com.jpmorganchase.fusion.http.Client;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class OAuthSecretBasedCredentials extends OAuthCredentials {
@@ -47,7 +48,7 @@ public class OAuthSecretBasedCredentials extends OAuthCredentials {
     @Override
     protected String getAuthHeader() {
         String auth = getClientId() + ":" + clientSecret;
-        return "Basic " + Base64.getEncoder().encodeToString(auth.getBytes());
+        return "Basic " + Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
     }
 
     public String getClientSecret() {

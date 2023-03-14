@@ -40,7 +40,7 @@
 
                 18. Optional Micrometer support
 
-                19. Make Fusion closeable and cascade the calls down
+                19. Make Fusion closeable and cascade the calls down?
 
                 20. Sonatype Lift for security review?
 

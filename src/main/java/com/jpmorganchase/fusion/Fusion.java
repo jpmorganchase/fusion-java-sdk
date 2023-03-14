@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -47,9 +46,6 @@ public class Fusion {
 
     @Builder.Default
     private String rootURL = DEFAULT_ROOT_URL;
-
-    @Getter(AccessLevel.NONE)
-    private Client httpClient;
 
     private OAuthConfiguration oAuthConfiguration;
 

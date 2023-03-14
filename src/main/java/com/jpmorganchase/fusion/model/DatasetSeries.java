@@ -34,4 +34,13 @@ public class DatasetSeries extends CatalogResource {
         this.createdDate = createdDate;
         this.linkedEntity = linkedEntity;
     }
+
+    public static class DatasetSeriesBuilder {
+        private Map<String, String> varArgs;
+
+        public DatasetSeriesBuilder varArgs(Map<String, String> varArgs) {
+            this.varArgs = copyMap(varArgs);
+            return this;
+        }
+    }
 }

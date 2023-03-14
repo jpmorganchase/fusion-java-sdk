@@ -36,4 +36,13 @@ public class Attribute extends CatalogResource {
         this.description = description;
         this.title = title;
     }
+
+    public static class AttributeBuilder {
+        private Map<String, String> varArgs;
+
+        public AttributeBuilder varArgs(Map<String, String> varArgs) {
+            this.varArgs = copyMap(varArgs);
+            return this;
+        }
+    }
 }

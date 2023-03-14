@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -54,7 +55,8 @@ public class JdkClient implements Client {
     }
 
     private HttpResponse<String> executeMethod(String method, String path, Map<String, String> headers, String body) {
-        InputStream bodyAsStream = body != null ? new ByteArrayInputStream(body.getBytes()) : null;
+        InputStream bodyAsStream =
+                body != null ? new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)) : null;
         return executeMethod(method, path, headers, bodyAsStream, true, this::getResponseBody);
     }
 
@@ -106,7 +108,8 @@ public class JdkClient implements Client {
     }
 
     private String getResponseBody(HttpURLConnection connection) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(getResponseStream(connection)));
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(getResponseStream(connection), StandardCharsets.UTF_8));
         StringWriter out = new StringWriter(connection.getContentLength() > 0 ? connection.getContentLength() : 2048);
 
         try {

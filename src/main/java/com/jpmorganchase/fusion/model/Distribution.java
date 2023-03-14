@@ -40,4 +40,13 @@ public class Distribution extends CatalogResource {
         this.fileExtension = fileExtension;
         this.mediaType = mediaType;
     }
+
+    public static class DistributionBuilder {
+        private Map<String, String> varArgs;
+
+        public DistributionBuilder varArgs(Map<String, String> varArgs) {
+            this.varArgs = copyMap(varArgs);
+            return this;
+        }
+    }
 }

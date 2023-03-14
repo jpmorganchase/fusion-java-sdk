@@ -37,4 +37,13 @@ public class DataProduct extends CatalogResource {
         this.title = title;
         this.status = status;
     }
+
+    public static class DataProductBuilder {
+        private Map<String, String> varArgs;
+
+        public DataProductBuilder varArgs(Map<String, String> varArgs) {
+            this.varArgs = copyMap(varArgs);
+            return this;
+        }
+    }
 }

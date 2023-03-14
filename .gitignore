@@ -3,4 +3,3 @@
 **/target/
 **/localAuthCredential.json
 **/client_credentials.json
-/src/main/java/Main.java

@@ -37,4 +37,13 @@ public class Dataset extends CatalogResource {
         this.title = title;
         this.frequency = frequency;
     }
+
+    public static class DatasetBuilder {
+        private Map<String, String> varArgs;
+
+        public DatasetBuilder varArgs(Map<String, String> varArgs) {
+            this.varArgs = copyMap(varArgs);
+            return this;
+        }
+    }
 }
