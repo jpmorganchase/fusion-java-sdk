@@ -16,6 +16,4 @@ public class OAuthConfiguration {
 
     @SerializedName("auth_url")
     private final String authServerUrl;
-
-    private String bearerToken;
 }

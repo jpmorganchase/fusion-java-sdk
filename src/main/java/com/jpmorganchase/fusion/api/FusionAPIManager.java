@@ -67,20 +67,19 @@ public class FusionAPIManager implements APIManager {
      * @param fileName       the filename
      */
     @Override
-    public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName)
-            throws IOException, APICallException {
+    public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) throws APICallException {
 
-        BufferedInputStream input = new BufferedInputStream(callAPIFileDownload(apiPath));
-        FileOutputStream fileOutput = new FileOutputStream(fileName);
+        try (BufferedInputStream input = new BufferedInputStream(callAPIFileDownload(apiPath));
+                FileOutputStream fileOutput = new FileOutputStream(fileName)) {
 
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = input.read(buf)) != -1) {
-            fileOutput.write(buf, 0, len);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = input.read(buf)) != -1) {
+                fileOutput.write(buf, 0, len);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failure downloading file", e); // TODO: Better error handling
         }
-
-        fileOutput.close();
-        input.close();
     }
 
     /**
@@ -97,7 +96,7 @@ public class FusionAPIManager implements APIManager {
     /**
      * Calls the API to retrieve file data and returns as an InputStream
      *
-     * @param apiPath        the URL of the API endpoint to call
+     * @param apiPath the URL of the API endpoint to call
      */
     @Override
     public InputStream callAPIFileDownload(String apiPath) throws IOException, APICallException {

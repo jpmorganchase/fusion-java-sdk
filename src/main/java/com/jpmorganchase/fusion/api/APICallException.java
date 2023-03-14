@@ -25,7 +25,7 @@ public class APICallException extends Exception {
      */
     public String getMessage() {
 
-        String errorMsg = "Unknown";
+        String errorMsg;
         switch (this.responseCode) {
             case 401:
                 errorMsg = "The bearer token is missing or an invalid bearer token was provided";
@@ -42,6 +42,8 @@ public class APICallException extends Exception {
             case 500:
                 errorMsg = "Internal API error. There was an error processing the request.";
                 break;
+            default:
+                errorMsg = "Unknown";
         }
         return errorMsg;
     }
