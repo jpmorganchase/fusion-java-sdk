@@ -461,8 +461,6 @@ public class JdkClientTest {
                 .lines()
                 .collect(Collectors.joining("\n"));
         assertThat(responseText, is(equalTo(SAMPLE_RESPONSE_BODY)));
-
-        // TODO: How do we test closure of the stream and connection? May need to make that inner class public
     }
 
     @Test
@@ -488,7 +486,5 @@ public class JdkClientTest {
                 .lines()
                 .collect(Collectors.joining("\n"));
         assertThat(responseText, is(equalTo(SAMPLE_RESPONSE_BODY)));
-
-        // TODO: How do we test closure of the stream and connection? May need to make that inner class public
     }
 }
