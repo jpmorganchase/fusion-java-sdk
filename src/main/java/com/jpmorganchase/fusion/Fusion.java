@@ -2,7 +2,9 @@ package com.jpmorganchase.fusion;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jpmorganchase.fusion.api.APICallException;
 import com.jpmorganchase.fusion.api.APIManager;
+import com.jpmorganchase.fusion.api.ApiInputValidationException;
 import com.jpmorganchase.fusion.api.FusionAPIManager;
 import com.jpmorganchase.fusion.credential.*;
 import com.jpmorganchase.fusion.http.Client;
@@ -10,6 +12,7 @@ import com.jpmorganchase.fusion.http.JdkClient;
 import com.jpmorganchase.fusion.model.*;
 import com.jpmorganchase.fusion.parsing.APIResponseParser;
 import com.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
+import com.jpmorganchase.fusion.parsing.ParsingException;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -20,13 +23,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
 /**
  * Class representing the Fusion API, providing methods that correspond to available API endpoints
  */
-@Getter
 @Builder
 public class Fusion {
 
@@ -45,10 +48,10 @@ public class Fusion {
     private String defaultCatalog = DEFAULT_CATALOG;
 
     @Builder.Default
+    @Getter(value = AccessLevel.PACKAGE)
     private String rootURL = DEFAULT_ROOT_URL;
 
-    private OAuthConfiguration oAuthConfiguration;
-
+    @Getter(value = AccessLevel.PACKAGE)
     private Credentials credentials;
 
     @Builder.Default
@@ -70,11 +73,17 @@ public class Fusion {
         this.defaultCatalog = newDefaultCatalogName;
     }
 
+    /**
+     * Update the currently used bearer token, where this is supported by the underlying Credentials implemenation
+     *
+     * @param token value of the new bearer token to be used
+     * @throws ApiInputValidationException if the underlying Credentials instance does not support a token update
+     */
     public void updateBearerToken(String token) {
         if (this.api instanceof FusionAPIManager) {
             ((FusionAPIManager) this.api).updateBearerToken(token);
         } else {
-            throw new RuntimeException("Bearer token update not supported"); // TODO: Better design?
+            throw new FusionException("Bearer token update not supported"); // TODO: Better design?
         }
     }
 
@@ -83,24 +92,32 @@ public class Fusion {
      *
      * @param url the API url to call
      * @return a map from the returned json object
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
      */
-    private Map<String, Map<String, Object>> callForMap(String url) throws Exception {
+    private Map<String, Map<String, Object>> callForMap(String url) {
         String json = this.api.callAPI(url);
         return responseParser.parseResourcesUntyped(json);
     }
 
     /**
      * Get a list of the catalogs available to the API account.
+     *
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
      */
-    public Map<String, Catalog> listCatalogs() throws Exception {
+    public Map<String, Catalog> listCatalogs() {
         String json = this.api.callAPI(rootURL.concat("catalogs/"));
         return responseParser.parseCatalogResponse(json);
     }
 
     /**
-     * Return the resources available for a specified catalog
+     * Return the resources available for a specified catalog, currently this will return only products and datasets
      *
-     * @param catalogName currently this will return only products and datasets
+     * @param catalogName identifer of the catalog to be queried
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
+     *
      */
     public Map<String, Map<String, Object>> catalogResources(String catalogName) throws Exception {
         String url = String.format("%1scatalogs/%2s", this.rootURL, catalogName);
@@ -108,14 +125,17 @@ public class Fusion {
     }
 
     /**
-     * Get a list of the data products in the default catalog
+     * Get a filtered list of the data products in the specified catalog
      *
-     * @param catalogName a String representing the identifier of the catalog to query.
+     * Note that as of current version this search capability is not yet implemented
+     *
+     * @param catalogName identifer of the catalog to be queried
      * @param contains    a search keyword.
      * @param idContains  is true if only apply the filter to the identifier
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
      */
-    public Map<String, DataProduct> listProducts(String catalogName, String contains, boolean idContains)
-            throws Exception {
+    public Map<String, DataProduct> listProducts(String catalogName, String contains, boolean idContains) {
         // TODO: unimplemented logic implied by the method parameters
         String url = String.format("%1scatalogs/%2s/products", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
@@ -123,19 +143,24 @@ public class Fusion {
     }
 
     /**
-     * Get a list of the data products in the default catalog
+     * Get a list of the data products in the specified catalog
      *
-     * @param catalogName a String representing the identifier of the catalog to query.
+     * @param catalogName identifer of the catalog to be queried
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
      */
-    public Map<String, DataProduct> listProducts(String catalogName) throws Exception {
+    public Map<String, DataProduct> listProducts(String catalogName) {
 
         return listProducts(catalogName, null, false);
     }
 
     /**
      * Get a list of the data products in the default catalog
+     *
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
      */
-    public Map<String, DataProduct> listProducts() throws Exception {
+    public Map<String, DataProduct> listProducts() {
         return listProducts(this.getDefaultCatalog(), null, false);
     }
 

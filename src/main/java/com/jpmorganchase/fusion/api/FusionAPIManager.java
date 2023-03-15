@@ -44,9 +44,9 @@ public class FusionAPIManager implements APIManager {
         if (sessionCredentials instanceof BearerTokenCredentials) {
             this.sessionCredentials = new BearerTokenCredentials(token);
         } else {
-            throw new RuntimeException(
-                    "Cannot update bearer token for credentials of this type"); // TODO: Better message, better error
-            // handling
+            throw new ApiInputValidationException(String.format(
+                    "Cannot update bearer token for credentials of type %s",
+                    sessionCredentials.getClass().getName()));
         }
     }
 
