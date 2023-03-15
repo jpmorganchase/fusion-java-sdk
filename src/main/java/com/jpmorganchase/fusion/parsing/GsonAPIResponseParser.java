@@ -76,7 +76,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
                 .collect(Collectors.toMap(
                         T::getIdentifier,
                         Function.identity(),
-                        // resolve any duplicate keys, for now jsut skip the dups
+                        // resolve any duplicate keys, for now just skip the duplicates
                         (r1, r2) -> {
                             logger.atWarn()
                                     .setMessage("Duplicate key '{}' found, will be ignored")
@@ -86,7 +86,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
                         }));
     }
 
-    // TODO: Refactor after tests are finished
     @Override
     public Map<String, Map<String, Object>> parseResourcesUntyped(String json) {
         Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
@@ -94,13 +93,17 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
         Object resources = responseMap.get("resources");
         if (resources instanceof List) {
+            @SuppressWarnings("unchecked") // List<Object> is always safe, compiler disagrees
             List<Object> resourceList = (List<Object>) resources;
+
             if (resourceList.size() == 0) throw generateNoResourceException();
             Map<String, Map<String, Object>> resourcesMap = new HashMap<>();
-            resourceList.stream().forEach((o -> {
+            resourceList.forEach((o -> {
+                @SuppressWarnings("unchecked") // Output of GSON parsing will always be in this format
                 Map<String, Object> resource = (Map<String, Object>) o;
+
                 String identifier = (String) resource.get("identifier");
-                resourcesMap.put(identifier, (Map<String, Object>) o);
+                resourcesMap.put(identifier, resource);
             }));
             return resourcesMap;
         } else {

@@ -16,7 +16,7 @@ import java.util.Map;
 import lombok.SneakyThrows;
 
 /**
- * Class that manages calls to the API. Intended to be called from multi-threaded code.
+ * Class that manages calls to the API. Intended to be called from multithreaded code.
  */
 public class FusionAPIManager implements APIManager {
 
@@ -61,13 +61,7 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("Authorization", "Bearer " + sessionCredentials.getBearerToken());
 
         HttpResponse<String> response = httpClient.get(apiPath, requestHeaders);
-
-        int httpCode = response.getStatusCode();
-        // TODO: Better response code handling?
-        if (response.getStatusCode() != 200) {
-            throw new APICallException(httpCode);
-        }
-
+        checkResponseStatus(response);
         return response.getBody();
     }
 
@@ -132,7 +126,6 @@ public class FusionAPIManager implements APIManager {
      * @param createdDate the creation date for the data is contained in the upload (in form yyyy-MM-dd).
      * @return the HTTP status code - will return 200 if successful
      */
-    // TODO: Sort out error handling
     @Override
     public int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate)
             throws APICallException {
@@ -198,7 +191,7 @@ public class FusionAPIManager implements APIManager {
         return response.getStatusCode();
     }
 
-    // TODO: Better error handling here
+    // TODO: Clean up error handling
     private <T> void checkResponseStatus(HttpResponse<T> response) throws APICallException {
         int httpCode = response.getStatusCode();
         if (httpCode != 200) {

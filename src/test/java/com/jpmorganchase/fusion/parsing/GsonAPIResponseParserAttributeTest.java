@@ -19,7 +19,6 @@ public class GsonAPIResponseParserAttributeTest {
     private static final String multipleAttributeJson = loadTestResource("multiple-attribute-response.json");
     private static final String duplicateAttributeJson = loadTestResource("duplicate-attribute-response.json");
 
-    // TODO: Need to map out all the fields
     private static final Attribute testAttribute = Attribute.builder()
             .identifier("name")
             .key(true)

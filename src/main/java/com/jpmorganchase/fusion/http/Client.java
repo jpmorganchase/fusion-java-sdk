@@ -5,7 +5,6 @@ import java.util.Map;
 
 public interface Client {
 
-    // TODO: Document exceptions
     HttpResponse<String> get(String path, Map<String, String> headers);
 
     HttpResponse<InputStream> getInputStream(String path, Map<String, String> headers);

@@ -82,7 +82,6 @@ public class GsonAPIResponseParserDatasetSeriesTest {
         assertThat(datasetSeriesMap.get("20220318").getToDate(), nullValue());
     }
 
-    // TODO: This is duplicated - fix
     private static String loadTestResource(String resourceName) {
         URL url = GsonAPIResponseParserDatasetSeriesTest.class.getResource(resourceName);
         try {

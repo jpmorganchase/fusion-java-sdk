@@ -130,7 +130,6 @@ public class JdkClient implements Client {
             if (100 <= httpCode && httpCode <= 399) {
                 return connection.getInputStream();
             } else {
-                // TODO: need to handle null case?
                 return connection.getErrorStream();
             }
         } catch (IOException e) {

@@ -8,7 +8,7 @@ import lombok.ToString;
 import lombok.Value;
 
 /**
- * An object represening a Fusion catalog, which is a container and inventory of datasets.
+ * An object representing a Fusion catalog, which is a container and inventory of datasets.
  */
 @Value
 @EqualsAndHashCode(callSuper = true)

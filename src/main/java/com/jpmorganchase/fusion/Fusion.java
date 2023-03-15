@@ -68,14 +68,14 @@ public class Fusion {
     /**
      * Set the default catalog. This allows the default context to be a specified catalog.
      *
-     * @param newDefaultCatalogName the identifier of the catalog to set as a the default
+     * @param newDefaultCatalogName the identifier of the catalog to set as the default
      */
     public void setDefaultCatalog(String newDefaultCatalogName) {
         this.defaultCatalog = newDefaultCatalogName;
     }
 
     /**
-     * Update the currently used bearer token, where this is supported by the underlying Credentials implemenation
+     * Update the currently used bearer token, where this is supported by the underlying Credentials implementation
      *
      * @param token value of the new bearer token to be used
      * @throws ApiInputValidationException if the underlying Credentials instance does not support a token update
@@ -96,6 +96,7 @@ public class Fusion {
      * @return a map from the returned json object
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     private Map<String, Map<String, Object>> callForMap(String url) {
         String json = this.api.callAPI(url);
@@ -107,6 +108,7 @@ public class Fusion {
      *
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Catalog> listCatalogs() {
         String json = this.api.callAPI(rootURL.concat("catalogs/"));
@@ -119,6 +121,7 @@ public class Fusion {
      * @param catalogName identifier of the catalog to be queried
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Map<String, Object>> catalogResources(String catalogName) {
         String url = String.format("%1scatalogs/%2s", this.rootURL, catalogName);
@@ -135,6 +138,7 @@ public class Fusion {
      * @param idContains  is true if only apply the filter to the identifier
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, DataProduct> listProducts(String catalogName, String contains, boolean idContains) {
         // TODO: unimplemented logic implied by the method parameters
@@ -149,6 +153,7 @@ public class Fusion {
      * @param catalogName identifier of the catalog to be queried
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, DataProduct> listProducts(String catalogName) {
 
@@ -160,6 +165,7 @@ public class Fusion {
      *
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, DataProduct> listProducts() {
         return listProducts(this.getDefaultCatalog(), null, false);
@@ -175,6 +181,7 @@ public class Fusion {
      * @param idContains  is true if only apply the filter to the identifier
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     // TODO: Search parameters
     public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) {
@@ -189,6 +196,7 @@ public class Fusion {
      * @param catalogName identifier of the catalog to be queried
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Dataset> listDatasets(String catalogName) {
         return listDatasets(catalogName, null, false);
@@ -199,6 +207,7 @@ public class Fusion {
      *
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Dataset> listDatasets() {
         return listDatasets(this.getDefaultCatalog(), null, false);
@@ -212,6 +221,7 @@ public class Fusion {
      * @param dataset     a String representing the dataset identifier to query.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Map<String, Object>> datasetResources(String catalogName, String dataset) {
 
@@ -226,6 +236,7 @@ public class Fusion {
      * @param dataset a String representing the dataset identifier to query.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Map<String, Object>> datasetResources(String dataset) {
 
@@ -239,6 +250,7 @@ public class Fusion {
      * @param dataset     a String representing the dataset identifier to query.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, DatasetSeries> listDatasetMembers(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries", this.rootURL, catalogName, dataset);
@@ -252,6 +264,7 @@ public class Fusion {
      * @param dataset a String representing the dataset identifier to query.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, DatasetSeries> listDatasetMembers(String dataset) {
 
@@ -266,6 +279,7 @@ public class Fusion {
      * @param seriesMember a String representing the series member identifier.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Map<String, Object>> datasetMemberResources(
             String catalogName, String dataset, String seriesMember) {
@@ -282,6 +296,7 @@ public class Fusion {
      * @param seriesMember a String representing the series member identifier.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Map<String, Object>> datasetMemberResources(String dataset, String seriesMember) {
 
@@ -295,6 +310,7 @@ public class Fusion {
      * @param dataset     a String representing the dataset identifier to query.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Attribute> listAttributes(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes", this.rootURL, catalogName, dataset);
@@ -308,6 +324,7 @@ public class Fusion {
      * @param dataset a String representing the dataset identifier to query.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Attribute> listAttributes(String dataset) {
 
@@ -321,6 +338,7 @@ public class Fusion {
      * @param dataset     a String representing the dataset identifier to query.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Map<String, Object>> attributeResources(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes", this.rootURL, catalogName, dataset);
@@ -335,6 +353,7 @@ public class Fusion {
      * @param seriesMember a String representing the series member identifier.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Distribution> listDistributions(String catalogName, String dataset, String seriesMember) {
 
@@ -352,6 +371,7 @@ public class Fusion {
      * @param seriesMember a String representing the series member identifier.
      * @throws APICallException if the call to the Fusion API fails
      * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Distribution> listDistributions(String dataset, String seriesMember) {
 
@@ -368,6 +388,7 @@ public class Fusion {
      * @param path         the absolute file path where the file should be written.
      * @throws APICallException if the call to the Fusion API fails
      * @throws FusionException  if the downloaded file cannot be saved to the specified target path
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, String seriesMember, String distribution, String path) {
 
@@ -384,7 +405,7 @@ public class Fusion {
     }
 
     /**
-     * Download a single distribution to the local filesystem. By default will write to downloads folder.
+     * Download a single distribution to the local filesystem. By default, this will write to downloads folder.
      *
      * @param catalogName  identifier of the catalog to be queried
      * @param dataset      a String representing the dataset identifier to download.
@@ -392,13 +413,14 @@ public class Fusion {
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @throws APICallException if the call to the Fusion API fails
      * @throws FusionException  if the downloaded file cannot be saved to the default path
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, String seriesMember, String distribution) {
         this.download(catalogName, dataset, seriesMember, distribution, Fusion.DEFAULT_PATH);
     }
 
     /**
-     * Download multiple distribution to the local filesystem. By default will write to downloads folder.
+     * Download multiple distribution to the local filesystem. By default, this will write to downloads folder.
      * Not implemented.
      *
      * @param catalogName   identifier of the catalog to be queried
@@ -407,6 +429,7 @@ public class Fusion {
      * @param distribution  a String representing the distribution identifier, this is the file extension.
      * @throws APICallException if the call to the Fusion API fails
      * @throws FusionException  if the downloaded file cannot be saved to the default path
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, List<String> seriesMembers, String distribution) {
         throw new FusionException("Functionality not yet implemented");
@@ -422,6 +445,7 @@ public class Fusion {
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @throws APICallException if the call to the Fusion API fails
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution) {
         String url = String.format(
@@ -443,6 +467,7 @@ public class Fusion {
      * @param createdDate  the creation date for the distribution
      * @throws ApiInputValidationException if the specified file cannot be read
      * @throws APICallException if the call to the Fusion API fails
+     * @throws OAuthException if a token could not be retrieved for authentication
      **/
     public void upload(
             String catalogName,
@@ -474,6 +499,7 @@ public class Fusion {
      * @param dataDate     the earliest, latest, and created date are all the same.
      * @throws ApiInputValidationException if the specified file cannot be read
      * @throws APICallException if the call to the Fusion API fails
+     * @throws OAuthException if a token could not be retrieved for authentication
      **/
     public void upload(
             String catalogName,
@@ -498,6 +524,7 @@ public class Fusion {
      * @param createdDate  the creation date for the distribution
      * @throws ApiInputValidationException if the specified file cannot be read
      * @throws APICallException if the call to the Fusion API fails
+     * @throws OAuthException if a token could not be retrieved for authentication
      **/
     public void upload(
             String catalogName,

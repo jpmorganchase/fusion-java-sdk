@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.jpmorganchase.fusion.http.Client;
@@ -26,15 +27,10 @@ public class OAuthPasswordBasedCredentialsTest {
     private static final String tokenJson =
             "{\"access_token\":\"my-oauth-generated-token\",\"token_type\":\"bearer\",\"expires_in\":3600}";
 
+    private static final String missingTokenJson = "{\"token_type\":\"bearer\",\"expires_in\":3600}";
+
     private static final String shortExpiryTokenJson =
             "{\"access_token\":\"my-short-expiry-oauth-generated-token\",\"token_type\":\"bearer\",\"expires_in\":1}";
-
-    @Test
-    void constructionWithNoClientCreatesDefaultClient() throws Exception {
-        credentials = new OAuthPasswordBasedCredentials(
-                "aClientID", "aUsername", "aPassword", "aResource", "http://localhost:8080/oAuth");
-        // TODO: Do we really want to assert this?
-    }
 
     @Test
     void retrievalOfOAuthToken() throws Exception {
@@ -61,7 +57,33 @@ public class OAuthPasswordBasedCredentialsTest {
     }
 
     @Test
-    // TODO: The when call needs to be refactored to remove this
+    void retrievalOfOAuthTokenResultsInCorrectExceptionWhenAnInvalidResponseIsReceived() throws Exception {
+        credentials = new OAuthPasswordBasedCredentials(
+                "aClientID", "aUsername", "aPassword", "aResource", "http://localhost:8080/oAuth", client);
+
+        Map<String, String> expectedOAuthHeaders = new HashMap<>();
+        expectedOAuthHeaders.put("Accept", "application/json");
+        expectedOAuthHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+
+        HttpResponse<String> invalidOAuthResponse =
+                HttpResponse.<String>builder().body(missingTokenJson).build();
+
+        when(client.post(
+                        "http://localhost:8080/oAuth",
+                        expectedOAuthHeaders,
+                        "grant_type=password&resource=aResource&client_id=aClientID&username=aUsername&password=aPassword"))
+                .thenReturn(invalidOAuthResponse);
+
+        OAuthException thrown = assertThrows(OAuthException.class, () -> {
+            credentials.getBearerToken();
+        });
+
+        assertThat(thrown.getResponse(), is(equalTo(missingTokenJson)));
+        assertThat(thrown.getMessage(), is(equalTo("Unable to parse bearer token in response from OAuth server")));
+    }
+
+    @Test
+    // TODO: The when call needs to be refactored to remove this suppression
     @SuppressWarnings("unchecked")
     void refreshOfOauthTokenAfterExpiry() throws Exception {
         IncrementingTimeProvider timeProvider = new IncrementingTimeProvider(2023, 3, 14, 12, 0, 0);

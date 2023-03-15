@@ -29,13 +29,6 @@ public class OAuthSecretBasedCredentialsTest {
             "{\"access_token\":\"my-short-expiry-oauth-generated-token\",\"token_type\":\"bearer\",\"expires_in\":30}";
 
     @Test
-    void constructionWithNoClientCreatesDefaultClient() throws Exception {
-        credentials = new OAuthSecretBasedCredentials(
-                "aClientID", "aClientSecret", "aResource", "http://localhost:8080/oAuth", client);
-        // TODO: Do we really want to assert this?
-    }
-
-    @Test
     void retrievalOfOAuthToken() throws Exception {
         credentials = new OAuthSecretBasedCredentials(
                 "aClientID", "aClientSecret", "aResource", "http://localhost:8080/oAuth", client);
@@ -61,7 +54,7 @@ public class OAuthSecretBasedCredentialsTest {
     }
 
     @Test
-    // TODO: The when call needs to be refactored to remove this
+    // TODO: The when call needs to be refactored to remove this suppression
     @SuppressWarnings("unchecked")
     void refreshOfOauthTokenAfterExpiry() throws Exception {
         IncrementingTimeProvider timeProvider = new IncrementingTimeProvider(2023, 3, 14, 12, 0, 0);
@@ -96,7 +89,7 @@ public class OAuthSecretBasedCredentialsTest {
     }
 
     @Test
-    // TODO: The when call needs to be refactored to remove this
+    // TODO: The when call needs to be refactored to remove this suppression
     @SuppressWarnings("unchecked")
     void tokenRefreshBoundaryTest() throws Exception {
         IncrementingTimeProvider timeProvider = new IncrementingTimeProvider(2023, 3, 14, 12, 0, 0);

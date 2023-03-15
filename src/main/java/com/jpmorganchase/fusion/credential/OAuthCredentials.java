@@ -60,10 +60,14 @@ public abstract class OAuthCredentials implements Credentials {
 
             HttpResponse<String> response = httpClient.post(authServerUrl, requestHeaders, getPostBodyContent());
 
-            // TODO: Error Handling?
             // Get the bearer token
             OAuthServerResponse oAuthServerResponse = OAuthServerResponse.fromJson(response.getBody());
             this.bearerToken = oAuthServerResponse.getAccessToken();
+            if (bearerToken == null) {
+                String message = "Unable to parse bearer token in response from OAuth server";
+                logger.error(String.format(message)); // Don't log the response body in case it has a token
+                throw new OAuthException(message, response.getBody());
+            }
 
             // Get the token expiry time
             Instant now = Instant.ofEpochMilli(timeProvider.currentTimeMillis());

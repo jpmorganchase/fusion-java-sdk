@@ -18,7 +18,6 @@ public class GsonAPIResponseParserDistributionTest {
     private static final String singleDistributionJson = loadTestResource("single-distribution-response.json");
     private static final String multipleDistributionJson = loadTestResource("multiple-distribution-response.json");
 
-    // TODO: Need to map out all the fields
     private static final Distribution testDistribution = Distribution.builder()
             .identifier("csv")
             .description("Snapshot data will be in a tabular, comma separated format.")

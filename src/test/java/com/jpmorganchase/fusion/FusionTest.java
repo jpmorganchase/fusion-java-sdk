@@ -216,10 +216,9 @@ public class FusionTest {
                         "/tmp/file.csv",
                         "2023-03-09",
                         "2023-03-09",
-                        "2023-03-09")) // TODO: get the dates
+                        "2023-03-09"))
                 .thenReturn(1);
 
-        // TODO: test with different dates as well
         f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", d);
     }
 
@@ -236,10 +235,9 @@ public class FusionTest {
                         requestBodyStream,
                         "2023-03-09",
                         "2023-03-09",
-                        "2023-03-09")) // TODO: get the dates
+                        "2023-03-09"))
                 .thenReturn(1);
 
-        // TODO: need a single data method for this as well
         f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, d, d);
     }
 
@@ -291,15 +289,4 @@ public class FusionTest {
         Map<String, Map<String, Object>> actualResponse = f.catalogResources("common");
         assertThat(actualResponse, is(equalTo(stubResponse)));
     }
-
-    // TODO: Can we get this to work?
-    /*private <T extends CatalogResource> Map<String, T> createStubResponse(Class<T> resourceClass){
-        Map<String, T> stubResponse = new HashMap<>();
-        try {
-            stubResponse.put("first", ((T)resourceClass.getDeclaredMethod("builder").invoke(null)).identifier("dataset1").build());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return stubResponse;
-    }*/
 }
