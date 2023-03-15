@@ -3,7 +3,7 @@ package com.jpmorganchase.fusion.api;
 /**
  * A custom exception to provide useful information on the response of an API call
  */
-public class APICallException extends Exception {
+public class APICallException extends RuntimeException {
 
     private final int responseCode;
 

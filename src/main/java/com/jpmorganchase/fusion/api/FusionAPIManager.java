@@ -79,7 +79,8 @@ public class FusionAPIManager implements APIManager {
      * @param fileName       the filename
      */
     @Override
-    public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName) throws APICallException {
+    public void callAPIFileDownload(String apiPath, String downloadFolder, String fileName)
+            throws APICallException, FileDownloadException {
 
         try (BufferedInputStream input = new BufferedInputStream(callAPIFileDownload(apiPath));
                 FileOutputStream fileOutput = new FileOutputStream(fileName)) {
@@ -90,7 +91,7 @@ public class FusionAPIManager implements APIManager {
                 fileOutput.write(buf, 0, len);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failure downloading file", e); // TODO: Better error handling
+            throw new FileDownloadException("Failure downloading file", e);
         }
     }
 
@@ -157,7 +158,6 @@ public class FusionAPIManager implements APIManager {
      * @param createdDate the creation date for the data is contained in the upload (in form yyyy-MM-dd).
      * @return the HTTP status code - will return 200 if successful
      */
-    // TODO: Sort out error handling
     // TODO: in the file case we probably dont want to do it like this - just read the file to calculate the digest and
     // then pass down the FileInputStream
     @SneakyThrows(NoSuchAlgorithmException.class)

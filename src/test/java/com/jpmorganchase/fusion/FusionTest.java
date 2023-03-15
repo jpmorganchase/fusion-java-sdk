@@ -184,8 +184,7 @@ public class FusionTest {
                                 Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
                         String.format("%s/%s_%s_%s.%s", "/tmp", "common", "sample_dataset", "20230308", "csv"));
 
-        int result = f.download("common", "sample_dataset", "20230308", "csv", "/tmp");
-        assertThat(result, is(1));
+        f.download("common", "sample_dataset", "20230308", "csv", "/tmp");
     }
 
     @Test
@@ -221,8 +220,7 @@ public class FusionTest {
                 .thenReturn(1);
 
         // TODO: test with different dates as well
-        int result = f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", d);
-        assertThat(result, is(1));
+        f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", d);
     }
 
     @Test
@@ -242,8 +240,7 @@ public class FusionTest {
                 .thenReturn(1);
 
         // TODO: need a single data method for this as well
-        int result = f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, d, d);
-        assertThat(result, is(1));
+        f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, d, d);
     }
 
     @Test

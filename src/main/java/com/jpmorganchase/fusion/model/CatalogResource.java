@@ -15,7 +15,7 @@ import lombok.ToString;
 public abstract class CatalogResource {
 
     private final String identifier;
-    private Map<String, String> varArgs;
+    private final Map<String, String> varArgs;
 
     public CatalogResource(String identifier, Map<String, String> varArgs) {
         this.varArgs = copyMap(varArgs);

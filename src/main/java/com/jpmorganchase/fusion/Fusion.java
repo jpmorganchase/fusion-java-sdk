@@ -41,6 +41,7 @@ public class Fusion {
 
     private static final String DEFAULT_CREDENTIALS_FILE = "config/client_credentials.json";
     private static final String DEFAULT_PATH = "downloads";
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private APIManager api;
 
@@ -79,11 +80,12 @@ public class Fusion {
      * @param token value of the new bearer token to be used
      * @throws ApiInputValidationException if the underlying Credentials instance does not support a token update
      */
+    // TODO: The implementation of this needs some thought. This way makes it difficult to test in isolation
     public void updateBearerToken(String token) {
         if (this.api instanceof FusionAPIManager) {
             ((FusionAPIManager) this.api).updateBearerToken(token);
         } else {
-            throw new FusionException("Bearer token update not supported"); // TODO: Better design?
+            throw new FusionException("Bearer token update not supported");
         }
     }
 
@@ -93,7 +95,7 @@ public class Fusion {
      * @param url the API url to call
      * @return a map from the returned json object
      * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
     private Map<String, Map<String, Object>> callForMap(String url) {
         String json = this.api.callAPI(url);
@@ -104,7 +106,7 @@ public class Fusion {
      * Get a list of the catalogs available to the API account.
      *
      * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
     public Map<String, Catalog> listCatalogs() {
         String json = this.api.callAPI(rootURL.concat("catalogs/"));
@@ -114,26 +116,25 @@ public class Fusion {
     /**
      * Return the resources available for a specified catalog, currently this will return only products and datasets
      *
-     * @param catalogName identifer of the catalog to be queried
+     * @param catalogName identifier of the catalog to be queried
      * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
-     *
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map<String, Map<String, Object>> catalogResources(String catalogName) throws Exception {
+    public Map<String, Map<String, Object>> catalogResources(String catalogName) {
         String url = String.format("%1scatalogs/%2s", this.rootURL, catalogName);
         return this.callForMap(url);
     }
 
     /**
      * Get a filtered list of the data products in the specified catalog
-     *
+     * <p>
      * Note that as of current version this search capability is not yet implemented
      *
-     * @param catalogName identifer of the catalog to be queried
+     * @param catalogName identifier of the catalog to be queried
      * @param contains    a search keyword.
      * @param idContains  is true if only apply the filter to the identifier
      * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
     public Map<String, DataProduct> listProducts(String catalogName, String contains, boolean idContains) {
         // TODO: unimplemented logic implied by the method parameters
@@ -145,9 +146,9 @@ public class Fusion {
     /**
      * Get a list of the data products in the specified catalog
      *
-     * @param catalogName identifer of the catalog to be queried
+     * @param catalogName identifier of the catalog to be queried
      * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
     public Map<String, DataProduct> listProducts(String catalogName) {
 
@@ -158,7 +159,7 @@ public class Fusion {
      * Get a list of the data products in the default catalog
      *
      * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the reponse from Fusion could not be parsed successfully
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
     public Map<String, DataProduct> listProducts() {
         return listProducts(this.getDefaultCatalog(), null, false);
@@ -166,13 +167,17 @@ public class Fusion {
 
     /**
      * Get a filtered list of the datasets in the specified catalog
+     * <p>
+     * Note that as of current version this search capability is not yet implemented
      *
-     * @param catalogName a String representing the identifier of the catalog to query.
+     * @param catalogName identifier of the catalog to be queried
      * @param contains    a search keyword.
      * @param idContains  is true if only apply the filter to the identifier
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
     // TODO: Search parameters
-    public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) throws Exception {
+    public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) {
         String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
         return responseParser.parseDatasetResponse(json);
@@ -181,16 +186,21 @@ public class Fusion {
     /**
      * Get a list of the datasets in the specified catalog
      *
-     * @param catalogName a String representing the identifier of the catalog to query.
+     * @param catalogName identifier of the catalog to be queried
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map<String, Dataset> listDatasets(String catalogName) throws Exception {
+    public Map<String, Dataset> listDatasets(String catalogName) {
         return listDatasets(catalogName, null, false);
     }
 
     /**
      * Get a list of the datasets in the default catalog
+     *
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map<String, Dataset> listDatasets() throws Exception {
+    public Map<String, Dataset> listDatasets() {
         return listDatasets(this.getDefaultCatalog(), null, false);
     }
 
@@ -198,10 +208,12 @@ public class Fusion {
      * Get the available resources for a dataset, in the specified catalog
      * Currently this will always return a datasetseries.
      *
-     * @param catalogName a String representing the identifier of the catalog to query.
+     * @param catalogName identifier of the catalog to be queried
      * @param dataset     a String representing the dataset identifier to query.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map datasetResources(String catalogName, String dataset) throws Exception {
+    public Map<String, Map<String, Object>> datasetResources(String catalogName, String dataset) {
 
         String url = String.format("%1scatalogs/%2s/datasets/%3s", this.rootURL, catalogName, dataset);
         return this.callForMap(url);
@@ -212,8 +224,10 @@ public class Fusion {
      * Currently this will always return a datasetseries.
      *
      * @param dataset a String representing the dataset identifier to query.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map datasetResources(String dataset) throws Exception {
+    public Map<String, Map<String, Object>> datasetResources(String dataset) {
 
         return this.datasetResources(this.getDefaultCatalog(), dataset);
     }
@@ -221,10 +235,12 @@ public class Fusion {
     /**
      * List the series members for a dataset in a specified catalog
      *
-     * @param catalogName a String representing the identifier of the catalog to query.
+     * @param catalogName identifier of the catalog to be queried
      * @param dataset     a String representing the dataset identifier to query.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map<String, DatasetSeries> listDatasetMembers(String catalogName, String dataset) throws Exception {
+    public Map<String, DatasetSeries> listDatasetMembers(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries", this.rootURL, catalogName, dataset);
         String json = this.api.callAPI(url);
         return responseParser.parseDatasetSeriesResponse(json);
@@ -234,8 +250,10 @@ public class Fusion {
      * List the series members for a dataset, using the default catalog
      *
      * @param dataset a String representing the dataset identifier to query.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map<String, DatasetSeries> listDatasetMembers(String dataset) throws Exception {
+    public Map<String, DatasetSeries> listDatasetMembers(String dataset) {
 
         return this.listDatasetMembers(this.getDefaultCatalog(), dataset);
     }
@@ -243,11 +261,14 @@ public class Fusion {
     /**
      * Get the metadata for a dataset series member
      *
-     * @param catalogName  a String representing the identifier of the catalog to query.
+     * @param catalogName  identifier of the catalog to be queried
      * @param dataset      a String representing the dataset identifier to query.
      * @param seriesMember a String representing the series member identifier.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map datasetMemberResources(String catalogName, String dataset, String seriesMember) throws Exception {
+    public Map<String, Map<String, Object>> datasetMemberResources(
+            String catalogName, String dataset, String seriesMember) {
 
         String url = String.format(
                 "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s", this.rootURL, catalogName, dataset, seriesMember);
@@ -257,10 +278,12 @@ public class Fusion {
     /**
      * Get the metadata for a dataset series member, using the default catalog
      *
-     * @param dataset      a String representing the dataset identifier to query.
+     * @param dataset      identifier of the catalog to be queried
      * @param seriesMember a String representing the series member identifier.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map datasetMemberResources(String dataset, String seriesMember) throws Exception {
+    public Map<String, Map<String, Object>> datasetMemberResources(String dataset, String seriesMember) {
 
         return this.datasetMemberResources(this.getDefaultCatalog(), dataset, seriesMember);
     }
@@ -270,8 +293,10 @@ public class Fusion {
      *
      * @param catalogName a String representing the identifier of the catalog to query.
      * @param dataset     a String representing the dataset identifier to query.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map<String, Attribute> listAttributes(String catalogName, String dataset) throws Exception {
+    public Map<String, Attribute> listAttributes(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes", this.rootURL, catalogName, dataset);
         String json = this.api.callAPI(url);
         return responseParser.parseAttributeResponse(json);
@@ -281,13 +306,23 @@ public class Fusion {
      * List the attributes for a specified dataset, uses the default catalog.
      *
      * @param dataset a String representing the dataset identifier to query.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map<String, Attribute> listAttributes(String dataset) throws Exception {
+    public Map<String, Attribute> listAttributes(String dataset) {
 
         return this.listAttributes(this.getDefaultCatalog(), dataset);
     }
 
-    public Map<String, Map<String, Object>> attributeResources(String catalogName, String dataset) throws Exception {
+    /**
+     * Get the metadata for a dataset, using the specified catalog
+     *
+     * @param catalogName identifier of the catalog to be queried
+     * @param dataset     a String representing the dataset identifier to query.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     */
+    public Map<String, Map<String, Object>> attributeResources(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes", this.rootURL, catalogName, dataset);
         return this.callForMap(url);
     }
@@ -295,12 +330,13 @@ public class Fusion {
     /**
      * List the distributions available for a series member, uses the default catalog.
      *
-     * @param catalogName  a String representing the identifier of the catalog to query.
+     * @param catalogName  identifier of the catalog to be queried
      * @param dataset      a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map<String, Distribution> listDistributions(String catalogName, String dataset, String seriesMember)
-            throws Exception {
+    public Map<String, Distribution> listDistributions(String catalogName, String dataset, String seriesMember) {
 
         String url = String.format(
                 "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
@@ -314,8 +350,10 @@ public class Fusion {
      *
      * @param dataset      a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
      */
-    public Map<String, Distribution> listDistributions(String dataset, String seriesMember) throws Exception {
+    public Map<String, Distribution> listDistributions(String dataset, String seriesMember) {
 
         return this.listDistributions(this.getDefaultCatalog(), dataset, seriesMember);
     }
@@ -323,82 +361,90 @@ public class Fusion {
     /**
      * Download a single distribution to the local filesystem
      *
-     * @param catalogName  a String representing the identifier of the catalog to download from
+     * @param catalogName  identifier of the catalog to be queried
      * @param dataset      a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @param path         the absolute file path where the file should be written.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FusionException  if the downloaded file cannot be saved to the specified target path
      */
-    public int download(String catalogName, String dataset, String seriesMember, String distribution, String path)
-            throws Exception {
+    public void download(String catalogName, String dataset, String seriesMember, String distribution, String path) {
 
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                 this.rootURL, catalogName, dataset, seriesMember, distribution);
-        Files.createDirectories(Paths.get(path));
+        try {
+            Files.createDirectories(Paths.get(path));
+        } catch (IOException e) {
+            throw new FusionException(String.format("Unable to save to target path %s", path));
+        }
         String filepath = String.format("%s/%s_%s_%s.%s", path, catalogName, dataset, seriesMember, distribution);
         this.api.callAPIFileDownload(url, filepath);
-        return 1; // TODO: Change this behaviour
     }
 
     /**
      * Download a single distribution to the local filesystem. By default will write to downloads folder.
      *
-     * @param catalogName  a String representing the identifier of the catalog to download from
+     * @param catalogName  identifier of the catalog to be queried
      * @param dataset      a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FusionException  if the downloaded file cannot be saved to the default path
      */
-    public int download(String catalogName, String dataset, String seriesMember, String distribution) throws Exception {
-
-        return this.download(catalogName, dataset, seriesMember, distribution, Fusion.DEFAULT_PATH);
+    public void download(String catalogName, String dataset, String seriesMember, String distribution) {
+        this.download(catalogName, dataset, seriesMember, distribution, Fusion.DEFAULT_PATH);
     }
 
     /**
      * Download multiple distribution to the local filesystem. By default will write to downloads folder.
      * Not implemented.
      *
-     * @param catalogName   a String representing the identifier of the catalog to download from
+     * @param catalogName   identifier of the catalog to be queried
      * @param dataset       a String representing the dataset identifier to download.
      * @param seriesMembers a List of Strings representing the series member identifiers.
      * @param distribution  a String representing the distribution identifier, this is the file extension.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FusionException  if the downloaded file cannot be saved to the default path
      */
-    public int download(String catalogName, String dataset, List<String> seriesMembers, String distribution) {
-        return 0;
+    public void download(String catalogName, String dataset, List<String> seriesMembers, String distribution) {
+        throw new FusionException("Functionality not yet implemented");
     }
 
     /**
      * Download a single distribution and return the data as an InputStream
+     * Note that users of this method are required to close the returned InputStream. Failure to do so will
+     * result in resource leaks, including the Http connection used to communicate with Fusion
      *
-     * @param catalogName  a String representing the identifier of the catalog to download from
+     * @param catalogName  identifier of the catalog to be queried
      * @param dataset      a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @throws APICallException if the call to the Fusion API fails
      */
-    public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution)
-            throws Exception {
+    public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution) {
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                 this.rootURL, catalogName, dataset, seriesMember, distribution);
         return this.api.callAPIFileDownload(url);
     }
 
-    // TODO: This is duplicated from LocalDateDeserializer, but might be ok?
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     /**
      * Upload a new dataset series member to a catalog.
      *
-     * @param catalogName  a String representing the identifier of the catalog to upload into
-     * @param dataset      a String representing the dataset identifier to upload against.
-     * @param seriesMember a String representing the series member identifier to add or replace
-     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param catalogName  identifier of the catalog to upload data into
+     * @param dataset      the dataset identifier to upload against.
+     * @param seriesMember the series member identifier to add or replace
+     * @param distribution the distribution identifier, this is the file extension.
      * @param filename     a path to the file containing the data to upload
      * @param fromDate     the earliest date for which there is data in the distribution
      * @param toDate       the latest date for which there is data in the distribution
      * @param createdDate  the creation date for the distribution
+     * @throws ApiInputValidationException if the specified file cannot be read
+     * @throws APICallException if the call to the Fusion API fails
      **/
-    public int upload(
+    public void upload(
             String catalogName,
             String dataset,
             String seriesMember,
@@ -406,8 +452,7 @@ public class Fusion {
             String filename,
             LocalDate fromDate,
             LocalDate toDate,
-            LocalDate createdDate)
-            throws Exception {
+            LocalDate createdDate) {
 
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
@@ -415,43 +460,46 @@ public class Fusion {
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
-        return this.api.callAPIFileUpload(url, filename, strFromDate, strToDate, strCreatedDate);
+        this.api.callAPIFileUpload(url, filename, strFromDate, strToDate, strCreatedDate);
     }
 
     /**
      * Upload a new dataset series member to a catalog.
      *
-     * @param catalogName  a String representing the identifier of the catalog to upload into
-     * @param dataset      a String representing the dataset identifier to upload against.
-     * @param seriesMember a String representing the series member identifier to add or replace
-     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param catalogName  identifier of the catalog to upload data into
+     * @param dataset      the dataset identifier to upload against.
+     * @param seriesMember the series member identifier to add or replace
+     * @param distribution the distribution identifier, this is the file extension.
      * @param filename     a path to the file containing the data to upload
      * @param dataDate     the earliest, latest, and created date are all the same.
+     * @throws ApiInputValidationException if the specified file cannot be read
+     * @throws APICallException if the call to the Fusion API fails
      **/
-    public int upload(
+    public void upload(
             String catalogName,
             String dataset,
             String seriesMember,
             String distribution,
             String filename,
-            LocalDate dataDate)
-            throws Exception {
-        return this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate);
+            LocalDate dataDate) {
+        this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate);
     }
 
     /**
      * Upload a new dataset series member to a catalog.
      *
-     * @param catalogName  a String representing the identifier of the catalog to upload into
-     * @param dataset      a String representing the dataset identifier to upload against.
-     * @param seriesMember a String representing the series member identifier to add or replace
-     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param catalogName  identifier of the catalog to upload data into
+     * @param dataset      the dataset identifier to upload against.
+     * @param seriesMember the series member identifier to add or replace
+     * @param distribution the distribution identifier, this is the file extension.
      * @param data         am InputStream of the data to be uploaded
      * @param fromDate     the earliest date for which there is data in the distribution
      * @param toDate       the latest date for which there is data in the distribution
      * @param createdDate  the creation date for the distribution
+     * @throws ApiInputValidationException if the specified file cannot be read
+     * @throws APICallException if the call to the Fusion API fails
      **/
-    public int upload(
+    public void upload(
             String catalogName,
             String dataset,
             String seriesMember,
@@ -459,8 +507,7 @@ public class Fusion {
             InputStream data,
             LocalDate fromDate,
             LocalDate toDate,
-            LocalDate createdDate)
-            throws Exception {
+            LocalDate createdDate) {
 
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
@@ -468,7 +515,7 @@ public class Fusion {
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
-        return this.api.callAPIFileUpload(url, data, strFromDate, strToDate, strCreatedDate);
+        this.api.callAPIFileUpload(url, data, strFromDate, strToDate, strCreatedDate);
     }
 
     public static FusionBuilder builder() {
