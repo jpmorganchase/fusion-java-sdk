@@ -1,0 +1,114 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/test/"
+  },
+  "@id": "datasets/",
+  "description": "A list of available datasets (for access or download in one or more formats)",
+  "identifier": "datasets",
+  "resources": [
+    {
+      "category": [
+        "Category 1"
+      ],
+      "createdDate": "2022-02-05",
+      "coverageStartDate": "2022-02-05",
+      "coverageEndDate": "2023-03-08",
+      "description": "Sample dataset description 1",
+      "frequency": "Daily",
+      "identifier": "SD0001",
+      "isThirdPartyData": false,
+      "isInternalOnlyDataset": false,
+      "language": "English",
+      "maintainer": "Maintainer 1",
+      "modifiedDate": "2023-03-08",
+      "publisher": "Publisher 1",
+      "region": [
+        "North America"
+      ],
+      "source": [
+        "Source System 1"
+      ],
+      "subCategory": [
+        "Subcategory 1"
+      ],
+      "title": "Sample Dataset 1 | North America",
+      "tag": [
+        "Tag1"
+      ],
+      "isRestricted": false,
+      "isRawData": false,
+      "hasSample": false,
+      "@id": "SD0001/"
+    },
+    {
+      "category": [
+        "Category 2"
+      ],
+      "createdDate": "2022-02-06",
+      "coverageStartDate": "2022-02-06",
+      "coverageEndDate": "2023-03-09",
+      "description": "Sample dataset description 2",
+      "frequency": "Daily",
+      "identifier": "SD0002",
+      "isThirdPartyData": false,
+      "isInternalOnlyDataset": false,
+      "language": "English",
+      "maintainer": "Maintainer 2",
+      "modifiedDate": "2023-03-09",
+      "publisher": "Publisher 2",
+      "region": [
+        "North America"
+      ],
+      "source": [
+        "Source System 2"
+      ],
+      "subCategory": [
+        "Subcategory 2"
+      ],
+      "title": "Sample Dataset 2 | North America",
+      "tag": [
+        "Tag2"
+      ],
+      "isRestricted": false,
+      "isRawData": false,
+      "hasSample": false,
+      "@id": "SD0002/"
+    },
+    {
+      "category": [
+        "Category 3"
+      ],
+      "createdDate": "2022-02-07",
+      "coverageStartDate": "2022-02-07",
+      "coverageEndDate": "2023-03-10",
+      "description": "Sample dataset description 3",
+      "frequency": "Daily",
+      "identifier": "SD0003",
+      "isThirdPartyData": false,
+      "isInternalOnlyDataset": false,
+      "language": "English",
+      "maintainer": "Maintainer 3",
+      "modifiedDate": "2023-03-10",
+      "publisher": "Publisher 3",
+      "region": [
+        "North America"
+      ],
+      "source": [
+        "Source System 3"
+      ],
+      "subCategory": [
+        "Subcategory 3"
+      ],
+      "title": "Sample Dataset 3 | North America",
+      "tag": [
+        "Tag3"
+      ],
+      "isRestricted": false,
+      "isRawData": false,
+      "hasSample": false,
+      "@id": "SD0003/"
+    }
+  ],
+  "title": "Datasets"
+}
