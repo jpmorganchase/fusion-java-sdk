@@ -3,9 +3,9 @@ package com.jpmorganchase.fusion.credential;
 import com.jpmorganchase.fusion.http.Client;
 import com.jpmorganchase.fusion.http.HttpResponse;
 import com.jpmorganchase.fusion.http.JdkClient;
-import java.io.*;
 import java.lang.invoke.MethodHandles;
-import java.util.Calendar;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -66,15 +66,15 @@ public abstract class OAuthCredentials implements Credentials {
             this.bearerToken = oAuthServerResponse.getAccessToken();
 
             // Get the token expiry time
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(timeProvider.currentTimeMillis());
-            int seconds = oAuthServerResponse.getExpiresIn();
-            calendar.add(Calendar.SECOND, seconds - 30);
-            this.bearerTokenExpiry = calendar.getTimeInMillis();
+            Instant now = Instant.ofEpochMilli(timeProvider.currentTimeMillis());
+            Instant expiryTime = now.plusSeconds(oAuthServerResponse.getExpiresIn() - 30);
+            this.bearerTokenExpiry = expiryTime.toEpochMilli();
+
             tokenRefreshes++;
             logger.atInfo()
                     .setMessage("Token expires at: {}")
-                    .addArgument(calendar.getTime())
+                    // TODO: This wont necessarily be accurate for a non-standard TimeProvider implementation
+                    .addArgument(expiryTime.atZone(ZoneId.systemDefault()))
                     .log();
             logger.atInfo()
                     .setMessage("Number of token refreshes: {}")

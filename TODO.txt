@@ -12,41 +12,31 @@
                 6.5     Need stream based methods for the file interactions
                 9. Credential refactoring - concurrency etc
                         -- need to write tests first and then separate out the logic in FUsionAPIManagerTest that is really testing these classes
-
+                13. Review all exception handling (Runtime vs Checked)
+                22. Make sure all time based operations are using correct libraries
 
 
                 TODO
 
-                ==> 3. Refactor all the HTTP tests to remove duplication -- IN PROGRESS
-                        ON HOLD - is this refactoring actually making the code easier to read? It's reducing duplication, but .... (Compare GET which is refactored, to PUT or POST which is not)
-
-                6.6 Refactor the Fusion tests - too much duplication (but keep it simple and readable)
-
-                7. Save and loading of credentials (use GSON), do we want an interface for this that the one Credential type that needs it can use?
-                        -- Loading is done via the builder, saving to be added
-
-
                 12. Documentation
-
-                13. Review all exception handling (Runtime vs Checked)
-
-                14. E2E Integration Tests
-
                 15. Review all naming conventions
-
                 16. Builder validation and error handling - null values passed in etc
-
                 17. Add additional logging
-
-                18. Optional Micrometer support
-
-                19. Make Fusion closeable and cascade the calls down?
-
-                20. Sonatype Lift for security review?
-
                 21. Make sure we're using nio packages everywhere
 
-                22. Make sure all time based operations are using correct libraries
 
+                TODO LATER
+
+                3. Refactor all the HTTP tests to remove duplication -- IN PROGRESS
+                                        ON HOLD - is this refactoring actually making the code easier to read? It's reducing duplication, but .... (Compare GET which is refactored, to PUT or POST which is not)
+
+                                6.6 Refactor the Fusion tests - too much duplication (but keep it simple and readable)
+                14. E2E Integration Tests
                 23. Conversion to HTTPS-only (issues with Wiremock proxies for testing to be resolved, see temporary branch)
+                20. Sonatype Lift for security review?
+                19. Make Fusion closeable and cascade the calls down?
+                18. Optional Micrometer support
+                7. Save and loading of credentials (use GSON), do we want an interface for this that the one Credential type that needs it can use?
+                                        -- Loading is done via the builder, saving to be added
+
          */
