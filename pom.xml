@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.jpmorganchase.fusion</groupId>
+    <groupId>io.github.jpmorganchase.fusion</groupId>
     <artifactId>fusion-sdk</artifactId>
     <packaging>jar</packaging>
     <version>0.0.1-SNAPSHOT</version>
@@ -144,10 +144,10 @@
                 </dependencies>
                 <configuration>
                     <targetClasses>
-                        <param>com.jpmorganchase.fusion.*</param>
+                        <param>io.github.jpmorganchase.fusion.*</param>
                     </targetClasses>
                     <targetTests>
-                        <param>com.jpmorganchase.fusion.*</param>
+                        <param>io.github.jpmorganchase.fusion.*</param>
                     </targetTests>
                 </configuration>
             </plugin>
