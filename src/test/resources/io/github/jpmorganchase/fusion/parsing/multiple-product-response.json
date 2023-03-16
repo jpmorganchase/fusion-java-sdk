@@ -1,0 +1,108 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/test/"
+  },
+  "@id": "products/",
+  "description": "A list of available products",
+  "identifier": "products",
+  "resources": [
+    {
+      "category": [
+        "Category 1"
+      ],
+      "datasetCount": 1,
+      "deliveryChannel": [
+        "API"
+      ],
+      "description": "Sample data product 1",
+      "identifier": "SDP001",
+      "isActive": true,
+      "maintainer": [
+        "Maintainer 1"
+      ],
+      "publisher": "Publisher 1",
+      "region": [
+        "Global"
+      ],
+      "releaseDate": "2023-08-03",
+      "shortAbstract": "Sample data product 1 short abstract",
+      "status": "Available",
+      "subCategory": [
+        "Subcategory 1"
+      ],
+      "tag": [
+        "Tag1"
+      ],
+      "theme": "Theme1",
+      "title": "Sample Data Product 1 Title",
+      "isRestricted": true,
+      "@id": "SDP001/"
+    },
+    {
+      "category": [
+        "Category 2"
+      ],
+      "datasetCount": 2,
+      "deliveryChannel": [
+        "API"
+      ],
+      "description": "Sample data product 2",
+      "identifier": "SDP002",
+      "isActive": false,
+      "maintainer": [
+        "Maintainer 2"
+      ],
+      "publisher": "Publisher 2",
+      "region": [
+        "Global"
+      ],
+      "releaseDate": "2023-08-02",
+      "shortAbstract": "Sample data product 2 short abstract",
+      "status": "Available",
+      "subCategory": [
+        "Subcategory 2"
+      ],
+      "tag": [
+        "Tag2"
+      ],
+      "theme": "Theme2",
+      "title": "Sample Data Product 2 Title",
+      "isRestricted": true,
+      "@id": "SDP002/"
+    },
+    {
+      "category": [
+        "Category 3"
+      ],
+      "datasetCount": 3,
+      "deliveryChannel": [
+        "API"
+      ],
+      "description": "Sample data product 3",
+      "identifier": "SDP003",
+      "isActive": true,
+      "maintainer": [
+        "Maintainer 3"
+      ],
+      "publisher": "Publisher 3",
+      "region": [
+        "Global"
+      ],
+      "releaseDate": "2023-08-01",
+      "shortAbstract": "Sample data product 3 short abstract",
+      "status": "Available",
+      "subCategory": [
+        "Subcategory 3"
+      ],
+      "tag": [
+        "Tag3"
+      ],
+      "theme": "Theme3",
+      "title": "Sample Data Product 3 Title",
+      "isRestricted": false,
+      "@id": "SDP003/"
+    }
+  ],
+  "title": "Products"
+}

@@ -1,0 +1,12 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/"
+  },
+  "@id": "catalogs/",
+  "description": "A list of available catalogs",
+  "identifier": "catalogs",
+  "resources": [
+  ],
+  "title": "Catalogs"
+}

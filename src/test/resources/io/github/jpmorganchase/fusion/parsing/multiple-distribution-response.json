@@ -1,0 +1,28 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/test/datasets/SAMPLE_DATASET/datasetseries/20230307/"
+  },
+  "@id": "distributions/",
+  "description": "A list of available distributions",
+  "identifier": "distributions",
+  "resources": [
+    {
+      "description": "Snapshot data will be in a tabular, comma separated format.",
+      "fileExtension": ".csv",
+      "identifier": "csv",
+      "mediaType": "text/csv; header=present; charset=utf-8",
+      "title": "CSV",
+      "@id": "csv/"
+    },
+    {
+      "description": "Snapshot data will be in a parquet format.",
+      "fileExtension": ".parquet",
+      "identifier": "parquet",
+      "mediaType": "application/parquet; header=present",
+      "title": "Parquet",
+      "@id": "parquet/"
+    }
+  ],
+  "title": "Distributions"
+}

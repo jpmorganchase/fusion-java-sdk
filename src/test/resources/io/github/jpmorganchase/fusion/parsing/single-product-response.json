@@ -1,0 +1,44 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/test/"
+  },
+  "@id": "products/",
+  "description": "A list of available products",
+  "identifier": "products",
+  "resources": [
+    {
+      "category": [
+        "Category 1"
+      ],
+      "datasetCount": 1,
+      "deliveryChannel": [
+        "API"
+      ],
+      "description": "Sample data product 1",
+      "identifier": "SDP001",
+      "isActive": true,
+      "maintainer": [
+        "Maintainer 1"
+      ],
+      "publisher": "Publisher 1",
+      "region": [
+        "Global"
+      ],
+      "releaseDate": "2023-08-03",
+      "shortAbstract": "Sample data product 1 short abstract",
+      "status": "Available",
+      "subCategory": [
+        "Subcategory 1"
+      ],
+      "tag": [
+        "Tag1"
+      ],
+      "theme": "Theme1",
+      "title": "Sample Data Product 1 Title",
+      "isRestricted": true,
+      "@id": "SDP001/"
+    }
+  ],
+  "title": "Products"
+}
