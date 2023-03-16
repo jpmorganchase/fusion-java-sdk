@@ -18,6 +18,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -397,8 +398,8 @@ public class Fusion {
                 this.rootURL, catalogName, dataset, seriesMember, distribution);
         try {
             Files.createDirectories(Paths.get(path));
-        } catch (IOException e) {
-            throw new FusionException(String.format("Unable to save to target path %s", path));
+        } catch (InvalidPathException | IOException e) {
+            throw new FusionException(String.format("Unable to save to target path %s", path), e);
         }
         String filepath = String.format("%s/%s_%s_%s.%s", path, catalogName, dataset, seriesMember, distribution);
         this.api.callAPIFileDownload(url, filepath);

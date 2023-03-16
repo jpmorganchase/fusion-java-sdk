@@ -149,7 +149,17 @@
                     <targetTests>
                         <param>io.github.jpmorganchase.fusion.*</param>
                     </targetTests>
+                    <mutationThreshold>85</mutationThreshold>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>pitest</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>mutationCoverage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
