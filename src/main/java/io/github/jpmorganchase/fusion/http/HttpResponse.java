@@ -16,5 +16,4 @@ public class HttpResponse<T> {
     public boolean isError() {
         return statusCode >= 400;
     }
-    
 }

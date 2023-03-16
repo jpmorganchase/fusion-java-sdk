@@ -356,7 +356,6 @@ public class JdkClientTest {
                 new CloseTrackingByteArrayInputStream("sample post body".getBytes());
         HttpResponse<String> response = httpClient.put(API_URL, requestHeaders, requestBodyStream);
 
-
         verify(putRequestedFor(urlEqualTo(BASE_PATH))
                 .withRequestBody(WireMock.equalTo("sample post body"))
                 .withHeader("header1", WireMock.equalTo("value1")));
