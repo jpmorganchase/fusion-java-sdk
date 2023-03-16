@@ -59,6 +59,13 @@ public abstract class OAuthCredentials implements Credentials {
             requestHeaders.put("Accept", "application/json");
 
             HttpResponse<String> response = httpClient.post(authServerUrl, requestHeaders, getPostBodyContent());
+            if (response.isError()) {
+                throw new OAuthException(
+                        String.format(
+                                "Error response received from OAuth server with status code %s",
+                                response.getStatusCode()),
+                        response.getBody());
+            }
 
             // Get the bearer token
             OAuthServerResponse oAuthServerResponse = OAuthServerResponse.fromJson(response.getBody());

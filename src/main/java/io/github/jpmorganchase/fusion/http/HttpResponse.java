@@ -12,4 +12,9 @@ public class HttpResponse<T> {
     int statusCode;
     Map<String, List<String>> headers;
     T body;
+
+    public boolean isError() {
+        return statusCode >= 400;
+    }
+    
 }

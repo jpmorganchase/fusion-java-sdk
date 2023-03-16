@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -75,6 +76,7 @@ public class JdkClientTest {
         getMethodStub();
         HttpResponse<String> response = executeGetRequest(NO_REQUEST_HEADERS);
         validateGetRequest(response);
+        assertThat(response.isError(), is(false));
     }
 
     private static void getMethodStub() {
@@ -151,6 +153,7 @@ public class JdkClientTest {
         HttpResponse<String> response = executeGetRequest(SINGLE_REQUEST_HEADER);
 
         validateGetRequest(response, SINGLE_REQUEST_HEADER);
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -160,6 +163,7 @@ public class JdkClientTest {
         HttpResponse<String> response = executeGetRequest(MULTIPLE_REQUEST_HEADERS);
 
         validateGetRequest(response, MULTIPLE_REQUEST_HEADERS);
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -169,6 +173,7 @@ public class JdkClientTest {
         HttpResponse<String> response = executeGetRequest(Collections.emptyMap());
 
         validateGetRequest(response, NO_REQUEST_HEADERS, "", HttpURLConnection.HTTP_NOT_FOUND);
+        assertThat(response.isError(), is(true));
     }
 
     @Test
@@ -178,6 +183,7 @@ public class JdkClientTest {
         HttpResponse<String> response = executeGetRequest(Collections.emptyMap());
 
         validateGetRequest(response, NO_REQUEST_HEADERS, "", HttpURLConnection.HTTP_INTERNAL_ERROR);
+        assertThat(response.isError(), is(true));
     }
 
     @Test
@@ -189,6 +195,7 @@ public class JdkClientTest {
 
         validateGetRequest(
                 response, NO_REQUEST_HEADERS, SAMPLE_RESPONSE_BODY, HttpURLConnection.HTTP_OK, SINGLE_RESPONSE_HEADER);
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -201,6 +208,7 @@ public class JdkClientTest {
 
         wiremockProxy.verify(getRequestedFor(urlEqualTo(BASE_PATH)));
         validateGetRequest(response);
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -213,6 +221,7 @@ public class JdkClientTest {
         verify(postRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -229,6 +238,7 @@ public class JdkClientTest {
                 .withHeader("header1", WireMock.equalTo("value1")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -249,6 +259,7 @@ public class JdkClientTest {
                 .withHeader("header3", WireMock.equalTo("value3")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -260,6 +271,7 @@ public class JdkClientTest {
         verify(postRequestedFor(urlEqualTo(BASE_PATH)));
         assertThat(response.getStatusCode(), is(equalTo(404)));
         assertThat(response.getBody(), is(emptyString()));
+        assertThat(response.isError(), is(true));
     }
 
     @Test
@@ -271,6 +283,7 @@ public class JdkClientTest {
         verify(postRequestedFor(urlEqualTo(BASE_PATH)));
         assertThat(response.getStatusCode(), is(equalTo(500)));
         assertThat(response.getBody(), is(emptyString()));
+        assertThat(response.isError(), is(true));
     }
 
     @Test
@@ -285,6 +298,7 @@ public class JdkClientTest {
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
         assertThat(response.getHeaders().get("test-header-1").get(0), is(equalTo("header-1-value")));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -299,6 +313,7 @@ public class JdkClientTest {
         verify(postRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -312,6 +327,7 @@ public class JdkClientTest {
         verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -325,6 +341,7 @@ public class JdkClientTest {
         verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -334,14 +351,19 @@ public class JdkClientTest {
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("header1", "value1");
-        HttpResponse<String> response =
-                httpClient.put(API_URL, requestHeaders, new ByteArrayInputStream("sample post body".getBytes()));
+
+        CloseTrackingByteArrayInputStream requestBodyStream =
+                new CloseTrackingByteArrayInputStream("sample post body".getBytes());
+        HttpResponse<String> response = httpClient.put(API_URL, requestHeaders, requestBodyStream);
+
 
         verify(putRequestedFor(urlEqualTo(BASE_PATH))
                 .withRequestBody(WireMock.equalTo("sample post body"))
                 .withHeader("header1", WireMock.equalTo("value1")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
+        assertThat(requestBodyStream.isClosed(), is(true));
     }
 
     @Test
@@ -363,6 +385,7 @@ public class JdkClientTest {
                 .withHeader("header3", WireMock.equalTo("value3")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -375,6 +398,7 @@ public class JdkClientTest {
         verify(putRequestedFor(urlEqualTo(BASE_PATH)));
         assertThat(response.getStatusCode(), is(equalTo(404)));
         assertThat(response.getBody(), is(emptyString()));
+        assertThat(response.isError(), is(true));
     }
 
     @Test
@@ -387,6 +411,7 @@ public class JdkClientTest {
         verify(putRequestedFor(urlEqualTo(BASE_PATH)));
         assertThat(response.getStatusCode(), is(equalTo(500)));
         assertThat(response.getBody(), is(emptyString()));
+        assertThat(response.isError(), is(true));
     }
 
     @Test
@@ -402,6 +427,7 @@ public class JdkClientTest {
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
         assertThat(response.getHeaders().get("test-header-1").get(0), is(equalTo("header-1-value")));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -417,6 +443,7 @@ public class JdkClientTest {
         verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
         assertThat(response.getStatusCode(), is(equalTo(200)));
         assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -461,6 +488,7 @@ public class JdkClientTest {
                 .lines()
                 .collect(Collectors.joining("\n"));
         assertThat(responseText, is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
     }
 
     @Test
@@ -486,5 +514,26 @@ public class JdkClientTest {
                 .lines()
                 .collect(Collectors.joining("\n"));
         assertThat(responseText, is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
+    }
+
+    // Wrapper for ByteArrayInputStream allowing us to check that the close method got called when expected
+    private static final class CloseTrackingByteArrayInputStream extends ByteArrayInputStream {
+
+        private final AtomicBoolean isClosed = new AtomicBoolean(false);
+
+        public CloseTrackingByteArrayInputStream(byte[] bytes) {
+            super(bytes);
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            isClosed.set(true);
+        }
+
+        public boolean isClosed() {
+            return isClosed.get();
+        }
     }
 }

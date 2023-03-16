@@ -3,6 +3,7 @@ package io.github.jpmorganchase.fusion;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import io.github.jpmorganchase.fusion.api.APIManager;
@@ -10,11 +11,10 @@ import io.github.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.InvalidPathException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -188,6 +188,21 @@ public class FusionTest {
     }
 
     @Test
+    public void testFileDownloadInteractionWithDefaultPath() throws Exception {
+        Fusion f = stubFusion();
+
+        doNothing()
+                .when(apiManager)
+                .callAPIFileDownload(
+                        String.format(
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                                Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
+                        String.format("%s/%s_%s_%s.%s", "downloads", "common", "sample_dataset", "20230308", "csv"));
+
+        f.download("common", "sample_dataset", "20230308", "csv");
+    }
+
+    @Test
     public void testFileDownloadAsStreamInteraction() throws Exception {
         Fusion f = stubFusion();
 
@@ -288,5 +303,53 @@ public class FusionTest {
 
         Map<String, Map<String, Object>> actualResponse = f.catalogResources("common");
         assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testDatasetInteractionUntyped() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, Map<String, Object>> stubResponse = new HashMap<>();
+        Map<String, Object> dataset1 = new HashMap<>();
+        dataset1.put("dataset1", Dataset.builder().identifier("dataset1").build());
+        stubResponse.put("dataset1", dataset1);
+
+        when(apiManager.callAPI(String.format(
+                        "%1scatalogs/%2s/datasets/%3s", Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset")))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
+
+        Map<String, Map<String, Object>> actualResponse = f.datasetResources("sample_dataset");
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testDatasetMemberInteractionUntyped() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, Map<String, Object>> stubResponse = new HashMap<>();
+        Map<String, Object> datasetMember1 = new HashMap<>();
+        datasetMember1.put(
+                "datasetMember1", Dataset.builder().identifier("datasetMember1").build());
+        stubResponse.put("datasetMember1", datasetMember1);
+
+        when(apiManager.callAPI(String.format(
+                        "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s",
+                        Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "1")))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
+
+        Map<String, Map<String, Object>> actualResponse = f.datasetMemberResources("sample_dataset", "1");
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void fileDownloadWithInvalidPathThrowsFusionException() throws Exception {
+        Fusion f = stubFusion();
+
+        FusionException thrown = assertThrows(FusionException.class, () -> {
+            f.download("common", "sample", "1", "csv", "\0");
+        });
+        assertThat(thrown.getCause().getClass(), is(equalTo(InvalidPathException.class)));
     }
 }

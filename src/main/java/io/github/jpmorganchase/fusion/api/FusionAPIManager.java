@@ -191,11 +191,9 @@ public class FusionAPIManager implements APIManager {
         return response.getStatusCode();
     }
 
-    // TODO: Clean up error handling
     private <T> void checkResponseStatus(HttpResponse<T> response) throws APICallException {
-        int httpCode = response.getStatusCode();
-        if (httpCode != 200) {
-            throw new APICallException(httpCode);
+        if (response.isError()) {
+            throw new APICallException(response.getStatusCode());
         }
     }
 }
