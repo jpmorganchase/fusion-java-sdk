@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.http;
 
 import java.io.*;
+import java.lang.invoke.MethodHandles;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
@@ -8,9 +9,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JdkClient implements Client {
 
+    private static final Logger logger =
+            LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     public static final String METHOD_GET = "GET";
     public static final String METHOD_POST = "POST";
     public static final String METHOD_PUT = "PUT";
@@ -73,17 +78,20 @@ public class JdkClient implements Client {
 
         try {
             int httpCode;
+            logRequest(connection, method);
             if (body != null) {
                 httpCode = executeRequestWithBody(connection, method, body);
             } else {
                 httpCode = executeRequest(connection, method);
             }
 
-            return HttpResponse.<T>builder()
+            HttpResponse<T> response = HttpResponse.<T>builder()
                     .body(resultMapper.apply(connection))
                     .headers(connection.getHeaderFields())
                     .statusCode(httpCode)
                     .build();
+            logger.atDebug().setMessage("Response: {}").addArgument(response).log();
+            return response;
         } finally {
             if (closeConnection) {
                 connection.disconnect();
@@ -95,7 +103,7 @@ public class JdkClient implements Client {
         try {
             return new URL(path);
         } catch (MalformedURLException e) {
-            throw new ClientException("Malformed URL path received", e);
+            throw new ClientException(String.format("Malformed URL path received: %s", path), e);
         }
     }
 
@@ -161,5 +169,13 @@ public class JdkClient implements Client {
         } catch (IOException e) {
             throw new ClientException("Failed to send request data", e);
         }
+    }
+
+    private void logRequest(HttpURLConnection connection, String method) {
+        logger.atDebug()
+                .setMessage("Executing {} request for URL: {}")
+                .addArgument(method)
+                .addArgument(connection.getURL())
+                .log();
     }
 }
