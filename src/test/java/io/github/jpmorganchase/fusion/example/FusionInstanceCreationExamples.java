@@ -1,7 +1,6 @@
 package io.github.jpmorganchase.fusion.example;
 
 import io.github.jpmorganchase.fusion.Fusion;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
