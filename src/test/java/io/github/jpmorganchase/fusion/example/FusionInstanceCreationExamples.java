@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
  * e.g. in the README.md for the repo. Having these as tests ensures they will not go out of date
  * as the code changes. If you make changes to this class, please check the documentation still
  * looks correct
+ *
+ * If there's a better way to do this we should discuss. This is a bit clunky
  */
 public class FusionInstanceCreationExamples {
 
@@ -23,7 +25,9 @@ public class FusionInstanceCreationExamples {
 
     @Test
     void createWithBearerToken() {
-        Fusion fusion = Fusion.builder().bearerToken(BEARER_TOKEN).build();
+        Fusion fusion = Fusion.builder()
+                .bearerToken(BEARER_TOKEN)
+                .build();
     }
 
     @Test
