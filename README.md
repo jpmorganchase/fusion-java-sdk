@@ -34,15 +34,32 @@ import io.github.jpmorganchase.fusion.Fusion;
 
 #### Creating the Fusion object
 
-Once you have the dependency added to your project and imports configured, you will need an instance of the Fusion class to interact with the API. This will be the primary way to use Fusion from your own code. To create an instance, use the builder from the class. Examples below:
+Once you have the dependency added to your project and imports configured, you will need an instance of the Fusion class to interact with the API. This will be the primary way to use Fusion from your own code. To create an instance, use the builder from the class. Examples below show different ways to intialise the Fusion object depending on your authentication mechanism.
 
-https://github.com/jpmorganchase/fusion-java-sdk/blob/91e72612ddd499009841b83951f5c9eb7ce58941/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L26
+##### With a pre-existing bearer token
 
-2. Example with credential file
-3. Example with embedded credential
-etc
+https://github.com/jpmorganchase/fusion-java-sdk/blob/91e72612ddd499009841b83951f5c9eb7ce58941/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L28-30
 
-From there you can interact with the Fusion object to retrieve metadata or download distribution files for any datasets that you need.
+Here _BEARER_TOKEN_ is the String value of a bearer token you have retrieved which provides access to the Fusion API. You can use this mechanism in cases where you already have a means to retrieve the token and would prefer to manage that within your application than having the SDK manage that on your behalf. 
+
+#### With an OAUth client ID and secret
+
+https://github.com/jpmorganchase/fusion-java-sdk/blob/317b6222f722f10e5c89d4bdde62ba923a9a3c2a/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L35-L37
+
+This will configure the SDK to retrieve a bearer token from an OAuth server using the supplied parameters:
+
+* _CLIENT_ID_ - A valid OAuth client identifier
+* _CLIENT_SECRET_ - A valid OAuth client secret
+* _RESOURCE_ - The OAUth audience
+* _AUTH_SERVER_URL_ - URL for the OAuth authentication server
+
+When configured in this way, the SDK will retrieve the token from the OAuth server prior to the first call you make to Fusion. On each subsequent call the same token will be re-used until it is close to expiry, at which point the SDK will retrieve a new token. Use this option if you want the SDK to manage the tokens on your behalf.
+
+#### Loading the OAuth configuration from a file
+
+#### Using the SDK
+
+ONce you have initialised the Fusion object, you can interact with it to retrieve metadata or download distribution files for any datasets that you need.
 
 Examples:
 
