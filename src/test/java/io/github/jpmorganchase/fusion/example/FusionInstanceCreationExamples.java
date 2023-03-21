@@ -25,9 +25,7 @@ public class FusionInstanceCreationExamples {
 
     @Test
     void createWithBearerToken() {
-        Fusion fusion = Fusion.builder()
-                .bearerToken(BEARER_TOKEN)
-                .build();
+        Fusion fusion = Fusion.builder().bearerToken(BEARER_TOKEN).build();
     }
 
     @Test
@@ -40,8 +38,6 @@ public class FusionInstanceCreationExamples {
     @Test
     @Disabled("Disabling temporarily")
     void loadCredentialsFromFile() {
-        Fusion fusion = Fusion.builder()
-                .credentialFile(CREDENTIAL_FILE_PATH)
-                .build();
+        Fusion fusion = Fusion.builder().credentialFile(CREDENTIAL_FILE_PATH).build();
     }
 }
