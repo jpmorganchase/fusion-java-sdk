@@ -40,6 +40,8 @@ public class FusionInstanceCreationExamples {
     @Test
     @Disabled("Disabling temporarily")
     void loadCredentialsFromFile() {
-        Fusion fusion = Fusion.builder().credentialFile(CREDENTIAL_FILE_PATH).build();
+        Fusion fusion = Fusion.builder()
+                .credentialFile(CREDENTIAL_FILE_PATH)
+                .build();
     }
 }
