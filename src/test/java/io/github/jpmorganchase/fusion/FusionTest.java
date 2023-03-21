@@ -26,6 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class FusionTest {
 
+    private static final String TMP_PATH = System.getProperty("java.io.tmpdir");
+
     @Mock
     private APIManager apiManager;
 
@@ -181,9 +183,9 @@ public class FusionTest {
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                                 Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
-                        String.format("%s/%s_%s_%s.%s", "/tmp", "common", "sample_dataset", "20230308", "csv"));
+                        String.format("%s/%s_%s_%s.%s", TMP_PATH, "common", "sample_dataset", "20230308", "csv"));
 
-        f.download("common", "sample_dataset", "20230308", "csv", "/tmp");
+        f.download("common", "sample_dataset", "20230308", "csv", TMP_PATH);
     }
 
     @Test
