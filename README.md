@@ -42,7 +42,7 @@ https://github.com/jpmorganchase/fusion-java-sdk/blob/1273ab6a7ebb8ab2ab5f5a3143
 
 Here _BEARER_TOKEN_ is the String value of a bearer token you have retrieved which provides access to the Fusion API. You can use this mechanism in cases where you already have a means to retrieve the token and would prefer to manage that within your application than having the SDK manage that on your behalf. 
 
-#### With an OAUth client ID and secret
+##### With an OAUth client ID and secret
 
 https://github.com/jpmorganchase/fusion-java-sdk/blob/1273ab6a7ebb8ab2ab5f5a3143d095a316ac7d58/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L35-L37
 
@@ -55,13 +55,37 @@ This will configure the SDK to retrieve a bearer token from an OAuth server usin
 
 When configured in this way, the SDK will retrieve the token from the OAuth server prior to the first call you make to Fusion. On each subsequent call the same token will be re-used until it is close to expiry, at which point the SDK will retrieve a new token. Use this option if you want the SDK to manage the tokens on your behalf.
 
-#### Loading the OAuth configuration from a file
+##### Loading the OAuth configuration from a file
+
+Insert code block
+
+This will configure the SDK to retrieve a bearer token from an OAuth server using configuration details stored in a file at the supplied path _CREDENTIAL_FILE_PATH_
+
+Configuration files are JSON in the following format:
+
+```json
+{
+  "resource": "JPMC:URI:RS-12345-App-ENV",
+  "client_secret": "aClientSecret",
+  "auth_url": "https://authserver.domain.com/as/token.oauth2",
+  "client_id": "aClientId"
+}
+```
+
+Where:
+
+* _resource_ - The OAUth audience
+* _client_secret_ - A valid OAuth client secret
+* _auth_url_ - URL for the OAuth authentication server
+* _client_id_ - A valid OAuth client identifier
+
+Similar to the above option, this will configure the SDK to manage the tokens on your behalf. Use this option is you want the OAuth configuration to be stored on the local filesystem.
 
 #### Using the SDK
 
 ONce you have initialised the Fusion object, you can interact with it to retrieve metadata or download distribution files for any datasets that you need.
 
-Examples:
+Examples (to follow):
 
 1. Download some metadata
 2. Download as a file
