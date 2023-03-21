@@ -36,12 +36,6 @@ import io.github.jpmorganchase.fusion.Fusion;
 
 Once you have the dependency added to your project and imports configured, you will need an instance of the Fusion class to interact with the API. This will be the primary way to use Fusion from your own code. To create an instance, use the builder from the class. Examples below show different ways to intialise the Fusion object depending on your authentication mechanism.
 
-##### With a pre-existing bearer token
-
-https://github.com/jpmorganchase/fusion-java-sdk/blob/3300f986bb55bf70ed0e36953c9834b8caa9960d/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L28-L30
-
-Here _BEARER_TOKEN_ is the String value of a bearer token you have retrieved which provides access to the Fusion API. You can use this mechanism in cases where you already have a means to retrieve the token and would prefer to manage that within your application than having the SDK manage that on your behalf. 
-
 ##### With an OAUth client ID and secret
 
 https://github.com/jpmorganchase/fusion-java-sdk/blob/3300f986bb55bf70ed0e36953c9834b8caa9960d/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L35-L37
@@ -81,12 +75,29 @@ Where:
 
 Similar to the above option, this will configure the SDK to manage the tokens on your behalf. Use this option is you want the OAuth configuration to be stored on the local filesystem.
 
+
+##### With a pre-existing bearer token
+
+https://github.com/jpmorganchase/fusion-java-sdk/blob/3300f986bb55bf70ed0e36953c9834b8caa9960d/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L28-L30
+
+Here _BEARER_TOKEN_ is the String value of a bearer token you have retrieved which provides access to the Fusion API. You can use this mechanism in cases where you already have a means to retrieve the token and would prefer to manage that within your application than having the SDK manage that on your behalf.
+
+Note than when your token has expired, you will need to pass a new token to the Fusion object by calling _updateBearerToken_, passing the new value. 
+
 #### Using the SDK
 
-ONce you have initialised the Fusion object, you can interact with it to retrieve metadata or download distribution files for any datasets that you need.
+Once you have initialised the Fusion object, you can interact with it to retrieve metadata or download distribution files for any datasets that you need.
 
 Examples (to follow):
 
 1. Download some metadata
 2. Download as a file
 3. Download as a stream
+
+#### Logging
+
+The Fusion SDK makes log calls to the SLF4J API. If you wish to see the logging you must configure an SLF4J implementation for your application. See the [SLF4J manual](https://www.slf4j.org/manual.html#swapping) for details.
+
+#### Exception Handling
+
+All exceptions thrown from calls to the Fusion object are runtime exceptions. These are documented in the Javadoc for the class itself. Runtime exceptions are used in place of checked exception in order to provide flexibility to users to handle exceptions within the most appropriate layer of your application, without requiring catching, wrapping and rethrowing.
