@@ -279,7 +279,7 @@ public class FusionTest {
         Map<String, Catalog> stubResponse = new HashMap<>();
         stubResponse.put("first", Catalog.builder().identifier("catalog1").build());
 
-        when(apiManager.callAPI(String.format("%1scatalogs/", Fusion.DEFAULT_ROOT_URL)))
+        when(apiManager.callAPI(String.format("%1scatalogs", Fusion.DEFAULT_ROOT_URL)))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseCatalogResponse("{\"key\":value}")).thenReturn(stubResponse);
 

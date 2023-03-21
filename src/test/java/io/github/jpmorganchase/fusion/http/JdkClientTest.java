@@ -469,7 +469,7 @@ public class JdkClientTest {
                 ClientException.class,
                 () -> httpClient.post("not/a/valid/url", Collections.emptyMap(), "test"),
                 "Expected ClientException but none thrown");
-        assertThat(thrown.getMessage(), is(equalTo("Malformed URL path received")));
+        assertThat(thrown.getMessage(), is(equalTo("Malformed URL path received: not/a/valid/url")));
     }
 
     @Test

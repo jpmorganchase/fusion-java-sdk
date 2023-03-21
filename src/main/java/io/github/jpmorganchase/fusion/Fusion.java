@@ -112,7 +112,7 @@ public class Fusion {
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Catalog> listCatalogs() {
-        String json = this.api.callAPI(rootURL.concat("catalogs/"));
+        String json = this.api.callAPI(rootURL.concat("catalogs"));
         return responseParser.parseCatalogResponse(json);
     }
 
