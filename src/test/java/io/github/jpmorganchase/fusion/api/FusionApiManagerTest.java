@@ -9,184 +9,289 @@ import static org.mockito.Mockito.*;
 import com.google.common.collect.Lists;
 import io.github.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.credential.Credentials;
+import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
+import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class FusionApiManagerTest {
 
-    private Credentials credentials;
+    private Credentials credentials = new BearerTokenCredentials("my-token");
     private FusionAPIManager fusionAPIManager;
 
     @Mock
     private Client client;
 
-    private static final String tokenJson =
-            "{\"access_token\":\"my-oauth-generated-token\",\"token_type\":\"bearer\",\"expires_in\":3600}";
+    @Mock
+    private DigestProducer digestProducer;
 
-    @BeforeEach
-    void setUp() {
-        credentials = new BearerTokenCredentials("my-token");
-        fusionAPIManager = new FusionAPIManager(credentials, client);
-    }
+    private String apiPath;
+
+    private Map<String, String> requestHeaders = new HashMap<>();
+
+    private DigestDescriptor digestDescriptor;
+
+    private byte[] uploadBody;
+
+    private int httpStatus;
+
+    private String fileName;
+
+    private byte[] downloadBody;
+
+    private Map<String, List<String>> responseHeaders = new HashMap<>();
+
+    private InputStream responseStream;
+
+    private File tempOutputFile;
+
+    private APICallException thrown;
+
+    private String responseBody;
+
+    private String actualResponse;
 
     @Test
-    void successfulGetCall() throws Exception {
-        Map<String, String> expectedHeaders = new HashMap<>();
-        expectedHeaders.put("Authorization", "Bearer my-token");
-        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
-                .statusCode(200)
-                .body("sample response")
-                .build();
-        when(client.get("http://localhost:8080/test", expectedHeaders)).thenReturn(expectedHttpResponse);
-
-        String response = fusionAPIManager.callAPI("http://localhost:8080/test");
-
-        assertThat(response, is(equalTo("sample response")));
+    void successfulGetCall() {
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenResponseBody("sample response");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenCallToClientToGetIsSuccessful();
+        WhenFusionApiManagerIsCalledToGet();
+        thenTheResponseBodyShouldMatchExpected();
     }
 
     @Test
     void failureForResourceNotFound() throws Exception {
-        Map<String, String> expectedHeaders = new HashMap<>();
-        expectedHeaders.put("Authorization", "Bearer my-token");
-        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
-                .statusCode(HttpURLConnection.HTTP_NOT_FOUND)
-                .build();
-        when(client.get("http://localhost:8080/test", expectedHeaders)).thenReturn(expectedHttpResponse);
-
-        APICallException thrown = assertThrows(
-                APICallException.class,
-                () -> fusionAPIManager.callAPI("http://localhost:8080/test"),
-                "Expected APICallException but none thrown");
-
-        assertThat(thrown.getMessage(), is(equalTo("The requested resource does not exist.")));
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenCallToClientToGetReturnsNotFound();
+        whenFusionApiManagerIsCalledThenExceptionShouldBeThrown();
+        thenExceptionMessageShouldMatchExpected("The requested resource does not exist.");
     }
 
     @Test
     void successfulFileDownload() throws Exception {
-        fusionAPIManager = new FusionAPIManager(credentials, client);
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenTempFile("fusion-test-", ".csv");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenDownloadBody("A,B,C\n1,2,3");
+        givenResponseHeader("Content-Type", "text/csv");
+        givenResponseHeader("Content-Disposition", "attachment; filename=test-testFile.csv");
+        givenCallToClientToGetInputStreamIsSuccessfully();
+        whenFusionApiManagerIsCalledToDownloadFileToPath();
+        thenTheFileContentsShouldMatchExpected();
+        finallyDeleteTempFile();
+    }
 
-        File tempOutputFile = File.createTempFile("fusion-test-", ".csv");
+    @Test
+    void successfulFileDownloadAsStream() throws Exception {
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenDownloadBody("A,B,C\n1,2,3");
+        givenResponseHeader("Content-Type", "text/csv");
+        givenResponseHeader("Content-Disposition", "attachment; filename=test-testFile.csv");
+        givenCallToClientToGetInputStreamIsSuccessfully();
+        whenFusionApiManagerIsCalledToDownloadFile();
+        thenTheDownloadBodyShouldMatchExpected();
+    }
 
-        Map<String, String> expectedRequestHeaders = new HashMap<>();
-        expectedRequestHeaders.put("Authorization", "Bearer my-token");
+    @Test
+    void successfulFileUpload() {
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenUploadFile("upload-test.csv");
+        givenUploadBody("A,B,C\n1,2,3\n4,5,6\n7,8,9");
+        givenRequestHeader("accept", "*/*");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Content-Type", "application/octet-stream");
+        givenRequestHeader("x-jpmc-distribution-from-date", "2023-03-01");
+        givenRequestHeader("x-jpmc-distribution-to-date", "2023-03-02");
+        givenRequestHeader("x-jpmc-distribution-created-date", "2023-03-03");
+        givenRequestHeader("Digest", "SHA-256=k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=");
+        givenRequestHeader("Content-Length", "23");
+        givenCallToProduceDigestReturnsDigestDescriptor("k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=");
+        givenCallToClientToUploadIsSuccessful();
+        whenFusionApiManagerIsCalledToUploadFileFromPath("2023-03-01", "2023-03-02", "2023-03-03");
+        thenHttpStatusShouldIndicateSuccess();
+    }
 
-        byte[] serverResponse = new String("A,B,C\n1,2,3").getBytes();
-        Map<String, List<String>> responseHeaders = new HashMap<>();
-        responseHeaders.put("Content-Type", Lists.newArrayList("text/csv"));
-        responseHeaders.put("Content-Disposition", Lists.newArrayList("attachment; filename=test-testFile.csv"));
-        HttpResponse<InputStream> expectedHttpResponse = HttpResponse.<InputStream>builder()
+    @Test
+    void successfulFileUploadWithStream() {
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenUploadBody("A,B,C\n1,2,3\n4,5,6\n7,8,9");
+        givenRequestHeader("accept", "*/*");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Content-Type", "application/octet-stream");
+        givenRequestHeader("x-jpmc-distribution-from-date", "2023-03-01");
+        givenRequestHeader("x-jpmc-distribution-to-date", "2023-03-02");
+        givenRequestHeader("x-jpmc-distribution-created-date", "2023-03-03");
+        givenRequestHeader("Digest", "SHA-256=k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=");
+        givenRequestHeader("Content-Length", "23");
+        givenCallToProduceDigestReturnsDigestDescriptor("k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=");
+        givenCallToClientToUploadIsSuccessful();
+        whenFusionApiManagerIsCalledToUploadFileFromStream("2023-03-01", "2023-03-02", "2023-03-03");
+        thenHttpStatusShouldIndicateSuccess();
+    }
+
+    private void thenTheResponseBodyShouldMatchExpected() {
+        assertThat(actualResponse, is(equalTo(responseBody)));
+    }
+
+    private void WhenFusionApiManagerIsCalledToGet() {
+        actualResponse = fusionAPIManager.callAPI(apiPath);
+    }
+
+    private void givenResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    private void givenCallToClientToGetIsSuccessful() {
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
                 .statusCode(200)
-                .body(new ByteArrayInputStream(serverResponse))
-                .headers(responseHeaders)
+                .body(responseBody)
                 .build();
-        when(client.getInputStream("http://localhost:8080/test", expectedRequestHeaders))
-                .thenReturn(expectedHttpResponse);
+        when(client.get(apiPath, requestHeaders)).thenReturn(expectedHttpResponse);
+    }
 
-        fusionAPIManager.callAPIFileDownload("http://localhost:8080/test", tempOutputFile.getAbsolutePath());
+    private void thenExceptionMessageShouldMatchExpected(String message) {
+        assertThat(thrown.getMessage(), is(equalTo(message)));
+    }
 
+    private void whenFusionApiManagerIsCalledThenExceptionShouldBeThrown() {
+        thrown = assertThrows(
+                APICallException.class,
+                () -> fusionAPIManager.callAPI(apiPath),
+                "Expected APICallException but none thrown");
+    }
+
+    private void givenCallToClientToGetReturnsNotFound() {
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                .statusCode(HttpURLConnection.HTTP_NOT_FOUND)
+                .build();
+        when(client.get(apiPath, requestHeaders)).thenReturn(expectedHttpResponse);
+    }
+
+    private void finallyDeleteTempFile() {
+        tempOutputFile.deleteOnExit();
+    }
+
+    private void thenTheFileContentsShouldMatchExpected() throws Exception {
         byte[] outputBytes = new byte[(int) tempOutputFile.length()];
         try (FileInputStream fis = new FileInputStream(tempOutputFile)) {
             fis.read(outputBytes);
         }
 
-        assertThat(outputBytes, is(equalTo(serverResponse)));
-        tempOutputFile.deleteOnExit();
+        assertThat(outputBytes, is(equalTo(downloadBody)));
     }
 
-    @Test
-    void successfulFileDownloadAsStream() throws Exception {
-        fusionAPIManager = new FusionAPIManager(credentials, client);
+    private void whenFusionApiManagerIsCalledToDownloadFileToPath() {
+        fusionAPIManager.callAPIFileDownload(apiPath, tempOutputFile.getAbsolutePath());
+    }
 
-        Map<String, String> expectedRequestHeaders = new HashMap<>();
-        expectedRequestHeaders.put("Authorization", "Bearer my-token");
+    private void givenTempFile(String prefix, String suffix) throws Exception {
+        tempOutputFile = File.createTempFile(prefix, suffix);
+    }
 
-        byte[] serverResponse = new String("A,B,C\n1,2,3").getBytes();
-        Map<String, List<String>> responseHeaders = new HashMap<>();
-        responseHeaders.put("Content-Type", Lists.newArrayList("text/csv"));
-        responseHeaders.put("Content-Disposition", Lists.newArrayList("attachment; filename=test-testFile.csv"));
-        HttpResponse<InputStream> expectedHttpResponse = HttpResponse.<InputStream>builder()
-                .statusCode(200)
-                .body(new ByteArrayInputStream(serverResponse))
-                .headers(responseHeaders)
-                .build();
-        when(client.getInputStream("http://localhost:8080/test", expectedRequestHeaders))
-                .thenReturn(expectedHttpResponse);
-
-        InputStream responseStream = fusionAPIManager.callAPIFileDownload("http://localhost:8080/test");
-
-        byte[] outputBytes = new byte[(int) serverResponse.length];
+    private void thenTheDownloadBodyShouldMatchExpected() throws Exception {
+        byte[] outputBytes = new byte[(int) downloadBody.length];
         responseStream.read(outputBytes);
 
-        assertThat(outputBytes, is(equalTo(serverResponse)));
+        assertThat(outputBytes, is(equalTo(downloadBody)));
     }
 
-    @Test
-    void successfulFileUpload() throws Exception {
-        fusionAPIManager = new FusionAPIManager(credentials, client);
-
-        Map<String, String> expectedRequestHeaders = new HashMap<>();
-        expectedRequestHeaders.put("accept", "*/*");
-        expectedRequestHeaders.put("Authorization", "Bearer my-token");
-        expectedRequestHeaders.put("Content-Type", "application/octet-stream");
-        expectedRequestHeaders.put("x-jpmc-distribution-from-date", "2023-03-01");
-        expectedRequestHeaders.put("x-jpmc-distribution-to-date", "2023-03-02");
-        expectedRequestHeaders.put("x-jpmc-distribution-created-date", "2023-03-03");
-        expectedRequestHeaders.put("Digest", "md5=SpmtmsY7xMV5dSZdQaLnpA==");
-        expectedRequestHeaders.put("Content-Length", "23");
-
-        when(client.put(any(), any(), any()))
-                .thenReturn(HttpResponse.<String>builder().statusCode(200).build());
-        // TODO: Now we need to validate the stub properly
-        // new ByteArrayInputStream("A,B,C\n1,2,3\n4,5,6\n7,8,9".getBytes())
-
-        fusionAPIManager.callAPIFileUpload(
-                "http://localhost:8080/test",
-                getPathFromResource("upload-test.csv"),
-                "2023-03-01",
-                "2023-03-02",
-                "2023-03-03");
+    private void whenFusionApiManagerIsCalledToDownloadFile() {
+        responseStream = fusionAPIManager.callAPIFileDownload(apiPath);
     }
 
-    @Test
-    void successfulFileUploadWithStream() throws Exception {
-        fusionAPIManager = new FusionAPIManager(credentials, client);
+    private void givenCallToClientToGetInputStreamIsSuccessfully() {
+        HttpResponse<InputStream> expectedHttpResponse = HttpResponse.<InputStream>builder()
+                .statusCode(200)
+                .body(new ByteArrayInputStream(downloadBody))
+                .headers(responseHeaders)
+                .build();
 
-        Map<String, String> expectedRequestHeaders = new HashMap<>();
-        expectedRequestHeaders.put("accept", "*/*");
-        expectedRequestHeaders.put("Authorization", "Bearer my-token");
-        expectedRequestHeaders.put("Content-Type", "application/octet-stream");
-        expectedRequestHeaders.put("x-jpmc-distribution-from-date", "2023-03-01");
-        expectedRequestHeaders.put("x-jpmc-distribution-to-date", "2023-03-02");
-        expectedRequestHeaders.put("x-jpmc-distribution-created-date", "2023-03-03");
-        expectedRequestHeaders.put("Digest", "md5=SpmtmsY7xMV5dSZdQaLnpA==");
-        expectedRequestHeaders.put("Content-Length", "23");
+        when(client.getInputStream(apiPath, requestHeaders)).thenReturn(expectedHttpResponse);
+    }
 
-        when(client.put(any(), any(), any()))
+    private void givenApiPath(String apiPath) {
+        this.apiPath = apiPath;
+    }
+
+    private void givenResponseHeader(String headerKey, String headerValue) {
+        responseHeaders.put(headerKey, Lists.newArrayList(headerValue));
+    }
+
+    private void givenDownloadBody(String body) {
+        this.downloadBody = body.getBytes();
+    }
+
+    private void givenUploadFile(String resource) {
+        this.fileName = getPathFromResource(resource);
+    }
+
+    private void thenHttpStatusShouldIndicateSuccess() {
+        assertThat(httpStatus, is(equalTo(200)));
+    }
+
+    private void whenFusionApiManagerIsCalledToUploadFileFromPath(String fromDate, String toDate, String createdDate) {
+        httpStatus = fusionAPIManager.callAPIFileUpload(apiPath, fileName, fromDate, toDate, createdDate);
+    }
+
+    private void whenFusionApiManagerIsCalledToUploadFileFromStream(
+            String fromDate, String toDate, String createdDate) {
+        httpStatus = fusionAPIManager.callAPIFileUpload(
+                apiPath, new ByteArrayInputStream(uploadBody), fromDate, toDate, createdDate);
+    }
+
+    private void givenCallToClientToUploadIsSuccessful() {
+        when(client.put(eq(apiPath), eq(requestHeaders), argThat(bodyEquals(uploadBody))))
                 .thenReturn(HttpResponse.<String>builder().statusCode(200).build());
-        // TODO: Now we need to validate the stub properly
-        // new ByteArrayInputStream("A,B,C\n1,2,3\n4,5,6\n7,8,9".getBytes())
+    }
 
-        fusionAPIManager.callAPIFileUpload(
-                "http://localhost:8080/test",
-                Files.newInputStream(Paths.get(getPathFromResource("upload-test.csv"))),
-                "2023-03-01",
-                "2023-03-02",
-                "2023-03-03");
+    private void givenUploadBody(String uploadbody) {
+        this.uploadBody = uploadbody.getBytes();
+    }
+
+    private void givenCallToProduceDigestReturnsDigestDescriptor(String digest) {
+        digestDescriptor = DigestDescriptor.builder()
+                .checksum(digest)
+                .size(uploadBody.length)
+                .content(uploadBody)
+                .build();
+
+        when(digestProducer.execute(argThat(bodyEquals(uploadBody)))).thenReturn(digestDescriptor);
+    }
+
+    private void givenRequestHeader(String headerKey, String headerValue) {
+        requestHeaders.put(headerKey, headerValue);
+    }
+
+    private void givenFusionApiManager() {
+        fusionAPIManager = new FusionAPIManager(credentials, client, digestProducer);
     }
 
     private static String getPathFromResource(String resourceName) {
@@ -196,6 +301,40 @@ public class FusionApiManagerTest {
             return path.toString();
         } catch (Exception e) {
             throw new RuntimeException("Failed to locate test data", e);
+        }
+    }
+
+    private static ArgumentMatcher<InputStream> bodyEquals(byte[] body) {
+        return new InputStreamArgumentMatcher(new ByteArrayInputStream(body));
+    }
+
+    @RequiredArgsConstructor
+    private static class InputStreamArgumentMatcher implements ArgumentMatcher<InputStream> {
+
+        private final InputStream left;
+
+        @Override
+        public boolean matches(InputStream right) {
+
+            String leftBody = body(left);
+            if (Objects.nonNull(right)) {
+                String rightBody = body(right);
+                return leftBody.equals(rightBody);
+            }
+
+            return false;
+        }
+
+        private String body(InputStream stream) {
+            try {
+                int n = stream.available();
+                byte[] bytes = new byte[n];
+                stream.read(bytes, 0, n);
+                return new String(bytes, StandardCharsets.UTF_8);
+            } catch (IOException ex) {
+                Assertions.fail(ex);
+            }
+            return "";
         }
     }
 }
