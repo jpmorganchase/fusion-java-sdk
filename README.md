@@ -38,6 +38,7 @@ Once you have the dependency added to your project and imports configured, you w
 
 ##### With an OAUth client ID and secret
 
+
 https://github.com/jpmorganchase/fusion-java-sdk/blob/3300f986bb55bf70ed0e36953c9834b8caa9960d/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L35-L37
 
 This will configure the SDK to retrieve a bearer token from an OAuth server using the supplied parameters:
