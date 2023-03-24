@@ -2,18 +2,16 @@ package io.github.jpmorganchase.fusion.api;
 
 import io.github.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.credential.Credentials;
+import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
+import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
+import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.http.JdkClient;
 import java.io.*;
 import java.nio.file.Files;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.SneakyThrows;
 
 /**
  * Class that manages calls to the API. Intended to be called from multithreaded code.
@@ -24,6 +22,8 @@ public class FusionAPIManager implements APIManager {
     private Credentials sessionCredentials;
     private final Client httpClient;
 
+    private final DigestProducer digestProducer;
+
     /**
      * Create a new FusionAPIManager object to handle connections to the API.
      * Sets the bearer token
@@ -33,11 +33,19 @@ public class FusionAPIManager implements APIManager {
     public FusionAPIManager(Credentials credentials) {
         this.sessionCredentials = credentials;
         this.httpClient = new JdkClient();
+        this.digestProducer = AlgoSpecificDigestProducer.builder().sha256().build();
     }
 
     public FusionAPIManager(Credentials credentials, Client httpClient) {
         this.sessionCredentials = credentials;
         this.httpClient = httpClient;
+        this.digestProducer = AlgoSpecificDigestProducer.builder().sha256().build();
+    }
+
+    public FusionAPIManager(Credentials credentials, Client httpClient, DigestProducer digestProducer) {
+        this.sessionCredentials = credentials;
+        this.httpClient = httpClient;
+        this.digestProducer = digestProducer;
     }
 
     public void updateBearerToken(String token) {
@@ -153,26 +161,11 @@ public class FusionAPIManager implements APIManager {
      */
     // TODO: in the file case we probably dont want to do it like this - just read the file to calculate the digest and
     // then pass down the FileInputStream
-    @SneakyThrows(NoSuchAlgorithmException.class)
     @Override
     public int callAPIFileUpload(String apiPath, InputStream data, String fromDate, String toDate, String createdDate)
             throws APICallException {
 
-        DigestInputStream dis = new DigestInputStream(data, MessageDigest.getInstance("MD5"));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buf = new byte[8192];
-        int length;
-        while (true) {
-            try {
-                if ((length = dis.read(buf)) == -1) break;
-            } catch (IOException e) {
-                throw new ApiInputValidationException("Failed to read data from input", e);
-            }
-            baos.write(buf, 0, length);
-        }
-
-        String myChecksum =
-                Base64.getEncoder().encodeToString(dis.getMessageDigest().digest());
+        DigestDescriptor upload = digestProducer.execute(data);
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("accept", "*/*");
@@ -181,10 +174,11 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("x-jpmc-distribution-from-date", fromDate);
         requestHeaders.put("x-jpmc-distribution-to-date", toDate);
         requestHeaders.put("x-jpmc-distribution-created-date", createdDate);
-        requestHeaders.put("Digest", "md5=" + myChecksum);
+        requestHeaders.put("Content-Length", String.valueOf(upload.getSize()));
+        requestHeaders.put("Digest", "SHA-256=" + upload.getChecksum());
 
         HttpResponse<String> response =
-                httpClient.put(apiPath, requestHeaders, new ByteArrayInputStream(baos.toByteArray()));
+                httpClient.put(apiPath, requestHeaders, new ByteArrayInputStream(upload.getContent()));
 
         checkResponseStatus(response);
 

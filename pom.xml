@@ -34,6 +34,10 @@
             <name>Martin McClintock</name>
             <email>martin.r.mcclintock@jpmorgan.com</email>
         </developer>
+        <developer>
+            <name>Ian Knight</name>
+            <email>ian.r.knight@jpmorgan.com</email>
+        </developer>
     </developers>
 
     <distributionManagement>
