@@ -11,9 +11,9 @@ public interface APIManager {
 
     InputStream callAPIFileDownload(String apiPath) throws APICallException, FileDownloadException;
 
-    int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate)
+    int callAPIFileUpload(String apiPath, String fileName, String catalogName, String dataset, String fromDate, String toDate, String createdDate)
             throws APICallException;
 
-    int callAPIFileUpload(String apiPath, InputStream data, String fromDate, String toDate, String createdDate)
+    int callAPIFileUpload(String apiPath, InputStream data, String catalogName, String dataset, String fromDate, String toDate, String createdDate)
             throws APICallException;
 }
