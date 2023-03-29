@@ -7,7 +7,7 @@ public class UserAgentGenerator {
             UserAgentGenerator.class.getPackage().getImplementationVersion();
 
     public static String getUserAgentString(Class<?> clientClass) {
-        String productVersion = PRODUCT_VERSION == null ? "UNKNOWN" : PRODUCT_VERSION;
+        String productVersion = PRODUCT_VERSION == null ? "UNPACKAGED" : PRODUCT_VERSION;
         String version = System.getProperty("java.version");
         return String.format("%s/%s (%s) Java/%s", PRODUCT_NAME, productVersion, clientClass.getSimpleName(), version);
     }

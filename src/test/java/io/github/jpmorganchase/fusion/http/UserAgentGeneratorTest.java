@@ -12,6 +12,6 @@ public class UserAgentGeneratorTest {
     void testMyUserAgent() {
         String agent = UserAgentGenerator.getUserAgentString(JdkClient.class);
         String javaVersion = System.getProperty("java.version");
-        assertThat(agent, is(equalTo("fusion-java-sdk/UNKNOWN (JdkClient) Java/" + javaVersion)));
+        assertThat(agent, is(equalTo("fusion-java-sdk/UNPACKAGED (JdkClient) Java/" + javaVersion)));
     }
 }
