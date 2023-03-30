@@ -1,8 +1,9 @@
 package io.github.jpmorganchase.fusion.oauth.provider;
 
+import static io.github.jpmorganchase.fusion.oauth.credential.Credentials.CredentialType.*;
+
 import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.http.Client;
-import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
 import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
 import io.github.jpmorganchase.fusion.oauth.retriever.OAuthTokenRetriever;
@@ -70,7 +71,7 @@ public class OAuthSessionTokenProvider implements SessionTokenProvider {
 
     @Override
     public void updateCredentials(Credentials credentials) {
-        if (this.credentials instanceof BearerTokenCredentials) {
+        if (BEARER.equals(credentials.getCredentialType())) {
             this.credentials = credentials;
         } else {
             throw new ApiInputValidationException(String.format(
