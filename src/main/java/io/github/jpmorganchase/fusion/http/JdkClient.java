@@ -75,6 +75,7 @@ public class JdkClient implements Client {
         URL url = parseUrl(path);
         HttpURLConnection connection = openConnection(url);
         headers.forEach(connection::setRequestProperty);
+        connection.setRequestProperty("User-Agent", UserAgentGenerator.getUserAgentString(this.getClass()));
 
         try {
             int httpCode;
