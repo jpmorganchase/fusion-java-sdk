@@ -13,10 +13,6 @@ import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,6 +26,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * Class representing the Fusion API, providing methods that correspond to available API endpoints
@@ -48,7 +47,6 @@ public class Fusion {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private APIManager api;
-
 
     @Builder.Default
     private String defaultCatalog = DEFAULT_CATALOG;
@@ -571,8 +569,7 @@ public class Fusion {
 
         public FusionBuilder secretBasedCredentials(
                 String clientId, String clientSecret, String resource, String authServerUrl) {
-            this.oAuthCredentials =
-                    new OAuthSecretBasedCredentials(clientId, resource, authServerUrl, clientSecret);
+            this.oAuthCredentials = new OAuthSecretBasedCredentials(clientId, resource, authServerUrl, clientSecret);
             return this;
         }
 
@@ -641,7 +638,6 @@ public class Fusion {
             if (api == null) {
                 api = new FusionAPIManager(credentials, client, rootUrl);
             }
-
 
             return super.build();
         }

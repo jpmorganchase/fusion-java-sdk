@@ -21,5 +21,4 @@ public class OAuthSecretBasedCredentials extends OAuthCredentials {
     public CredentialType getCredentialType() {
         return CredentialType.SECRET;
     }
-
 }

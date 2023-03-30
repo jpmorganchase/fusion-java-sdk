@@ -14,7 +14,6 @@ public class OAuthDatasetCredentials implements Credentials {
     private String dataset;
     private String authServerUrl;
 
-
     @Override
     public CredentialType getCredentialType() {
         return CredentialType.DATASET;

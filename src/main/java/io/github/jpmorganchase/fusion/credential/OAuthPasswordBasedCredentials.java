@@ -22,5 +22,4 @@ public class OAuthPasswordBasedCredentials extends OAuthCredentials {
     public CredentialType getCredentialType() {
         return CredentialType.PASSWORD;
     }
-
 }

@@ -3,12 +3,11 @@ package io.github.jpmorganchase.fusion.credential;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.http.JdkClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OAuthTokenRetriever implements TokenRetriever {
 
@@ -25,7 +24,6 @@ public class OAuthTokenRetriever implements TokenRetriever {
     public OAuthTokenRetriever(Client httpClient, TimeProvider timeProvider) {
         this.httpClient = httpClient;
         this.timeProvider = timeProvider;
-
     }
 
     @Override
@@ -39,24 +37,29 @@ public class OAuthTokenRetriever implements TokenRetriever {
             case DATASET:
                 return retrieveWithDatasetCredentials((OAuthDatasetCredentials) credentials);
             default:
-                throw new OAuthException(String.format("Unable to retrieve token, unsupported credential type %s", credentials.getClass().getName()), "Unable to initiate request");
+                throw new OAuthException(
+                        String.format(
+                                "Unable to retrieve token, unsupported credential type %s",
+                                credentials.getClass().getName()),
+                        "Unable to initiate request");
         }
-
     }
 
-
-    public BearerToken retrieveWithPasswordCredentials(OAuthPasswordBasedCredentials credentials){
+    public BearerToken retrieveWithPasswordCredentials(OAuthPasswordBasedCredentials credentials) {
         Map<String, String> requestHeaders = initRequestHeaders();
         requestHeaders.put("Content-Type", "application/x-www-form-urlencoded");
 
         String body = String.format(
                 "grant_type=password&resource=%1$s&client_id=%2$s&username=%3$s&password=%4$s",
-                credentials.getResource(), credentials.getClientId(), credentials.getUsername(), credentials.getPassword());
+                credentials.getResource(),
+                credentials.getClientId(),
+                credentials.getUsername(),
+                credentials.getPassword());
 
-        return retrieve(credentials.getAuthServerUrl(), requestHeaders,  new ArrayList<>(), body);
+        return retrieve(credentials.getAuthServerUrl(), requestHeaders, new ArrayList<>(), body);
     }
 
-    public BearerToken retrieveWithSecretCredentials(OAuthSecretBasedCredentials credentials){
+    public BearerToken retrieveWithSecretCredentials(OAuthSecretBasedCredentials credentials) {
         Map<String, String> requestHeaders = initRequestHeaders();
         String auth = credentials.getClientId() + ":" + credentials.getClientSecret();
         String authVal = "Basic " + Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
@@ -68,23 +71,25 @@ public class OAuthTokenRetriever implements TokenRetriever {
         return retrieve(credentials.getAuthServerUrl(), requestHeaders, new ArrayList<>(), body);
     }
 
-    public BearerToken retrieveWithDatasetCredentials(OAuthDatasetCredentials credentials){
+    public BearerToken retrieveWithDatasetCredentials(OAuthDatasetCredentials credentials) {
         Map<String, String> requestHeaders = initRequestHeaders();
         requestHeaders.put("Authorization", "Bearer " + credentials.getToken());
 
-        return retrieve(credentials.getAuthServerUrl(), requestHeaders, Arrays.asList(credentials.getCatalog(), credentials.getDataset()), null);
+        return retrieve(
+                credentials.getAuthServerUrl(),
+                requestHeaders,
+                Arrays.asList(credentials.getCatalog(), credentials.getDataset()),
+                null);
     }
 
-
-    private BearerToken retrieve(String authServerUrl, Map<String, String> requestHeaders, List<String> pathParams, String body){
-
+    private BearerToken retrieve(
+            String authServerUrl, Map<String, String> requestHeaders, List<String> pathParams, String body) {
 
         HttpResponse<String> response = executeRequest(authServerUrl, requestHeaders, pathParams, body);
         if (response.isError()) {
             throw new OAuthException(
                     String.format(
-                            "Error response received from OAuth server with status code %s",
-                            response.getStatusCode()),
+                            "Error response received from OAuth server with status code %s", response.getStatusCode()),
                     response.getBody());
         }
 
@@ -95,27 +100,25 @@ public class OAuthTokenRetriever implements TokenRetriever {
             throw new OAuthException(message, response.getBody());
         }
 
-
         return BearerToken.of(oAuthServerResponse, timeProvider.currentTimeMillis());
     }
 
-    private HttpResponse<String> executeRequest(String authServerUrl, Map<String, String> requestHeaders, List<String> pathParams, String body){
+    private HttpResponse<String> executeRequest(
+            String authServerUrl, Map<String, String> requestHeaders, List<String> pathParams, String body) {
 
         if (pathParams.size() > 0) {
             return httpClient.get(fusionAuthServerUrlForDataset(authServerUrl, pathParams), requestHeaders);
         }
         return httpClient.post(authServerUrl, requestHeaders, body);
-
     }
 
     private String fusionAuthServerUrlForDataset(String fusionAuthServerUrl, List<String> urlPathParams) {
         return String.format(fusionAuthServerUrl, urlPathParams.toArray());
     }
 
-    private Map<String, String> initRequestHeaders(){
+    private Map<String, String> initRequestHeaders() {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Accept", "application/json");
         return requestHeaders;
     }
-
 }

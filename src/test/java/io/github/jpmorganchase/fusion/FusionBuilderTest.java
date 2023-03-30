@@ -1,20 +1,19 @@
 package io.github.jpmorganchase.fusion;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import io.github.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.credential.OAuthPasswordBasedCredentials;
 import io.github.jpmorganchase.fusion.credential.OAuthSecretBasedCredentials;
-import org.junit.jupiter.api.Test;
-
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
 
 public class FusionBuilderTest {
 

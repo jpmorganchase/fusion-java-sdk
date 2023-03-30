@@ -5,6 +5,9 @@ public interface Credentials {
     CredentialType getCredentialType();
 
     enum CredentialType {
-        SECRET, PASSWORD, BEARER, DATASET
+        SECRET,
+        PASSWORD,
+        BEARER,
+        DATASET
     }
 }

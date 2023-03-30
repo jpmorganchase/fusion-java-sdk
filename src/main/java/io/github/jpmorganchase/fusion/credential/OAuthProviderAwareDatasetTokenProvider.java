@@ -11,43 +11,47 @@ public class OAuthProviderAwareDatasetTokenProvider implements OAuthDatasetToken
     private final OAuthSessionTokenProvider sessionTokenProvider;
     private final OAuthTokenRetriever tokenRetriever;
     private final TimeProvider timeProvider;
-    private final Map<String, BearerToken> datasetTokens = new HashMap<>();
 
-    public OAuthProviderAwareDatasetTokenProvider(String fusionAuthUrl, OAuthSessionTokenProvider sessionTokenProvider){
-        this(fusionAuthUrl, sessionTokenProvider, new OAuthTokenRetriever(), new SystemTimeProvider());
+    private final Map<String, BearerToken> datasetTokens;
+
+    public OAuthProviderAwareDatasetTokenProvider(
+            String fusionAuthUrl, OAuthSessionTokenProvider sessionTokenProvider) {
+        this(fusionAuthUrl, sessionTokenProvider, new OAuthTokenRetriever(), new SystemTimeProvider(), new HashMap<>());
     }
 
-    public OAuthProviderAwareDatasetTokenProvider(String fusionAuthUrl, OAuthSessionTokenProvider sessionTokenProvider, OAuthTokenRetriever tokenRetriever, TimeProvider timeProvider) {
+    public OAuthProviderAwareDatasetTokenProvider(
+            String fusionAuthUrl,
+            OAuthSessionTokenProvider sessionTokenProvider,
+            OAuthTokenRetriever tokenRetriever,
+            TimeProvider timeProvider,
+            Map<String, BearerToken> datasetTokens) {
         this.fusionAuthUrl = fusionAuthUrl + FUSION_AUTH_URL_POSTFIX;
         this.tokenRetriever = tokenRetriever;
         this.sessionTokenProvider = sessionTokenProvider;
         this.timeProvider = timeProvider;
+        this.datasetTokens = new HashMap<>(datasetTokens);
     }
 
     @Override
     public synchronized String getDatasetBearerToken(String catalog, String dataset) {
 
         String datasetTokenKey = String.format("%s_%s", catalog, dataset);
-        if (datasetTokens.containsKey(datasetTokenKey)){
+        if (datasetTokens.containsKey(datasetTokenKey)) {
             BearerToken bearerToken = datasetTokens.get(datasetTokenKey);
 
-            if (!bearerToken.hasTokenExpired(timeProvider.currentTimeMillis())){
+            if (!bearerToken.hasTokenExpired(timeProvider.currentTimeMillis())) {
                 return bearerToken.getToken();
             }
-
         }
 
-        BearerToken bearerToken = tokenRetriever.retrieveWithDatasetCredentials(
-                OAuthDatasetCredentials.builder()
-                        .token(sessionTokenProvider.getSessionBearerToken())
-                        .catalog(catalog)
-                        .dataset(dataset)
-                        .authServerUrl(this.fusionAuthUrl)
-                        .build());
+        BearerToken bearerToken = tokenRetriever.retrieve(OAuthDatasetCredentials.builder()
+                .token(sessionTokenProvider.getSessionBearerToken())
+                .catalog(catalog)
+                .dataset(dataset)
+                .authServerUrl(this.fusionAuthUrl)
+                .build());
 
         datasetTokens.put(datasetTokenKey, bearerToken);
         return bearerToken.getToken();
     }
-
-
 }

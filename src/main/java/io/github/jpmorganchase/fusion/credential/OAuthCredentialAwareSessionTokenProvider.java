@@ -1,17 +1,16 @@
 package io.github.jpmorganchase.fusion.credential;
 
 import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
+import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.invoke.MethodHandles;
 
 public class OAuthCredentialAwareSessionTokenProvider implements OAuthSessionTokenProvider {
 
     private static final Logger logger =
             LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private  Credentials credentials;
+    private Credentials credentials;
     private final OAuthTokenRetriever tokenRetriever;
 
     private final TimeProvider timeProvider;
@@ -20,11 +19,12 @@ public class OAuthCredentialAwareSessionTokenProvider implements OAuthSessionTok
 
     private int sessionTokenRefreshes;
 
-    public OAuthCredentialAwareSessionTokenProvider(Credentials credentials){
+    public OAuthCredentialAwareSessionTokenProvider(Credentials credentials) {
         this(credentials, new OAuthTokenRetriever(), new SystemTimeProvider());
     }
 
-    public OAuthCredentialAwareSessionTokenProvider(Credentials credentials, OAuthTokenRetriever oAuthTokenRetriever, TimeProvider timeProvider){
+    public OAuthCredentialAwareSessionTokenProvider(
+            Credentials credentials, OAuthTokenRetriever oAuthTokenRetriever, TimeProvider timeProvider) {
 
         this.credentials = credentials;
         this.tokenRetriever = oAuthTokenRetriever;
@@ -48,7 +48,6 @@ public class OAuthCredentialAwareSessionTokenProvider implements OAuthSessionTok
                     .setMessage("Number of token refreshes: {}")
                     .addArgument(this.sessionTokenRefreshes)
                     .log();
-
         }
         return bearerToken.getToken();
     }
@@ -63,5 +62,4 @@ public class OAuthCredentialAwareSessionTokenProvider implements OAuthSessionTok
                     credentials.getClass().getName()));
         }
     }
-
 }

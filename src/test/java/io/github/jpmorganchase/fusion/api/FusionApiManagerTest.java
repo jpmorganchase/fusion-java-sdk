@@ -1,5 +1,11 @@
 package io.github.jpmorganchase.fusion.api;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
+
 import com.google.common.collect.Lists;
 import io.github.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.credential.Credentials;
@@ -7,14 +13,6 @@ import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatcher;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -25,12 +23,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class FusionApiManagerTest {
@@ -259,8 +258,9 @@ public class FusionApiManagerTest {
     }
 
     private void whenFusionApiManagerIsCalledToUploadFileFromPath(String fromDate, String toDate, String createdDate) {
-        //TODO : Fix these tests - they need to define catalog and dataset
-        httpStatus = fusionAPIManager.callAPIFileUpload(apiPath, fileName, "common", "test", fromDate, toDate, createdDate);
+        // TODO : Fix these tests - they need to define catalog and dataset
+        httpStatus =
+                fusionAPIManager.callAPIFileUpload(apiPath, fileName, "common", "test", fromDate, toDate, createdDate);
     }
 
     private void whenFusionApiManagerIsCalledToUploadFileFromStream(

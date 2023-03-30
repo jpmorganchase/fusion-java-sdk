@@ -7,7 +7,6 @@ import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.http.JdkClient;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -132,7 +131,14 @@ public class FusionAPIManager implements APIManager {
      * @return the HTTP status code - will return 200 if successful
      */
     @Override
-    public int callAPIFileUpload(String apiPath, String fileName, String catalogName, String dataset, String fromDate, String toDate, String createdDate)
+    public int callAPIFileUpload(
+            String apiPath,
+            String fileName,
+            String catalogName,
+            String dataset,
+            String fromDate,
+            String toDate,
+            String createdDate)
             throws APICallException {
 
         InputStream fileInputStream;
@@ -159,7 +165,14 @@ public class FusionAPIManager implements APIManager {
     // TODO: in the file case we probably dont want to do it like this - just read the file to calculate the digest and
     // then pass down the FileInputStream
     @Override
-    public int callAPIFileUpload(String apiPath, InputStream data, String catalogName, String dataset, String fromDate, String toDate, String createdDate)
+    public int callAPIFileUpload(
+            String apiPath,
+            InputStream data,
+            String catalogName,
+            String dataset,
+            String fromDate,
+            String toDate,
+            String createdDate)
             throws APICallException {
 
         DigestDescriptor upload = digestProducer.execute(data);
@@ -167,7 +180,8 @@ public class FusionAPIManager implements APIManager {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("accept", "*/*");
         requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
-        requestHeaders.put("Fusion-Authorization", "Bearer " + datasetTokenProvider.getDatasetBearerToken(catalogName, dataset));
+        requestHeaders.put(
+                "Fusion-Authorization", "Bearer " + datasetTokenProvider.getDatasetBearerToken(catalogName, dataset));
         requestHeaders.put("Content-Type", "application/octet-stream");
         requestHeaders.put("x-jpmc-distribution-from-date", fromDate);
         requestHeaders.put("x-jpmc-distribution-to-date", toDate);
