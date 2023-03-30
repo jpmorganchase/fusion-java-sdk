@@ -1,18 +1,12 @@
 package io.github.jpmorganchase.fusion.api;
 
-import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import io.github.jpmorganchase.fusion.http.JdkClient;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
-import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
-import io.github.jpmorganchase.fusion.oauth.provider.OAuthDatasetTokenProvider;
-import io.github.jpmorganchase.fusion.oauth.provider.OAuthSessionTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -29,33 +23,11 @@ public class FusionAPIManager implements APIManager {
     private final Client httpClient;
     private final DigestProducer digestProducer;
 
-    /**
-     * Create a new FusionAPIManager object to handle connections to the API.
-     * Sets the bearer token
-     *
-     * @param credentials a credentials file with OAuth parameters.
-     */
-    public FusionAPIManager(Credentials credentials, String rootUrl) {
-        this.sessionTokenProvider = new OAuthSessionTokenProvider(credentials);
-        this.datasetTokenProvider = new OAuthDatasetTokenProvider(rootUrl, sessionTokenProvider);
-        this.httpClient = new JdkClient();
-        this.digestProducer = AlgoSpecificDigestProducer.builder().sha256().build();
-    }
-
-    public FusionAPIManager(Credentials credentials, Client httpClient, String rootUrl) {
-        this.sessionTokenProvider = new OAuthSessionTokenProvider(credentials);
-        this.datasetTokenProvider = new OAuthDatasetTokenProvider(rootUrl, sessionTokenProvider);
-        this.httpClient = httpClient;
-        this.digestProducer = AlgoSpecificDigestProducer.builder().sha256().build();
-    }
-
-    public FusionAPIManager(Credentials credentials, Client httpClient, String rootUrl, DigestProducer digestProducer) {
-        this.sessionTokenProvider = new OAuthSessionTokenProvider(credentials);
-        this.datasetTokenProvider = new OAuthDatasetTokenProvider(rootUrl, sessionTokenProvider);
-        this.httpClient = httpClient;
-        this.digestProducer = digestProducer;
-    }
-    public FusionAPIManager(Credentials credentials, Client httpClient, String rootUrl, DigestProducer digestProducer, SessionTokenProvider sessionTokenProvider, DatasetTokenProvider datasetTokenProvider) {
+    public FusionAPIManager(
+            Client httpClient,
+            SessionTokenProvider sessionTokenProvider,
+            DatasetTokenProvider datasetTokenProvider,
+            DigestProducer digestProducer) {
         this.sessionTokenProvider = sessionTokenProvider;
         this.datasetTokenProvider = datasetTokenProvider;
         this.httpClient = httpClient;

@@ -1,11 +1,11 @@
 package io.github.jpmorganchase.fusion.oauth.provider;
 
+import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.oauth.credential.OAuthDatasetCredentials;
 import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
 import io.github.jpmorganchase.fusion.oauth.retriever.OAuthTokenRetriever;
 import io.github.jpmorganchase.fusion.time.SystemTimeProvider;
 import io.github.jpmorganchase.fusion.time.TimeProvider;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +21,16 @@ public class OAuthDatasetTokenProvider implements DatasetTokenProvider {
     private final Map<String, BearerToken> datasetTokens;
 
     public OAuthDatasetTokenProvider(
-            String fusionAuthUrl, SessionTokenProvider sessionTokenProvider) {
+            String fusionAuthUrl, SessionTokenProvider sessionTokenProvider, Client httpClient) {
+        this(fusionAuthUrl, sessionTokenProvider, new OAuthTokenRetriever(httpClient));
+    }
+
+    public OAuthDatasetTokenProvider(
+            String fusionAuthUrl, SessionTokenProvider sessionTokenProvider, OAuthTokenRetriever tokenRetriever) {
+        this(fusionAuthUrl, sessionTokenProvider, tokenRetriever, new SystemTimeProvider(), new HashMap<>());
+    }
+
+    public OAuthDatasetTokenProvider(String fusionAuthUrl, SessionTokenProvider sessionTokenProvider) {
         this(fusionAuthUrl, sessionTokenProvider, new OAuthTokenRetriever(), new SystemTimeProvider(), new HashMap<>());
     }
 

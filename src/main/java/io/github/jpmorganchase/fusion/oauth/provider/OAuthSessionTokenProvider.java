@@ -1,16 +1,16 @@
 package io.github.jpmorganchase.fusion.oauth.provider;
 
 import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
+import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
 import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
 import io.github.jpmorganchase.fusion.oauth.retriever.OAuthTokenRetriever;
 import io.github.jpmorganchase.fusion.time.SystemTimeProvider;
 import io.github.jpmorganchase.fusion.time.TimeProvider;
+import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.invoke.MethodHandles;
 
 public class OAuthSessionTokenProvider implements SessionTokenProvider {
 
@@ -28,6 +28,10 @@ public class OAuthSessionTokenProvider implements SessionTokenProvider {
 
     public OAuthSessionTokenProvider(Credentials credentials) {
         this(credentials, new OAuthTokenRetriever(), new SystemTimeProvider());
+    }
+
+    public OAuthSessionTokenProvider(Credentials credentials, Client httpClient) {
+        this(credentials, new OAuthTokenRetriever(httpClient), new SystemTimeProvider());
     }
 
     public OAuthSessionTokenProvider(

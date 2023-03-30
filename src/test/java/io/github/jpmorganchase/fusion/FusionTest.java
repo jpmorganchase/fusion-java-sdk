@@ -236,7 +236,7 @@ public class FusionTest {
                                 Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
                         "/tmp/file.csv",
                         "common",
-                        "dataset",
+                        "sample_dataset",
                         "2023-03-09",
                         "2023-03-09",
                         "2023-03-09"))

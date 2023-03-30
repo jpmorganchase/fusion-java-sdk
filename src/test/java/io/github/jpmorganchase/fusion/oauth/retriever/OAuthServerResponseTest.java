@@ -1,10 +1,10 @@
 package io.github.jpmorganchase.fusion.oauth.retriever;
 
-import org.junit.jupiter.api.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+
+import org.junit.jupiter.api.Test;
 
 public class OAuthServerResponseTest {
 

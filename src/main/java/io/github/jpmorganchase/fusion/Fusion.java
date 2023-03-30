@@ -6,18 +6,18 @@ import io.github.jpmorganchase.fusion.api.APICallException;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.api.FusionAPIManager;
+import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
+import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.JdkClient;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.credential.*;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
+import io.github.jpmorganchase.fusion.oauth.provider.OAuthDatasetTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.OAuthSessionTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,6 +31,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * Class representing the Fusion API, providing methods that correspond to available API endpoints
@@ -637,8 +640,15 @@ public class Fusion {
                 throw new FusionInitialisationException("No Fusion credentials provided, cannot build Fusion instance");
             }
 
+            // TODO : Make this part of the builder journey
+            OAuthSessionTokenProvider sessionTokenProvider = new OAuthSessionTokenProvider(credentials, client);
+            OAuthDatasetTokenProvider datasetTokenProvider =
+                    new OAuthDatasetTokenProvider(rootUrl, sessionTokenProvider, client);
+            DigestProducer digestProducer =
+                    AlgoSpecificDigestProducer.builder().sha256().build();
+
             if (api == null) {
-                api = new FusionAPIManager(credentials, client, rootUrl);
+                api = new FusionAPIManager(client, sessionTokenProvider, datasetTokenProvider, digestProducer);
             }
 
             return super.build();

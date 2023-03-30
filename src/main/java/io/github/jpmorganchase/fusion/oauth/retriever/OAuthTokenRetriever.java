@@ -11,12 +11,11 @@ import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
 import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
 import io.github.jpmorganchase.fusion.time.SystemTimeProvider;
 import io.github.jpmorganchase.fusion.time.TimeProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OAuthTokenRetriever implements TokenRetriever {
 
@@ -28,6 +27,10 @@ public class OAuthTokenRetriever implements TokenRetriever {
 
     public OAuthTokenRetriever() {
         this(new JdkClient(), new SystemTimeProvider());
+    }
+
+    public OAuthTokenRetriever(Client httpClient) {
+        this(httpClient, new SystemTimeProvider());
     }
 
     public OAuthTokenRetriever(Client httpClient, TimeProvider timeProvider) {
