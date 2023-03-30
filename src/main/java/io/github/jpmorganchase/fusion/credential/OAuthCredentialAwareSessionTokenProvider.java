@@ -1,22 +1,18 @@
 package io.github.jpmorganchase.fusion.credential;
 
 import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
-import lombok.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 
-@Builder
 public class OAuthCredentialAwareSessionTokenProvider implements OAuthSessionTokenProvider {
 
     private static final Logger logger =
             LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private Credentials credentials;
+    private  Credentials credentials;
     private final OAuthTokenRetriever tokenRetriever;
-
-    private final CredentialType credentialType;
 
     private final TimeProvider timeProvider;
 
@@ -31,15 +27,6 @@ public class OAuthCredentialAwareSessionTokenProvider implements OAuthSessionTok
     public OAuthCredentialAwareSessionTokenProvider(Credentials credentials, OAuthTokenRetriever oAuthTokenRetriever, TimeProvider timeProvider){
 
         this.credentials = credentials;
-
-        if (this.credentials instanceof OAuthSecretBasedCredentials){
-            this.credentialType = CredentialType.SECRET;
-        } else if ((this.credentials instanceof OAuthPasswordBasedCredentials)){
-            this.credentialType = CredentialType.PASSWORD;
-        } else {
-            this.credentialType = CredentialType.TOKEN;
-        }
-
         this.tokenRetriever = oAuthTokenRetriever;
         this.timeProvider = timeProvider;
     }
@@ -49,18 +36,7 @@ public class OAuthCredentialAwareSessionTokenProvider implements OAuthSessionTok
 
         if (bearerToken.hasTokenExpired(timeProvider.currentTimeMillis())) {
 
-            //TODO Move to Retriever
-            switch (credentialType){
-                case SECRET:
-                    bearerToken = tokenRetriever.retrieveWithSecretCredentials((OAuthSecretBasedCredentials) credentials);
-                    break;
-                case PASSWORD:
-                    bearerToken = tokenRetriever.retrieveWithPasswordCredentials((OAuthPasswordBasedCredentials) credentials);
-                    break;
-                case TOKEN:
-                default:
-                    return bearerToken.getToken();
-            }
+            bearerToken = tokenRetriever.retrieve(credentials);
 
             sessionTokenRefreshes++;
             logger.atInfo()
@@ -86,10 +62,6 @@ public class OAuthCredentialAwareSessionTokenProvider implements OAuthSessionTok
                     "Cannot update bearer token for credentials of type %s",
                     credentials.getClass().getName()));
         }
-    }
-
-    private enum CredentialType {
-        SECRET, PASSWORD, TOKEN
     }
 
 }

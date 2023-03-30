@@ -17,4 +17,10 @@ public class OAuthPasswordBasedCredentials extends OAuthCredentials {
         this.username = username;
         this.password = password;
     }
+
+    @Override
+    public CredentialType getCredentialType() {
+        return CredentialType.PASSWORD;
+    }
+
 }

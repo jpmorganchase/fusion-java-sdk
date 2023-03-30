@@ -3,7 +3,6 @@ package io.github.jpmorganchase.fusion.credential;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.http.JdkClient;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +10,6 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-@Getter
 public class OAuthTokenRetriever implements TokenRetriever {
 
     private static final Logger logger =
@@ -30,8 +28,23 @@ public class OAuthTokenRetriever implements TokenRetriever {
 
     }
 
-
     @Override
+    public BearerToken retrieve(Credentials credentials) {
+
+        switch (credentials.getCredentialType()) {
+            case SECRET:
+                return retrieveWithSecretCredentials((OAuthSecretBasedCredentials) credentials);
+            case PASSWORD:
+                return retrieveWithPasswordCredentials((OAuthPasswordBasedCredentials) credentials);
+            case DATASET:
+                return retrieveWithDatasetCredentials((OAuthDatasetCredentials) credentials);
+            default:
+                throw new OAuthException(String.format("Unable to retrieve token, unsupported credential type %s", credentials.getClass().getName()), "Unable to initiate request");
+        }
+
+    }
+
+
     public BearerToken retrieveWithPasswordCredentials(OAuthPasswordBasedCredentials credentials){
         Map<String, String> requestHeaders = initRequestHeaders();
         requestHeaders.put("Content-Type", "application/x-www-form-urlencoded");
@@ -40,10 +53,9 @@ public class OAuthTokenRetriever implements TokenRetriever {
                 "grant_type=password&resource=%1$s&client_id=%2$s&username=%3$s&password=%4$s",
                 credentials.getResource(), credentials.getClientId(), credentials.getUsername(), credentials.getPassword());
 
-        return retrieve(credentials.getAuthServerUrl(), new HashMap<>(),  new ArrayList<>(), body);
+        return retrieve(credentials.getAuthServerUrl(), requestHeaders,  new ArrayList<>(), body);
     }
 
-    @Override
     public BearerToken retrieveWithSecretCredentials(OAuthSecretBasedCredentials credentials){
         Map<String, String> requestHeaders = initRequestHeaders();
         String auth = credentials.getClientId() + ":" + credentials.getClientSecret();
@@ -56,8 +68,7 @@ public class OAuthTokenRetriever implements TokenRetriever {
         return retrieve(credentials.getAuthServerUrl(), requestHeaders, new ArrayList<>(), body);
     }
 
-    @Override
-    public BearerToken retrieveForDatasetWithFusionCredentials(FusionCredentials credentials){
+    public BearerToken retrieveWithDatasetCredentials(OAuthDatasetCredentials credentials){
         Map<String, String> requestHeaders = initRequestHeaders();
         requestHeaders.put("Authorization", "Bearer " + credentials.getToken());
 
@@ -68,7 +79,7 @@ public class OAuthTokenRetriever implements TokenRetriever {
     private BearerToken retrieve(String authServerUrl, Map<String, String> requestHeaders, List<String> pathParams, String body){
 
 
-        HttpResponse<String> response = executeRequest(authServerUrl, requestHeaders, pathParams.toArray(new String[0]), body);
+        HttpResponse<String> response = executeRequest(authServerUrl, requestHeaders, pathParams, body);
         if (response.isError()) {
             throw new OAuthException(
                     String.format(
@@ -76,6 +87,7 @@ public class OAuthTokenRetriever implements TokenRetriever {
                             response.getStatusCode()),
                     response.getBody());
         }
+
         OAuthServerResponse oAuthServerResponse = OAuthServerResponse.fromJson(response.getBody());
         if (oAuthServerResponse.getAccessToken() == null) {
             String message = "Unable to parse bearer token in response from OAuth server";
@@ -87,17 +99,17 @@ public class OAuthTokenRetriever implements TokenRetriever {
         return BearerToken.of(oAuthServerResponse, timeProvider.currentTimeMillis());
     }
 
-    private HttpResponse<String> executeRequest(String authServerUrl, Map<String, String> requestHeaders, String[] pathParams, String body){
+    private HttpResponse<String> executeRequest(String authServerUrl, Map<String, String> requestHeaders, List<String> pathParams, String body){
 
-        if (pathParams.length > 0) {
-            return getHttpClient().get(fusionAuthServerUrlForDataset(authServerUrl, pathParams), requestHeaders);
+        if (pathParams.size() > 0) {
+            return httpClient.get(fusionAuthServerUrlForDataset(authServerUrl, pathParams), requestHeaders);
         }
-        return getHttpClient().post(authServerUrl, requestHeaders, body);
+        return httpClient.post(authServerUrl, requestHeaders, body);
 
     }
 
-    private String fusionAuthServerUrlForDataset(String fusionAuthServerUrl, String... urlPathParams) {
-        return String.format(fusionAuthServerUrl, urlPathParams);
+    private String fusionAuthServerUrlForDataset(String fusionAuthServerUrl, List<String> urlPathParams) {
+        return String.format(fusionAuthServerUrl, urlPathParams.toArray());
     }
 
     private Map<String, String> initRequestHeaders(){

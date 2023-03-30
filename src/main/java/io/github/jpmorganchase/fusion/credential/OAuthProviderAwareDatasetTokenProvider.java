@@ -37,8 +37,8 @@ public class OAuthProviderAwareDatasetTokenProvider implements OAuthDatasetToken
 
         }
 
-        BearerToken bearerToken = tokenRetriever.retrieveForDatasetWithFusionCredentials(
-                FusionCredentials.builder()
+        BearerToken bearerToken = tokenRetriever.retrieveWithDatasetCredentials(
+                OAuthDatasetCredentials.builder()
                         .token(sessionTokenProvider.getSessionBearerToken())
                         .catalog(catalog)
                         .dataset(dataset)

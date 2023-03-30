@@ -16,4 +16,10 @@ public class OAuthSecretBasedCredentials extends OAuthCredentials {
         super(clientId, resource, authServerUrl);
         this.clientSecret = clientSecret;
     }
+
+    @Override
+    public CredentialType getCredentialType() {
+        return CredentialType.SECRET;
+    }
+
 }

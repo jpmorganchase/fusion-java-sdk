@@ -259,13 +259,14 @@ public class FusionApiManagerTest {
     }
 
     private void whenFusionApiManagerIsCalledToUploadFileFromPath(String fromDate, String toDate, String createdDate) {
-        httpStatus = fusionAPIManager.callAPIFileUpload(apiPath, fileName, fromDate, toDate, createdDate);
+        //TODO : Fix these tests - they need to define catalog and dataset
+        httpStatus = fusionAPIManager.callAPIFileUpload(apiPath, fileName, "common", "test", fromDate, toDate, createdDate);
     }
 
     private void whenFusionApiManagerIsCalledToUploadFileFromStream(
             String fromDate, String toDate, String createdDate) {
         httpStatus = fusionAPIManager.callAPIFileUpload(
-                apiPath, new ByteArrayInputStream(uploadBody), fromDate, toDate, createdDate);
+                apiPath, new ByteArrayInputStream(uploadBody), "common", "test", fromDate, toDate, createdDate);
     }
 
     private void givenCallToClientToUploadIsSuccessful() {

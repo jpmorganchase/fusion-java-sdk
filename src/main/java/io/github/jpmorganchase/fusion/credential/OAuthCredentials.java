@@ -10,7 +10,7 @@ import lombok.ToString;
 @RequiredArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class OAuthCredentials implements Credentials {
+public abstract class OAuthCredentials implements Credentials {
 
     @SerializedName("client_id")
     private final String clientId;

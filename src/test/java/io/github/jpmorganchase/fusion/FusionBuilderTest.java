@@ -1,6 +1,8 @@
 package io.github.jpmorganchase.fusion;
 
 import io.github.jpmorganchase.fusion.credential.BearerTokenCredentials;
+import io.github.jpmorganchase.fusion.credential.OAuthPasswordBasedCredentials;
+import io.github.jpmorganchase.fusion.credential.OAuthSecretBasedCredentials;
 import org.junit.jupiter.api.Test;
 
 import java.net.URISyntaxException;
