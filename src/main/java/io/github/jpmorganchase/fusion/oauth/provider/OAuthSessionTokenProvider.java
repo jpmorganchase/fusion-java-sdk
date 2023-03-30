@@ -6,9 +6,13 @@ import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
 import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
 import io.github.jpmorganchase.fusion.oauth.retriever.OAuthTokenRetriever;
+import io.github.jpmorganchase.fusion.oauth.retriever.TokenRetriever;
 import io.github.jpmorganchase.fusion.time.SystemTimeProvider;
 import io.github.jpmorganchase.fusion.time.TimeProvider;
 import java.lang.invoke.MethodHandles;
+import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,12 +22,13 @@ public class OAuthSessionTokenProvider implements SessionTokenProvider {
             LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private Credentials credentials;
-    private final OAuthTokenRetriever tokenRetriever;
+    private final TokenRetriever tokenRetriever;
 
     private final TimeProvider timeProvider;
 
     private BearerToken bearerToken;
 
+    @Getter(AccessLevel.PUBLIC)
     private int sessionTokenRefreshes;
 
     public OAuthSessionTokenProvider(Credentials credentials) {
@@ -35,7 +40,7 @@ public class OAuthSessionTokenProvider implements SessionTokenProvider {
     }
 
     public OAuthSessionTokenProvider(
-            Credentials credentials, OAuthTokenRetriever oAuthTokenRetriever, TimeProvider timeProvider) {
+            Credentials credentials, TokenRetriever oAuthTokenRetriever, TimeProvider timeProvider) {
 
         this.credentials = credentials;
         this.tokenRetriever = oAuthTokenRetriever;
@@ -45,7 +50,7 @@ public class OAuthSessionTokenProvider implements SessionTokenProvider {
     @Override
     public final synchronized String getSessionBearerToken() {
 
-        if (bearerToken.hasTokenExpired(timeProvider.currentTimeMillis())) {
+        if (Objects.isNull(bearerToken) || bearerToken.hasTokenExpired(timeProvider.currentTimeMillis())) {
 
             bearerToken = tokenRetriever.retrieve(credentials);
 
