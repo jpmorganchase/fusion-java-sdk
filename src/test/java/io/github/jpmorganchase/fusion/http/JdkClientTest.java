@@ -49,6 +49,7 @@ public class JdkClientTest {
     private static Map<String, String> MULTIPLE_REQUEST_HEADERS;
     private static final Map<String, String> NO_REQUEST_HEADERS = Collections.emptyMap();
     private static Map<String, String> SINGLE_RESPONSE_HEADER;
+    private static String EXPECTED_USER_AGENT;
 
     @BeforeAll
     public static void setUp() throws MalformedURLException {
@@ -69,6 +70,8 @@ public class JdkClientTest {
 
         SINGLE_RESPONSE_HEADER = new HashMap<>();
         SINGLE_RESPONSE_HEADER.put("test-header-1", "header-value-1");
+
+        EXPECTED_USER_AGENT = "fusion-java-sdk/UNPACKAGED (JdkClient) Java/" + System.getProperty("java.version");
     }
 
     @Test
@@ -128,17 +131,19 @@ public class JdkClientTest {
             String expectedResponseBody,
             int expectedResponseCode,
             Map<String, String> expectedResponseHeaders) {
+        RequestPatternBuilder requestPatternBuilder = getRequestedFor(urlEqualTo(BASE_PATH));
+
         if (expectedRequestHeaders.size() > 0) {
             // Add headers to the stub expectation if we had any on the request
-            RequestPatternBuilder requestPatternBuilder = getRequestedFor(urlEqualTo(BASE_PATH));
             for (Map.Entry<String, String> header : expectedRequestHeaders.entrySet()) {
                 requestPatternBuilder.withHeader(header.getKey(), WireMock.equalTo(header.getValue()));
             }
-            verify(requestPatternBuilder);
-        } else {
-            // otherwise just verify that the URL was invoked
-            verify(getRequestedFor(urlEqualTo(BASE_PATH)));
         }
+        // add the standard user-agent header to expectations
+        requestPatternBuilder.withHeader("User-Agent", WireMock.equalTo(EXPECTED_USER_AGENT));
+
+        verify(requestPatternBuilder);
+
         assertThat(response.getStatusCode(), is(equalTo(expectedResponseCode)));
         assertThat(response.getBody(), is(equalTo(expectedResponseBody)));
 
