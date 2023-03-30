@@ -1,13 +1,22 @@
-package io.github.jpmorganchase.fusion.credential;
+package io.github.jpmorganchase.fusion.oauth.retriever;
 
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.http.JdkClient;
+import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
+import io.github.jpmorganchase.fusion.oauth.credential.OAuthDatasetCredentials;
+import io.github.jpmorganchase.fusion.oauth.credential.OAuthPasswordBasedCredentials;
+import io.github.jpmorganchase.fusion.oauth.credential.OAuthSecretBasedCredentials;
+import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
+import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
+import io.github.jpmorganchase.fusion.time.SystemTimeProvider;
+import io.github.jpmorganchase.fusion.time.TimeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class OAuthTokenRetriever implements TokenRetriever {
 

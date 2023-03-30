@@ -1,4 +1,4 @@
-package io.github.jpmorganchase.fusion.credential;
+package io.github.jpmorganchase.fusion.oauth.retriever;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

@@ -1,18 +1,22 @@
 package io.github.jpmorganchase.fusion.api;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
 import com.google.common.collect.Lists;
-import io.github.jpmorganchase.fusion.credential.BearerTokenCredentials;
-import io.github.jpmorganchase.fusion.credential.Credentials;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
+import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
+import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
+import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,13 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatcher;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FusionApiManagerTest {
@@ -42,6 +46,12 @@ public class FusionApiManagerTest {
 
     @Mock
     private DigestProducer digestProducer;
+
+    @Mock
+    private SessionTokenProvider sessionTokenProvider;
+
+    @Mock
+    private DatasetTokenProvider datasetTokenProvider;
 
     private String apiPath;
 
@@ -73,6 +83,7 @@ public class FusionApiManagerTest {
     void successfulGetCall() {
         givenFusionApiManager();
         givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
         givenResponseBody("sample response");
         givenRequestHeader("Authorization", "Bearer my-token");
         givenCallToClientToGetIsSuccessful();
@@ -80,10 +91,15 @@ public class FusionApiManagerTest {
         thenTheResponseBodyShouldMatchExpected();
     }
 
+    private void givenSessionBearerToken(String token) {
+        given(sessionTokenProvider.getSessionBearerToken()).willReturn(token);
+    }
+
     @Test
     void failureForResourceNotFound() throws Exception {
         givenFusionApiManager();
         givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
         givenRequestHeader("Authorization", "Bearer my-token");
         givenCallToClientToGetReturnsNotFound();
         whenFusionApiManagerIsCalledThenExceptionShouldBeThrown();
@@ -94,6 +110,7 @@ public class FusionApiManagerTest {
     void successfulFileDownload() throws Exception {
         givenFusionApiManager();
         givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
         givenTempFile("fusion-test-", ".csv");
         givenRequestHeader("Authorization", "Bearer my-token");
         givenDownloadBody("A,B,C\n1,2,3");
@@ -109,6 +126,7 @@ public class FusionApiManagerTest {
     void successfulFileDownloadAsStream() throws Exception {
         givenFusionApiManager();
         givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
         givenRequestHeader("Authorization", "Bearer my-token");
         givenDownloadBody("A,B,C\n1,2,3");
         givenResponseHeader("Content-Type", "text/csv");
@@ -122,10 +140,13 @@ public class FusionApiManagerTest {
     void successfulFileUpload() {
         givenFusionApiManager();
         givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "simple_dataset", "dataset-token");
         givenUploadFile("upload-test.csv");
         givenUploadBody("A,B,C\n1,2,3\n4,5,6\n7,8,9");
         givenRequestHeader("accept", "*/*");
         givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
         givenRequestHeader("Content-Type", "application/octet-stream");
         givenRequestHeader("x-jpmc-distribution-from-date", "2023-03-01");
         givenRequestHeader("x-jpmc-distribution-to-date", "2023-03-02");
@@ -142,9 +163,12 @@ public class FusionApiManagerTest {
     void successfulFileUploadWithStream() {
         givenFusionApiManager();
         givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "simple_dataset", "dataset-token");
         givenUploadBody("A,B,C\n1,2,3\n4,5,6\n7,8,9");
         givenRequestHeader("accept", "*/*");
         givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
         givenRequestHeader("Content-Type", "application/octet-stream");
         givenRequestHeader("x-jpmc-distribution-from-date", "2023-03-01");
         givenRequestHeader("x-jpmc-distribution-to-date", "2023-03-02");
@@ -155,6 +179,10 @@ public class FusionApiManagerTest {
         givenCallToClientToUploadIsSuccessful();
         whenFusionApiManagerIsCalledToUploadFileFromStream("2023-03-01", "2023-03-02", "2023-03-03");
         thenHttpStatusShouldIndicateSuccess();
+    }
+
+    private void givenDatasetBearerToken(String catalog, String dataset, String token) {
+        given(datasetTokenProvider.getDatasetBearerToken(catalog, dataset)).willReturn(token);
     }
 
     private void thenTheResponseBodyShouldMatchExpected() {
@@ -260,13 +288,13 @@ public class FusionApiManagerTest {
     private void whenFusionApiManagerIsCalledToUploadFileFromPath(String fromDate, String toDate, String createdDate) {
         // TODO : Fix these tests - they need to define catalog and dataset
         httpStatus =
-                fusionAPIManager.callAPIFileUpload(apiPath, fileName, "common", "test", fromDate, toDate, createdDate);
+                fusionAPIManager.callAPIFileUpload(apiPath, fileName, "common", "simple_dataset", fromDate, toDate, createdDate);
     }
 
     private void whenFusionApiManagerIsCalledToUploadFileFromStream(
             String fromDate, String toDate, String createdDate) {
         httpStatus = fusionAPIManager.callAPIFileUpload(
-                apiPath, new ByteArrayInputStream(uploadBody), "common", "test", fromDate, toDate, createdDate);
+                apiPath, new ByteArrayInputStream(uploadBody), "common", "simple_dataset", fromDate, toDate, createdDate);
     }
 
     private void givenCallToClientToUploadIsSuccessful() {
@@ -293,7 +321,7 @@ public class FusionApiManagerTest {
     }
 
     private void givenFusionApiManager() {
-        fusionAPIManager = new FusionAPIManager(credentials, client, "http://fusion.com", digestProducer);
+        fusionAPIManager = new FusionAPIManager(credentials, client, "http://fusion.com", digestProducer, sessionTokenProvider, datasetTokenProvider);
     }
 
     private static String getPathFromResource(String resourceName) {

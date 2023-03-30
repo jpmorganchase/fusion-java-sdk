@@ -1,26 +1,32 @@
-package io.github.jpmorganchase.fusion.credential;
+package io.github.jpmorganchase.fusion.oauth.provider;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.BDDMockito.given;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
+import io.github.jpmorganchase.fusion.oauth.credential.OAuthDatasetCredentials;
+import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
+import io.github.jpmorganchase.fusion.oauth.retriever.OAuthTokenRetriever;
+import io.github.jpmorganchase.fusion.time.TimeProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.BDDMockito.given;
+
 @ExtendWith(MockitoExtension.class)
-class OAuthProviderAwareDatasetTokenProviderTest {
+class OAuthDatasetTokenProviderTest {
 
     @Mock
-    private OAuthSessionTokenProvider sessionTokenProvider;
+    private SessionTokenProvider sessionTokenProvider;
 
     @Mock
     private OAuthTokenRetriever tokenRetriever;
@@ -32,7 +38,7 @@ class OAuthProviderAwareDatasetTokenProviderTest {
 
     private Map<String, BearerToken> datasetTokens = new HashMap<>();
 
-    private OAuthProviderAwareDatasetTokenProvider tokenProvider;
+    private OAuthDatasetTokenProvider tokenProvider;
 
     private Credentials datasetCredentials;
 
@@ -135,7 +141,7 @@ class OAuthProviderAwareDatasetTokenProviderTest {
     }
 
     private void givenTheDatasetTokenProvider() {
-        this.tokenProvider = new OAuthProviderAwareDatasetTokenProvider(
+        this.tokenProvider = new OAuthDatasetTokenProvider(
                 fusionRootUrl, sessionTokenProvider, tokenRetriever, timeProvider, datasetTokens);
     }
 

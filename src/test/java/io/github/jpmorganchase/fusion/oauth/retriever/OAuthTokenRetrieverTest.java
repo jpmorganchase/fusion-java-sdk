@@ -1,21 +1,27 @@
-package io.github.jpmorganchase.fusion.credential;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.BDDMockito.given;
+package io.github.jpmorganchase.fusion.oauth.retriever;
 
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import io.github.jpmorganchase.fusion.oauth.credential.*;
+import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
+import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
+import io.github.jpmorganchase.fusion.time.IncrementingTimeProvider;
+import io.github.jpmorganchase.fusion.time.TimeProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class OAuthTokenRetrieverTest {

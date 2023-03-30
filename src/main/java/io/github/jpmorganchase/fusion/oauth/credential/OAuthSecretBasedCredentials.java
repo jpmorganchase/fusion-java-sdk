@@ -1,4 +1,4 @@
-package io.github.jpmorganchase.fusion.credential;
+package io.github.jpmorganchase.fusion.oauth.credential;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.EqualsAndHashCode;

@@ -1,27 +1,33 @@
-package io.github.jpmorganchase.fusion.credential;
+package io.github.jpmorganchase.fusion.oauth.provider;
+
+import io.github.jpmorganchase.fusion.oauth.credential.OAuthDatasetCredentials;
+import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
+import io.github.jpmorganchase.fusion.oauth.retriever.OAuthTokenRetriever;
+import io.github.jpmorganchase.fusion.time.SystemTimeProvider;
+import io.github.jpmorganchase.fusion.time.TimeProvider;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class OAuthProviderAwareDatasetTokenProvider implements OAuthDatasetTokenProvider {
+public class OAuthDatasetTokenProvider implements DatasetTokenProvider {
 
     private static final String FUSION_AUTH_URL_POSTFIX = "catalogs/%s/datasets/%s/authorize/token";
 
     private final String fusionAuthUrl;
-    private final OAuthSessionTokenProvider sessionTokenProvider;
+    private final SessionTokenProvider sessionTokenProvider;
     private final OAuthTokenRetriever tokenRetriever;
     private final TimeProvider timeProvider;
 
     private final Map<String, BearerToken> datasetTokens;
 
-    public OAuthProviderAwareDatasetTokenProvider(
-            String fusionAuthUrl, OAuthSessionTokenProvider sessionTokenProvider) {
+    public OAuthDatasetTokenProvider(
+            String fusionAuthUrl, SessionTokenProvider sessionTokenProvider) {
         this(fusionAuthUrl, sessionTokenProvider, new OAuthTokenRetriever(), new SystemTimeProvider(), new HashMap<>());
     }
 
-    public OAuthProviderAwareDatasetTokenProvider(
+    public OAuthDatasetTokenProvider(
             String fusionAuthUrl,
-            OAuthSessionTokenProvider sessionTokenProvider,
+            SessionTokenProvider sessionTokenProvider,
             OAuthTokenRetriever tokenRetriever,
             TimeProvider timeProvider,
             Map<String, BearerToken> datasetTokens) {

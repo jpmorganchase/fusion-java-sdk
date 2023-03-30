@@ -1,11 +1,18 @@
-package io.github.jpmorganchase.fusion.credential;
+package io.github.jpmorganchase.fusion.oauth.provider;
 
 import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
-import java.lang.invoke.MethodHandles;
+import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
+import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
+import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
+import io.github.jpmorganchase.fusion.oauth.retriever.OAuthTokenRetriever;
+import io.github.jpmorganchase.fusion.time.SystemTimeProvider;
+import io.github.jpmorganchase.fusion.time.TimeProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OAuthCredentialAwareSessionTokenProvider implements OAuthSessionTokenProvider {
+import java.lang.invoke.MethodHandles;
+
+public class OAuthSessionTokenProvider implements SessionTokenProvider {
 
     private static final Logger logger =
             LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -19,11 +26,11 @@ public class OAuthCredentialAwareSessionTokenProvider implements OAuthSessionTok
 
     private int sessionTokenRefreshes;
 
-    public OAuthCredentialAwareSessionTokenProvider(Credentials credentials) {
+    public OAuthSessionTokenProvider(Credentials credentials) {
         this(credentials, new OAuthTokenRetriever(), new SystemTimeProvider());
     }
 
-    public OAuthCredentialAwareSessionTokenProvider(
+    public OAuthSessionTokenProvider(
             Credentials credentials, OAuthTokenRetriever oAuthTokenRetriever, TimeProvider timeProvider) {
 
         this.credentials = credentials;
