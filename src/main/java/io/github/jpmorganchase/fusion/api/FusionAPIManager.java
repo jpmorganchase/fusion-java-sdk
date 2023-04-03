@@ -1,13 +1,12 @@
 package io.github.jpmorganchase.fusion.api;
 
-import io.github.jpmorganchase.fusion.credential.BearerTokenCredentials;
-import io.github.jpmorganchase.fusion.credential.Credentials;
-import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import io.github.jpmorganchase.fusion.http.JdkClient;
+import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
+import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -19,43 +18,24 @@ import java.util.Map;
 public class FusionAPIManager implements APIManager {
 
     private static final String DEFAULT_FOLDER = "downloads";
-    private Credentials sessionCredentials;
+    private final SessionTokenProvider sessionTokenProvider;
+    private final DatasetTokenProvider datasetTokenProvider;
     private final Client httpClient;
-
     private final DigestProducer digestProducer;
 
-    /**
-     * Create a new FusionAPIManager object to handle connections to the API.
-     * Sets the bearer token
-     *
-     * @param credentials a credentials file with OAuth parameters.
-     */
-    public FusionAPIManager(Credentials credentials) {
-        this.sessionCredentials = credentials;
-        this.httpClient = new JdkClient();
-        this.digestProducer = AlgoSpecificDigestProducer.builder().sha256().build();
-    }
-
-    public FusionAPIManager(Credentials credentials, Client httpClient) {
-        this.sessionCredentials = credentials;
-        this.httpClient = httpClient;
-        this.digestProducer = AlgoSpecificDigestProducer.builder().sha256().build();
-    }
-
-    public FusionAPIManager(Credentials credentials, Client httpClient, DigestProducer digestProducer) {
-        this.sessionCredentials = credentials;
+    public FusionAPIManager(
+            Client httpClient,
+            SessionTokenProvider sessionTokenProvider,
+            DatasetTokenProvider datasetTokenProvider,
+            DigestProducer digestProducer) {
+        this.sessionTokenProvider = sessionTokenProvider;
+        this.datasetTokenProvider = datasetTokenProvider;
         this.httpClient = httpClient;
         this.digestProducer = digestProducer;
     }
 
     public void updateBearerToken(String token) {
-        if (sessionCredentials instanceof BearerTokenCredentials) {
-            this.sessionCredentials = new BearerTokenCredentials(token);
-        } else {
-            throw new ApiInputValidationException(String.format(
-                    "Cannot update bearer token for credentials of type %s",
-                    sessionCredentials.getClass().getName()));
-        }
+        sessionTokenProvider.updateCredentials(new BearerTokenCredentials(token));
     }
 
     /**
@@ -66,7 +46,7 @@ public class FusionAPIManager implements APIManager {
     @Override
     public String callAPI(String apiPath) throws APICallException {
         Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("Authorization", "Bearer " + sessionCredentials.getBearerToken());
+        requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
 
         HttpResponse<String> response = httpClient.get(apiPath, requestHeaders);
         checkResponseStatus(response);
@@ -116,7 +96,7 @@ public class FusionAPIManager implements APIManager {
     @Override
     public InputStream callAPIFileDownload(String apiPath) throws APICallException {
         Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("Authorization", "Bearer " + sessionCredentials.getBearerToken());
+        requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
 
         HttpResponse<InputStream> response = httpClient.getInputStream(apiPath, requestHeaders);
 
@@ -135,7 +115,14 @@ public class FusionAPIManager implements APIManager {
      * @return the HTTP status code - will return 200 if successful
      */
     @Override
-    public int callAPIFileUpload(String apiPath, String fileName, String fromDate, String toDate, String createdDate)
+    public int callAPIFileUpload(
+            String apiPath,
+            String fileName,
+            String catalogName,
+            String dataset,
+            String fromDate,
+            String toDate,
+            String createdDate)
             throws APICallException {
 
         InputStream fileInputStream;
@@ -146,7 +133,7 @@ public class FusionAPIManager implements APIManager {
                     String.format("File does not exist at supplied input location: %s", fileName), e);
         }
 
-        return callAPIFileUpload(apiPath, fileInputStream, fromDate, toDate, createdDate);
+        return callAPIFileUpload(apiPath, fileInputStream, catalogName, dataset, fromDate, toDate, createdDate);
     }
 
     /**
@@ -162,14 +149,23 @@ public class FusionAPIManager implements APIManager {
     // TODO: in the file case we probably dont want to do it like this - just read the file to calculate the digest and
     // then pass down the FileInputStream
     @Override
-    public int callAPIFileUpload(String apiPath, InputStream data, String fromDate, String toDate, String createdDate)
+    public int callAPIFileUpload(
+            String apiPath,
+            InputStream data,
+            String catalogName,
+            String dataset,
+            String fromDate,
+            String toDate,
+            String createdDate)
             throws APICallException {
 
         DigestDescriptor upload = digestProducer.execute(data);
 
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("accept", "*/*");
-        requestHeaders.put("Authorization", "Bearer " + sessionCredentials.getBearerToken());
+        requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
+        requestHeaders.put(
+                "Fusion-Authorization", "Bearer " + datasetTokenProvider.getDatasetBearerToken(catalogName, dataset));
         requestHeaders.put("Content-Type", "application/octet-stream");
         requestHeaders.put("x-jpmc-distribution-from-date", fromDate);
         requestHeaders.put("x-jpmc-distribution-to-date", toDate);

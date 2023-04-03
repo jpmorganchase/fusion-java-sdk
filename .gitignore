@@ -3,3 +3,4 @@
 **/target/
 **/localAuthCredential.json
 **/client_credentials.json
+.vscode

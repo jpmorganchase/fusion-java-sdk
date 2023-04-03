@@ -1,13 +1,16 @@
-package io.github.jpmorganchase.fusion.credential;
+package io.github.jpmorganchase.fusion.oauth.credential;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @RequiredArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class OAuthConfiguration {
+public abstract class OAuthCredentials implements Credentials {
 
     @SerializedName("client_id")
     private final String clientId;
