@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.BDDMockito.given;
 
+import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
+import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
 import io.github.jpmorganchase.fusion.oauth.credential.OAuthPasswordBasedCredentials;
 import io.github.jpmorganchase.fusion.oauth.credential.OAuthSecretBasedCredentials;
@@ -16,6 +18,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -36,6 +39,8 @@ class OAuthSessionTokenProviderTest {
     private TimeProvider timeProvider;
 
     private String sessionBearerToken;
+
+    private ApiInputValidationException exception;
 
     @Test
     public void testNewBearerTokenIsRetrievedWithSecretCredentials() {
@@ -84,6 +89,52 @@ class OAuthSessionTokenProviderTest {
         thenSessionBearerTokenRefreshesShouldBeEqualTo(2);
     }
 
+    @Test
+    public void testUpdateCredentialsWithBearerTokenCredentials() {
+        givenBearerCredentials("my-bearer-token-one");
+        givenSessionTokenProvider();
+        givenSessionTokenProviderIsUpdatedWithNewCredentials("my-bearer-token-two");
+
+        whenGetSessionBearerTokenIsCalled();
+
+        thenSessionBearerTokenShouldBeEqualTo("my-bearer-token-two");
+    }
+
+    @Test
+    public void testUpdateCredentialsWithPasswordBasedCredentials() {
+        givenPasswordCredentials("id", "resource", "user", "pass", "https://auth/token");
+        givenSessionTokenProvider();
+
+        whenAnAttemptIsMadeToUpdateTheCredentialsThenAnExceptionIsExpected();
+
+        thenTheExceptionMessageShouldBeEqualTo("Cannot update bearer token for credentials of type "
+                + credentials.getClass().getName());
+    }
+
+    @Test
+    public void testUpdateCredentialsWithSecretBasedCredentials() {
+        givenSecretCredentials("id", "resource", "secret", "http://auth/token");
+        givenSessionTokenProvider();
+
+        whenAnAttemptIsMadeToUpdateTheCredentialsThenAnExceptionIsExpected();
+
+        thenTheExceptionMessageShouldBeEqualTo("Cannot update bearer token for credentials of type "
+                + credentials.getClass().getName());
+    }
+
+    private void thenTheExceptionMessageShouldBeEqualTo(String message) {
+        assertThat(exception.getMessage(), is(equalTo(message)));
+    }
+
+    private void whenAnAttemptIsMadeToUpdateTheCredentialsThenAnExceptionIsExpected() {
+        exception = Assertions.assertThrows(
+                ApiInputValidationException.class, () -> tokenProvider.updateCredentials(credentials));
+    }
+
+    private void givenSessionTokenProviderIsUpdatedWithNewCredentials(String token) {
+        tokenProvider.updateCredentials(new BearerTokenCredentials(token));
+    }
+
     private void givenTimeProviderReturnsCurrentTimeAs(String currentTime) {
         given(timeProvider.currentTimeMillis()).willReturn(timeInMillis(currentTime));
     }
@@ -106,6 +157,10 @@ class OAuthSessionTokenProviderTest {
 
     private void givenSecretCredentials(String id, String resource, String secret, String authServerUrl) {
         credentials = new OAuthSecretBasedCredentials(id, resource, authServerUrl, secret);
+    }
+
+    private void givenBearerCredentials(String token) {
+        credentials = new BearerTokenCredentials(token);
     }
 
     private void givenTheTokenRetrieverReturnsBearerTokens(List<BearerToken> tokens) {

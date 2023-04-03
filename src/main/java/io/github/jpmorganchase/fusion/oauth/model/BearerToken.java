@@ -1,5 +1,6 @@
 package io.github.jpmorganchase.fusion.oauth.model;
 
+import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.retriever.OAuthServerResponse;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -12,13 +13,16 @@ import lombok.Value;
 @AllArgsConstructor(staticName = "of", access = AccessLevel.PRIVATE)
 public class BearerToken {
     private final String token;
-    private final long expiry;
+    private final Long expiry;
     private final Instant expiryTime;
     private final boolean isExpirable;
 
+    public static BearerToken of(BearerTokenCredentials credentials) {
+        return BearerToken.of(credentials.getBearerToken());
+    }
+
     public static BearerToken of(String token) {
-        Instant expiry = Instant.MAX;
-        return new BearerToken(token, expiry.toEpochMilli(), expiry, false);
+        return new BearerToken(token, null, null, false);
     }
 
     public static BearerToken of(OAuthServerResponse oAuthServerResponse, long currentTimeInMillis) {
