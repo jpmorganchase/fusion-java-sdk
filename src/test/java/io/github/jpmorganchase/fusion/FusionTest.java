@@ -4,14 +4,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.model.*;
+import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
 import java.time.LocalDate;
@@ -230,6 +234,8 @@ public class FusionTest {
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                                 Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
                         "/tmp/file.csv",
+                        "common",
+                        "sample_dataset",
                         "2023-03-09",
                         "2023-03-09",
                         "2023-03-09"))
@@ -249,6 +255,8 @@ public class FusionTest {
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                                 Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
                         requestBodyStream,
+                        "common",
+                        "sample_dataset",
                         "2023-03-09",
                         "2023-03-09",
                         "2023-03-09"))

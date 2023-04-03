@@ -1,4 +1,4 @@
-package io.github.jpmorganchase.fusion.credential;
+package io.github.jpmorganchase.fusion.time;
 
 public class SystemTimeProvider implements TimeProvider {
     @Override

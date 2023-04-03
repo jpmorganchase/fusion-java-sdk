@@ -6,14 +6,21 @@ import io.github.jpmorganchase.fusion.api.APICallException;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.api.FusionAPIManager;
-import io.github.jpmorganchase.fusion.credential.*;
+import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
+import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.JdkClient;
 import io.github.jpmorganchase.fusion.model.*;
+import io.github.jpmorganchase.fusion.oauth.credential.*;
+import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
+import io.github.jpmorganchase.fusion.oauth.provider.OAuthDatasetTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.OAuthSessionTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
@@ -486,7 +493,7 @@ public class Fusion {
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
-        this.api.callAPIFileUpload(url, filename, strFromDate, strToDate, strCreatedDate);
+        this.api.callAPIFileUpload(url, filename, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
     }
 
     /**
@@ -543,7 +550,7 @@ public class Fusion {
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
-        this.api.callAPIFileUpload(url, data, strFromDate, strToDate, strCreatedDate);
+        this.api.callAPIFileUpload(url, data, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
     }
 
     public static FusionBuilder builder() {
@@ -554,9 +561,10 @@ public class Fusion {
         // Implementation of helper methods to allow for simpler instantiation. Note that Lombok will fill in the
         // missing, standard builder methods
         protected Credentials credentials;
-        protected OAuthConfiguration oAuthConfiguration;
+        protected OAuthCredentials oAuthCredentials;
         protected Client client;
         protected String credentialFile;
+        protected String rootUrl;
         protected APIManager api;
 
         public FusionBuilder bearerToken(String token) {
@@ -566,15 +574,14 @@ public class Fusion {
 
         public FusionBuilder secretBasedCredentials(
                 String clientId, String clientSecret, String resource, String authServerUrl) {
-            this.oAuthConfiguration =
-                    new OAuthSecretBasedConfiguration(clientId, resource, authServerUrl, clientSecret);
+            this.oAuthCredentials = new OAuthSecretBasedCredentials(clientId, resource, authServerUrl, clientSecret);
             return this;
         }
 
         public FusionBuilder passwordBasedCredentials(
                 String clientId, String username, String password, String resource, String authServerUrl) {
-            this.oAuthConfiguration =
-                    new OAuthPasswordBasedConfiguration(clientId, resource, authServerUrl, username, password);
+            this.oAuthCredentials =
+                    new OAuthPasswordBasedCredentials(clientId, resource, authServerUrl, username, password);
             return this;
         }
 
@@ -589,6 +596,11 @@ public class Fusion {
 
         public FusionBuilder credentialFile(String credentialFile) {
             this.credentialFile = credentialFile;
+            return this;
+        }
+
+        public FusionBuilder rootUrl(String rootUrl) {
+            this.rootUrl = rootUrl;
             return this;
         }
     }
@@ -608,7 +620,7 @@ public class Fusion {
                     // Java 8 doesn't allow specification of the charset if we use a FileReader
                     InputStreamReader fileReader = new InputStreamReader(
                             Files.newInputStream(Paths.get(credentialFile)), StandardCharsets.UTF_8);
-                    oAuthConfiguration = gson.fromJson(fileReader, OAuthSecretBasedConfiguration.class);
+                    oAuthCredentials = gson.fromJson(fileReader, OAuthSecretBasedCredentials.class);
                     fileReader.close();
                 } catch (IOException e) {
                     throw new FusionInitialisationException(
@@ -616,13 +628,11 @@ public class Fusion {
                 }
             }
 
-            if (oAuthConfiguration != null) {
-                if (oAuthConfiguration instanceof OAuthSecretBasedConfiguration) {
-                    credentials =
-                            new OAuthSecretBasedCredentials((OAuthSecretBasedConfiguration) oAuthConfiguration, client);
-                } else if (oAuthConfiguration instanceof OAuthPasswordBasedConfiguration) {
-                    credentials = new OAuthPasswordBasedCredentials(
-                            (OAuthPasswordBasedConfiguration) oAuthConfiguration, client);
+            if (oAuthCredentials != null) {
+                if (oAuthCredentials instanceof OAuthSecretBasedCredentials) {
+                    credentials = oAuthCredentials;
+                } else if (oAuthCredentials instanceof OAuthPasswordBasedCredentials) {
+                    credentials = oAuthCredentials;
                 }
             }
 
@@ -630,8 +640,15 @@ public class Fusion {
                 throw new FusionInitialisationException("No Fusion credentials provided, cannot build Fusion instance");
             }
 
+            // TODO : Make this part of the builder journey
+            OAuthSessionTokenProvider sessionTokenProvider = new OAuthSessionTokenProvider(credentials, client);
+            OAuthDatasetTokenProvider datasetTokenProvider =
+                    new OAuthDatasetTokenProvider(rootUrl, sessionTokenProvider, client);
+            DigestProducer digestProducer =
+                    AlgoSpecificDigestProducer.builder().sha256().build();
+
             if (api == null) {
-                api = new FusionAPIManager(credentials, client);
+                api = new FusionAPIManager(client, sessionTokenProvider, datasetTokenProvider, digestProducer);
             }
 
             return super.build();

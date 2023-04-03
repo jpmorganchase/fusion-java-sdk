@@ -5,9 +5,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.github.jpmorganchase.fusion.credential.BearerTokenCredentials;
-import io.github.jpmorganchase.fusion.credential.OAuthPasswordBasedCredentials;
-import io.github.jpmorganchase.fusion.credential.OAuthSecretBasedCredentials;
+import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
+import io.github.jpmorganchase.fusion.oauth.credential.OAuthPasswordBasedCredentials;
+import io.github.jpmorganchase.fusion.oauth.credential.OAuthSecretBasedCredentials;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.NoSuchFileException;
