@@ -58,7 +58,7 @@ public class Fusion {
 
     @Builder.Default
     @Getter(value = AccessLevel.PACKAGE)
-    private String rootURL = DEFAULT_ROOT_URL;
+    private String rootURL;
 
     @Getter(value = AccessLevel.PACKAGE)
     private Credentials credentials;
@@ -638,6 +638,10 @@ public class Fusion {
 
             if (credentials == null) {
                 throw new FusionInitialisationException("No Fusion credentials provided, cannot build Fusion instance");
+            }
+
+            if (rootURL == null) {
+                rootURL = DEFAULT_ROOT_URL;
             }
 
             // TODO : Make this part of the builder journey
