@@ -58,7 +58,7 @@ public class Fusion {
 
     @Builder.Default
     @Getter(value = AccessLevel.PACKAGE)
-    private String rootURL = DEFAULT_ROOT_URL;
+    private String rootURL;
 
     @Getter(value = AccessLevel.PACKAGE)
     private Credentials credentials;
@@ -564,7 +564,7 @@ public class Fusion {
         protected OAuthCredentials oAuthCredentials;
         protected Client client;
         protected String credentialFile;
-        protected String rootUrl;
+        protected String rootURL;
         protected APIManager api;
 
         public FusionBuilder bearerToken(String token) {
@@ -599,8 +599,8 @@ public class Fusion {
             return this;
         }
 
-        public FusionBuilder rootUrl(String rootUrl) {
-            this.rootUrl = rootUrl;
+        public FusionBuilder rootURL(String rootURL) {
+            this.rootURL = rootURL;
             return this;
         }
     }
@@ -640,10 +640,14 @@ public class Fusion {
                 throw new FusionInitialisationException("No Fusion credentials provided, cannot build Fusion instance");
             }
 
+            if (rootURL == null) {
+                rootURL = DEFAULT_ROOT_URL;
+            }
+
             // TODO : Make this part of the builder journey
             OAuthSessionTokenProvider sessionTokenProvider = new OAuthSessionTokenProvider(credentials, client);
             OAuthDatasetTokenProvider datasetTokenProvider =
-                    new OAuthDatasetTokenProvider(rootUrl, sessionTokenProvider, client);
+                    new OAuthDatasetTokenProvider(rootURL, sessionTokenProvider, client);
             DigestProducer digestProducer =
                     AlgoSpecificDigestProducer.builder().sha256().build();
 
