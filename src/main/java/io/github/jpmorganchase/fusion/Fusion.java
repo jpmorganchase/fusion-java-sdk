@@ -564,7 +564,7 @@ public class Fusion {
         protected OAuthCredentials oAuthCredentials;
         protected Client client;
         protected String credentialFile;
-        protected String rootUrl;
+        protected String rootURL;
         protected APIManager api;
 
         public FusionBuilder bearerToken(String token) {
@@ -599,8 +599,8 @@ public class Fusion {
             return this;
         }
 
-        public FusionBuilder rootUrl(String rootUrl) {
-            this.rootUrl = rootUrl;
+        public FusionBuilder rootURL(String rootURL) {
+            this.rootURL = rootURL;
             return this;
         }
     }
@@ -643,7 +643,7 @@ public class Fusion {
             // TODO : Make this part of the builder journey
             OAuthSessionTokenProvider sessionTokenProvider = new OAuthSessionTokenProvider(credentials, client);
             OAuthDatasetTokenProvider datasetTokenProvider =
-                    new OAuthDatasetTokenProvider(rootUrl, sessionTokenProvider, client);
+                    new OAuthDatasetTokenProvider(rootURL, sessionTokenProvider, client);
             DigestProducer digestProducer =
                     AlgoSpecificDigestProducer.builder().sha256().build();
 
