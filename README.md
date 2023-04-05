@@ -89,11 +89,36 @@ Note than when your token has expired, you will need to pass a new token to the 
 
 Once you have initialised the Fusion object, you can interact with it to retrieve metadata or download distribution files for any datasets that you need.
 
-Examples (to follow):
+##### Examples:
 
-1. Download some metadata
-2. Download as a file
-3. Download as a stream
+1. List catalogs
+```java
+Map<String, Catalog> catalogs = fusion.listCatalogs();
+```
+2. List datasets
+```java
+Map<String, Dataset> datasets = fusion.listDatasets("my-catalog");
+```
+3. Download some dataset metadata
+```java
+Map<String, Attribute> attributes = fusion.listAttributes("my-catalog", "my-dataset");
+```
+4. List the series members available in the dataset
+```java
+Map<String, DatasetSeries> members = fusion.listDatasetMembers("my-catalog", "my-dataset");
+```
+5. List the distributions available in the dataset member
+```java
+Map<String, Distribution> distributions = fusion.listDistributions("my-catalog", "my-dataset", "my-series-member");
+```
+6. Download as a file
+```java
+fusion.download("my-catalog", "my-dataset", "my-series-member", "csv", "/downloads/distributions");
+```
+7. Download as a stream
+```java
+InputStream is = fusion.downloadStream("my-catalog", "my-dataset", "my-series-member", "csv");
+```
 
 #### Logging
 
