@@ -38,8 +38,11 @@ Once you have the dependency added to your project and imports configured, you w
 
 ##### With an OAUth client ID and secret
 
-
-https://github.com/jpmorganchase/fusion-java-sdk/blob/3300f986bb55bf70ed0e36953c9834b8caa9960d/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L35-L37
+```java
+Fusion fusion = Fusion.builder()
+                        .secretBasedCredentials(CLIENT_ID, CLIENT_SECRET, RESOURCE, AUTH_SERVER_URL)
+                        .build();
+```
 
 This will configure the SDK to retrieve a bearer token from an OAuth server using the supplied parameters:
 
@@ -52,7 +55,9 @@ When configured in this way, the SDK will retrieve the token from the OAuth serv
 
 ##### Loading the OAuth configuration from a file
 
-https://github.com/jpmorganchase/fusion-java-sdk/blob/3300f986bb55bf70ed0e36953c9834b8caa9960d/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L43-L45
+```java
+Fusion fusion = Fusion.builder().credentialFile(CREDENTIAL_FILE_PATH).build();
+```
 
 This will configure the SDK to retrieve a bearer token from an OAuth server using configuration details stored in a file at the supplied path _CREDENTIAL_FILE_PATH_
 
@@ -79,7 +84,9 @@ Similar to the above option, this will configure the SDK to manage the tokens on
 
 ##### With a pre-existing bearer token
 
-https://github.com/jpmorganchase/fusion-java-sdk/blob/3300f986bb55bf70ed0e36953c9834b8caa9960d/src/test/java/io/github/jpmorganchase/fusion/example/FusionInstanceCreationExamples.java#L28-L30
+```java
+Fusion fusion = Fusion.builder().bearerToken(BEARER_TOKEN).build();
+```
 
 Here _BEARER_TOKEN_ is the String value of a bearer token you have retrieved which provides access to the Fusion API. You can use this mechanism in cases where you already have a means to retrieve the token and would prefer to manage that within your application than having the SDK manage that on your behalf.
 
