@@ -11,7 +11,7 @@
     </appender>
 
     <!-- Increase this to INFO to see request and response details for WireMock tests -->
-    <logger name="WireMock" level="DEBUG"/>
+    <logger name="WireMock" level="INFO"/>
 
 
     <root level="ERROR">
