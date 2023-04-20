@@ -19,12 +19,14 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(PactConsumerTestExt.class)
+@Slf4j
 public class FusionUploadConsumerPactTest {
 
     private static final String FUSION_API_VERSION = "/v1/";
@@ -110,6 +112,10 @@ public class FusionUploadConsumerPactTest {
     }
 
     private void givenInstanceOfFusionSdk(MockServer mockServer) {
+
+        log.atInfo().log("Mock Server is {}", mockServer);
+        log.atInfo().log("Mock Server url {}", mockServer.getUrl());
+
         fusion = Fusion.builder()
                 .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
                 .bearerToken("my-bearer-token")
