@@ -3,8 +3,11 @@ package io.github.jpmorganchase.fusion.pact.util;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Map;
 
+@Slf4j
 public class RequestResponseHelper {
 
     private static final String USER_AGENT_VAL = "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60";
@@ -51,6 +54,7 @@ public class RequestResponseHelper {
             Map<String, String> headers,
             String body) {
 
+        log.atInfo().log("Initialising Expectation for upload");
         return builder.given(given)
                 .uponReceiving(upon)
                 .path(path)

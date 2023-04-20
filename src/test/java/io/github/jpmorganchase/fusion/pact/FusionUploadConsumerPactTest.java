@@ -74,6 +74,8 @@ public class FusionUploadConsumerPactTest {
     @PactTestFor(pactMethod = "uploadFile")
     void testUploadFile(MockServer mockServer) {
 
+        log.atInfo().log("Executing upload file test");
+
         givenInstanceOfFusionSdk(mockServer);
         givenFileReadForUpload("/common_API_TEST_20220117.csv", "A,B,C");
 
@@ -91,6 +93,9 @@ public class FusionUploadConsumerPactTest {
     @Test
     @PactTestFor(pactMethod = "uploadStream")
     void testUploadStream(MockServer mockServer) {
+
+        log.atInfo().log("Executing upload stream test");
+
         givenInstanceOfFusionSdk(mockServer);
 
         Assertions.assertDoesNotThrow(() -> fusion.upload(
@@ -112,10 +117,6 @@ public class FusionUploadConsumerPactTest {
     }
 
     private void givenInstanceOfFusionSdk(MockServer mockServer) {
-
-        log.atInfo().log("Mock Server is {}", mockServer);
-        log.atInfo().log("Mock Server url {}", mockServer.getUrl());
-
         fusion = Fusion.builder()
                 .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
                 .bearerToken("my-bearer-token")
