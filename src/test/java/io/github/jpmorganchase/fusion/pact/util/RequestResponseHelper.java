@@ -8,8 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class RequestResponseHelper {
-
-    private static final String USER_AGENT_VAL = "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60";
+    
     private static final String BEARER_TOKEN = "my-bearer-token";
     private static final String AUTH_VAL = "Bearer " + BEARER_TOKEN;
 
@@ -22,7 +21,6 @@ public class RequestResponseHelper {
                 .uponReceiving(upon)
                 .path(path)
                 .matchHeader("Authorization", AUTH_VAL)
-                .matchHeader("User-Agent", USER_AGENT_VAL)
                 .method("GET")
                 .willRespondWith()
                 .status(200)
@@ -36,7 +34,6 @@ public class RequestResponseHelper {
                 .uponReceiving(upon)
                 .path(path)
                 .matchHeader("Authorization", AUTH_VAL)
-                .matchHeader("User-Agent", USER_AGENT_VAL)
                 .method("GET")
                 .willRespondWith()
                 .status(200)
