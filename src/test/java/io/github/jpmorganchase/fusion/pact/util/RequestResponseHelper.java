@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class RequestResponseHelper {
-    
+
     private static final String BEARER_TOKEN = "my-bearer-token";
     private static final String AUTH_VAL = "Bearer " + BEARER_TOKEN;
 
