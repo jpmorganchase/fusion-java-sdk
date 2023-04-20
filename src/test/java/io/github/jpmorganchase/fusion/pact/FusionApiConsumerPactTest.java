@@ -1,5 +1,11 @@
 package io.github.jpmorganchase.fusion.pact;
 
+import static io.github.jpmorganchase.fusion.pact.util.BodyBuilders.*;
+import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.downloadExpectation;
+import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.getExpectation;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
@@ -10,25 +16,16 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.pact.util.FileHelper;
-import lombok.SneakyThrows;
-import org.hamcrest.core.Is;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Map;
-
-import static io.github.jpmorganchase.fusion.pact.util.BodyBuilders.*;
-import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.downloadExpectation;
-import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.getExpectation;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import lombok.SneakyThrows;
+import org.hamcrest.core.Is;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(PactConsumerTestExt.class)
 public class FusionApiConsumerPactTest {
@@ -40,55 +37,103 @@ public class FusionApiConsumerPactTest {
 
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
     public RequestResponsePact listCatalogs(PactDslWithProvider builder) {
-        return getExpectation(builder, "a list of catalogs", "a request for available catalogs", "/v1/catalogs", catalogs());
+        return getExpectation(
+                builder, "a list of catalogs", "a request for available catalogs", "/v1/catalogs", catalogs());
     }
 
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
     public RequestResponsePact getCatalogResources(PactDslWithProvider builder) {
-        return getExpectation(builder, "a list of catalogs resources", "a request for catalogs resources", "/v1/catalogs/common", catalogResources());
+        return getExpectation(
+                builder,
+                "a list of catalogs resources",
+                "a request for catalogs resources",
+                "/v1/catalogs/common",
+                catalogResources());
     }
 
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
     public RequestResponsePact listProducts(PactDslWithProvider builder) {
-        return getExpectation(builder, "a list of data products", "a request for a list of data products", "/v1/catalogs/common/products", products());
+        return getExpectation(
+                builder,
+                "a list of data products",
+                "a request for a list of data products",
+                "/v1/catalogs/common/products",
+                products());
     }
 
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
     public RequestResponsePact listDatasets(PactDslWithProvider builder) {
-        return getExpectation(builder, "a list of datasets", "a request for a list of datasets", "/v1/catalogs/common/datasets", datasets());
+        return getExpectation(
+                builder,
+                "a list of datasets",
+                "a request for a list of datasets",
+                "/v1/catalogs/common/datasets",
+                datasets());
     }
 
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
     public RequestResponsePact getDatasetResources(PactDslWithProvider builder) {
-        return getExpectation(builder, "a dataset resource", "a request for a dataset resource", "/v1/catalogs/common/datasets/GFI_OP_CF", datasetResource());
+        return getExpectation(
+                builder,
+                "a dataset resource",
+                "a request for a dataset resource",
+                "/v1/catalogs/common/datasets/GFI_OP_CF",
+                datasetResource());
     }
 
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
     public RequestResponsePact listDatasetMembers(PactDslWithProvider builder) {
-        return getExpectation(builder, "a list of series members for a dataset", "a request for a list of series members of a dataset", "/v1/catalogs/common/datasets/API_TEST/datasetseries", datasetMembers());
+        return getExpectation(
+                builder,
+                "a list of series members for a dataset",
+                "a request for a list of series members of a dataset",
+                "/v1/catalogs/common/datasets/API_TEST/datasetseries",
+                datasetMembers());
     }
+
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
     public RequestResponsePact getDatasetMemberResources(PactDslWithProvider builder) {
-        return getExpectation(builder, "metadata for a dataset series member", "a request dataset series member metadata", "/v1/catalogs/common/datasets/API_TEST/datasetseries/20230319", datasetMemberResources());
+        return getExpectation(
+                builder,
+                "metadata for a dataset series member",
+                "a request dataset series member metadata",
+                "/v1/catalogs/common/datasets/API_TEST/datasetseries/20230319",
+                datasetMemberResources());
     }
+
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
     public RequestResponsePact listAttributes(PactDslWithProvider builder) {
-        return getExpectation(builder, "a list of attributes for a dataset in a catalog", "a request for a list of attributes from a dataset", "/v1/catalogs/common/datasets/API_TEST/attributes", attributes());
+        return getExpectation(
+                builder,
+                "a list of attributes for a dataset in a catalog",
+                "a request for a list of attributes from a dataset",
+                "/v1/catalogs/common/datasets/API_TEST/attributes",
+                attributes());
     }
 
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
     public RequestResponsePact listDistributions(PactDslWithProvider builder) {
-        return getExpectation(builder, "a list of distributions available for a series member", "a request for distributions available for a series member", "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220116/distributions", distributions());
+        return getExpectation(
+                builder,
+                "a list of distributions available for a series member",
+                "a request for distributions available for a series member",
+                "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220116/distributions",
+                distributions());
     }
 
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
     public RequestResponsePact download(PactDslWithProvider builder) {
-        return downloadExpectation(builder, "a distribution that is available for download", "a request is made to download the distribution", "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220116/distributions/csv", "A,B,C");
+        return downloadExpectation(
+                builder,
+                "a distribution that is available for download",
+                "a request is made to download the distribution",
+                "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220116/distributions/csv",
+                "A,B,C");
     }
 
     @AfterEach
     @SneakyThrows
-    public void cleanupDirectory(){
+    public void cleanupDirectory() {
         Files.deleteIfExists(Paths.get("downloads/common_API_TEST_20220116.csv"));
     }
 
@@ -107,9 +152,11 @@ public class FusionApiConsumerPactTest {
         assertThat("Expected catalog is null", catalog, is(notNullValue()));
         assertThat("Expected catalog identifier to match", catalog.getIdentifier(), is(equalTo("common")));
         assertThat("Expected catalog title to match", catalog.getTitle(), is(equalTo("Common data catalog")));
-        assertThat("Expected catalog description to match", catalog.getDescription(), is(equalTo("A catalog of common data")));
+        assertThat(
+                "Expected catalog description to match",
+                catalog.getDescription(),
+                is(equalTo("A catalog of common data")));
         assertThat("Expected catalog LinkedEntity to match", catalog.getLinkedEntity(), is(equalTo("common")));
-
     }
 
     @Test
@@ -132,7 +179,6 @@ public class FusionApiConsumerPactTest {
             assertThat("resource identifier is missing from resource", dataset.containsKey("identifier"), is(true));
             assertThat("resource title is missing from resource", dataset.containsKey("title"), is(true));
         });
-
     }
 
     @Test
@@ -146,12 +192,14 @@ public class FusionApiConsumerPactTest {
         assertThat("Data Products Missing", products.get("ESG00008"), is(notNullValue()));
 
         DataProduct dataProduct = products.get("ESG00008");
-        assertThat("data product description incorrect", dataProduct.getDescription(), is(equalTo("MSCI ESG Description")));
+        assertThat(
+                "data product description incorrect",
+                dataProduct.getDescription(),
+                is(equalTo("MSCI ESG Description")));
         assertThat("data product linkedEntity is incorrect", dataProduct.getLinkedEntity(), is(equalTo("ESG00008/")));
         assertThat("data product title is incorrect", dataProduct.getTitle(), is(equalTo("MSCI ESG Ratings")));
         assertThat("data product status is incorrect", dataProduct.getStatus(), is(equalTo("Available")));
         assertThat("data product identifier is incorrect", dataProduct.getIdentifier(), is(equalTo("ESG00008")));
-
     }
 
     @Test
@@ -165,12 +213,14 @@ public class FusionApiConsumerPactTest {
         assertThat("Dataset Missing", datasets.get("GFI_OP_CF"), is(notNullValue()));
 
         Dataset dataset = datasets.get("GFI_OP_CF");
-        assertThat("dataset description incorrect", dataset.getDescription(), is(equalTo("Premium, volatility, and greeks for EUR")));
+        assertThat(
+                "dataset description incorrect",
+                dataset.getDescription(),
+                is(equalTo("Premium, volatility, and greeks for EUR")));
         assertThat("dataset linkedEntity is incorrect", dataset.getLinkedEntity(), is(equalTo("GFI_OP_CF/")));
         assertThat("dataset title is incorrect", dataset.getTitle(), is(equalTo("Swaptions Caps & Floors")));
         assertThat("dataset identifier is incorrect", dataset.getIdentifier(), is(equalTo("GFI_OP_CF")));
         assertThat("dataset frequency is incorrect", dataset.getFrequency(), is(equalTo("Daily")));
-
     }
 
     @Test
@@ -182,15 +232,20 @@ public class FusionApiConsumerPactTest {
         Map<String, Map<String, Object>> datasetResources = fusion.datasetResources("common", "GFI_OP_CF");
 
         assertThat("dataset resources must not be empty", datasetResources, Is.is(notNullValue()));
-        assertThat("dataset resources expected to contain key", datasetResources.containsKey("datasetseries"), is(true));
+        assertThat(
+                "dataset resources expected to contain key", datasetResources.containsKey("datasetseries"), is(true));
 
         Map<String, Object> resource = datasetResources.get("datasetseries");
         assertThat("dataset resource @id is incorrect", resource.get("@id"), is(equalTo("datasetseries/")));
-        assertThat("dataset resource description is incorrect", resource.get("description"), is(equalTo("A list of available datasetseries of a dataset")));
-        assertThat("dataset resource identifier is incorrect", resource.get("identifier"), is(equalTo("datasetseries")));
+        assertThat(
+                "dataset resource description is incorrect",
+                resource.get("description"),
+                is(equalTo("A list of available datasetseries of a dataset")));
+        assertThat(
+                "dataset resource identifier is incorrect", resource.get("identifier"), is(equalTo("datasetseries")));
         assertThat("dataset resource title is incorrect", resource.get("title"), is(equalTo("Datasetseries")));
-
     }
+
     @Test
     @PactTestFor(pactMethod = "listDatasetMembers")
     void testListDatasetMembers(MockServer mockServer) {
@@ -203,10 +258,13 @@ public class FusionApiConsumerPactTest {
         DatasetSeries series = datasetMembers.get("20230319");
         assertThat("dataset series @id is incorrect", series.getIdentifier(), is(equalTo("20230319")));
         assertThat("dataset series linked entity is incorrect", series.getLinkedEntity(), is(equalTo("20230319/")));
-        assertThat("dataset series createdDate is incorrect", series.getCreatedDate(), is(equalTo(LocalDate.of(2023, 3, 19))));
-        assertThat("dataset series fromDate is incorrect", series.getFromDate(), is(equalTo(LocalDate.of(2023, 3, 18))));
+        assertThat(
+                "dataset series createdDate is incorrect",
+                series.getCreatedDate(),
+                is(equalTo(LocalDate.of(2023, 3, 19))));
+        assertThat(
+                "dataset series fromDate is incorrect", series.getFromDate(), is(equalTo(LocalDate.of(2023, 3, 18))));
         assertThat("dataset series toDate is incorrect", series.getToDate(), is(equalTo(LocalDate.of(2023, 3, 17))));
-
     }
 
     @Test
@@ -215,18 +273,26 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-        Map<String, Map<String, Object>> datasetMemberResources = fusion.datasetMemberResources("common", "API_TEST", "20230319");
+        Map<String, Map<String, Object>> datasetMemberResources =
+                fusion.datasetMemberResources("common", "API_TEST", "20230319");
 
         assertThat("dataset member resources must not be empty", datasetMemberResources, Is.is(notNullValue()));
-        assertThat("dataset resources expected to contain key", datasetMemberResources.containsKey("distributions"), is(true));
+        assertThat(
+                "dataset resources expected to contain key",
+                datasetMemberResources.containsKey("distributions"),
+                is(true));
 
         Map<String, Object> resource = datasetMemberResources.get("distributions");
         assertThat("dataset resource @id is incorrect", resource.get("@id"), is(equalTo("distributions/")));
-        assertThat("dataset resource description is incorrect", resource.get("description"), is(equalTo("A list of available distributions")));
-        assertThat("dataset resource identifier is incorrect", resource.get("identifier"), is(equalTo("distributions")));
+        assertThat(
+                "dataset resource description is incorrect",
+                resource.get("description"),
+                is(equalTo("A list of available distributions")));
+        assertThat(
+                "dataset resource identifier is incorrect", resource.get("identifier"), is(equalTo("distributions")));
         assertThat("dataset resource title is incorrect", resource.get("title"), is(equalTo("Distributions")));
-
     }
+
     @Test
     @PactTestFor(pactMethod = "listAttributes")
     void testListAttributes(MockServer mockServer) {
@@ -240,7 +306,10 @@ public class FusionApiConsumerPactTest {
 
         Attribute attribute = attributes.get("A");
         assertThat("attribute identifier is incorrect", attribute.getIdentifier(), is(equalTo("A")));
-        assertThat("attribute description is incorrect", attribute.getDescription(), is(equalTo("Description for attribute A")));
+        assertThat(
+                "attribute description is incorrect",
+                attribute.getDescription(),
+                is(equalTo("Description for attribute A")));
         assertThat("attribute title is incorrect", attribute.getTitle(), is(equalTo("A")));
         assertThat("attribute index is incorrect", attribute.getIndex(), is(equalTo(1L)));
         assertThat("attribute dataType is incorrect", attribute.getDataType(), is(equalTo("String")));
@@ -262,13 +331,18 @@ public class FusionApiConsumerPactTest {
         assertThat("attribute resource identifier is incorrect", resource.get("identifier"), is(equalTo("A")));
         assertThat("attribute resource source is incorrect", resource.get("source"), is(equalTo("Data Query")));
         assertThat("attribute resource dataType is incorrect", resource.get("dataType"), is(equalTo("String")));
-        assertThat("attribute resource description is incorrect", resource.get("description"), is(equalTo("Description for attribute A")));
-        //TODO : Query - gson seems to translate our index integer as a double
+        assertThat(
+                "attribute resource description is incorrect",
+                resource.get("description"),
+                is(equalTo("Description for attribute A")));
+        // TODO : Query - gson seems to translate our index integer as a double
         assertThat("attribute resource index is incorrect", resource.get("index"), is(equalTo(1.0)));
         assertThat("attribute resource isDatasetKey is incorrect", resource.get("isDatasetKey"), is(false));
-        assertThat("attribute resource sourceFieldId is incorrect", resource.get("sourceFieldId"), is(equalTo("a_source_field")));
+        assertThat(
+                "attribute resource sourceFieldId is incorrect",
+                resource.get("sourceFieldId"),
+                is(equalTo("a_source_field")));
         assertThat("attribute resource title is incorrect", resource.get("title"), is(equalTo("A")));
-
     }
 
     @Test
@@ -284,11 +358,17 @@ public class FusionApiConsumerPactTest {
 
         Distribution distribution = distributions.get("csv");
         assertThat("distribution identifier is incorrect", distribution.getIdentifier(), is(equalTo("csv")));
-        assertThat("distribution description is incorrect", distribution.getDescription(), is(equalTo("Snapshot data, in tabular, csv format")));
+        assertThat(
+                "distribution description is incorrect",
+                distribution.getDescription(),
+                is(equalTo("Snapshot data, in tabular, csv format")));
         assertThat("distribution @id is incorrect", distribution.getLinkedEntity(), is(equalTo("csv/")));
         assertThat("distribution title is incorrect", distribution.getTitle(), is(equalTo("CSV")));
         assertThat("distribution fileExtension is incorrect", distribution.getFileExtension(), is(equalTo(".csv")));
-        assertThat("distribution mediaType is incorrect", distribution.getMediaType(), is(equalTo("text/csv; header=present; charset=utf-8")));
+        assertThat(
+                "distribution mediaType is incorrect",
+                distribution.getMediaType(),
+                is(equalTo("text/csv; header=present; charset=utf-8")));
     }
 
     @Test
@@ -310,12 +390,10 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-
         downloadedFileInputStream = fusion.downloadStream("common", "API_TEST", "20220116", "csv");
 
         thenTheFileContentsShouldBeEqualTo("A,B,C");
     }
-
 
     @SneakyThrows
     private void thenTheFileContentsShouldBeEqualTo(String expected) {
@@ -324,14 +402,16 @@ public class FusionApiConsumerPactTest {
     }
 
     @SneakyThrows
-    private void thenTheFileShouldBeDownloaded(String path){
+    private void thenTheFileShouldBeDownloaded(String path) {
         downloadedFileInputStream = Files.newInputStream(Paths.get(path));
-        assertThat("downloaded file is unavailable", downloadedFileInputStream.available(), is(greaterThanOrEqualTo(1)));
+        assertThat(
+                "downloaded file is unavailable", downloadedFileInputStream.available(), is(greaterThanOrEqualTo(1)));
     }
 
     private void givenInstanceOfFusionSdk(MockServer mockServer) {
-        fusion = Fusion.builder().rootURL(mockServer.getUrl() + FUSION_API_VERSION).bearerToken("my-bearer-token").build();
+        fusion = Fusion.builder()
+                .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
+                .bearerToken("my-bearer-token")
+                .build();
     }
-
-
 }
