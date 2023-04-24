@@ -12,8 +12,7 @@
         "method": "GET",
         "path": "/v1/catalogs/common/datasets/GFI_OP_CF",
         "headers": {
-          "Authorization": "Bearer my-bearer-token",
-          "User-Agent": "fusion-java-sdk/UNPACKAGED (JdkClient) Java/1.8.0_60"
+          "Authorization": "Bearer my-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -22,15 +21,6 @@
                 {
                   "match": "regex",
                   "regex": "Bearer my-bearer-token"
-                }
-              ],
-              "combine": "AND"
-            },
-            "User-Agent": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60"
                 }
               ],
               "combine": "AND"
@@ -52,7 +42,6 @@
           "isRawData": false,
           "isInternalOnlyDataset": false,
           "description": "Premium, volatility, and greeks for EUR",
-          "Title": "Swaptions Caps & Floors",
           "resources": [
             {
               "identifier": "datasetseries",
@@ -66,15 +55,16 @@
             "string",
             "string"
           ],
+          "title": "Swaptions Caps & Floors",
           "@context": {
             "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
             "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
           },
           "maintainer": "J.P. Morgan DM Rates Research",
           "frequency": "Daily",
-          "createdDate": "2023-04-20",
+          "createdDate": "2023-04-24",
           "isThirdPartyData": false,
-          "modifiedDate": "2023-04-20",
+          "modifiedDate": "2023-04-24",
           "publisher": "J.P. Morgan",
           "@id": "GFI_OP_CF/",
           "tag": [
@@ -134,7 +124,7 @@
               ],
               "combine": "AND"
             },
-            "$.Title": {
+            "$.title": {
               "matchers": [
                 {
                   "match": "type"
@@ -408,8 +398,7 @@
         "method": "GET",
         "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220116/distributions/csv",
         "headers": {
-          "Authorization": "Bearer my-bearer-token",
-          "User-Agent": "fusion-java-sdk/UNPACKAGED (JdkClient) Java/1.8.0_60"
+          "Authorization": "Bearer my-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -418,15 +407,6 @@
                 {
                   "match": "regex",
                   "regex": "Bearer my-bearer-token"
-                }
-              ],
-              "combine": "AND"
-            },
-            "User-Agent": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60"
                 }
               ],
               "combine": "AND"
@@ -450,8 +430,7 @@
         "method": "GET",
         "path": "/v1/catalogs/common/datasets/API_TEST/attributes",
         "headers": {
-          "Authorization": "Bearer my-bearer-token",
-          "User-Agent": "fusion-java-sdk/UNPACKAGED (JdkClient) Java/1.8.0_60"
+          "Authorization": "Bearer my-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -460,15 +439,6 @@
                 {
                   "match": "regex",
                   "regex": "Bearer my-bearer-token"
-                }
-              ],
-              "combine": "AND"
-            },
-            "User-Agent": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60"
                 }
               ],
               "combine": "AND"
@@ -484,7 +454,6 @@
         "body": {
           "identifier": "attributes",
           "description": "A list of available attributes",
-          "Title": "Attributes",
           "resources": [
             {
               "identifier": "A",
@@ -499,6 +468,7 @@
             }
           ],
           "@id": "attributes/",
+          "title": "Attributes",
           "@context": {
             "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
             "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
@@ -546,7 +516,7 @@
               ],
               "combine": "AND"
             },
-            "$.Title": {
+            "$.title": {
               "matchers": [
                 {
                   "match": "type"
@@ -661,8 +631,7 @@
         "method": "GET",
         "path": "/v1/catalogs/common",
         "headers": {
-          "Authorization": "Bearer my-bearer-token",
-          "User-Agent": "fusion-java-sdk/UNPACKAGED (JdkClient) Java/1.8.0_60"
+          "Authorization": "Bearer my-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -671,15 +640,6 @@
                 {
                   "match": "regex",
                   "regex": "Bearer my-bearer-token"
-                }
-              ],
-              "combine": "AND"
-            },
-            "User-Agent": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60"
                 }
               ],
               "combine": "AND"
@@ -695,7 +655,6 @@
         "body": {
           "identifier": "common",
           "description": "A catalog of common data",
-          "Title": "Common data catalog",
           "resources": [
             {
               "identifier": "datasets",
@@ -705,6 +664,7 @@
             }
           ],
           "@id": "common",
+          "title": "Common data catalog",
           "@context": {
             "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
             "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
@@ -752,7 +712,7 @@
               ],
               "combine": "AND"
             },
-            "$.Title": {
+            "$.title": {
               "matchers": [
                 {
                   "match": "type"
@@ -827,8 +787,7 @@
         "method": "GET",
         "path": "/v1/catalogs",
         "headers": {
-          "Authorization": "Bearer my-bearer-token",
-          "User-Agent": "fusion-java-sdk/UNPACKAGED (JdkClient) Java/1.8.0_60"
+          "Authorization": "Bearer my-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -837,15 +796,6 @@
                 {
                   "match": "regex",
                   "regex": "Bearer my-bearer-token"
-                }
-              ],
-              "combine": "AND"
-            },
-            "User-Agent": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60"
                 }
               ],
               "combine": "AND"
@@ -861,7 +811,6 @@
         "body": {
           "identifier": "catalogs",
           "description": "A list of available catalogs, catalogs",
-          "Title": "Catalogs",
           "resources": [
             {
               "identifier": "common",
@@ -871,6 +820,7 @@
             }
           ],
           "@id": "catalogs/",
+          "title": "Catalogs",
           "@context": {
             "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
             "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
@@ -918,7 +868,7 @@
               ],
               "combine": "AND"
             },
-            "$.Title": {
+            "$.title": {
               "matchers": [
                 {
                   "match": "type"
@@ -992,8 +942,7 @@
         "method": "GET",
         "path": "/v1/catalogs/common/products",
         "headers": {
-          "Authorization": "Bearer my-bearer-token",
-          "User-Agent": "fusion-java-sdk/UNPACKAGED (JdkClient) Java/1.8.0_60"
+          "Authorization": "Bearer my-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -1002,15 +951,6 @@
                 {
                   "match": "regex",
                   "regex": "Bearer my-bearer-token"
-                }
-              ],
-              "combine": "AND"
-            },
-            "User-Agent": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60"
                 }
               ],
               "combine": "AND"
@@ -1026,7 +966,6 @@
         "body": {
           "identifier": "products",
           "description": "A list of available products",
-          "Title": "Products",
           "resources": [
             {
               "identifier": "ESG00008",
@@ -1035,7 +974,7 @@
                 "string"
               ],
               "datasetCount": 18,
-              "releaseDate": "2023-04-20",
+              "releaseDate": "2023-04-24",
               "deliveryChannel": [
                 "string",
                 "string"
@@ -1068,6 +1007,7 @@
             }
           ],
           "@id": "products/",
+          "title": "Products",
           "@context": {
             "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
             "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
@@ -1115,7 +1055,7 @@
               ],
               "combine": "AND"
             },
-            "$.Title": {
+            "$.title": {
               "matchers": [
                 {
                   "match": "type"
@@ -1385,8 +1325,7 @@
         "method": "GET",
         "path": "/v1/catalogs/common/datasets",
         "headers": {
-          "Authorization": "Bearer my-bearer-token",
-          "User-Agent": "fusion-java-sdk/UNPACKAGED (JdkClient) Java/1.8.0_60"
+          "Authorization": "Bearer my-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -1395,15 +1334,6 @@
                 {
                   "match": "regex",
                   "regex": "Bearer my-bearer-token"
-                }
-              ],
-              "combine": "AND"
-            },
-            "User-Agent": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60"
                 }
               ],
               "combine": "AND"
@@ -1419,7 +1349,6 @@
         "body": {
           "identifier": "datasets",
           "description": "A list of available datasets",
-          "Title": "Datasets",
           "resources": [
             {
               "identifier": "GFI_OP_CF",
@@ -1438,9 +1367,9 @@
               "title": "Swaptions Caps & Floors",
               "maintainer": "J.P. Morgan DM Rates Research",
               "frequency": "Daily",
-              "createdDate": "2023-04-20",
+              "createdDate": "2023-04-24",
               "isThirdPartyData": false,
-              "modifiedDate": "2023-04-20",
+              "modifiedDate": "2023-04-24",
               "publisher": "J.P. Morgan",
               "tag": [
                 "string",
@@ -1460,6 +1389,7 @@
             }
           ],
           "@id": "datasets/",
+          "title": "Datasets",
           "@context": {
             "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
             "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
@@ -1507,7 +1437,7 @@
               ],
               "combine": "AND"
             },
-            "$.Title": {
+            "$.title": {
               "matchers": [
                 {
                   "match": "type"
@@ -1781,8 +1711,7 @@
         "method": "GET",
         "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220116/distributions",
         "headers": {
-          "Authorization": "Bearer my-bearer-token",
-          "User-Agent": "fusion-java-sdk/UNPACKAGED (JdkClient) Java/1.8.0_60"
+          "Authorization": "Bearer my-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -1791,15 +1720,6 @@
                 {
                   "match": "regex",
                   "regex": "Bearer my-bearer-token"
-                }
-              ],
-              "combine": "AND"
-            },
-            "User-Agent": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60"
                 }
               ],
               "combine": "AND"
@@ -1815,7 +1735,6 @@
         "body": {
           "identifier": "distributions",
           "description": "A list of available distributions",
-          "Title": "Distributions",
           "resources": [
             {
               "identifier": "csv",
@@ -1827,6 +1746,7 @@
             }
           ],
           "@id": "distributions/",
+          "title": "Distributions",
           "@context": {
             "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
             "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
@@ -1874,7 +1794,7 @@
               ],
               "combine": "AND"
             },
-            "$.Title": {
+            "$.title": {
               "matchers": [
                 {
                   "match": "type"
@@ -1965,8 +1885,7 @@
         "method": "GET",
         "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries",
         "headers": {
-          "Authorization": "Bearer my-bearer-token",
-          "User-Agent": "fusion-java-sdk/UNPACKAGED (JdkClient) Java/1.8.0_60"
+          "Authorization": "Bearer my-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -1975,15 +1894,6 @@
                 {
                   "match": "regex",
                   "regex": "Bearer my-bearer-token"
-                }
-              ],
-              "combine": "AND"
-            },
-            "User-Agent": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60"
                 }
               ],
               "combine": "AND"
@@ -1999,7 +1909,6 @@
         "body": {
           "identifier": "datasetseries",
           "description": "A list of available datasetseries of a dataset",
-          "Title": "DatasetSeries",
           "resources": [
             {
               "fromDate": "2023-03-18",
@@ -2010,6 +1919,7 @@
             }
           ],
           "@id": "datasetseries/",
+          "title": "DatasetSeries",
           "@context": {
             "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
             "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
@@ -2057,7 +1967,7 @@
               ],
               "combine": "AND"
             },
-            "$.Title": {
+            "$.title": {
               "matchers": [
                 {
                   "match": "type"
@@ -2143,8 +2053,7 @@
         "method": "GET",
         "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/20230319",
         "headers": {
-          "Authorization": "Bearer my-bearer-token",
-          "User-Agent": "fusion-java-sdk/UNPACKAGED (JdkClient) Java/1.8.0_60"
+          "Authorization": "Bearer my-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -2153,15 +2062,6 @@
                 {
                   "match": "regex",
                   "regex": "Bearer my-bearer-token"
-                }
-              ],
-              "combine": "AND"
-            },
-            "User-Agent": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "fusion-java-sdk/UNPACKAGED \\(JdkClient\\) Java/1\\.8\\.0_60"
                 }
               ],
               "combine": "AND"

@@ -196,6 +196,6 @@ public class BodyBuilders {
                 .stringType("@id", id)
                 .stringType("description", desc)
                 .stringType("identifier", identifier)
-                .stringType("Title", title);
+                .stringType("title", title);
     }
 }
