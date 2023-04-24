@@ -19,14 +19,12 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(PactConsumerTestExt.class)
-@Slf4j
 public class FusionUploadConsumerPactTest {
 
     private static final String FUSION_API_VERSION = "/v1/";
@@ -42,7 +40,6 @@ public class FusionUploadConsumerPactTest {
                 builder,
                 "a distribution that is available for download",
                 "a request is made to download the distribution",
-                "/v1/catalogs/common/datasets/API_TEST/authorize/token",
                 "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220117/distributions/csv",
                 uploadHeaders,
                 "A,B,C");
@@ -57,7 +54,6 @@ public class FusionUploadConsumerPactTest {
                 builder,
                 "a distribution that is available for download",
                 "a request is made to download the distribution",
-                "/v1/catalogs/common/datasets/API_TEST/authorize/token",
                 "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220117/distributions/csv",
                 uploadHeaders,
                 "A,B,C");
@@ -73,9 +69,6 @@ public class FusionUploadConsumerPactTest {
     @SneakyThrows
     @PactTestFor(pactMethod = "uploadFile")
     void testUploadFile(MockServer mockServer) {
-
-        log.atInfo().log("Executing upload file test");
-
         givenInstanceOfFusionSdk(mockServer);
         givenFileReadForUpload("/common_API_TEST_20220117.csv", "A,B,C");
 
@@ -93,9 +86,6 @@ public class FusionUploadConsumerPactTest {
     @Test
     @PactTestFor(pactMethod = "uploadStream")
     void testUploadStream(MockServer mockServer) {
-
-        log.atInfo().log("Executing upload stream test");
-
         givenInstanceOfFusionSdk(mockServer);
 
         Assertions.assertDoesNotThrow(() -> fusion.upload(

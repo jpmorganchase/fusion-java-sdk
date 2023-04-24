@@ -4,9 +4,7 @@ import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class RequestResponseHelper {
 
     private static final String BEARER_TOKEN = "my-bearer-token";
@@ -45,12 +43,10 @@ public class RequestResponseHelper {
             PactDslWithProvider builder,
             String given,
             String upon,
-            String authPath,
             String path,
             Map<String, String> headers,
             String body) {
 
-        log.atInfo().log("Initialising Expectation for upload");
         return builder.given(given)
                 .uponReceiving(upon)
                 .path(path)
