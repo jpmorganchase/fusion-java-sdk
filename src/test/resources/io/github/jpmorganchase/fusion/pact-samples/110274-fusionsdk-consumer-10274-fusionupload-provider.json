@@ -1,9 +1,9 @@
 {
   "provider": {
-    "name": "FusionUpload"
+    "name": "10274-fusionupload-provider"
   },
   "consumer": {
-    "name": "FusionSdk"
+    "name": "110274-fusionsdk-consumer"
   },
   "interactions": [
     {
