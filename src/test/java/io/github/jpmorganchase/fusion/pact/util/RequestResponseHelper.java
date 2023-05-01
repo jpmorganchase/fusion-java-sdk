@@ -1,9 +1,13 @@
 package io.github.jpmorganchase.fusion.pact.util;
 
+import au.com.dius.pact.consumer.dsl.Dsl;
 import au.com.dius.pact.consumer.dsl.DslPart;
+import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import java.util.Map;
+
+import static io.github.jpmorganchase.fusion.pact.util.BodyBuilders.error;
 
 public class RequestResponseHelper {
 
@@ -30,6 +34,34 @@ public class RequestResponseHelper {
     public static RequestResponsePact getExpectation(
             PactDslWithProvider builder, String given, String upon, String path, DslPart body) {
         return getExpectation(builder, given, upon, path, body, "application/json");
+    }
+
+    public static RequestResponsePact failedGetExpectation(
+            PactDslWithProvider builder, String given, String upon, String path, String error, int status) {
+        return failedGetExpectation(builder, given, upon, path, status, error(path, status, error));
+    }
+
+    public static RequestResponsePact failedGetExpectation(
+            PactDslWithProvider builder, String given, String upon, String path, int status) {
+        return failedGetExpectation(builder, given, upon, path,  null, status);
+    }
+
+    public static RequestResponsePact failedGetExpectation(
+            PactDslWithProvider builder, String given, String upon, String path, int status, DslPart body) {
+
+        PactDslResponse response = builder.given(given)
+                .uponReceiving(upon)
+                .path(path)
+                .matchHeader("Authorization", AUTH_VAL)
+                .method("GET")
+                .willRespondWith()
+                .status(status);
+
+        if (null!=body){
+            response.body(body);
+        }
+
+        return response.toPact();
     }
 
     public static RequestResponsePact downloadExpectation(

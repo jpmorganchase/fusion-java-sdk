@@ -27,6 +27,21 @@ public class BodyBuilders {
                 .closeArray();
     }
 
+    public static DslPart noCatalogs() {
+        return header("catalogs/", "A list of available catalogs, catalogs", "catalogs", "Catalogs")
+                .minArrayLike("resources", 0);
+    }
+
+    public static DslPart error(String path, int status, String error) {
+        PactDslJsonBody b = new PactDslJsonBody();
+        return b.stringType("timestamp", "2023-05-01")
+                .stringType("path", path)
+                .integerType("status", status)
+                .stringType("error", error)
+                .stringType("requestId");
+
+    }
+
     public static DslPart catalogResources() {
         return header("common", "A catalog of common data", "common", "Common data catalog")
                 .minArrayLike("resources", 1)
@@ -62,6 +77,12 @@ public class BodyBuilders {
                 .closeArray();
     }
 
+    public static DslPart noProducts() {
+        return header("products/", "A list of available products", "products", "Products")
+                .minArrayLike("resources", 0)
+                .closeArray();
+    }
+
     public static DslPart datasets() {
         return header("datasets/", "A list of available datasets", "datasets", "Datasets")
                 .minArrayLike("resources", 1)
@@ -84,6 +105,12 @@ public class BodyBuilders {
                 .booleanType("isRawData", false)
                 .booleanType("hasSample", false)
                 .stringType("@id", "GFI_OP_CF/")
+                .closeArray();
+    }
+
+    public static DslPart noDatasets() {
+        return header("datasets/", "A list of available datasets", "datasets", "Datasets")
+                .minArrayLike("resources", 0)
                 .closeArray();
     }
 
@@ -127,6 +154,17 @@ public class BodyBuilders {
                 .date("toDate", "yyyy-MM-dd", asDate("2023-03-17"))
                 .stringType("identifier", "20230319")
                 .stringType("@id", "20230319/")
+                .closeArray();
+    }
+
+    public static DslPart noDatasetMembers() {
+
+        return header(
+                "datasetseries/",
+                "A list of available datasetseries of a dataset",
+                "datasetseries",
+                "DatasetSeries")
+                .minArrayLike("resources", 0)
                 .closeArray();
     }
 

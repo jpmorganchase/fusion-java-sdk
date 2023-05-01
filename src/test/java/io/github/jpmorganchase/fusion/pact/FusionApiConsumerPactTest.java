@@ -1,8 +1,7 @@
 package io.github.jpmorganchase.fusion.pact;
 
 import static io.github.jpmorganchase.fusion.pact.util.BodyBuilders.*;
-import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.downloadExpectation;
-import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.getExpectation;
+import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -14,6 +13,7 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import io.github.jpmorganchase.fusion.Fusion;
+import io.github.jpmorganchase.fusion.api.APICallException;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.pact.util.FileHelper;
 import java.io.InputStream;
@@ -21,9 +21,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Map;
+
+import io.github.jpmorganchase.fusion.parsing.ParsingException;
 import lombok.SneakyThrows;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -38,27 +41,73 @@ public class FusionApiConsumerPactTest {
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listCatalogs(PactDslWithProvider builder) {
         return getExpectation(
-                builder, "a list of catalogs", "a request for available catalogs", "/v1/catalogs", catalogs());
+                builder,
+                "catalogs are available",
+                "a request for catalogs",
+                "/v1/catalogs",
+                catalogs());
+    }
+
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
+    public RequestResponsePact listCatalogsWhenNoneAreAvailable(PactDslWithProvider builder) {
+        return getExpectation(
+                builder,
+                "no catalogs are available",
+                "a request for catalogs",
+                "/v1/catalogs",
+                noCatalogs());
+    }
+
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
+    public RequestResponsePact listCatalogsWhenNotAuthorized(PactDslWithProvider builder) {
+        return failedGetExpectation(
+                builder,
+                "not authorized to list catalogs",
+                "a request for catalogs",
+                "/v1/catalogs",
+                401);
     }
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact getCatalogResources(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
-                "a list of catalogs resources",
-                "a request for catalogs resources",
+                "catalog resources exist",
+                "a request for catalog resources",
                 "/v1/catalogs/common",
                 catalogResources());
+    }
+
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
+    public RequestResponsePact getCatalogResourcesWhenCatalogNotFound(PactDslWithProvider builder) {
+        return failedGetExpectation(
+                builder,
+                "a catalog that does not exist",
+                "a request for that catalogs resources",
+                "/v1/catalogs/alternate",
+                "Not Found",
+                404
+                );
     }
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listProducts(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
-                "a list of data products",
+                "data products exist",
                 "a request for a list of data products",
                 "/v1/catalogs/common/products",
                 products());
+    }
+
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
+    public RequestResponsePact listProductsWhenNoneExist(PactDslWithProvider builder) {
+        return getExpectation(
+                builder,
+                "no data products exist",
+                "a request for a list of data products",
+                "/v1/catalogs/common/products",
+                noProducts());
     }
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
@@ -72,11 +121,21 @@ public class FusionApiConsumerPactTest {
     }
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
+    public RequestResponsePact listDatasetsWhenNoneExist(PactDslWithProvider builder) {
+        return getExpectation(
+                builder,
+                "no datasets exist",
+                "a request for a list of datasets",
+                "/v1/catalogs/common/datasets",
+                noDatasets());
+    }
+
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact getDatasetResources(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
-                "a dataset resource",
-                "a request for a dataset resource",
+                "dataset resources are available",
+                "a request for a dataset resources",
                 "/v1/catalogs/common/datasets/GFI_OP_CF",
                 datasetResource());
     }
@@ -85,18 +144,28 @@ public class FusionApiConsumerPactTest {
     public RequestResponsePact listDatasetMembers(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
-                "a list of series members for a dataset",
-                "a request for a list of series members of a dataset",
+                "dataset members are available",
+                "a request for a list of dataset members",
                 "/v1/catalogs/common/datasets/API_TEST/datasetseries",
                 datasetMembers());
+    }
+
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
+    public RequestResponsePact listDatasetMembersWhenNoneExist(PactDslWithProvider builder) {
+        return getExpectation(
+                builder,
+                "no dataset members exist",
+                "a request for a list of dataset members",
+                "/v1/catalogs/common/datasets/API_TEST/datasetseries",
+                noDatasetMembers());
     }
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact getDatasetMemberResources(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
-                "metadata for a dataset series member",
-                "a request for dataset series member metadata",
+                "metadata belonging to a dataset series member",
+                "a request for a dataset members metadata",
                 "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16",
                 datasetMemberResources());
     }
@@ -105,7 +174,7 @@ public class FusionApiConsumerPactTest {
     public RequestResponsePact listAttributes(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
-                "a list of attributes for a dataset in a catalog",
+                "attributes belonging to a dataset",
                 "a request for a list of attributes from a dataset",
                 "/v1/catalogs/common/datasets/API_TEST/attributes",
                 attributes(),
@@ -116,8 +185,8 @@ public class FusionApiConsumerPactTest {
     public RequestResponsePact listDistributions(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
-                "a list of distributions available for a series member",
-                "a request for distributions available for a series member",
+                "distributions available for a dataset member",
+                "a request to list available distributions belonging to a dataset member",
                 "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions",
                 distributions());
     }
@@ -161,6 +230,29 @@ public class FusionApiConsumerPactTest {
     }
 
     @Test
+    @PactTestFor(pactMethod = "listCatalogsWhenNoneAreAvailable")
+    void testListCatalogsWhenNoneAreAvailable(MockServer mockServer) {
+
+        givenInstanceOfFusionSdk(mockServer);
+
+        ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listCatalogs());
+        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "listCatalogsWhenNotAuthorized")
+    void testListCatalogsWhenNotAuthorized(MockServer mockServer) {
+
+        givenInstanceOfFusionSdk(mockServer);
+
+        APICallException ex = Assertions.assertThrows(APICallException.class, () -> fusion.listCatalogs());
+        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("The bearer token is missing or an invalid bearer token was provided")));
+        assertThat("Exception message is incorrect", ex.getResponseCode(), is(equalTo(401)));
+
+    }
+
+    @Test
     @PactTestFor(pactMethod = "getCatalogResources")
     void testCatalogResources(MockServer mockServer) {
 
@@ -180,6 +272,18 @@ public class FusionApiConsumerPactTest {
             assertThat("resource identifier is missing from resource", dataset.containsKey("identifier"), is(true));
             assertThat("resource title is missing from resource", dataset.containsKey("title"), is(true));
         });
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "getCatalogResourcesWhenCatalogNotFound")
+    void testCatalogResourcesNotFound(MockServer mockServer) {
+
+        givenInstanceOfFusionSdk(mockServer);
+
+        APICallException ex = Assertions.assertThrows(APICallException.class, () -> fusion.catalogResources("alternate"));
+
+        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("The requested resource does not exist.")));
+        assertThat("Exception response code is incorrect", ex.getResponseCode(), is(equalTo(404)));
     }
 
     @Test
@@ -204,6 +308,16 @@ public class FusionApiConsumerPactTest {
     }
 
     @Test
+    @PactTestFor(pactMethod = "listProductsWhenNoneExist")
+    void testListProductsWhenNoneExist(MockServer mockServer) {
+
+        givenInstanceOfFusionSdk(mockServer);
+
+        ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listProducts("common"));
+        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+    }
+
+    @Test
     @PactTestFor(pactMethod = "listDatasets")
     void testListDatasets(MockServer mockServer) {
 
@@ -222,6 +336,16 @@ public class FusionApiConsumerPactTest {
         assertThat("dataset title is incorrect", dataset.getTitle(), is(equalTo("Swaptions Caps & Floors")));
         assertThat("dataset identifier is incorrect", dataset.getIdentifier(), is(equalTo("GFI_OP_CF")));
         assertThat("dataset frequency is incorrect", dataset.getFrequency(), is(equalTo("Daily")));
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "listDatasetsWhenNoneExist")
+    void testListDatasetsWhenNoneExist(MockServer mockServer) {
+
+        givenInstanceOfFusionSdk(mockServer);
+
+        ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listDatasets("common"));
+        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
     }
 
     @Test
@@ -266,6 +390,16 @@ public class FusionApiConsumerPactTest {
         assertThat(
                 "dataset series fromDate is incorrect", series.getFromDate(), is(equalTo(LocalDate.of(2023, 3, 18))));
         assertThat("dataset series toDate is incorrect", series.getToDate(), is(equalTo(LocalDate.of(2023, 3, 17))));
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "listDatasetMembersWhenNoneExist")
+    void testListDatasetMembersWhenNoneExist(MockServer mockServer) {
+
+        givenInstanceOfFusionSdk(mockServer);
+
+        ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listDatasetMembers("common", "API_TEST"));
+        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
     }
 
     @Test

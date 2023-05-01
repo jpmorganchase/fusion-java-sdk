@@ -31,7 +31,7 @@ public class FusionUploadConsumerPactTest {
 
     Fusion fusion;
 
-    @Pact(provider = "10274-fusionupload-provider", consumer = "110274-fusionsdk-consumer")
+    @Pact(provider = "110274-fusionupload-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact uploadFile(PactDslWithProvider builder) {
 
         Map<String, String> uploadHeaders = givenUploadHeaders(

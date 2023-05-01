@@ -1,6 +1,6 @@
 {
   "provider": {
-    "name": "10274-fusionupload-provider"
+    "name": "110274-fusionupload-provider"
   },
   "consumer": {
     "name": "110274-fusionsdk-consumer"
