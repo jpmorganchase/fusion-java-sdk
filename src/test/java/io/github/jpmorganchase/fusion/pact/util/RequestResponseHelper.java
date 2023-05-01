@@ -3,6 +3,8 @@ package io.github.jpmorganchase.fusion.pact.util;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public class RequestResponseHelper {
@@ -14,7 +16,7 @@ public class RequestResponseHelper {
     ;
 
     public static RequestResponsePact getExpectation(
-            PactDslWithProvider builder, String given, String upon, String path, DslPart body) {
+            PactDslWithProvider builder, String given, String upon, String path, DslPart body, String contentType) {
         return builder.given(given)
                 .uponReceiving(upon)
                 .path(path)
@@ -22,8 +24,14 @@ public class RequestResponseHelper {
                 .method("GET")
                 .willRespondWith()
                 .status(200)
+                .matchHeader("Content-Type", contentType)
                 .body(body)
                 .toPact();
+    }
+
+    public static RequestResponsePact getExpectation(
+            PactDslWithProvider builder, String given, String upon, String path, DslPart body) {
+        return getExpectation(builder, given, upon, path, body, "application/json");
     }
 
     public static RequestResponsePact downloadExpectation(
@@ -35,7 +43,7 @@ public class RequestResponseHelper {
                 .method("GET")
                 .willRespondWith()
                 .status(200)
-                .body(body)
+                .body(body, "text/csv")
                 .toPact();
     }
 

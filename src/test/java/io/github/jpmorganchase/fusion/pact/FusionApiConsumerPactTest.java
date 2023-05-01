@@ -96,8 +96,8 @@ public class FusionApiConsumerPactTest {
         return getExpectation(
                 builder,
                 "metadata for a dataset series member",
-                "a request dataset series member metadata",
-                "/v1/catalogs/common/datasets/API_TEST/datasetseries/20230319",
+                "a request for dataset series member metadata",
+                "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16",
                 datasetMemberResources());
     }
 
@@ -108,7 +108,7 @@ public class FusionApiConsumerPactTest {
                 "a list of attributes for a dataset in a catalog",
                 "a request for a list of attributes from a dataset",
                 "/v1/catalogs/common/datasets/API_TEST/attributes",
-                attributes());
+                attributes(), "application/ld\\+json");
     }
 
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
@@ -117,7 +117,7 @@ public class FusionApiConsumerPactTest {
                 builder,
                 "a list of distributions available for a series member",
                 "a request for distributions available for a series member",
-                "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220116/distributions",
+                "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions",
                 distributions());
     }
 
@@ -127,14 +127,14 @@ public class FusionApiConsumerPactTest {
                 builder,
                 "a distribution that is available for download",
                 "a request is made to download the distribution",
-                "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220116/distributions/csv",
+                "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions/csv",
                 "A,B,C");
     }
 
     @AfterEach
     @SneakyThrows
     public void cleanupDirectory() {
-        Files.deleteIfExists(Paths.get("downloads/common_API_TEST_20220116.csv"));
+        Files.deleteIfExists(Paths.get("downloads/common_API_TEST_2022-01-16.csv"));
     }
 
     @Test
@@ -274,7 +274,7 @@ public class FusionApiConsumerPactTest {
         givenInstanceOfFusionSdk(mockServer);
 
         Map<String, Map<String, Object>> datasetMemberResources =
-                fusion.datasetMemberResources("common", "API_TEST", "20230319");
+                fusion.datasetMemberResources("common", "API_TEST", "2022-01-16");
 
         assertThat("dataset member resources must not be empty", datasetMemberResources, Is.is(notNullValue()));
         assertThat(
@@ -327,7 +327,7 @@ public class FusionApiConsumerPactTest {
         assertThat("attribute resources expected to contain key", resources.containsKey("A"), is(true));
 
         Map<String, Object> resource = resources.get("A");
-        assertThat("attribute resource id is incorrect", resource.get("id"), is(equalTo("4000003")));
+        assertThat("attribute resource id is incorrect", String.valueOf(resource.get("id")), is(equalTo("4000003.0")));
         assertThat("attribute resource identifier is incorrect", resource.get("identifier"), is(equalTo("A")));
         assertThat("attribute resource source is incorrect", resource.get("source"), is(equalTo("Data Query")));
         assertThat("attribute resource dataType is incorrect", resource.get("dataType"), is(equalTo("String")));
@@ -351,7 +351,7 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-        Map<String, Distribution> distributions = fusion.listDistributions("common", "API_TEST", "20220116");
+        Map<String, Distribution> distributions = fusion.listDistributions("common", "API_TEST", "2022-01-16");
 
         assertThat("distributions must not be empty", distributions, Is.is(notNullValue()));
         assertThat("distributions expected to contain key", distributions.containsKey("csv"), is(true));
@@ -378,9 +378,9 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-        fusion.download("common", "API_TEST", "20220116", "csv");
+        fusion.download("common", "API_TEST", "2022-01-16", "csv");
 
-        thenTheFileShouldBeDownloaded("downloads/common_API_TEST_20220116.csv");
+        thenTheFileShouldBeDownloaded("downloads/common_API_TEST_2022-01-16.csv");
         thenTheFileContentsShouldBeEqualTo("A,B,C");
     }
 
@@ -390,7 +390,7 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-        downloadedFileInputStream = fusion.downloadStream("common", "API_TEST", "20220116", "csv");
+        downloadedFileInputStream = fusion.downloadStream("common", "API_TEST", "2022-01-16", "csv");
 
         thenTheFileContentsShouldBeEqualTo("A,B,C");
     }
