@@ -31,7 +31,7 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
+          "Content-Type": "application/json"
         },
         "body": {
           "identifier": "GFI_OP_CF",
@@ -62,9 +62,9 @@
           },
           "maintainer": "J.P. Morgan DM Rates Research",
           "frequency": "Daily",
-          "createdDate": "2023-04-24",
+          "createdDate": "2023-05-01",
           "isThirdPartyData": false,
-          "modifiedDate": "2023-04-24",
+          "modifiedDate": "2023-05-01",
           "publisher": "J.P. Morgan",
           "@id": "GFI_OP_CF/",
           "tag": [
@@ -83,6 +83,17 @@
           "isRestricted": false
         },
         "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
           "body": {
             "$.@context.@vocab": {
               "matchers": [
@@ -348,17 +359,6 @@
               ],
               "combine": "AND"
             }
-          },
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
-                }
-              ],
-              "combine": "AND"
-            }
           }
         },
         "generators": {
@@ -396,7 +396,7 @@
       "description": "a request is made to download the distribution",
       "request": {
         "method": "GET",
-        "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220116/distributions/csv",
+        "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions/csv",
         "headers": {
           "Authorization": "Bearer my-bearer-token"
         },
@@ -416,6 +416,9 @@
       },
       "response": {
         "status": 200,
+        "headers": {
+          "Content-Type": "text/csv"
+        },
         "body": "A,B,C"
       },
       "providerStates": [
@@ -449,7 +452,7 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
+          "Content-Type": "application/ld+json"
         },
         "body": {
           "identifier": "attributes",
@@ -462,7 +465,7 @@
               "sourceFieldId": "a_source_field",
               "description": "Description for attribute A",
               "index": 1,
-              "id": "4000003",
+              "id": 4000003,
               "source": "Data Query",
               "title": "A"
             }
@@ -475,6 +478,17 @@
           }
         },
         "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/ld\\+json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
           "body": {
             "$.@context.@vocab": {
               "matchers": [
@@ -544,7 +558,7 @@
             "$.resources[*].id": {
               "matchers": [
                 {
-                  "match": "type"
+                  "match": "integer"
                 }
               ],
               "combine": "AND"
@@ -605,17 +619,6 @@
               ],
               "combine": "AND"
             }
-          },
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
-                }
-              ],
-              "combine": "AND"
-            }
           }
         }
       },
@@ -650,7 +653,7 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
+          "Content-Type": "application/json"
         },
         "body": {
           "identifier": "common",
@@ -671,6 +674,17 @@
           }
         },
         "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
           "body": {
             "$.@context.@vocab": {
               "matchers": [
@@ -761,17 +775,6 @@
               ],
               "combine": "AND"
             }
-          },
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
-                }
-              ],
-              "combine": "AND"
-            }
           }
         }
       },
@@ -806,7 +809,7 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
+          "Content-Type": "application/json"
         },
         "body": {
           "identifier": "catalogs",
@@ -827,6 +830,17 @@
           }
         },
         "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
           "body": {
             "$.@context.@vocab": {
               "matchers": [
@@ -916,17 +930,6 @@
               ],
               "combine": "AND"
             }
-          },
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
-                }
-              ],
-              "combine": "AND"
-            }
           }
         }
       },
@@ -961,7 +964,7 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
+          "Content-Type": "application/json"
         },
         "body": {
           "identifier": "products",
@@ -974,7 +977,7 @@
                 "string"
               ],
               "datasetCount": 18,
-              "releaseDate": "2023-04-24",
+              "releaseDate": "2023-05-01",
               "deliveryChannel": [
                 "string",
                 "string"
@@ -1014,6 +1017,17 @@
           }
         },
         "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
           "body": {
             "$.@context.@vocab": {
               "matchers": [
@@ -1271,17 +1285,6 @@
               ],
               "combine": "AND"
             }
-          },
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
-                }
-              ],
-              "combine": "AND"
-            }
           }
         },
         "generators": {
@@ -1344,7 +1347,7 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
+          "Content-Type": "application/json"
         },
         "body": {
           "identifier": "datasets",
@@ -1365,11 +1368,10 @@
                 "string"
               ],
               "title": "Swaptions Caps & Floors",
-              "maintainer": "J.P. Morgan DM Rates Research",
               "frequency": "Daily",
-              "createdDate": "2023-04-24",
+              "createdDate": "2023-05-01",
               "isThirdPartyData": false,
-              "modifiedDate": "2023-04-24",
+              "modifiedDate": "2023-05-01",
               "publisher": "J.P. Morgan",
               "tag": [
                 "string",
@@ -1396,6 +1398,17 @@
           }
         },
         "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
           "body": {
             "$.@context.@vocab": {
               "matchers": [
@@ -1528,14 +1541,6 @@
               ],
               "combine": "AND"
             },
-            "$.resources[*].maintainer": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
             "$.resources[*].modifiedDate": {
               "matchers": [
                 {
@@ -1661,17 +1666,6 @@
               ],
               "combine": "AND"
             }
-          },
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
-                }
-              ],
-              "combine": "AND"
-            }
           }
         },
         "generators": {
@@ -1709,7 +1703,7 @@
       "description": "a request for distributions available for a series member",
       "request": {
         "method": "GET",
-        "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/20220116/distributions",
+        "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions",
         "headers": {
           "Authorization": "Bearer my-bearer-token"
         },
@@ -1730,7 +1724,7 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
+          "Content-Type": "application/json"
         },
         "body": {
           "identifier": "distributions",
@@ -1753,6 +1747,17 @@
           }
         },
         "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
           "body": {
             "$.@context.@vocab": {
               "matchers": [
@@ -1859,17 +1864,6 @@
               ],
               "combine": "AND"
             }
-          },
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
-                }
-              ],
-              "combine": "AND"
-            }
           }
         }
       },
@@ -1904,7 +1898,7 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
+          "Content-Type": "application/json"
         },
         "body": {
           "identifier": "datasetseries",
@@ -1926,6 +1920,17 @@
           }
         },
         "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
           "body": {
             "$.@context.@vocab": {
               "matchers": [
@@ -2027,17 +2032,6 @@
               ],
               "combine": "AND"
             }
-          },
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
-                }
-              ],
-              "combine": "AND"
-            }
           }
         }
       },
@@ -2072,28 +2066,39 @@
       "response": {
         "status": 200,
         "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
+          "Content-Type": "application/json"
         },
         "body": {
-          "fromDate": "2023-03-18",
-          "identifier": "20230319",
-          "createdDate": "2023-03-19",
-          "toDate": "2023-03-17",
-          "resources": [
-            {
-              "identifier": "distributions",
-              "description": "A list of available distributions",
-              "@id": "distributions/",
-              "title": "Distributions"
-            }
-          ],
-          "@id": "20230319/",
           "@context": {
             "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
             "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
-          }
+          },
+          "@id": "20230319/",
+          "createdDate": "2023-03-19",
+          "fromDate": "2023-03-18",
+          "identifier": "20230319",
+          "resources": [
+            {
+              "@id": "distributions/",
+              "description": "A list of available distributions",
+              "identifier": "distributions",
+              "title": "Distributions"
+            }
+          ],
+          "toDate": "2023-03-17"
         },
         "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
           "body": {
             "$.@context.@vocab": {
               "matchers": [
@@ -2195,13 +2200,170 @@
               ],
               "combine": "AND"
             }
-          },
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "metadata for a dataset series member"
+        }
+      ]
+    },
+    {
+      "description": "a request for dataset series member metadata",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "fromDate": "2023-03-18",
+          "identifier": "20230319",
+          "createdDate": "2023-03-19",
+          "toDate": "2023-03-17",
+          "resources": [
+            {
+              "identifier": "distributions",
+              "description": "A list of available distributions",
+              "@id": "distributions/",
+              "title": "Distributions"
+            }
+          ],
+          "@id": "20230319/",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
           "header": {
             "Content-Type": {
               "matchers": [
                 {
                   "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.createdDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.fromDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.toDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
                 }
               ],
               "combine": "AND"
