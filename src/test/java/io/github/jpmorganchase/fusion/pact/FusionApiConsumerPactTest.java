@@ -35,13 +35,13 @@ public class FusionApiConsumerPactTest {
     Fusion fusion;
     InputStream downloadedFileInputStream;
 
-    @Pact(provider = "FusionApi", consumer = "FusionSdk")
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listCatalogs(PactDslWithProvider builder) {
         return getExpectation(
                 builder, "a list of catalogs", "a request for available catalogs", "/v1/catalogs", catalogs());
     }
 
-    @Pact(provider = "FusionApi", consumer = "FusionSdk")
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact getCatalogResources(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
@@ -51,7 +51,7 @@ public class FusionApiConsumerPactTest {
                 catalogResources());
     }
 
-    @Pact(provider = "FusionApi", consumer = "FusionSdk")
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listProducts(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
@@ -61,7 +61,7 @@ public class FusionApiConsumerPactTest {
                 products());
     }
 
-    @Pact(provider = "FusionApi", consumer = "FusionSdk")
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listDatasets(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
@@ -71,7 +71,7 @@ public class FusionApiConsumerPactTest {
                 datasets());
     }
 
-    @Pact(provider = "FusionApi", consumer = "FusionSdk")
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact getDatasetResources(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
@@ -81,7 +81,7 @@ public class FusionApiConsumerPactTest {
                 datasetResource());
     }
 
-    @Pact(provider = "FusionApi", consumer = "FusionSdk")
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listDatasetMembers(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
@@ -91,7 +91,7 @@ public class FusionApiConsumerPactTest {
                 datasetMembers());
     }
 
-    @Pact(provider = "FusionApi", consumer = "FusionSdk")
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact getDatasetMemberResources(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
@@ -101,7 +101,7 @@ public class FusionApiConsumerPactTest {
                 datasetMemberResources());
     }
 
-    @Pact(provider = "FusionApi", consumer = "FusionSdk")
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listAttributes(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
@@ -112,7 +112,7 @@ public class FusionApiConsumerPactTest {
                 "application/ld\\+json");
     }
 
-    @Pact(provider = "FusionApi", consumer = "FusionSdk")
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listDistributions(PactDslWithProvider builder) {
         return getExpectation(
                 builder,
@@ -122,7 +122,7 @@ public class FusionApiConsumerPactTest {
                 distributions());
     }
 
-    @Pact(provider = "FusionApi", consumer = "FusionSdk")
+    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact download(PactDslWithProvider builder) {
         return downloadExpectation(
                 builder,
