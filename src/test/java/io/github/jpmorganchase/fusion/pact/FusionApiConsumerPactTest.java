@@ -16,13 +16,12 @@ import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.api.APICallException;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.pact.util.FileHelper;
+import io.github.jpmorganchase.fusion.parsing.ParsingException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Map;
-
-import io.github.jpmorganchase.fusion.parsing.ParsingException;
 import lombok.SneakyThrows;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.AfterEach;
@@ -40,32 +39,19 @@ public class FusionApiConsumerPactTest {
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listCatalogs(PactDslWithProvider builder) {
-        return getExpectation(
-                builder,
-                "catalogs are available",
-                "a request for catalogs",
-                "/v1/catalogs",
-                catalogs());
+        return getExpectation(builder, "catalogs are available", "a request for catalogs", "/v1/catalogs", catalogs());
     }
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listCatalogsWhenNoneAreAvailable(PactDslWithProvider builder) {
         return getExpectation(
-                builder,
-                "no catalogs are available",
-                "a request for catalogs",
-                "/v1/catalogs",
-                noCatalogs());
+                builder, "no catalogs are available", "a request for catalogs", "/v1/catalogs", noCatalogs());
     }
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listCatalogsWhenNotAuthorized(PactDslWithProvider builder) {
         return failedGetExpectation(
-                builder,
-                "not authorized to list catalogs",
-                "a request for catalogs",
-                "/v1/catalogs",
-                401);
+                builder, "not authorized to list catalogs", "a request for catalogs", "/v1/catalogs", 401);
     }
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
@@ -86,8 +72,7 @@ public class FusionApiConsumerPactTest {
                 "a request for that catalogs resources",
                 "/v1/catalogs/alternate",
                 "Not Found",
-                404
-                );
+                404);
     }
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
@@ -236,8 +221,10 @@ public class FusionApiConsumerPactTest {
         givenInstanceOfFusionSdk(mockServer);
 
         ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listCatalogs());
-        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
-
+        assertThat(
+                "Exception message is incorrect",
+                ex.getMessage(),
+                is(equalTo("Failed to parse resources from JSON, none found")));
     }
 
     @Test
@@ -247,9 +234,11 @@ public class FusionApiConsumerPactTest {
         givenInstanceOfFusionSdk(mockServer);
 
         APICallException ex = Assertions.assertThrows(APICallException.class, () -> fusion.listCatalogs());
-        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("The bearer token is missing or an invalid bearer token was provided")));
+        assertThat(
+                "Exception message is incorrect",
+                ex.getMessage(),
+                is(equalTo("The bearer token is missing or an invalid bearer token was provided")));
         assertThat("Exception message is incorrect", ex.getResponseCode(), is(equalTo(401)));
-
     }
 
     @Test
@@ -280,9 +269,13 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-        APICallException ex = Assertions.assertThrows(APICallException.class, () -> fusion.catalogResources("alternate"));
+        APICallException ex =
+                Assertions.assertThrows(APICallException.class, () -> fusion.catalogResources("alternate"));
 
-        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("The requested resource does not exist.")));
+        assertThat(
+                "Exception message is incorrect",
+                ex.getMessage(),
+                is(equalTo("The requested resource does not exist.")));
         assertThat("Exception response code is incorrect", ex.getResponseCode(), is(equalTo(404)));
     }
 
@@ -314,7 +307,10 @@ public class FusionApiConsumerPactTest {
         givenInstanceOfFusionSdk(mockServer);
 
         ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listProducts("common"));
-        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+        assertThat(
+                "Exception message is incorrect",
+                ex.getMessage(),
+                is(equalTo("Failed to parse resources from JSON, none found")));
     }
 
     @Test
@@ -345,7 +341,10 @@ public class FusionApiConsumerPactTest {
         givenInstanceOfFusionSdk(mockServer);
 
         ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listDatasets("common"));
-        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+        assertThat(
+                "Exception message is incorrect",
+                ex.getMessage(),
+                is(equalTo("Failed to parse resources from JSON, none found")));
     }
 
     @Test
@@ -398,8 +397,12 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-        ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listDatasetMembers("common", "API_TEST"));
-        assertThat("Exception message is incorrect", ex.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+        ParsingException ex =
+                Assertions.assertThrows(ParsingException.class, () -> fusion.listDatasetMembers("common", "API_TEST"));
+        assertThat(
+                "Exception message is incorrect",
+                ex.getMessage(),
+                is(equalTo("Failed to parse resources from JSON, none found")));
     }
 
     @Test

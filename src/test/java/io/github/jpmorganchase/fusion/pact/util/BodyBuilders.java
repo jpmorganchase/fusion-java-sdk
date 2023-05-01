@@ -39,7 +39,6 @@ public class BodyBuilders {
                 .integerType("status", status)
                 .stringType("error", error)
                 .stringType("requestId");
-
     }
 
     public static DslPart catalogResources() {
@@ -160,10 +159,10 @@ public class BodyBuilders {
     public static DslPart noDatasetMembers() {
 
         return header(
-                "datasetseries/",
-                "A list of available datasetseries of a dataset",
-                "datasetseries",
-                "DatasetSeries")
+                        "datasetseries/",
+                        "A list of available datasetseries of a dataset",
+                        "datasetseries",
+                        "DatasetSeries")
                 .minArrayLike("resources", 0)
                 .closeArray();
     }

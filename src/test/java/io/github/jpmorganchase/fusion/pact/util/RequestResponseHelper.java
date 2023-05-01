@@ -1,13 +1,12 @@
 package io.github.jpmorganchase.fusion.pact.util;
 
-import au.com.dius.pact.consumer.dsl.Dsl;
+import static io.github.jpmorganchase.fusion.pact.util.BodyBuilders.error;
+
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import java.util.Map;
-
-import static io.github.jpmorganchase.fusion.pact.util.BodyBuilders.error;
 
 public class RequestResponseHelper {
 
@@ -43,7 +42,7 @@ public class RequestResponseHelper {
 
     public static RequestResponsePact failedGetExpectation(
             PactDslWithProvider builder, String given, String upon, String path, int status) {
-        return failedGetExpectation(builder, given, upon, path,  null, status);
+        return failedGetExpectation(builder, given, upon, path, null, status);
     }
 
     public static RequestResponsePact failedGetExpectation(
@@ -57,7 +56,7 @@ public class RequestResponseHelper {
                 .willRespondWith()
                 .status(status);
 
-        if (null!=body){
+        if (null != body) {
             response.body(body);
         }
 
