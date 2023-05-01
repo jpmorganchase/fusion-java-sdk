@@ -3,8 +3,6 @@ package io.github.jpmorganchase.fusion.pact.util;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
-
-import java.util.HashMap;
 import java.util.Map;
 
 public class RequestResponseHelper {

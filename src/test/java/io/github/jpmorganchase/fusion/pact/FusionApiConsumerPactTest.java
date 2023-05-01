@@ -108,7 +108,8 @@ public class FusionApiConsumerPactTest {
                 "a list of attributes for a dataset in a catalog",
                 "a request for a list of attributes from a dataset",
                 "/v1/catalogs/common/datasets/API_TEST/attributes",
-                attributes(), "application/ld\\+json");
+                attributes(),
+                "application/ld\\+json");
     }
 
     @Pact(provider = "FusionApi", consumer = "FusionSdk")
