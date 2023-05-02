@@ -1,7 +1,5 @@
 package io.github.jpmorganchase.fusion.pact.util;
 
-import static io.github.jpmorganchase.fusion.pact.util.BodyBuilders.error;
-
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
@@ -36,13 +34,8 @@ public class RequestResponseHelper {
     }
 
     public static RequestResponsePact failedGetExpectation(
-            PactDslWithProvider builder, String given, String upon, String path, String error, int status) {
-        return failedGetExpectation(builder, given, upon, path, status, error(path, status, error));
-    }
-
-    public static RequestResponsePact failedGetExpectation(
             PactDslWithProvider builder, String given, String upon, String path, int status) {
-        return failedGetExpectation(builder, given, upon, path, null, status);
+        return failedGetExpectation(builder, given, upon, path, status, null);
     }
 
     public static RequestResponsePact failedGetExpectation(

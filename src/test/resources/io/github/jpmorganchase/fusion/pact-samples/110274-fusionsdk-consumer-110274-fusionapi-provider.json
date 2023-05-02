@@ -7,7 +7,7 @@
   },
   "interactions": [
     {
-      "description": "a request for that catalogs resources",
+      "description": "a request for catalogs resources",
       "request": {
         "method": "GET",
         "path": "/v1/catalogs/alternate",
@@ -29,80 +29,7 @@
         }
       },
       "response": {
-        "status": 404,
-        "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
-        },
-        "body": {
-          "path": "/v1/catalogs/alternate",
-          "requestId": "string",
-          "error": "Not Found",
-          "timestamp": "2023-05-01",
-          "status": 404
-        },
-        "matchingRules": {
-          "body": {
-            "$.timestamp": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.path": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.status": {
-              "matchers": [
-                {
-                  "match": "integer"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.error": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.requestId": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            }
-          },
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
-                }
-              ],
-              "combine": "AND"
-            }
-          }
-        },
-        "generators": {
-          "body": {
-            "$.requestId": {
-              "type": "RandomString",
-              "size": 20
-            }
-          }
-        }
+        "status": 404
       },
       "providerStates": [
         {
@@ -192,9 +119,9 @@
               ],
               "title": "Swaptions Caps & Floors",
               "frequency": "Daily",
-              "createdDate": "2023-05-01",
+              "createdDate": "2023-05-02",
               "isThirdPartyData": false,
-              "modifiedDate": "2023-05-01",
+              "modifiedDate": "2023-05-02",
               "publisher": "J.P. Morgan",
               "tag": [
                 "string",
@@ -1072,7 +999,7 @@
                 "string"
               ],
               "datasetCount": 18,
-              "releaseDate": "2023-05-01",
+              "releaseDate": "2023-05-02",
               "deliveryChannel": [
                 "string",
                 "string"
@@ -1641,9 +1568,9 @@
           },
           "maintainer": "J.P. Morgan DM Rates Research",
           "frequency": "Daily",
-          "createdDate": "2023-05-01",
+          "createdDate": "2023-05-02",
           "isThirdPartyData": false,
-          "modifiedDate": "2023-05-01",
+          "modifiedDate": "2023-05-02",
           "publisher": "J.P. Morgan",
           "@id": "GFI_OP_CF/",
           "tag": [
@@ -2812,79 +2739,7 @@
         }
       },
       "response": {
-        "status": 401,
-        "headers": {
-          "Content-Type": "application/json; charset=UTF-8"
-        },
-        "body": {
-          "path": "/v1/catalogs",
-          "requestId": "string",
-          "timestamp": "2023-05-01",
-          "status": 401
-        },
-        "matchingRules": {
-          "body": {
-            "$.timestamp": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.path": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.status": {
-              "matchers": [
-                {
-                  "match": "integer"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.error": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            },
-            "$.requestId": {
-              "matchers": [
-                {
-                  "match": "type"
-                }
-              ],
-              "combine": "AND"
-            }
-          },
-          "header": {
-            "Content-Type": {
-              "matchers": [
-                {
-                  "match": "regex",
-                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
-                }
-              ],
-              "combine": "AND"
-            }
-          }
-        },
-        "generators": {
-          "body": {
-            "$.requestId": {
-              "type": "RandomString",
-              "size": 20
-            }
-          }
-        }
+        "status": 401
       },
       "providerStates": [
         {

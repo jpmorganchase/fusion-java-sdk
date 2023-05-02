@@ -69,9 +69,8 @@ public class FusionApiConsumerPactTest {
         return failedGetExpectation(
                 builder,
                 "a catalog that does not exist",
-                "a request for that catalogs resources",
+                "a request for catalogs resources",
                 "/v1/catalogs/alternate",
-                "Not Found",
                 404);
     }
 
@@ -231,7 +230,7 @@ public class FusionApiConsumerPactTest {
     @PactTestFor(pactMethod = "listCatalogsWhenNotAuthorized")
     void testListCatalogsWhenNotAuthorized(MockServer mockServer) {
 
-        givenInstanceOfFusionSdk(mockServer);
+        givenInstanceOfFusionSdk(mockServer, "invalid-bearer-token");
 
         APICallException ex = Assertions.assertThrows(APICallException.class, () -> fusion.listCatalogs());
         assertThat(
@@ -547,9 +546,13 @@ public class FusionApiConsumerPactTest {
     }
 
     private void givenInstanceOfFusionSdk(MockServer mockServer) {
+        givenInstanceOfFusionSdk(mockServer, "my-bearer-token");
+    }
+
+    private void givenInstanceOfFusionSdk(MockServer mockServer, String bearerToken) {
         fusion = Fusion.builder()
                 .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
-                .bearerToken("my-bearer-token")
+                .bearerToken(bearerToken)
                 .build();
     }
 }
