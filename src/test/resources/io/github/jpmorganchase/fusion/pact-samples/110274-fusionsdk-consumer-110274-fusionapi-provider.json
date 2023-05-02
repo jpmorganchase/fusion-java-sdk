@@ -2722,7 +2722,7 @@
         "method": "GET",
         "path": "/v1/catalogs",
         "headers": {
-          "Authorization": "Bearer my-bearer-token"
+          "Authorization": "Bearer invalid-bearer-token"
         },
         "matchingRules": {
           "header": {
@@ -2730,7 +2730,7 @@
               "matchers": [
                 {
                   "match": "regex",
-                  "regex": "Bearer my-bearer-token"
+                  "regex": "Bearer invalid-bearer-token"
                 }
               ],
               "combine": "AND"
