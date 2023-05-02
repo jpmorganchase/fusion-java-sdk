@@ -1,7 +1,6 @@
 package io.github.jpmorganchase.fusion.pact.util;
 
 import au.com.dius.pact.consumer.dsl.DslPart;
-import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import java.util.Map;
@@ -35,25 +34,19 @@ public class RequestResponseHelper {
 
     public static RequestResponsePact failedGetExpectation(
             PactDslWithProvider builder, String given, String upon, String path, int status) {
-        return failedGetExpectation(builder, given, upon, path, status, null);
+        return failedGetExpectation(builder, given, upon, path, status, AUTH_VAL);
     }
 
     public static RequestResponsePact failedGetExpectation(
-            PactDslWithProvider builder, String given, String upon, String path, int status, DslPart body) {
-
-        PactDslResponse response = builder.given(given)
+            PactDslWithProvider builder, String given, String upon, String path, int status, String authValue) {
+        return builder.given(given)
                 .uponReceiving(upon)
                 .path(path)
-                .matchHeader("Authorization", AUTH_VAL)
+                .matchHeader("Authorization", authValue)
                 .method("GET")
                 .willRespondWith()
-                .status(status);
-
-        if (null != body) {
-            response.body(body);
-        }
-
-        return response.toPact();
+                .status(status)
+                .toPact();
     }
 
     public static RequestResponsePact downloadExpectation(

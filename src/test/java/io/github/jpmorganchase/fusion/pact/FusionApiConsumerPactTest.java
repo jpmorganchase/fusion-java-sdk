@@ -51,7 +51,12 @@ public class FusionApiConsumerPactTest {
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
     public RequestResponsePact listCatalogsWhenNotAuthorized(PactDslWithProvider builder) {
         return failedGetExpectation(
-                builder, "not authorized to list catalogs", "a request for catalogs", "/v1/catalogs", 401);
+                builder,
+                "not authorized to list catalogs",
+                "a request for catalogs",
+                "/v1/catalogs",
+                401,
+                "Bearer invalid-bearer-token");
     }
 
     @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
