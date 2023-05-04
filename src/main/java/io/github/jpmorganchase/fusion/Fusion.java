@@ -13,9 +13,11 @@ import io.github.jpmorganchase.fusion.http.JdkClient;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.credential.*;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
+import io.github.jpmorganchase.fusion.oauth.model.BearerToken;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.OAuthDatasetTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.OAuthSessionTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.SimpleDatasetTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
@@ -30,6 +32,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -567,6 +570,8 @@ public class Fusion {
         protected String credentialFile;
         protected String rootURL;
         protected APIManager api;
+        protected Map<String, BearerToken> datasetBearerTokens = new HashMap<>();
+
         protected DatasetTokenProvider datasetTokenProvider;
 
         public FusionBuilder bearerToken(String token) {
@@ -606,8 +611,8 @@ public class Fusion {
             return this;
         }
 
-        public FusionBuilder datasetTokenProvider(DatasetTokenProvider datasetTokenProvider) {
-            this.datasetTokenProvider = datasetTokenProvider;
+        public FusionBuilder datasetBearerToken(String catalog, String dataset, String token) {
+            datasetBearerTokens.put(String.format("%s_%s", catalog, dataset), BearerToken.of(token));
             return this;
         }
     }
@@ -653,9 +658,12 @@ public class Fusion {
 
             // TODO : Make this part of the builder journey
             OAuthSessionTokenProvider sessionTokenProvider = new OAuthSessionTokenProvider(credentials, client);
-            if (datasetTokenProvider == null) {
+            if (datasetBearerTokens.isEmpty()) {
                 datasetTokenProvider = new OAuthDatasetTokenProvider(rootURL, sessionTokenProvider, client);
+            } else {
+                datasetTokenProvider = new SimpleDatasetTokenProvider(datasetBearerTokens);
             }
+
             DigestProducer digestProducer =
                     AlgoSpecificDigestProducer.builder().sha256().build();
 

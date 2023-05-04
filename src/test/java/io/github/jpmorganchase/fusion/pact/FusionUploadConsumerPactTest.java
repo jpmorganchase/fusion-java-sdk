@@ -110,7 +110,7 @@ public class FusionUploadConsumerPactTest {
         fusion = Fusion.builder()
                 .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
                 .bearerToken("my-bearer-token")
-                .datasetTokenProvider((catalog, dataset) -> "my-fusion-bearer")
+                .datasetBearerToken("common", "API_TEST", "my-fusion-bearer")
                 .build();
     }
 
