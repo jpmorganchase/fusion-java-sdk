@@ -1,23 +1,28 @@
 package io.github.jpmorganchase.fusion.pact.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
 import lombok.SneakyThrows;
 
 public class FileHelper {
 
     private FileHelper() {}
 
-    @SneakyThrows
-    public static String readContentsFromStream(InputStream is) {
-        byte[] bytes = new byte[1024];
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int read = is.read(bytes);
-        while (read != -1) {
-            baos.write(bytes, 0, read);
-            read = is.read(bytes);
+    /**
+     This is a test method to read contents from an input stream and return them as a string.
+
+     @param is The input stream to read from.
+     @return The contents of the input stream as a string.
+     */
+    public static String readContentsFromStream(InputStream is) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            return sb.toString();
         }
-        baos.close();
-        return baos.toString();
     }
 }
