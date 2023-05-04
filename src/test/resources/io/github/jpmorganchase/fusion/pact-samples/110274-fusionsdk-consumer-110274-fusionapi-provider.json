@@ -1,0 +1,2759 @@
+{
+  "provider": {
+    "name": "110274-fusionapi-provider"
+  },
+  "consumer": {
+    "name": "110274-fusionsdk-consumer"
+  },
+  "interactions": [
+    {
+      "description": "a request for catalogs resources",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/alternate",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 404
+      },
+      "providerStates": [
+        {
+          "name": "a catalog that does not exist"
+        }
+      ]
+    },
+    {
+      "description": "a request is made to download the distribution",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions/csv",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "text/csv"
+        },
+        "body": "A,B,C"
+      },
+      "providerStates": [
+        {
+          "name": "a distribution that is available for download"
+        }
+      ]
+    },
+    {
+      "description": "a request for a list of datasets",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/datasets",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "datasets",
+          "description": "A list of available datasets",
+          "resources": [
+            {
+              "identifier": "GFI_OP_CF",
+              "subCategory": [
+                "string",
+                "string"
+              ],
+              "isRawData": false,
+              "isInternalOnlyDataset": false,
+              "description": "Premium, volatility, and greeks for EUR",
+              "language": "English",
+              "source": [
+                "string",
+                "string"
+              ],
+              "title": "Swaptions Caps & Floors",
+              "frequency": "Daily",
+              "createdDate": "2023-05-02",
+              "isThirdPartyData": false,
+              "modifiedDate": "2023-05-02",
+              "publisher": "J.P. Morgan",
+              "tag": [
+                "string",
+                "string"
+              ],
+              "@id": "GFI_OP_CF/",
+              "category": [
+                "string",
+                "string"
+              ],
+              "region": [
+                "string",
+                "string"
+              ],
+              "hasSample": false,
+              "isRestricted": false
+            }
+          ],
+          "@id": "datasets/",
+          "title": "Datasets",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].category": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].category[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].createdDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].frequency": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].isThirdPartyData": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].isInternalOnlyDataset": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].language": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].modifiedDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].publisher": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].region": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].region[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].source": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].source[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].subCategory": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].subCategory[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].tag": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].tag[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].isRestricted": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].isRawData": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].hasSample": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        },
+        "generators": {
+          "body": {
+            "$.resources[*].category[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.resources[*].region[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.resources[*].source[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.resources[*].subCategory[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.resources[*].tag[*]": {
+              "type": "RandomString",
+              "size": 20
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "a list of datasets"
+        }
+      ]
+    },
+    {
+      "description": "a request for a list of attributes from a dataset",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/datasets/API_TEST/attributes",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/ld+json"
+        },
+        "body": {
+          "identifier": "attributes",
+          "description": "A list of available attributes",
+          "resources": [
+            {
+              "identifier": "A",
+              "isDatasetKey": false,
+              "dataType": "String",
+              "sourceFieldId": "a_source_field",
+              "description": "Description for attribute A",
+              "index": 1,
+              "id": 4000003,
+              "source": "Data Query",
+              "title": "A"
+            }
+          ],
+          "@id": "attributes/",
+          "title": "Attributes",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/ld\\+json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].id": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].source": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].dataType": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].index": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].isDatasetKey": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].sourceFieldId": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "attributes belonging to a dataset"
+        }
+      ]
+    },
+    {
+      "description": "a request for catalog resources",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "common",
+          "description": "A catalog of common data",
+          "resources": [
+            {
+              "identifier": "datasets",
+              "description": "A list of available datasets (for access or download in one or more formats)",
+              "@id": "datasets/",
+              "title": "Datasets"
+            }
+          ],
+          "@id": "common",
+          "title": "Common data catalog",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "catalog resources exist"
+        }
+      ]
+    },
+    {
+      "description": "a request for catalogs",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "catalogs",
+          "description": "A list of available catalogs, catalogs",
+          "resources": [
+            {
+              "identifier": "common",
+              "description": "A catalog of common data",
+              "@id": "common",
+              "title": "Common data catalog"
+            }
+          ],
+          "@id": "catalogs/",
+          "title": "Catalogs",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "catalogs are available"
+        }
+      ]
+    },
+    {
+      "description": "a request for a list of data products",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/products",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "products",
+          "description": "A list of available products",
+          "resources": [
+            {
+              "identifier": "ESG00008",
+              "subCategory": [
+                "string",
+                "string"
+              ],
+              "datasetCount": 18,
+              "releaseDate": "2023-05-02",
+              "deliveryChannel": [
+                "string",
+                "string"
+              ],
+              "description": "MSCI ESG Description",
+              "isActive": true,
+              "title": "MSCI ESG Ratings",
+              "maintainer": [
+                "string",
+                "string"
+              ],
+              "shortAbstract": "A robust ESG integration tool",
+              "publisher": "J.P. Morgan",
+              "theme": "ESG",
+              "tag": [
+                "string",
+                "string"
+              ],
+              "@id": "ESG00008/",
+              "category": [
+                "string",
+                "string"
+              ],
+              "region": [
+                "string",
+                "string"
+              ],
+              "isRestricted": true,
+              "status": "Available"
+            }
+          ],
+          "@id": "products/",
+          "title": "Products",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].category": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].category[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].datasetCount": {
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].deliveryChannel": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].deliveryChannel[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].isActive": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].maintainer": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].maintainer[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].publisher": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].region": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].region[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].releaseDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].shortAbstract": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].status": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].subCategory": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].subCategory[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].tag": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].tag[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].theme": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].isRestricted": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        },
+        "generators": {
+          "body": {
+            "$.resources[*].category[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.resources[*].deliveryChannel[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.resources[*].maintainer[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.resources[*].region[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.resources[*].subCategory[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.resources[*].tag[*]": {
+              "type": "RandomString",
+              "size": 20
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "data products exist"
+        }
+      ]
+    },
+    {
+      "description": "a request for a list of dataset members",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "datasetseries",
+          "description": "A list of available datasetseries of a dataset",
+          "resources": [
+            {
+              "fromDate": "2023-03-18",
+              "identifier": "20230319",
+              "createdDate": "2023-03-19",
+              "toDate": "2023-03-17",
+              "@id": "20230319/"
+            }
+          ],
+          "@id": "datasetseries/",
+          "title": "DatasetSeries",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].createdDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].fromDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].toDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "dataset members are available"
+        }
+      ]
+    },
+    {
+      "description": "a request for a dataset resources",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/datasets/GFI_OP_CF",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "GFI_OP_CF",
+          "subCategory": [
+            "string",
+            "string"
+          ],
+          "isRawData": false,
+          "isInternalOnlyDataset": false,
+          "description": "Premium, volatility, and greeks for EUR",
+          "resources": [
+            {
+              "identifier": "datasetseries",
+              "description": "A list of available datasetseries of a dataset",
+              "@id": "datasetseries/",
+              "title": "Datasetseries"
+            }
+          ],
+          "language": "English",
+          "source": [
+            "string",
+            "string"
+          ],
+          "title": "Swaptions Caps & Floors",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          },
+          "maintainer": "J.P. Morgan DM Rates Research",
+          "frequency": "Daily",
+          "createdDate": "2023-05-02",
+          "isThirdPartyData": false,
+          "modifiedDate": "2023-05-02",
+          "publisher": "J.P. Morgan",
+          "@id": "GFI_OP_CF/",
+          "tag": [
+            "string",
+            "string"
+          ],
+          "category": [
+            "string",
+            "string"
+          ],
+          "region": [
+            "string",
+            "string"
+          ],
+          "hasSample": false,
+          "isRestricted": false
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.category": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.category[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.createdDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.frequency": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.isThirdPartyData": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.isInternalOnlyDataset": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.language": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.maintainer": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.modifiedDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.publisher": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.region": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.region[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.source": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.source[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.subCategory": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.subCategory[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.tag": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.tag[*]": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.isRestricted": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.isRawData": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.hasSample": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        },
+        "generators": {
+          "body": {
+            "$.category[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.region[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.source[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.subCategory[*]": {
+              "type": "RandomString",
+              "size": 20
+            },
+            "$.tag[*]": {
+              "type": "RandomString",
+              "size": 20
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "dataset resources are available"
+        }
+      ]
+    },
+    {
+      "description": "a request to list available distributions belonging to a dataset member",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "distributions",
+          "description": "A list of available distributions",
+          "resources": [
+            {
+              "identifier": "csv",
+              "fileExtension": ".csv",
+              "description": "Snapshot data, in tabular, csv format",
+              "mediaType": "text/csv; header=present; charset=utf-8",
+              "@id": "csv/",
+              "title": "CSV"
+            }
+          ],
+          "@id": "distributions/",
+          "title": "Distributions",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].fileExtension": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].mediaType": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "distributions available for a dataset member"
+        }
+      ]
+    },
+    {
+      "description": "a request for a dataset members metadata",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "fromDate": "2023-03-18",
+          "identifier": "20230319",
+          "createdDate": "2023-03-19",
+          "toDate": "2023-03-17",
+          "resources": [
+            {
+              "identifier": "distributions",
+              "description": "A list of available distributions",
+              "@id": "distributions/",
+              "title": "Distributions"
+            }
+          ],
+          "@id": "20230319/",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources[*].title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.createdDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.fromDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.toDate": {
+              "matchers": [
+                {
+                  "match": "date",
+                  "format": "yyyy-MM-dd"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "metadata belonging to a dataset series member"
+        }
+      ]
+    },
+    {
+      "description": "a request for catalogs",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "catalogs",
+          "description": "A list of available catalogs, catalogs",
+          "resources": [
+
+          ],
+          "@id": "catalogs/",
+          "title": "Catalogs",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "no catalogs are available"
+        }
+      ]
+    },
+    {
+      "description": "a request for a list of data products",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/products",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "products",
+          "description": "A list of available products",
+          "resources": [
+
+          ],
+          "@id": "products/",
+          "title": "Products",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "no data products exist"
+        }
+      ]
+    },
+    {
+      "description": "a request for a list of dataset members",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/datasets/API_TEST/datasetseries",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "datasetseries",
+          "description": "A list of available datasetseries of a dataset",
+          "resources": [
+
+          ],
+          "@id": "datasetseries/",
+          "title": "DatasetSeries",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "no dataset members exist"
+        }
+      ]
+    },
+    {
+      "description": "a request for a list of datasets",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs/common/datasets",
+        "headers": {
+          "Authorization": "Bearer my-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer my-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "identifier": "datasets",
+          "description": "A list of available datasets",
+          "resources": [
+
+          ],
+          "@id": "datasets/",
+          "title": "Datasets",
+          "@context": {
+            "@base": "https://fusion-api.test.aws.jpmchase.net/v1",
+            "@vocab": "https://www.w3.org/ns/dcat3.jsondld"
+          }
+        },
+        "matchingRules": {
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "body": {
+            "$.@context.@vocab": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@context.@base": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.@id": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.description": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.identifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.title": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.resources": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 0
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "no datasets exist"
+        }
+      ]
+    },
+    {
+      "description": "a request for catalogs",
+      "request": {
+        "method": "GET",
+        "path": "/v1/catalogs",
+        "headers": {
+          "Authorization": "Bearer invalid-bearer-token"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer invalid-bearer-token"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 401
+      },
+      "providerStates": [
+        {
+          "name": "not authorized to list catalogs"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.41"
+    }
+  }
+}

@@ -4,3 +4,4 @@
 **/localAuthCredential.json
 **/client_credentials.json
 .vscode
+.DS_Store
