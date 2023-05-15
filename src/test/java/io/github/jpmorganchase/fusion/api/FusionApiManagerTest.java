@@ -12,6 +12,7 @@ import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
+import io.github.jpmorganchase.fusion.model.MultipartTransferContext;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
@@ -77,6 +78,8 @@ public class FusionApiManagerTest {
     private String responseBody;
 
     private String actualResponse;
+
+    private MultipartTransferContext multipartTransferContext;
 
     @Test
     void successfulGetCall() {
@@ -178,6 +181,41 @@ public class FusionApiManagerTest {
         givenCallToClientToUploadIsSuccessful();
         whenFusionApiManagerIsCalledToUploadFileFromStream("2023-03-01", "2023-03-02", "2023-03-03");
         thenHttpStatusShouldIndicateSuccess();
+    }
+
+    @Test
+    void successfullyInitiateMultipartUpload() {
+
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
+        givenUploadFile("large-upload-test.csv");
+        givenRequestHeader("accept", "*/*");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
+        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa");
+        whenFusionApiManagerIsCalledToInitiateMultipartUpload();
+        thenOperationIdShouldMatch("some-operation-id-aa");
+        thenMultipartTransferContextShouldAllowToProgress();
+
+    }
+
+    private void thenMultipartTransferContextShouldAllowToProgress() {
+        assertThat(multipartTransferContext.canProceedToTransfer(), is(equalTo(true)));
+    }
+
+    private void thenOperationIdShouldMatch(String expected) {
+        assertThat(multipartTransferContext.getOperation().getOperationId(), is(equalTo(expected)));
+    }
+
+    private void whenFusionApiManagerIsCalledToInitiateMultipartUpload() {
+        multipartTransferContext = fusionAPIManager.callAPIToInitiateMultipartUpload(apiPath);
+    }
+
+    private void givenCallToClientToInitiateTransferIsSuccessful(String operationId) {
+        when(client.post(eq(apiPath + "/operationType/upload"), eq(requestHeaders), isNull()))
+                .thenReturn(HttpResponse.<String>builder().body("{\"operationId\": \"" + operationId + "\"}").statusCode(200).build());
     }
 
     private void givenDatasetBearerToken(String catalog, String dataset, String token) {

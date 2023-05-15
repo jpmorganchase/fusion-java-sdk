@@ -65,6 +65,11 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
+    public Operation parseOperationResponse(String json) {
+        return gson.fromJson(json, Operation.class);
+    }
+
+    @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass) {
         // TODO: handle varArgs
 

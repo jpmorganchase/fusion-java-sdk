@@ -1,13 +1,19 @@
 package io.github.jpmorganchase.fusion.api;
 
+import com.google.gson.GsonBuilder;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
+import io.github.jpmorganchase.fusion.model.MultipartTransferContext;
+import io.github.jpmorganchase.fusion.model.Operation;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
+import lombok.SneakyThrows;
+
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -179,6 +185,83 @@ public class FusionAPIManager implements APIManager {
         checkResponseStatus(response);
 
         return response.getStatusCode();
+    }
+
+    @SneakyThrows
+    public int callAPIFileUploadForMultipart(String apiPath,
+                                             InputStream data,
+                                             String catalogName,
+                                             String dataset,
+                                             String fromDate,
+                                             String toDate,
+                                             String createdDate) {
+
+
+        //Initiate a multipart upload
+        //1. POST /v1/catalogs/{catalog}/datasets/{dataset}/datasetseries/{seriesmember}/distributions/{distribution}/operationType/upload
+
+        MultipartTransferContext transferContext = callAPIToInitiateMultipartUpload(apiPath);
+        if (transferContext.canProceedToTransfer()) {
+
+            //Post part of an upload
+            //2. PUT /v1/catalogs/{catalog}/datasets/{dataset}/datasetseries/{seriesmember}/distributions/{distribution}/operations/upload
+
+            //8MB is the default AWS Chunk Size; this will work for files up to size of 78.125 Gb
+            //as max part size for AWS is 10,000.
+            int chunkSize = 8 * (1024 * 1024);
+
+            byte[] buffer = new byte[chunkSize];
+            int read = 0;
+            int partCnt = 1;
+            while ((read = data.read(buffer)) != -1) {
+                ByteBuffer bb = ByteBuffer.wrap(buffer, 0, read);
+
+                String partTransferTemplatePath = "%soperations/upload?operationId=%s&partNumber=%d";
+                String partTransferPath = apiPath + "operations/upload";
+
+            }
+
+
+        }
+
+        return 200;
+    }
+
+    protected MultipartTransferContext callAPIToInitiateMultipartUpload(String apiPath) {
+        String startUploadPath = apiPath + "/operationType/upload";
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("accept", "*/*");
+        requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
+        requestHeaders.put("Fusion-Authorization", "Bearer " + datasetTokenProvider.getDatasetBearerToken("common", "test-dataset"));
+        HttpResponse<String> startResponse = httpClient.post(startUploadPath, requestHeaders, null);
+
+        if (startResponse.isError()) {
+            throw new APICallException(startResponse.getStatusCode());
+        }
+
+        //TODO : Knighto; doesn't feel right that we are hand cranking the Gson Builder; bake this into the response parser
+        return MultipartTransferContext.started(new GsonBuilder().create().fromJson(startResponse.getBody(), Operation.class));
+    }
+
+    /**
+     * TODO : Ian; this seems like an fileTransferUtils candidate;
+     *
+     * @param stream the data to be uploaded
+     * @return true if the data to be uploaded is > 50MB
+     * @throws IOException on error reading bytes from stream
+     */
+    public boolean isUploadGreaterThan50MB(InputStream stream) throws IOException {
+        final int CHUNK_SIZE = 1024 * 1024; // 1MB
+        long totalSize = 0;
+        byte[] buffer = new byte[CHUNK_SIZE];
+        int bytesRead;
+        while ((bytesRead = stream.read(buffer)) != -1) {
+            totalSize += bytesRead;
+            if (totalSize >= 50 * CHUNK_SIZE) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private <T> void checkResponseStatus(HttpResponse<T> response) throws APICallException {
