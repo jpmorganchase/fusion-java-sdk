@@ -7,6 +7,8 @@ import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.model.MultipartTransferContext;
 import io.github.jpmorganchase.fusion.model.Operation;
+import io.github.jpmorganchase.fusion.model.UploadedPart;
+import io.github.jpmorganchase.fusion.model.UploadedPartContext;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
@@ -24,6 +26,8 @@ import java.util.Map;
 public class FusionAPIManager implements APIManager {
 
     private static final String DEFAULT_FOLDER = "downloads";
+    private static final String PART_UPLOAD_PATH = "%s/operations/upload?operationId=%s&partNumber=%d";
+    private static final String COMPLETE_PART_UPLOAD_PATH = "%s/operations/upload?operationId=%s";
     private final SessionTokenProvider sessionTokenProvider;
     private final DatasetTokenProvider datasetTokenProvider;
     private final Client httpClient;
@@ -197,35 +201,99 @@ public class FusionAPIManager implements APIManager {
                                              String createdDate) {
 
 
-        //Initiate a multipart upload
-        //1. POST /v1/catalogs/{catalog}/datasets/{dataset}/datasetseries/{seriesmember}/distributions/{distribution}/operationType/upload
-
-        MultipartTransferContext transferContext = callAPIToInitiateMultipartUpload(apiPath);
-        if (transferContext.canProceedToTransfer()) {
-
-            //Post part of an upload
-            //2. PUT /v1/catalogs/{catalog}/datasets/{dataset}/datasetseries/{seriesmember}/distributions/{distribution}/operations/upload
-
-            //8MB is the default AWS Chunk Size; this will work for files up to size of 78.125 Gb
-            //as max part size for AWS is 10,000.
-            int chunkSize = 8 * (1024 * 1024);
-
-            byte[] buffer = new byte[chunkSize];
-            int read = 0;
-            int partCnt = 1;
-            while ((read = data.read(buffer)) != -1) {
-                ByteBuffer bb = ByteBuffer.wrap(buffer, 0, read);
-
-                String partTransferTemplatePath = "%soperations/upload?operationId=%s&partNumber=%d";
-                String partTransferPath = apiPath + "operations/upload";
-
+        MultipartTransferContext mtx = callAPIToInitiateMultipartUpload(apiPath);
+        if (mtx.canProceedToTransfer()) {
+            mtx = callAPIToUploadParts(mtx, apiPath, data);
+            if (mtx.canProceedToComplete()){
+                mtx = callAPIToCompleteMultipartUpload(mtx, apiPath, catalogName, dataset, fromDate, toDate, createdDate);
             }
-
-
         }
 
         return 200;
     }
+
+    protected MultipartTransferContext callAPIToCompleteMultipartUpload(MultipartTransferContext mtx,
+                                                                        String operationId,
+                                                                        String apiPath,
+                                                                        String catalogName,
+                                                                        String dataset,
+                                                                        String fromDate,
+                                                                        String toDate,
+                                                                        String createdDate) {
+
+        String completeTransferPath = String.format(COMPLETE_PART_UPLOAD_PATH, apiPath, operationId);
+        DigestDescriptor digestOfDigests = digestProducer.execute(mtx.digests());
+
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
+        requestHeaders.put(
+                "Fusion-Authorization", "Bearer " + datasetTokenProvider.getDatasetBearerToken(catalogName, dataset));
+        requestHeaders.put("x-jpmc-distribution-from-date", fromDate);
+        requestHeaders.put("x-jpmc-distribution-to-date", toDate);
+        requestHeaders.put("x-jpmc-distribution-created-date", createdDate);
+        requestHeaders.put("Digest", "SHA-256=" + digestOfDigests.getChecksum());
+
+        String body = new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .create()
+                .toJson(mtx.getParts());
+
+        HttpResponse<String> completeResponse = httpClient.post(completeTransferPath, requestHeaders, body);
+        if (completeResponse.isError()){
+            //TODO : knighto - what do we want to do with this exception
+            throw new APICallException(completeResponse.getStatusCode());
+        }
+
+        return mtx.competed();
+    }
+
+    @SneakyThrows
+    protected MultipartTransferContext callAPIToUploadParts(MultipartTransferContext mtx, String apiPath, InputStream data) {
+        //TODO : knighto - should we make this configurable
+        int chunkSize = 8 * (1024 * 1024);
+
+        byte[] buffer = new byte[chunkSize];
+        int read;
+        int partCnt = 1;
+        int totalBytes = 0;
+
+        while ((read = data.read(buffer)) != -1) {
+
+            //TODO knighto - exception handling; just now this will throw a runtime; what should we do?
+            UploadedPartContext partCtx = callAPIToUploadPart(apiPath, mtx.getOperation().getOperationId(), buffer, read, partCnt);
+            mtx.partUploaded(partCtx);
+
+            partCnt += 1;
+            totalBytes += read;
+        }
+
+        return mtx.transferred(chunkSize, totalBytes, partCnt);
+    }
+
+    protected UploadedPartContext callAPIToUploadPart(String apiPath, String operationId, byte[] part, int read, int partCnt){
+
+        String partTransferPath = String.format(PART_UPLOAD_PATH, apiPath, operationId, partCnt);
+        DigestDescriptor digestOfPart = digestProducer.execute(new ByteArrayInputStream(ByteBuffer.wrap(part, 0, read).array()));
+
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("accept", "*/*");
+        requestHeaders.put("Content-Type", "application/octet-stream");
+        requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
+        requestHeaders.put("Fusion-Authorization", "Bearer " + datasetTokenProvider.getDatasetBearerToken("common", "test-dataset"));
+        requestHeaders.put("Digest", "SHA-256="+digestOfPart.getChecksum());
+
+        HttpResponse<String> partResponse = httpClient.put(partTransferPath, requestHeaders, new ByteArrayInputStream(digestOfPart.getContent()));
+        if (partResponse.isError()){
+            //TODO : knighto; this is going to fail the entire upload; should we try this part again
+            throw new APICallException(partResponse.getStatusCode());
+        }
+
+        return UploadedPartContext.builder()
+                .digest(digestOfPart.getRawChecksum())
+                .parts(new GsonBuilder().create().fromJson(partResponse.getBody(), UploadedPart.class))
+                .build();
+    }
+
 
     protected MultipartTransferContext callAPIToInitiateMultipartUpload(String apiPath) {
         String startUploadPath = apiPath + "/operationType/upload";

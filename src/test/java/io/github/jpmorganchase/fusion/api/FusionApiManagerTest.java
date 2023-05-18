@@ -5,14 +5,20 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.*;
 
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.model.MultipartTransferContext;
+import io.github.jpmorganchase.fusion.model.Operation;
+import io.github.jpmorganchase.fusion.model.UploadedPart;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
@@ -21,6 +27,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -28,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -195,10 +203,81 @@ public class FusionApiManagerTest {
         givenRequestHeader("Authorization", "Bearer my-token");
         givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
         givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa");
+
         whenFusionApiManagerIsCalledToInitiateMultipartUpload();
+
+
         thenOperationIdShouldMatch("some-operation-id-aa");
         thenMultipartTransferContextShouldAllowToProgress();
 
+    }
+
+    @Test
+    void successfullyUploadParts(){
+
+        givenSha256DigestProducer();
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
+        givenUploadFile("large-upload-test.csv");
+
+        givenRequestHeader("accept", "*/*");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
+        givenRequestHeader("Content-Type", "application/octet-stream");
+
+        givenMultipartTransferIsStarted("my-op-id");
+
+        givenCallToClientToUploadPart(1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=");
+        givenCallToClientToUploadPart(2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=");
+        givenCallToClientToUploadPart(3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=");
+        givenCallToClientToUploadPart(4, "bQh4+hfqaWNwCLE1tEJzlqOJ7ZWVDzWQJOsjPaT7Xsk=");
+
+
+        whenFusionApiManagerIsCalledToUploadParts();
+
+        //then
+        thenMultipartTransferContextStatusShouldBeComplete();
+
+    }
+
+    private void givenSha256DigestProducer() {
+        this.digestProducer = AlgoSpecificDigestProducer.builder().sha256().build();
+    }
+
+    private void givenMultipartTransferIsStarted(String opId) {
+        Operation op = new Operation(opId);
+        multipartTransferContext = MultipartTransferContext.started(op);
+    }
+
+    private void givenCallToClientToUploadPart(int partCnt, String digest) {
+
+        String path = String.format("/operations/upload?operationId=%s&partNumber=%d", multipartTransferContext.getOperation().getOperationId(), partCnt);
+
+        Map<String, String> headers = new HashMap<>(requestHeaders);
+        headers.put("Digest", "SHA-256="+digest);
+
+        UploadedPart uploadedPart = UploadedPart.builder()
+                .partNumber(String.valueOf(partCnt))
+                .partIdentifier("provider-gen-part-id-"+partCnt)
+                .partDigest(digest)
+                .build();
+
+        String body = new GsonBuilder().create().toJson(uploadedPart);
+
+        when(client.put(eq(apiPath + path), eq(headers), isNotNull()))
+                .thenReturn(HttpResponse.<String>builder().body(body).statusCode(200).build());
+    }
+
+    private void thenMultipartTransferContextStatusShouldBeComplete() {
+        assertThat(multipartTransferContext.getStatus(), is(equalTo(MultipartTransferContext.MultipartTransferStatus.COMPLETED)));
+    }
+
+    @SneakyThrows
+    private void whenFusionApiManagerIsCalledToUploadParts() {
+        InputStream data = Files.newInputStream(new File(fileName).toPath());
+        multipartTransferContext = fusionAPIManager.callAPIToUploadParts(multipartTransferContext, apiPath, data);
     }
 
     private void thenMultipartTransferContextShouldAllowToProgress() {

@@ -4,10 +4,12 @@ import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 import lombok.Builder;
 import lombok.SneakyThrows;
@@ -45,13 +47,29 @@ public class AlgoSpecificDigestProducer implements DigestProducer {
             baos.write(buf, 0, length);
         }
 
-        String myChecksum =
-                Base64.getEncoder().encodeToString(dis.getMessageDigest().digest());
+        byte[] digest = dis.getMessageDigest().digest();
+        String digestAsBase64 = Base64.getEncoder().encodeToString(digest);
 
         return DigestDescriptor.builder()
-                .checksum(myChecksum)
+                .rawChecksum(digest)
+                .checksum(digestAsBase64)
                 .size(baos.size())
                 .content(baos.toByteArray())
+                .build();
+    }
+
+    @SneakyThrows
+    @Override
+    public DigestDescriptor execute(List<ByteBuffer> digests) {
+
+        MessageDigest digestOfAll = MessageDigest.getInstance(digestAlgorithm);
+        for (ByteBuffer digest : digests){
+            digestOfAll.update(digest.array());
+        }
+        byte[] raw = digestOfAll.digest();
+        return DigestDescriptor.builder()
+                .rawChecksum(raw)
+                .checksum(Base64.getEncoder().encodeToString(raw))
                 .build();
     }
 
