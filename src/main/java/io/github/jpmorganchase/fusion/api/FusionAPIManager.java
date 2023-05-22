@@ -5,10 +5,7 @@ import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import io.github.jpmorganchase.fusion.model.MultipartTransferContext;
-import io.github.jpmorganchase.fusion.model.Operation;
-import io.github.jpmorganchase.fusion.model.UploadedPart;
-import io.github.jpmorganchase.fusion.model.UploadedPartContext;
+import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
@@ -200,12 +197,12 @@ public class FusionAPIManager implements APIManager {
                                              String toDate,
                                              String createdDate) {
 
-
+        //TODO knighto - we want to surround this with a try catch block and attempt to abort the upload on exception
         MultipartTransferContext mtx = callAPIToInitiateMultipartUpload(apiPath);
         if (mtx.canProceedToTransfer()) {
             mtx = callAPIToUploadParts(mtx, apiPath, data);
             if (mtx.canProceedToComplete()){
-                mtx = callAPIToCompleteMultipartUpload(mtx, apiPath, catalogName, dataset, fromDate, toDate, createdDate);
+                callAPIToCompleteMultipartUpload(mtx, apiPath, catalogName, dataset, fromDate, toDate, createdDate);
             }
         }
 
@@ -213,7 +210,6 @@ public class FusionAPIManager implements APIManager {
     }
 
     protected MultipartTransferContext callAPIToCompleteMultipartUpload(MultipartTransferContext mtx,
-                                                                        String operationId,
                                                                         String apiPath,
                                                                         String catalogName,
                                                                         String dataset,
@@ -221,7 +217,7 @@ public class FusionAPIManager implements APIManager {
                                                                         String toDate,
                                                                         String createdDate) {
 
-        String completeTransferPath = String.format(COMPLETE_PART_UPLOAD_PATH, apiPath, operationId);
+        String completeTransferPath = String.format(COMPLETE_PART_UPLOAD_PATH, apiPath, mtx.getOperation().getOperationId());
         DigestDescriptor digestOfDigests = digestProducer.execute(mtx.digests());
 
         Map<String, String> requestHeaders = new HashMap<>();
@@ -233,23 +229,21 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("x-jpmc-distribution-created-date", createdDate);
         requestHeaders.put("Digest", "SHA-256=" + digestOfDigests.getChecksum());
 
+        //TODO Move this to our dedicated parser
         String body = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
                 .create()
-                .toJson(mtx.getParts());
+                .toJson(mtx.uploadedParts());
 
         HttpResponse<String> completeResponse = httpClient.post(completeTransferPath, requestHeaders, body);
-        if (completeResponse.isError()){
-            //TODO : knighto - what do we want to do with this exception
-            throw new APICallException(completeResponse.getStatusCode());
-        }
+
+        checkResponseStatus(completeResponse);
 
         return mtx.competed();
     }
 
     @SneakyThrows
     protected MultipartTransferContext callAPIToUploadParts(MultipartTransferContext mtx, String apiPath, InputStream data) {
-        //TODO : knighto - should we make this configurable
+        //TODO : knighto - should we make this configurable - static as 8MB
         int chunkSize = 8 * (1024 * 1024);
 
         byte[] buffer = new byte[chunkSize];
@@ -283,14 +277,12 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("Digest", "SHA-256="+digestOfPart.getChecksum());
 
         HttpResponse<String> partResponse = httpClient.put(partTransferPath, requestHeaders, new ByteArrayInputStream(digestOfPart.getContent()));
-        if (partResponse.isError()){
-            //TODO : knighto; this is going to fail the entire upload; should we try this part again
-            throw new APICallException(partResponse.getStatusCode());
-        }
+
+        checkResponseStatus(partResponse);
 
         return UploadedPartContext.builder()
                 .digest(digestOfPart.getRawChecksum())
-                .parts(new GsonBuilder().create().fromJson(partResponse.getBody(), UploadedPart.class))
+                .part(new GsonBuilder().create().fromJson(partResponse.getBody(), UploadedPart.class))
                 .build();
     }
 
@@ -303,9 +295,7 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("Fusion-Authorization", "Bearer " + datasetTokenProvider.getDatasetBearerToken("common", "test-dataset"));
         HttpResponse<String> startResponse = httpClient.post(startUploadPath, requestHeaders, null);
 
-        if (startResponse.isError()) {
-            throw new APICallException(startResponse.getStatusCode());
-        }
+        checkResponseStatus(startResponse);
 
         //TODO : Knighto; doesn't feel right that we are hand cranking the Gson Builder; bake this into the response parser
         return MultipartTransferContext.started(new GsonBuilder().create().fromJson(startResponse.getBody(), Operation.class));

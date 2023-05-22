@@ -16,9 +16,7 @@ import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import io.github.jpmorganchase.fusion.model.MultipartTransferContext;
-import io.github.jpmorganchase.fusion.model.Operation;
-import io.github.jpmorganchase.fusion.model.UploadedPart;
+import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
@@ -227,26 +225,95 @@ public class FusionApiManagerTest {
         givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
         givenRequestHeader("Content-Type", "application/octet-stream");
 
-        givenMultipartTransferIsStarted("my-op-id");
+        givenMultipartTransferContextStatusIsStarted("my-op-id");
 
         givenCallToClientToUploadPart(1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=");
         givenCallToClientToUploadPart(2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=");
         givenCallToClientToUploadPart(3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=");
         givenCallToClientToUploadPart(4, "bQh4+hfqaWNwCLE1tEJzlqOJ7ZWVDzWQJOsjPaT7Xsk=");
 
-
         whenFusionApiManagerIsCalledToUploadParts();
 
         //then
-        thenMultipartTransferContextStatusShouldBeComplete();
+        thenMultipartTransferContextStatusShouldBeTransferred();
 
+    }
+
+    @Test
+    void successfullyCompleteMultipartUpload() {
+
+        givenSha256DigestProducer();
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
+
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
+        givenRequestHeader("x-jpmc-distribution-from-date", "2023-05-18");
+        givenRequestHeader("x-jpmc-distribution-to-date", "2023-05-18");
+        givenRequestHeader("x-jpmc-distribution-created-date", "2023-05-18");
+        givenRequestHeader("Digest", "SHA-256=kdNJFWpnN7XnQx02fsMYlZ5CxZzdCXvI4GEBIoqh/Wk=");
+
+        givenMultipartTransferContextStatusIsStarted("my-op-id");
+        givenPartHasBeenUploaded(1, "provider-gen-part-id-1", "base64-checksum-1", "digest-as-bytes-1".getBytes());
+        givenPartHasBeenUploaded(2, "provider-gen-part-id-2", "base64-checksum-2", "digest-as-bytes-2".getBytes());
+        givenPartHasBeenUploaded(3, "provider-gen-part-id-3", "base64-checksum-3", "digest-as-bytes-3".getBytes());
+        givenPartHasBeenUploaded(4, "provider-gen-part-id-4", "base64-checksum-4", "digest-as-bytes-4".getBytes());
+        givenMultipartTransferContextStatusIsTransferred(8 * (1024 * 1024), 33554432, 4);
+        givenCallToClientToCompleteMultipartUpload();
+
+        whenFusionApiManagerIsCalledToCompleteMultipartTransfer();
+
+        thenMultipartTransferStatusShouldBeComplete();
+
+    }
+
+    private void thenMultipartTransferStatusShouldBeComplete() {
+        assertThat(multipartTransferContext.getStatus(), is(equalTo(MultipartTransferContext.MultipartTransferStatus.COMPLETED)));
+    }
+
+    private void givenCallToClientToCompleteMultipartUpload() {
+
+        String body = new GsonBuilder().create().toJson(multipartTransferContext.uploadedParts());
+        String path = String.format("/operations/upload?operationId=%s", multipartTransferContext.getOperation().getOperationId());
+
+        when(client.post(eq(apiPath + path), eq(requestHeaders), eq(body)))
+                .thenReturn(HttpResponse.<String>builder().statusCode(200).build());
+    }
+
+    private void whenFusionApiManagerIsCalledToCompleteMultipartTransfer() {
+
+        multipartTransferContext = fusionAPIManager.callAPIToCompleteMultipartUpload(
+                multipartTransferContext,
+                apiPath,
+                "common",
+                "test-dataset",
+                "2023-05-18",
+                "2023-05-18",
+                "2023-05-18");
+    }
+
+    private void givenMultipartTransferContextStatusIsTransferred(int chunkSize, int totalBytes, int partCount) {
+        multipartTransferContext.transferred(chunkSize, totalBytes, partCount);
+    }
+
+    private void givenPartHasBeenUploaded(int partCnt, String partIdentifier, String partChecksum, byte[] partChecksumBytes) {
+        multipartTransferContext.partUploaded(UploadedPartContext.builder()
+                .part(UploadedPart.builder()
+                    .partNumber(String.valueOf(partCnt))
+                    .partIdentifier(partIdentifier)
+                    .partDigest(partIdentifier)
+                    .build())
+                .digest(partChecksumBytes)
+                .partCount(partCnt).build());
     }
 
     private void givenSha256DigestProducer() {
         this.digestProducer = AlgoSpecificDigestProducer.builder().sha256().build();
     }
 
-    private void givenMultipartTransferIsStarted(String opId) {
+    private void givenMultipartTransferContextStatusIsStarted(String opId) {
         Operation op = new Operation(opId);
         multipartTransferContext = MultipartTransferContext.started(op);
     }
@@ -270,8 +337,8 @@ public class FusionApiManagerTest {
                 .thenReturn(HttpResponse.<String>builder().body(body).statusCode(200).build());
     }
 
-    private void thenMultipartTransferContextStatusShouldBeComplete() {
-        assertThat(multipartTransferContext.getStatus(), is(equalTo(MultipartTransferContext.MultipartTransferStatus.COMPLETED)));
+    private void thenMultipartTransferContextStatusShouldBeTransferred() {
+        assertThat(multipartTransferContext.getStatus(), is(equalTo(MultipartTransferContext.MultipartTransferStatus.TRANSFERRED)));
     }
 
     @SneakyThrows

@@ -1,9 +1,14 @@
 package io.github.jpmorganchase.fusion.model;
 
+import io.github.jpmorganchase.fusion.FusionException;
+import io.github.jpmorganchase.fusion.api.APICallException;
 import lombok.*;
 
 import java.nio.ByteBuffer;
 import java.util.*;
+
+import static io.github.jpmorganchase.fusion.model.MultipartTransferContext.MultipartTransferStatus.COMPLETED;
+import static io.github.jpmorganchase.fusion.model.MultipartTransferContext.MultipartTransferStatus.TRANSFERRED;
 
 @Getter
 @ToString
@@ -23,17 +28,14 @@ public class MultipartTransferContext {
         return new MultipartTransferContext(operation, MultipartTransferStatus.INITIATED, new ArrayList<>(), 0,0, 0);
     }
 
-    public static MultipartTransferContext error() {
-        return new MultipartTransferContext(null, MultipartTransferStatus.IN_ERROR, new ArrayList<>(), 0,0, 0);
-    }
-
     public MultipartTransferContext inProgress(){
         this.status = MultipartTransferStatus.IN_PROGRESS;
         return this;
     }
 
     public MultipartTransferContext transferred(int chunkSize, int totalBytes, int totalPartsCount){
-        this.status = MultipartTransferStatus.TRANSFERRED;
+        this.parts.sort(Comparator.comparingInt(UploadedPartContext::getPartCount));
+        this.status = TRANSFERRED;
         this.chunkSize = chunkSize;
         this.totalBytes = totalBytes;
         this.totalPartsCount = totalPartsCount;
@@ -58,7 +60,10 @@ public class MultipartTransferContext {
     }
 
     public List<ByteBuffer> digests(){
-        this.parts.sort(Comparator.comparingInt(UploadedPartContext::getPartCount));
+
+        if (!TRANSFERRED.equals(this.status) && !COMPLETED.equals(this.status)) {
+            throw new FusionException("Unable to complete operation, transfer of parts not yet complete");
+        }
 
         List<ByteBuffer> digests = new ArrayList<>();
         for (UploadedPartContext part : parts){
@@ -70,11 +75,27 @@ public class MultipartTransferContext {
 
     public boolean canProceedToComplete(){
         //TODO : knighto - dependant on how we implement this; threaded etc, we can perform additional checks
-        return MultipartTransferStatus.TRANSFERRED.equals(this.status) && parts.size() > 0;
+        return TRANSFERRED.equals(this.status) && parts.size() > 0;
     }
 
     public boolean canProceedToTransfer(){
         return MultipartTransferStatus.INITIATED.equals(status);
+    }
+
+    public UploadedParts uploadedParts() {
+
+        if (!TRANSFERRED.equals(this.status) && !COMPLETED.equals(this.status)) {
+            throw new FusionException("Unable to complete operation, transfer of parts not yet complete");
+        }
+
+        List<UploadedPart> uploadedParts = new ArrayList<>();
+        for (UploadedPartContext ctx : parts) {
+            uploadedParts.add(ctx.getPart());
+        }
+        return UploadedParts.builder()
+                .parts(Collections.unmodifiableList(uploadedParts))
+                .build();
+
     }
 
     public enum MultipartTransferStatus {

@@ -1,20 +1,17 @@
 package io.github.jpmorganchase.fusion.model;
 
-import com.google.gson.annotations.Expose;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
 
+import java.util.List;
+
 @Value
 @EqualsAndHashCode
 @ToString
 @Builder
-public class UploadedPartContext {
+public class UploadedParts {
 
-    byte[] digest;
-    int partCount;
-    @Expose
-    UploadedPart part;
-
+    List<UploadedPart> parts;
 }
