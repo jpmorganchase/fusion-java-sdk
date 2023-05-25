@@ -110,7 +110,8 @@ class AlgoSpecificDigestProducerTest {
     }
 
     private void whenExecuteIsCalledWithNullDataThenExceptionShouldBeThrown() {
-        Assertions.assertThrows(ApiInputValidationException.class, () -> algoSpecificDigestProducer.execute((InputStream) null));
+        Assertions.assertThrows(
+                ApiInputValidationException.class, () -> algoSpecificDigestProducer.execute((InputStream) null));
     }
 
     private void givenInputData(byte[] inputData) {

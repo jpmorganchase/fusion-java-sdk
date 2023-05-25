@@ -1,9 +1,7 @@
 package io.github.jpmorganchase.fusion.digest;
 
 import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -30,7 +28,6 @@ public class AlgoSpecificDigestProducer implements DigestProducer {
     @SneakyThrows(NoSuchAlgorithmException.class)
     @Override
     public DigestDescriptor execute(InputStream data) {
-
         assertInputStream(data);
 
         DigestInputStream dis = new DigestInputStream(data, MessageDigest.getInstance(digestAlgorithm));
@@ -63,7 +60,7 @@ public class AlgoSpecificDigestProducer implements DigestProducer {
     public DigestDescriptor execute(List<ByteBuffer> digests) {
 
         MessageDigest digestOfAll = MessageDigest.getInstance(digestAlgorithm);
-        for (ByteBuffer digest : digests){
+        for (ByteBuffer digest : digests) {
             digestOfAll.update(digest.array());
         }
         byte[] raw = digestOfAll.digest();

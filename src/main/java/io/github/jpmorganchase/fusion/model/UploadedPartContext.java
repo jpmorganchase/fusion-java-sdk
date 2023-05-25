@@ -14,7 +14,7 @@ public class UploadedPartContext {
 
     byte[] digest;
     int partCount;
+
     @Expose
     UploadedPart part;
-
 }

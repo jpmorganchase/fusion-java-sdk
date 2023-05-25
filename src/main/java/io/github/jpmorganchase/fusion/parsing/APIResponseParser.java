@@ -21,4 +21,6 @@ public interface APIResponseParser {
     Map<String, Map<String, Object>> parseResourcesUntyped(String json);
 
     Operation parseOperationResponse(String json);
+
+    UploadedPart parseUploadPartResponse(String json);
 }

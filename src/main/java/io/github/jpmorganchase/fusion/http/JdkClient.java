@@ -19,6 +19,7 @@ public class JdkClient implements Client {
     public static final String METHOD_GET = "GET";
     public static final String METHOD_POST = "POST";
     public static final String METHOD_PUT = "PUT";
+    public static final String METHOD_DELETE = "DELETE";
     private final Proxy proxy;
 
     public JdkClient(Proxy proxy) {
@@ -53,6 +54,14 @@ public class JdkClient implements Client {
             throw new ClientException("No request body specified for PUT operation");
         }
         return executeMethod(METHOD_PUT, path, headers, body, true, this::getResponseBody);
+    }
+
+    @Override
+    public HttpResponse<String> delete(String path, Map<String, String> headers, String body) {
+        if (body == null) {
+            throw new ClientException("No request body specified for POST operation");
+        }
+        return executeMethod(METHOD_DELETE, path, headers, body);
     }
 
     private HttpResponse<String> executeMethod(String method, String path, Map<String, String> headers) {

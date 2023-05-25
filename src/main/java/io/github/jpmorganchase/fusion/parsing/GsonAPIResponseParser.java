@@ -70,6 +70,11 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
+    public UploadedPart parseUploadPartResponse(String json) {
+        return new GsonBuilder().create().fromJson(json, UploadedPart.class);
+    }
+
+    @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass) {
         // TODO: handle varArgs
 

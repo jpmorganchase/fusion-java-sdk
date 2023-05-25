@@ -2,10 +2,7 @@ package io.github.jpmorganchase.fusion;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.github.jpmorganchase.fusion.api.APICallException;
-import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
-import io.github.jpmorganchase.fusion.api.FusionAPIManager;
+import io.github.jpmorganchase.fusion.api.*;
 import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
@@ -56,6 +53,10 @@ public class Fusion {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private APIManager api;
+
+    private APIUploader uploader;
+
+    private APIDownloader downloader;
 
     @Builder.Default
     private String defaultCatalog = DEFAULT_CATALOG;
@@ -497,7 +498,7 @@ public class Fusion {
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
-        this.api.callAPIFileUpload(url, filename, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
+        this.uploader.callAPIFileUpload(url, filename, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
     }
 
     /**
@@ -534,7 +535,7 @@ public class Fusion {
      * @param fromDate     the earliest date for which there is data in the distribution
      * @param toDate       the latest date for which there is data in the distribution
      * @param createdDate  the creation date for the distribution
-     * @throws ApiInputValidationException if the specified file cannot be read
+     * @throws ApiInputValidationException if the specified stream cannot be read
      * @throws APICallException if the call to the Fusion API fails
      * @throws OAuthException if a token could not be retrieved for authentication
      **/
@@ -554,7 +555,7 @@ public class Fusion {
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
-        this.api.callAPIFileUpload(url, data, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
+        this.uploader.callAPIFileUpload(url, data, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
     }
 
     public static FusionBuilder builder() {
@@ -570,6 +571,7 @@ public class Fusion {
         protected String credentialFile;
         protected String rootURL;
         protected APIManager api;
+        protected APIUploader uploader;
         protected Map<String, BearerToken> datasetBearerTokens = new HashMap<>();
 
         protected DatasetTokenProvider datasetTokenProvider;
@@ -668,7 +670,17 @@ public class Fusion {
                     AlgoSpecificDigestProducer.builder().sha256().build();
 
             if (api == null) {
-                api = new FusionAPIManager(client, sessionTokenProvider, datasetTokenProvider, digestProducer);
+                api = new FusionAPIManager(client, sessionTokenProvider);
+            }
+
+            if (uploader == null) {
+                uploader = FusionAPIUploader.builder()
+                        .httpClient(client)
+                        .sessionTokenProvider(sessionTokenProvider)
+                        .datasetTokenProvider(datasetTokenProvider)
+                        .digestProducer(digestProducer)
+                        .uploadPartSize(16)
+                        .build();
             }
 
             return super.build();

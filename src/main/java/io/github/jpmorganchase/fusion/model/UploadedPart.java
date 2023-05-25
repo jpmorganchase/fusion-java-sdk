@@ -14,5 +14,4 @@ public class UploadedPart {
     String partNumber;
     String partIdentifier;
     String partDigest;
-
 }

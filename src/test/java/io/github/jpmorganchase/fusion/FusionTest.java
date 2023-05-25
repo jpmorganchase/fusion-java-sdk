@@ -4,10 +4,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.api.APIUploader;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
@@ -34,6 +34,9 @@ public class FusionTest {
 
     @Mock
     private APIManager apiManager;
+
+    @Mock
+    private APIUploader apiUploader;
 
     @Mock
     private APIResponseParser responseParser;
@@ -229,7 +232,10 @@ public class FusionTest {
         Fusion f = stubFusion();
         LocalDate d = LocalDate.of(2023, 3, 9);
 
-        when(apiManager.callAPIFileUpload(
+        f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", d);
+
+        verify(apiUploader)
+                .callAPIFileUpload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                                 Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
@@ -238,10 +244,7 @@ public class FusionTest {
                         "sample_dataset",
                         "2023-03-09",
                         "2023-03-09",
-                        "2023-03-09"))
-                .thenReturn(1);
-
-        f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", d);
+                        "2023-03-09");
     }
 
     @Test
@@ -250,7 +253,11 @@ public class FusionTest {
         LocalDate d = LocalDate.of(2023, 3, 9);
 
         InputStream requestBodyStream = new ByteArrayInputStream("A,B,C\nD,E,F".getBytes());
-        when(apiManager.callAPIFileUpload(
+
+        f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, d, d);
+
+        verify(apiUploader)
+                .callAPIFileUpload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                                 Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
@@ -259,10 +266,7 @@ public class FusionTest {
                         "sample_dataset",
                         "2023-03-09",
                         "2023-03-09",
-                        "2023-03-09"))
-                .thenReturn(1);
-
-        f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, d, d);
+                        "2023-03-09");
     }
 
     @Test
@@ -279,6 +283,7 @@ public class FusionTest {
                 .credentials(new BearerTokenCredentials("my token"))
                 .api(apiManager)
                 .responseParser(responseParser)
+                .uploader(apiUploader)
                 .build();
     }
 
