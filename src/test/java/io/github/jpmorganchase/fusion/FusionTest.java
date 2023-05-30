@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+import io.github.jpmorganchase.fusion.api.APIDownloader;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.APIUploader;
 import io.github.jpmorganchase.fusion.http.Client;
@@ -37,6 +38,9 @@ public class FusionTest {
 
     @Mock
     private APIUploader apiUploader;
+
+    @Mock
+    private APIDownloader apiDownloader;
 
     @Mock
     private APIResponseParser responseParser;
@@ -185,12 +189,14 @@ public class FusionTest {
         Fusion f = stubFusion();
 
         doNothing()
-                .when(apiManager)
+                .when(apiDownloader)
                 .callAPIFileDownload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                                 Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
-                        String.format("%s/%s_%s_%s.%s", TMP_PATH, "common", "sample_dataset", "20230308", "csv"));
+                        String.format("%s/%s_%s_%s.%s", TMP_PATH, "common", "sample_dataset", "20230308", "csv"),
+                        "common",
+                        "sample_dataset");
 
         f.download("common", "sample_dataset", "20230308", "csv", TMP_PATH);
     }
@@ -200,12 +206,14 @@ public class FusionTest {
         Fusion f = stubFusion();
 
         doNothing()
-                .when(apiManager)
+                .when(apiDownloader)
                 .callAPIFileDownload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                                 Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
-                        String.format("%s/%s_%s_%s.%s", "downloads", "common", "sample_dataset", "20230308", "csv"));
+                        String.format("%s/%s_%s_%s.%s", "downloads", "common", "sample_dataset", "20230308", "csv"),
+                        "common",
+                        "sample_dataset");
 
         f.download("common", "sample_dataset", "20230308", "csv");
     }
@@ -214,9 +222,12 @@ public class FusionTest {
     public void testFileDownloadAsStreamInteraction() throws Exception {
         Fusion f = stubFusion();
 
-        when(apiManager.callAPIFileDownload(String.format(
-                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                        Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv")))
+        when(apiDownloader.callAPIFileDownload(
+                        String.format(
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                                Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
+                        "common",
+                        "sample_dataset"))
                 .thenReturn(new ByteArrayInputStream("A,B,C\nD,E,F".getBytes()));
 
         InputStream response = f.downloadStream("common", "sample_dataset", "20230308", "csv");
@@ -284,6 +295,7 @@ public class FusionTest {
                 .api(apiManager)
                 .responseParser(responseParser)
                 .uploader(apiUploader)
+                .downloader(apiDownloader)
                 .build();
     }
 

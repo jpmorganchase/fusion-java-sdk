@@ -1,37 +1,294 @@
 package io.github.jpmorganchase.fusion.api;
 
-import java.io.InputStream;
+import io.github.jpmorganchase.fusion.api.request.DownloadRequest;
+import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
+import io.github.jpmorganchase.fusion.api.response.Head;
+import io.github.jpmorganchase.fusion.digest.DigestProducer;
+import io.github.jpmorganchase.fusion.http.Client;
+import io.github.jpmorganchase.fusion.http.HttpResponse;
+import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import lombok.Builder;
+import lombok.Getter;
 
+@Builder
+@Getter
 public class FusionAPIDownloader implements APIDownloader {
 
-    @Override
-    public void callAPIFileDownload(
-            String apiPath, String downloadFolder, String fileName, String catalog, String dataset)
-            throws APICallException {}
+    private static final String DEFAULT_FOLDER = "downloads";
+    private static final String HEAD_PATH = "%s/operationType/download";
+    private static final String HEAD_PATH_FOR_PART = "%s?downloadPartNumber=%d";
 
-    @Override
-    public void callAPIFileDownload(String apiPath, String fileName, String catalog, String dataset)
-            throws APICallException, FileDownloadException {}
+    private static final String FILE_RW_MODE = "rw";
 
+    private final Client httpClient;
+    private final SessionTokenProvider sessionTokenProvider;
+    private final DatasetTokenProvider datasetTokenProvider;
+    private final DigestProducer digestProducer;
+
+    /**
+     * Size of Thread-Pool to be used for uploading chunks of a multipart file
+     * Defaults to number of available processors.
+     */
+    @Builder.Default
+    int downloadThreadPoolSize = Runtime.getRuntime().availableProcessors();
+
+    private final Object lock = new Object();
+
+    /**
+     * Calls the API to retrieve file data and saves to disk in the default location
+     *
+     * @param apiPath  the URL of the API endpoint to call
+     * @param filePath the absolute path where the file will be persisted.
+     */
+    @Override
+    public void callAPIFileDownload(String apiPath, String filePath, String catalog, String dataset)
+            throws APICallException, FileDownloadException {
+
+        DownloadRequest dr = DownloadRequest.builder()
+                .apiPath(apiPath)
+                .filePath(filePath)
+                .catalog(catalog)
+                .dataset(dataset)
+                .build();
+
+        downloadToFile(dr);
+    }
+
+    /**
+     * Calls the API to retrieve file data and returns as an InputStream
+     *
+     * @param apiPath the URL of the API endpoint to call
+     */
     @Override
     public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset)
             throws APICallException, FileDownloadException {
-        return null;
+
+        DownloadRequest dr = DownloadRequest.builder()
+                .apiPath(apiPath)
+                .catalog(catalog)
+                .dataset(dataset)
+                .isDownloadToStream(true)
+                .build();
+
+        return downloadToStream(dr);
     }
 
-    private void download() {
-        // Need to first of all check HEAD for entire file and identify if it is a mp or sp
+    protected void downloadToFile(DownloadRequest dr) {
 
-        // GET
-        // /v1/catalogs/{{catalog}}/datasets/{{dataset}}/datasetseries/{{series}}/distributions/csv/operationType/download
-        // following headers always returned :: x-jpmc-checksum-sha256, x-jpmc-version-id, x-jpmc-latest-version-id
-        // following header is returned if mp :: x-jpmc-mp-parts-count
-
+        Head head = callAPIToGetHead(dr);
+        if (head.isMultipart()) {
+            performMultiPartDownloadToFile(dr, head);
+        } else {
+            performSinglePartDownloadToFile(dr);
+        }
     }
 
-    private void head() {}
+    protected void performMultiPartDownloadToFile(DownloadRequest dr, Head head) {
 
-    private void downloadSinglePartFile() {}
+        ExecutorService executor = getExecutor();
+        try (RandomAccessFile raf = new RandomAccessFile(dr.getFilePath(), FILE_RW_MODE)) {
 
-    private void downloadMultiPartFile() {}
+            raf.setLength(head.getContentLength());
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+            for (int p = 1; p <= head.getPartCount(); p++) {
+                final int part = p;
+                futures.add(CompletableFuture.runAsync(
+                        () -> {
+                            GetPartResponse getPartResponse = callToAPIToGetPart(dr, part);
+                            writePartToFile(getPartResponse, raf);
+                        },
+                        executor));
+            }
+
+            CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+            allFutures.join();
+
+        } catch (IOException | CompletionException | CancellationException ex) {
+            ;
+            throw new FileDownloadException("Unable to write to specified download file, please try again", ex);
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    private void writePartToFile(GetPartResponse gpr, RandomAccessFile raf) {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (BufferedInputStream input = new BufferedInputStream(gpr.getContent())) {
+
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = input.read(buffer)) != -1) {
+                baos.write(buffer, 0, bytesRead);
+            }
+
+            synchronized (lock) {
+                raf.seek(gpr.getHead().getContentRange().getStart());
+                raf.write(baos.toByteArray());
+            }
+
+        } catch (IOException ex) {
+            throw new FileDownloadException("Problem encountered attempting to write part to file : ", ex);
+        }
+    }
+
+    protected GetPartResponse callToAPIToGetPart(DownloadRequest dr, int partNumber) {
+
+        String getPartPath = getPathForHeadAndGet(dr, partNumber);
+
+        Map<String, String> requestHeaders = new HashMap<>();
+        setSecurityHeaders(dr, requestHeaders);
+
+        HttpResponse<InputStream> response = httpClient.getInputStream(getPartPath, requestHeaders);
+        checkResponseStatus(response);
+
+        // TODO :: knighto - this is a good place to verify the digest
+
+        return GetPartResponse.builder()
+                .content(response.getBody())
+                .head(Head.builder().fromHeaders(response.getHeaders()).build())
+                .build();
+    }
+
+    public void performSinglePartDownloadToFile(DownloadRequest dr) throws APICallException {
+
+        try (InputStream input = performSinglePartDownloadToStream(dr)) {
+
+            FileOutputStream fileOutput = new FileOutputStream(dr.getFilePath());
+
+            byte[] buf = new byte[8192];
+            int len;
+            while ((len = input.read(buf)) != -1) {
+                fileOutput.write(buf, 0, len);
+            }
+        } catch (IOException e) {
+            throw new FileDownloadException("Failure downloading file, unable to write to file", e);
+        }
+    }
+
+    protected InputStream downloadToStream(DownloadRequest dr) {
+        Head head = callAPIToGetHead(dr);
+        if (head.isMultipart()) {
+            return performMultiPartDownloadToStream(dr, head);
+        } else {
+            return performSinglePartDownloadToStream(dr);
+        }
+    }
+
+    protected InputStream performMultiPartDownloadToStream(DownloadRequest dr, Head head) {
+
+        ExecutorService executor = getExecutor();
+        List<CompletableFuture<GetPartResponse>> futures = new ArrayList<>();
+
+        try {
+
+            for (int p = 1; p <= head.getPartCount(); p++) {
+                final int part = p;
+                futures.add(CompletableFuture.supplyAsync(() -> callToAPIToGetPart(dr, part), executor));
+            }
+
+            List<InputStream> inputStreams = futures.stream()
+                    .map(CompletableFuture::join)
+                    .sorted(Comparator.comparingInt(gpr -> gpr.getHead().getPartCount()))
+                    .map(GetPartResponse::getContent)
+                    .collect(Collectors.toList());
+
+            return consolidateMultiPartStreams(inputStreams);
+
+        } catch (CompletionException | CancellationException e) {
+            throw new FileDownloadException("Unable to download specified distribution", e);
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    private ByteArrayInputStream consolidateMultiPartStreams(List<InputStream> inputStreams) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+
+        for (InputStream is : inputStreams) {
+            try (BufferedInputStream bis = new BufferedInputStream(is)) {
+                while ((bytesRead = bis.read(buffer)) != -1) {
+                    baos.write(buffer, 0, bytesRead);
+                }
+            } catch (IOException e) {
+                throw new FileDownloadException("Problem encountered handling downloaded stream", e);
+            }
+        }
+
+        return new ByteArrayInputStream(baos.toByteArray());
+    }
+
+    public InputStream performSinglePartDownloadToStream(DownloadRequest dr) throws APICallException {
+        Map<String, String> requestHeaders = new HashMap<>();
+        setSecurityHeaders(dr, requestHeaders);
+
+        HttpResponse<InputStream> response = httpClient.getInputStream(dr.getApiPath(), requestHeaders);
+
+        checkResponseStatus(response);
+        return response.getBody();
+    }
+
+    /**
+     * Returns the Head object representing the entire file
+     *
+     * @param dr {@link DownloadRequest}
+     * @return {@link Head} object describing the file
+     */
+    protected Head callAPIToGetHead(DownloadRequest dr) {
+        String headPath = getPathForHeadAndGet(dr, 0);
+
+        Map<String, String> requestHeaders = new HashMap<>();
+        setSecurityHeaders(dr, requestHeaders);
+
+        HttpResponse<String> headResponse = httpClient.get(headPath, requestHeaders);
+        checkResponseStatus(headResponse);
+
+        return Head.builder().fromHeaders(headResponse.getHeaders()).build();
+    }
+
+    private String getPathForHeadAndGet(DownloadRequest dr, int partNumber) {
+        String headPath = String.format(HEAD_PATH, dr.getApiPath());
+        if (partNumber > 0) {
+            headPath = String.format(HEAD_PATH_FOR_PART, headPath, partNumber);
+        }
+        return headPath;
+    }
+
+    private ExecutorService getExecutor() {
+        return Executors.newFixedThreadPool(downloadThreadPoolSize);
+    }
+
+    /**
+     * TODO : Definite duplication - this needs to be moved
+     *
+     * @param response to be verified
+     * @param <T> type expected in the body of the response
+     * @throws APICallException indicating a failure to communicate with Fusion API
+     */
+    private <T> void checkResponseStatus(HttpResponse<T> response) throws APICallException {
+        if (response.isError()) {
+            throw new APICallException(response.getStatusCode());
+        }
+    }
+
+    /**
+     * TODO : This is a candidate to extract out to its own class to be used by upload & download
+     *
+     * @param dr The {@link DownloadRequest} requiring security
+     * @param requestHeaders pertaining to the request
+     */
+    private void setSecurityHeaders(DownloadRequest dr, Map<String, String> requestHeaders) {
+        requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
+        requestHeaders.put(
+                "Fusion-Authorization",
+                "Bearer " + datasetTokenProvider.getDatasetBearerToken(dr.getCatalog(), dr.getDataset()));
+    }
 }

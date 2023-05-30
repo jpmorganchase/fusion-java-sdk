@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.parsing;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.model.*;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;

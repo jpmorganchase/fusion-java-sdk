@@ -1,6 +1,7 @@
-package io.github.jpmorganchase.fusion.model;
+package io.github.jpmorganchase.fusion.api.context;
 
 import com.google.gson.annotations.Expose;
+import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

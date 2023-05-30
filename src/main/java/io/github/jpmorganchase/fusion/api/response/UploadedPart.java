@@ -1,4 +1,4 @@
-package io.github.jpmorganchase.fusion.model;
+package io.github.jpmorganchase.fusion.api.response;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

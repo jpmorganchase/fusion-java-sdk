@@ -1,14 +1,14 @@
 package io.github.jpmorganchase.fusion.api;
 
 import com.google.gson.GsonBuilder;
+import io.github.jpmorganchase.fusion.api.context.MultipartTransferContext;
+import io.github.jpmorganchase.fusion.api.context.UploadedPartContext;
 import io.github.jpmorganchase.fusion.api.request.UploadRequest;
+import io.github.jpmorganchase.fusion.api.response.UploadedParts;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import io.github.jpmorganchase.fusion.model.MultipartTransferContext;
-import io.github.jpmorganchase.fusion.model.UploadedPartContext;
-import io.github.jpmorganchase.fusion.model.UploadedParts;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
@@ -196,7 +196,7 @@ public class FusionAPIUploader implements APIUploader {
 
         ExecutorService executor = Executors.newFixedThreadPool(uploadThreadPoolSize);
         try {
-            List<Future<?>> futures = new ArrayList<>();
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
 
             int bytesRead;
             while ((bytesRead = ur.getData().read(buffer)) != -1) {
@@ -204,14 +204,16 @@ public class FusionAPIUploader implements APIUploader {
                 final int currentBytesRead = bytesRead;
                 byte[] taskBuffer = Arrays.copyOf(buffer, bytesRead);
 
-                futures.add(executor.submit(() ->
-                        mtx.partUploaded(callAPIToUploadPart(mtx, ur, taskBuffer, currentBytesRead, currentPartCnt))));
+                futures.add(CompletableFuture.runAsync(
+                        () -> mtx.partUploaded(
+                                callAPIToUploadPart(mtx, ur, taskBuffer, currentBytesRead, currentPartCnt)),
+                        executor));
 
                 partCnt++;
                 totalBytes += bytesRead;
             }
 
-            for (Future<?> future : futures) {
+            for (CompletableFuture<Void> future : futures) {
                 future.get();
             }
 

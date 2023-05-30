@@ -4,9 +4,6 @@ import java.io.InputStream;
 
 public interface APIDownloader {
 
-    void callAPIFileDownload(String apiPath, String downloadFolder, String fileName, String catalog, String dataset)
-            throws APICallException;
-
     void callAPIFileDownload(String apiPath, String fileName, String catalog, String dataset)
             throws APICallException, FileDownloadException;
 

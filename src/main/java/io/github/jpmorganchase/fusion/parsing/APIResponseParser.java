@@ -1,5 +1,6 @@
 package io.github.jpmorganchase.fusion.parsing;
 
+import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.model.*;
 import java.util.Map;
 

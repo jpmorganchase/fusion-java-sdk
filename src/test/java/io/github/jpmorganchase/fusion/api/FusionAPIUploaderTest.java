@@ -9,16 +9,16 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.GsonBuilder;
+import io.github.jpmorganchase.fusion.api.context.MultipartTransferContext;
+import io.github.jpmorganchase.fusion.api.context.UploadedPartContext;
 import io.github.jpmorganchase.fusion.api.request.UploadRequest;
+import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import io.github.jpmorganchase.fusion.model.MultipartTransferContext;
 import io.github.jpmorganchase.fusion.model.Operation;
-import io.github.jpmorganchase.fusion.model.UploadedPart;
-import io.github.jpmorganchase.fusion.model.UploadedPartContext;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
 import java.io.*;
@@ -64,8 +64,6 @@ class FusionAPIUploaderTest {
     private DigestDescriptor digestDescriptor;
 
     private byte[] uploadBody;
-
-    private int httpStatus;
 
     private String fileName;
 
@@ -426,10 +424,6 @@ class FusionAPIUploaderTest {
 
     private void givenUploadFile(String resource) {
         this.fileName = getPathFromResource(resource);
-    }
-
-    private void thenHttpStatusShouldIndicateSuccess() {
-        assertThat(httpStatus, is(equalTo(200)));
     }
 
     private void whenSDKAPIUploaderIsCalledToUploadFileFromPath(String fromDate, String toDate, String createdDate) {

@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-import com.google.common.collect.Lists;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.model.*;
@@ -15,13 +14,13 @@ import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@SuppressWarnings("SameParameterValue")
 @ExtendWith(MockitoExtension.class)
 public class FusionApiManagerTest {
 
@@ -35,15 +34,7 @@ public class FusionApiManagerTest {
 
     private String apiPath;
 
-    private Map<String, String> requestHeaders = new HashMap<>();
-
-    private byte[] downloadBody;
-
-    private Map<String, List<String>> responseHeaders = new HashMap<>();
-
-    private InputStream responseStream;
-
-    private File tempOutputFile;
+    private final Map<String, String> requestHeaders = new HashMap<>();
 
     private APICallException thrown;
 
@@ -68,7 +59,7 @@ public class FusionApiManagerTest {
     }
 
     @Test
-    void failureForResourceNotFound() throws Exception {
+    void failureForResourceNotFound() {
         givenFusionApiManager();
         givenApiPath("http://localhost:8080/test");
         givenSessionBearerToken("my-token");
@@ -76,36 +67,6 @@ public class FusionApiManagerTest {
         givenCallToClientToGetReturnsNotFound();
         whenFusionApiManagerIsCalledThenExceptionShouldBeThrown();
         thenExceptionMessageShouldMatchExpected("The requested resource does not exist.");
-    }
-
-    @Test
-    void successfulFileDownload() throws Exception {
-        givenFusionApiManager();
-        givenApiPath("http://localhost:8080/test");
-        givenSessionBearerToken("my-token");
-        givenTempFile("fusion-test-", ".csv");
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenDownloadBody("A,B,C\n1,2,3");
-        givenResponseHeader("Content-Type", "text/csv");
-        givenResponseHeader("Content-Disposition", "attachment; filename=test-testFile.csv");
-        givenCallToClientToGetInputStreamIsSuccessfully();
-        whenFusionApiManagerIsCalledToDownloadFileToPath();
-        thenTheFileContentsShouldMatchExpected();
-        finallyDeleteTempFile();
-    }
-
-    @Test
-    void successfulFileDownloadAsStream() throws Exception {
-        givenFusionApiManager();
-        givenApiPath("http://localhost:8080/test");
-        givenSessionBearerToken("my-token");
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenDownloadBody("A,B,C\n1,2,3");
-        givenResponseHeader("Content-Type", "text/csv");
-        givenResponseHeader("Content-Disposition", "attachment; filename=test-testFile.csv");
-        givenCallToClientToGetInputStreamIsSuccessfully();
-        whenFusionApiManagerIsCalledToDownloadFile();
-        thenTheDownloadBodyShouldMatchExpected();
     }
 
     private void thenTheResponseBodyShouldMatchExpected() {
@@ -146,58 +107,8 @@ public class FusionApiManagerTest {
         when(client.get(apiPath, requestHeaders)).thenReturn(expectedHttpResponse);
     }
 
-    private void finallyDeleteTempFile() {
-        tempOutputFile.deleteOnExit();
-    }
-
-    private void thenTheFileContentsShouldMatchExpected() throws Exception {
-        byte[] outputBytes = new byte[(int) tempOutputFile.length()];
-        try (FileInputStream fis = new FileInputStream(tempOutputFile)) {
-            fis.read(outputBytes);
-        }
-
-        assertThat(outputBytes, is(equalTo(downloadBody)));
-    }
-
-    private void whenFusionApiManagerIsCalledToDownloadFileToPath() {
-        fusionAPIManager.callAPIFileDownload(apiPath, tempOutputFile.getAbsolutePath());
-    }
-
-    private void givenTempFile(String prefix, String suffix) throws Exception {
-        tempOutputFile = File.createTempFile(prefix, suffix);
-    }
-
-    private void thenTheDownloadBodyShouldMatchExpected() throws Exception {
-        byte[] outputBytes = new byte[(int) downloadBody.length];
-        responseStream.read(outputBytes);
-
-        assertThat(outputBytes, is(equalTo(downloadBody)));
-    }
-
-    private void whenFusionApiManagerIsCalledToDownloadFile() {
-        responseStream = fusionAPIManager.callAPIFileDownload(apiPath);
-    }
-
-    private void givenCallToClientToGetInputStreamIsSuccessfully() {
-        HttpResponse<InputStream> expectedHttpResponse = HttpResponse.<InputStream>builder()
-                .statusCode(200)
-                .body(new ByteArrayInputStream(downloadBody))
-                .headers(responseHeaders)
-                .build();
-
-        when(client.getInputStream(apiPath, requestHeaders)).thenReturn(expectedHttpResponse);
-    }
-
     private void givenApiPath(String apiPath) {
         this.apiPath = apiPath;
-    }
-
-    private void givenResponseHeader(String headerKey, String headerValue) {
-        responseHeaders.put(headerKey, Lists.newArrayList(headerValue));
-    }
-
-    private void givenDownloadBody(String body) {
-        this.downloadBody = body.getBytes();
     }
 
     private void givenRequestHeader(String headerKey, String headerValue) {

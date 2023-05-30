@@ -414,7 +414,7 @@ public class Fusion {
             throw new FusionException(String.format("Unable to save to target path %s", path), e);
         }
         String filepath = String.format("%s/%s_%s_%s.%s", path, catalogName, dataset, seriesMember, distribution);
-        this.api.callAPIFileDownload(url, filepath);
+        this.downloader.callAPIFileDownload(url, filepath, catalogName, dataset);
     }
 
     /**
@@ -464,7 +464,7 @@ public class Fusion {
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                 this.rootURL, catalogName, dataset, seriesMember, distribution);
-        return this.api.callAPIFileDownload(url);
+        return this.downloader.callAPIFileDownload(url, catalogName, dataset);
     }
 
     /**
@@ -572,6 +572,7 @@ public class Fusion {
         protected String rootURL;
         protected APIManager api;
         protected APIUploader uploader;
+        protected APIDownloader downloader;
         protected Map<String, BearerToken> datasetBearerTokens = new HashMap<>();
 
         protected DatasetTokenProvider datasetTokenProvider;
@@ -670,7 +671,10 @@ public class Fusion {
                     AlgoSpecificDigestProducer.builder().sha256().build();
 
             if (api == null) {
-                api = new FusionAPIManager(client, sessionTokenProvider);
+                api = FusionAPIManager.builder()
+                        .httpClient(client)
+                        .sessionTokenProvider(sessionTokenProvider)
+                        .build();
             }
 
             if (uploader == null) {
@@ -680,6 +684,15 @@ public class Fusion {
                         .datasetTokenProvider(datasetTokenProvider)
                         .digestProducer(digestProducer)
                         .uploadPartSize(16)
+                        .build();
+            }
+
+            if (downloader == null) {
+                downloader = FusionAPIDownloader.builder()
+                        .httpClient(client)
+                        .sessionTokenProvider(sessionTokenProvider)
+                        .datasetTokenProvider(datasetTokenProvider)
+                        .digestProducer(digestProducer)
                         .build();
             }
 

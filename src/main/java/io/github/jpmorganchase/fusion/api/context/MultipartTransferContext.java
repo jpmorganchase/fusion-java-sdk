@@ -1,7 +1,10 @@
-package io.github.jpmorganchase.fusion.model;
+package io.github.jpmorganchase.fusion.api.context;
 
-import static io.github.jpmorganchase.fusion.model.MultipartTransferContext.MultipartTransferStatus.TRANSFERRED;
+import static io.github.jpmorganchase.fusion.api.context.MultipartTransferContext.MultipartTransferStatus.TRANSFERRED;
 
+import io.github.jpmorganchase.fusion.api.response.UploadedPart;
+import io.github.jpmorganchase.fusion.api.response.UploadedParts;
+import io.github.jpmorganchase.fusion.model.Operation;
 import java.nio.ByteBuffer;
 import java.util.*;
 import lombok.*;

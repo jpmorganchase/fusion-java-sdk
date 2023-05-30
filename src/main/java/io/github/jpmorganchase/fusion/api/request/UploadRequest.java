@@ -1,7 +1,6 @@
 package io.github.jpmorganchase.fusion.api.request;
 
 import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
-import io.github.jpmorganchase.fusion.api.FileUploadException;
 import java.io.*;
 import java.nio.file.Files;
 import lombok.*;
@@ -74,7 +73,7 @@ public class UploadRequest {
         public UploadRequest build() {
 
             if (maxSinglePartFileSize <= 0) {
-                throw new FileUploadException("Max single part file size must be specified");
+                throw new ApiInputValidationException("Max single part file size must be specified");
             }
 
             if (fileName != null) {
