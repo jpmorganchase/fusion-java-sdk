@@ -1,6 +1,8 @@
 package io.github.jpmorganchase.fusion.api;
 
-public class ApiInputValidationException extends RuntimeException {
+import io.github.jpmorganchase.fusion.exception.FusionException;
+
+public class ApiInputValidationException extends FusionException {
 
     public ApiInputValidationException(String s) {
         super(s);

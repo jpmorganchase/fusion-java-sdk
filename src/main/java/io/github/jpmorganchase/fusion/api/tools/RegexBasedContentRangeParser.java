@@ -6,12 +6,13 @@ import java.util.regex.Pattern;
 
 /**
  * Tool used to parse the "Content-Range" header for each pertinent element.
- *
+ * <p>
  * Content-Range header expected to hold a value following the pattern "bytes startPos-endPos/contentLength"
  */
 public class RegexBasedContentRangeParser implements ContentRangeParser {
 
     private static final String PATTERN = "bytes (\\d+)-(\\d+)/(\\d+)";
+    private static final Long EMPTY = -1L;
 
     @Override
     public ContentRange parse(String contentRange) {
@@ -26,6 +27,6 @@ public class RegexBasedContentRangeParser implements ContentRangeParser {
                     .build();
         }
 
-        return ContentRange.builder().build();
+        return ContentRange.builder().start(EMPTY).end(EMPTY).total(EMPTY).build();
     }
 }

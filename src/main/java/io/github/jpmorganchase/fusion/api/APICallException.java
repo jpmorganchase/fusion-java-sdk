@@ -1,9 +1,11 @@
 package io.github.jpmorganchase.fusion.api;
 
+import io.github.jpmorganchase.fusion.exception.FusionException;
+
 /**
  * A custom exception to provide useful information on the response of an API call
  */
-public class APICallException extends RuntimeException {
+public class APICallException extends FusionException {
 
     private final int responseCode;
 
@@ -41,6 +43,9 @@ public class APICallException extends RuntimeException {
                 break;
             case 500:
                 errorMsg = "Internal API error. There was an error processing the request.";
+                break;
+            case 504:
+                errorMsg = "Request timed out. Please try again.";
                 break;
             default:
                 errorMsg = "Unknown";

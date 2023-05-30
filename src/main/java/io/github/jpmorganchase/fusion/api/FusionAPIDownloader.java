@@ -4,6 +4,7 @@ import io.github.jpmorganchase.fusion.api.request.DownloadRequest;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
+import io.github.jpmorganchase.fusion.exception.FusionException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
@@ -18,6 +19,13 @@ import lombok.Getter;
 @Builder
 @Getter
 public class FusionAPIDownloader implements APIDownloader {
+
+    private static final String WRITE_TO_FILE_EXCEPTION_MSG =
+            "Problem encountered attempting to write downloaded distribution to file";
+    private static final String WRITE_TO_STREAM_EXCEPTION_MSG =
+            "Problem encountered attempting to write downloaded distribution to stream";
+    private static final String DOWNLOAD_FAILED_EXCEPTION_MSG =
+            "Problem encountered attempting to download distribution";
 
     private static final String DEFAULT_FOLDER = "downloads";
     private static final String HEAD_PATH = "%s/operationType/download";
@@ -110,8 +118,7 @@ public class FusionAPIDownloader implements APIDownloader {
             allFutures.join();
 
         } catch (IOException | CompletionException | CancellationException ex) {
-            ;
-            throw new FileDownloadException("Unable to write to specified download file, please try again", ex);
+            throw handleExceptionThrownWhenAttemptingToGetParts(ex);
         } finally {
             executor.shutdown();
         }
@@ -120,7 +127,7 @@ public class FusionAPIDownloader implements APIDownloader {
     private void writePartToFile(GetPartResponse gpr, RandomAccessFile raf) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (BufferedInputStream input = new BufferedInputStream(gpr.getContent())) {
+        try (InputStream input = gpr.getContent()) {
 
             byte[] buffer = new byte[8192];
             int bytesRead;
@@ -134,7 +141,7 @@ public class FusionAPIDownloader implements APIDownloader {
             }
 
         } catch (IOException ex) {
-            throw new FileDownloadException("Problem encountered attempting to write part to file : ", ex);
+            throw new FileDownloadException(WRITE_TO_FILE_EXCEPTION_MSG, ex);
         }
     }
 
@@ -146,6 +153,7 @@ public class FusionAPIDownloader implements APIDownloader {
         setSecurityHeaders(dr, requestHeaders);
 
         HttpResponse<InputStream> response = httpClient.getInputStream(getPartPath, requestHeaders);
+
         checkResponseStatus(response);
 
         // TODO :: knighto - this is a good place to verify the digest
@@ -159,16 +167,15 @@ public class FusionAPIDownloader implements APIDownloader {
     public void performSinglePartDownloadToFile(DownloadRequest dr) throws APICallException {
 
         try (InputStream input = performSinglePartDownloadToStream(dr)) {
-
-            FileOutputStream fileOutput = new FileOutputStream(dr.getFilePath());
-
-            byte[] buf = new byte[8192];
-            int len;
-            while ((len = input.read(buf)) != -1) {
-                fileOutput.write(buf, 0, len);
+            try (FileOutputStream fileOutput = new FileOutputStream(dr.getFilePath())) {
+                byte[] buf = new byte[8192];
+                int len;
+                while ((len = input.read(buf)) != -1) {
+                    fileOutput.write(buf, 0, len);
+                }
             }
         } catch (IOException e) {
-            throw new FileDownloadException("Failure downloading file, unable to write to file", e);
+            throw new FileDownloadException(WRITE_TO_FILE_EXCEPTION_MSG, e);
         }
     }
 
@@ -202,7 +209,7 @@ public class FusionAPIDownloader implements APIDownloader {
             return consolidateMultiPartStreams(inputStreams);
 
         } catch (CompletionException | CancellationException e) {
-            throw new FileDownloadException("Unable to download specified distribution", e);
+            throw handleExceptionThrownWhenAttemptingToGetParts(e);
         } finally {
             executor.shutdown();
         }
@@ -214,12 +221,12 @@ public class FusionAPIDownloader implements APIDownloader {
         int bytesRead;
 
         for (InputStream is : inputStreams) {
-            try (BufferedInputStream bis = new BufferedInputStream(is)) {
-                while ((bytesRead = bis.read(buffer)) != -1) {
+            try (InputStream closableStream = is) {
+                while ((bytesRead = closableStream.read(buffer)) != -1) {
                     baos.write(buffer, 0, bytesRead);
                 }
             } catch (IOException e) {
-                throw new FileDownloadException("Problem encountered handling downloaded stream", e);
+                throw new FileDownloadException(WRITE_TO_STREAM_EXCEPTION_MSG, e);
             }
         }
 
@@ -260,6 +267,15 @@ public class FusionAPIDownloader implements APIDownloader {
             headPath = String.format(HEAD_PATH_FOR_PART, headPath, partNumber);
         }
         return headPath;
+    }
+
+    private FusionException handleExceptionThrownWhenAttemptingToGetParts(Exception ex) {
+        if (ex.getCause() instanceof FusionException) {
+            return (FusionException) ex.getCause();
+        }
+
+        Throwable cause = (null != ex.getCause() ? ex.getCause() : ex);
+        return new FileDownloadException(DOWNLOAD_FAILED_EXCEPTION_MSG, cause);
     }
 
     private ExecutorService getExecutor() {

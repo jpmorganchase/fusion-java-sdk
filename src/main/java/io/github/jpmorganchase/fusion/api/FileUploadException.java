@@ -1,6 +1,8 @@
 package io.github.jpmorganchase.fusion.api;
 
-public class FileUploadException extends RuntimeException {
+import io.github.jpmorganchase.fusion.exception.FusionException;
+
+public class FileUploadException extends FusionException {
 
     public FileUploadException(String s) {
         super(s);
