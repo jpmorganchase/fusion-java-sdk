@@ -558,6 +558,7 @@ public class FusionApiConsumerPactTest {
         fusion = Fusion.builder()
                 .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
                 .bearerToken(bearerToken)
+                .datasetBearerToken("common", "API_TEST", "my-fusion-bearer")
                 .build();
     }
 }

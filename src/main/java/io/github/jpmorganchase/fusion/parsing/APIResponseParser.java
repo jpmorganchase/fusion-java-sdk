@@ -1,5 +1,6 @@
 package io.github.jpmorganchase.fusion.parsing;
 
+import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.model.*;
 import java.util.Map;
 
@@ -19,4 +20,8 @@ public interface APIResponseParser {
     <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass);
 
     Map<String, Map<String, Object>> parseResourcesUntyped(String json);
+
+    Operation parseOperationResponse(String json);
+
+    UploadedPart parseUploadPartResponse(String json);
 }

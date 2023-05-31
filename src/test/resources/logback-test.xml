@@ -11,10 +11,10 @@
     </appender>
 
     <!-- Increase this to INFO to see request and response details for WireMock tests -->
-    <logger name="WireMock" level="ERROR"/>
+    <logger name="WireMock" level="DEBUG"/>
 
 
-    <root level="ERROR">
+    <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
     </root>
 

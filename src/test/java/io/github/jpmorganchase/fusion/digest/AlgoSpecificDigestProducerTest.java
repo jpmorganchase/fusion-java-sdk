@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -109,7 +110,8 @@ class AlgoSpecificDigestProducerTest {
     }
 
     private void whenExecuteIsCalledWithNullDataThenExceptionShouldBeThrown() {
-        Assertions.assertThrows(ApiInputValidationException.class, () -> algoSpecificDigestProducer.execute(null));
+        Assertions.assertThrows(
+                ApiInputValidationException.class, () -> algoSpecificDigestProducer.execute((InputStream) null));
     }
 
     private void givenInputData(byte[] inputData) {

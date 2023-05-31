@@ -52,6 +52,14 @@ public class RequestResponseHelper {
     public static RequestResponsePact downloadExpectation(
             PactDslWithProvider builder, String given, String upon, String path, String body) {
         return builder.given(given)
+                .uponReceiving(upon + "head")
+                .path(path + "/operationType/download")
+                .matchHeader("Authorization", AUTH_VAL)
+                .method("GET")
+                .willRespondWith()
+                .matchHeader("x-jpmc-version-id", "a1")
+                .matchHeader("x-jpmc-checksum-sha256", "c1")
+                .matchHeader("Content-Length", "5")
                 .uponReceiving(upon)
                 .path(path)
                 .matchHeader("Authorization", AUTH_VAL)

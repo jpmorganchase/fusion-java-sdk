@@ -2,10 +2,7 @@ package io.github.jpmorganchase.fusion;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.github.jpmorganchase.fusion.api.APICallException;
-import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
-import io.github.jpmorganchase.fusion.api.FusionAPIManager;
+import io.github.jpmorganchase.fusion.api.*;
 import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
@@ -56,6 +53,10 @@ public class Fusion {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private APIManager api;
+
+    private APIUploader uploader;
+
+    private APIDownloader downloader;
 
     @Builder.Default
     private String defaultCatalog = DEFAULT_CATALOG;
@@ -399,7 +400,7 @@ public class Fusion {
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @param path         the absolute file path where the file should be written.
      * @throws APICallException if the call to the Fusion API fails
-     * @throws FusionException  if the downloaded file cannot be saved to the specified target path
+     * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, String seriesMember, String distribution, String path) {
@@ -413,7 +414,7 @@ public class Fusion {
             throw new FusionException(String.format("Unable to save to target path %s", path), e);
         }
         String filepath = String.format("%s/%s_%s_%s.%s", path, catalogName, dataset, seriesMember, distribution);
-        this.api.callAPIFileDownload(url, filepath);
+        this.downloader.callAPIFileDownload(url, filepath, catalogName, dataset);
     }
 
     /**
@@ -424,7 +425,7 @@ public class Fusion {
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @throws APICallException if the call to the Fusion API fails
-     * @throws FusionException  if the downloaded file cannot be saved to the default path
+     * @throws FileDownloadException  if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, String seriesMember, String distribution) {
@@ -440,7 +441,7 @@ public class Fusion {
      * @param seriesMembers a List of Strings representing the series member identifiers.
      * @param distribution  a String representing the distribution identifier, this is the file extension.
      * @throws APICallException if the call to the Fusion API fails
-     * @throws FusionException  if the downloaded file cannot be saved to the default path
+     * @throws FileDownloadException  if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, List<String> seriesMembers, String distribution) {
@@ -457,13 +458,14 @@ public class Fusion {
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution) {
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                 this.rootURL, catalogName, dataset, seriesMember, distribution);
-        return this.api.callAPIFileDownload(url);
+        return this.downloader.callAPIFileDownload(url, catalogName, dataset);
     }
 
     /**
@@ -479,6 +481,7 @@ public class Fusion {
      * @param createdDate  the creation date for the distribution
      * @throws ApiInputValidationException if the specified file cannot be read
      * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      **/
     public void upload(
@@ -497,7 +500,7 @@ public class Fusion {
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
-        this.api.callAPIFileUpload(url, filename, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
+        this.uploader.callAPIFileUpload(url, filename, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
     }
 
     /**
@@ -511,6 +514,7 @@ public class Fusion {
      * @param dataDate     the earliest, latest, and created date are all the same.
      * @throws ApiInputValidationException if the specified file cannot be read
      * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      **/
     public void upload(
@@ -534,8 +538,9 @@ public class Fusion {
      * @param fromDate     the earliest date for which there is data in the distribution
      * @param toDate       the latest date for which there is data in the distribution
      * @param createdDate  the creation date for the distribution
-     * @throws ApiInputValidationException if the specified file cannot be read
+     * @throws ApiInputValidationException if the specified stream cannot be read
      * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      **/
     public void upload(
@@ -554,7 +559,7 @@ public class Fusion {
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
-        this.api.callAPIFileUpload(url, data, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
+        this.uploader.callAPIFileUpload(url, data, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
     }
 
     public static FusionBuilder builder() {
@@ -570,6 +575,8 @@ public class Fusion {
         protected String credentialFile;
         protected String rootURL;
         protected APIManager api;
+        protected APIUploader uploader;
+        protected APIDownloader downloader;
         protected Map<String, BearerToken> datasetBearerTokens = new HashMap<>();
 
         protected DatasetTokenProvider datasetTokenProvider;
@@ -668,7 +675,29 @@ public class Fusion {
                     AlgoSpecificDigestProducer.builder().sha256().build();
 
             if (api == null) {
-                api = new FusionAPIManager(client, sessionTokenProvider, datasetTokenProvider, digestProducer);
+                api = FusionAPIManager.builder()
+                        .httpClient(client)
+                        .sessionTokenProvider(sessionTokenProvider)
+                        .build();
+            }
+
+            if (uploader == null) {
+                uploader = FusionAPIUploader.builder()
+                        .httpClient(client)
+                        .sessionTokenProvider(sessionTokenProvider)
+                        .datasetTokenProvider(datasetTokenProvider)
+                        .digestProducer(digestProducer)
+                        .uploadPartSize(16)
+                        .build();
+            }
+
+            if (downloader == null) {
+                downloader = FusionAPIDownloader.builder()
+                        .httpClient(client)
+                        .sessionTokenProvider(sessionTokenProvider)
+                        .datasetTokenProvider(datasetTokenProvider)
+                        .digestProducer(digestProducer)
+                        .build();
             }
 
             return super.build();

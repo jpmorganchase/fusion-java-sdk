@@ -12,4 +12,6 @@ public interface Client {
     HttpResponse<String> post(String path, Map<String, String> headers, String body);
 
     HttpResponse<String> put(String path, Map<String, String> headers, InputStream body);
+
+    HttpResponse<String> delete(String path, Map<String, String> headers, String body);
 }

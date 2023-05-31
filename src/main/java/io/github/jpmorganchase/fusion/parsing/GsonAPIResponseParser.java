@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.parsing;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.model.*;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
@@ -62,6 +63,16 @@ public class GsonAPIResponseParser implements APIResponseParser {
     @Override
     public Map<String, Distribution> parseDistributionResponse(String json) {
         return parseResourcesFromResponse(json, Distribution.class);
+    }
+
+    @Override
+    public Operation parseOperationResponse(String json) {
+        return gson.fromJson(json, Operation.class);
+    }
+
+    @Override
+    public UploadedPart parseUploadPartResponse(String json) {
+        return new GsonBuilder().create().fromJson(json, UploadedPart.class);
     }
 
     @Override
