@@ -200,6 +200,7 @@ public class FusionAPIDownloader implements APIDownloader {
                 futures.add(CompletableFuture.supplyAsync(() -> callToAPIToGetPart(dr, part), executor));
             }
 
+            // TODO :: Build a InputStream wrapper - which verifies each stream based on the digest
             List<InputStream> inputStreams = futures.stream()
                     .map(CompletableFuture::join)
                     .sorted(Comparator.comparingInt(gpr -> gpr.getHead().getPartCount()))

@@ -14,7 +14,7 @@ import lombok.Value;
 public class UploadedPartContext {
 
     byte[] digest;
-    int partCount;
+    int partNo;
 
     @Expose
     UploadedPart part;

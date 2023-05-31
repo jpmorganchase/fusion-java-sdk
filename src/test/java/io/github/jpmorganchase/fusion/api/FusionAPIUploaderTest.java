@@ -13,6 +13,7 @@ import io.github.jpmorganchase.fusion.api.context.MultipartTransferContext;
 import io.github.jpmorganchase.fusion.api.context.UploadedPartContext;
 import io.github.jpmorganchase.fusion.api.request.UploadRequest;
 import io.github.jpmorganchase.fusion.api.response.UploadedPart;
+import io.github.jpmorganchase.fusion.api.response.UploadedParts;
 import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
@@ -27,9 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
@@ -59,21 +58,25 @@ class FusionAPIUploaderTest {
 
     private String apiPath;
 
-    private Map<String, String> requestHeaders = new HashMap<>();
-
     private DigestDescriptor digestDescriptor;
 
     private byte[] uploadBody;
 
+    private InputStream uploadStream;
+
     private String fileName;
 
-    private APICallException thrown;
+    private Throwable thrown;
 
     private MultipartTransferContext multipartTransferContext;
 
     private UploadRequest uploadRequest;
 
+    private List<UploadedPart> uploadedParts = new ArrayList<>();
+
     private int uploadPartSize = 16;
+
+    private int singlePartUploadSizeLimit = 16;
 
     private void givenSessionBearerToken(String token) {
         given(sessionTokenProvider.getSessionBearerToken()).willReturn(token);
@@ -81,71 +84,125 @@ class FusionAPIUploaderTest {
 
     @Test
     void successfulSinglePartFileUpload() {
+        // given
         givenSdkAPIUploader();
         givenApiPath("http://localhost:8080/test");
         givenSessionBearerToken("my-token");
         givenDatasetBearerToken("common", "simple_dataset", "dataset-token");
         givenUploadFile("upload-test.csv");
         givenUploadBody("A,B,C\n1,2,3\n4,5,6\n7,8,9");
-        givenRequestHeader("accept", "*/*");
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
-        givenRequestHeader("Content-Type", "application/octet-stream");
-        givenRequestHeader("x-jpmc-distribution-from-date", "2023-03-01");
-        givenRequestHeader("x-jpmc-distribution-to-date", "2023-03-02");
-        givenRequestHeader("x-jpmc-distribution-created-date", "2023-03-03");
-        givenRequestHeader("Digest", "SHA-256=k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=");
-        givenRequestHeader("Content-Length", "23");
+
         givenCallToProduceDigestReturnsDigestDescriptor("k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=");
-        givenCallToClientToUploadIsSuccessful();
-        whenSDKAPIUploaderIsCalledToUploadFileFromPath("2023-03-01", "2023-03-02", "2023-03-03");
+        givenCallToClientToUploadIsSuccessful(
+                "my-token",
+                "dataset-token",
+                "2023-03-01",
+                "2023-03-02",
+                "2023-03-03",
+                "k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=",
+                "23");
+        // when
+        whenSDKAPIUploaderIsCalledToUploadFileFromPath(
+                "common", "simple_dataset", "2023-03-01", "2023-03-02", "2023-03-03");
     }
 
     @Test
     void successfulSinglePartFileUploadWithStream() {
+        // given
         givenSdkAPIUploader();
         givenApiPath("http://localhost:8080/test");
         givenSessionBearerToken("my-token");
         givenDatasetBearerToken("common", "simple_dataset", "dataset-token");
         givenUploadBody("A,B,C\n1,2,3\n4,5,6\n7,8,9");
-        givenRequestHeader("accept", "*/*");
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
-        givenRequestHeader("Content-Type", "application/octet-stream");
-        givenRequestHeader("x-jpmc-distribution-from-date", "2023-03-01");
-        givenRequestHeader("x-jpmc-distribution-to-date", "2023-03-02");
-        givenRequestHeader("x-jpmc-distribution-created-date", "2023-03-03");
-        givenRequestHeader("Digest", "SHA-256=k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=");
-        givenRequestHeader("Content-Length", "23");
         givenCallToProduceDigestReturnsDigestDescriptor("k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=");
-        givenCallToClientToUploadIsSuccessful();
-        whenSDKAPIUploaderIsCalledToUploadFileFromStream("2023-03-01", "2023-03-02", "2023-03-03");
+        givenCallToClientToUploadIsSuccessful(
+                "my-token",
+                "dataset-token",
+                "2023-03-01",
+                "2023-03-02",
+                "2023-03-03",
+                "k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=",
+                "23");
+        // when
+        whenSDKAPIUploaderIsCalledToUploadFileFromStream(
+                "common", "simple_dataset", "2023-03-01", "2023-03-02", "2023-03-03");
     }
 
     @Test
     void successfullyInitiateMultipartUpload() {
-
+        // given
         givenSdkAPIUploader();
         givenApiPath(
                 "http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
         givenSessionBearerToken("my-token");
         givenDatasetBearerToken("common", "test-dataset", "dataset-token");
         givenUploadFile("large-upload-test.csv");
-        givenRequestHeader("accept", "*/*");
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
-        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa");
+        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token");
         givenUploadRequest();
-
+        // when
         whenFusionApiManagerIsCalledToInitiateMultipartUpload();
-
+        // then
         thenOperationIdShouldMatch("some-operation-id-aa");
         thenMultipartTransferContextShouldAllowToProgress();
     }
 
     @Test
-    void successfullyUploadParts() {
+    void successfullyUploadPartsWithSizeSetToSixteen() {
+        // given
+        givenSha256DigestProducer();
+        givenUploadPartSize(16);
+        givenSdkAPIUploader();
+        givenApiPath(
+                "http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
+        givenUploadFile("large-upload-test.csv");
+        givenMultipartTransferContextStatusIsStarted("my-op-id");
+        givenCallToClientToUploadPart(
+                1, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=", "my-op-id", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                2, "Vlrqh/mN2FJfct6E4Ah5UhnwPQ2tIoyQW4vmUBVD+lw=", "my-op-id", "my-token", "dataset-token");
+        givenUploadRequest("2023-03-19");
 
+        // when
+        whenFusionApiManagerIsCalledToUploadParts();
+
+        // then
+        thenMultipartTransferContextStatusShouldBeTransferred();
+    }
+
+    @Test
+    void successfullyUploadPartsWithPartSizeSetToEight() {
+        // given
+        givenSha256DigestProducer();
+        givenUploadPartSize(8);
+        givenSdkAPIUploader();
+        givenApiPath(
+                "http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
+        givenUploadFile("large-upload-test.csv");
+        givenMultipartTransferContextStatusIsStarted("my-op-id");
+        givenCallToClientToUploadPart(
+                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "my-op-id", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "my-op-id", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=", "my-op-id", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "my-op-id", "my-token", "dataset-token");
+        givenUploadRequest("2023-03-19");
+
+        // when
+        whenFusionApiManagerIsCalledToUploadParts();
+
+        // then
+        thenMultipartTransferContextStatusShouldBeTransferred();
+    }
+
+    @Test
+    void successfullyCompleteMultipartUpload() {
+        // given
         givenSha256DigestProducer();
         givenSdkAPIUploader();
         givenApiPath(
@@ -153,27 +210,197 @@ class FusionAPIUploaderTest {
         givenSessionBearerToken("my-token");
         givenDatasetBearerToken("common", "test-dataset", "dataset-token");
         givenUploadFile("large-upload-test.csv");
-
-        givenRequestHeader("accept", "*/*");
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
-        givenRequestHeader("Content-Type", "application/octet-stream");
+        givenUploadRequest("2023-05-18");
 
         givenMultipartTransferContextStatusIsStarted("my-op-id");
+        givenPartHasBeenUploaded(1, "provider-gen-part-id-1", "base64-checksum-1", "digest-as-bytes-1".getBytes());
+        givenPartHasBeenUploaded(2, "provider-gen-part-id-2", "base64-checksum-2", "digest-as-bytes-2".getBytes());
+        givenPartHasBeenUploaded(3, "provider-gen-part-id-3", "base64-checksum-3", "digest-as-bytes-3".getBytes());
+        givenPartHasBeenUploaded(4, "provider-gen-part-id-4", "base64-checksum-4", "digest-as-bytes-4".getBytes());
+        givenMultipartTransferContextStatusIsTransferred(8 * (1024 * 1024), 33554432, 4);
+        givenCallToClientToCompleteMultipartUpload(
+                "my-op-id",
+                "my-token",
+                "dataset-token",
+                "2023-05-18",
+                "2023-05-18",
+                "2023-05-18",
+                "kdNJFWpnN7XnQx02fsMYlZ5CxZzdCXvI4GEBIoqh/Wk=");
 
-        givenCallToClientToUploadPart(1, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=");
-        givenCallToClientToUploadPart(2, "Vlrqh/mN2FJfct6E4Ah5UhnwPQ2tIoyQW4vmUBVD+lw=");
+        // when
+        whenFusionApiManagerIsCalledToCompleteMultipartTransfer();
 
-        givenUploadRequest("2023-03-19");
-
-        whenFusionApiManagerIsCalledToUploadParts();
-
-        thenMultipartTransferContextStatusShouldBeTransferred();
+        // then
+        thenMultipartTransferStatusShouldBeComplete();
     }
 
     @Test
-    void successfullyUploadPartsWithPartSizeSetToEight() {
+    void successfullyMultipartUpload() {
+        // given
+        givenSha256DigestProducer();
+        givenUploadPartSize(8);
+        givenSdkAPIUploader();
+        givenApiPath(
+                "http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
+        givenUploadFile("large-upload-test.csv");
+        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToCompleteMultipartUpload(
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                "2023-03-01",
+                "2023-03-02",
+                "2023-03-03",
+                "IASqXk2/aZRMT2siJkzc/3Mg6DSG2oil5IwkMeb4KgE=");
 
+        // When
+        whenSDKAPIUploaderIsCalledToUploadFileFromPath(
+                "common", "test-dataset", "2023-03-01", "2023-03-02", "2023-03-03");
+    }
+
+    @Test
+    void successfullyMultipartUploadWithStream() {
+        // given
+        givenSha256DigestProducer();
+        givenUploadPartSize(8);
+        givenSdkAPIUploader();
+        givenApiPath(
+                "http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
+        givenUploadStream("large-upload-test.csv");
+
+        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToCompleteMultipartUpload(
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                "2023-03-01",
+                "2023-03-02",
+                "2023-03-03",
+                "IASqXk2/aZRMT2siJkzc/3Mg6DSG2oil5IwkMeb4KgE=");
+
+        // When
+        whenSDKAPIUploaderIsCalledToUploadFileFromStream(
+                "common", "test-dataset", "2023-03-01", "2023-03-02", "2023-03-03");
+    }
+
+    @Test
+    void multipartUploadFailsToInitiateTransfer() {
+        // given
+        givenSha256DigestProducer();
+        givenUploadPartSize(8);
+        givenSdkAPIUploader();
+        givenApiPath(
+                "http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
+        givenUploadFile("large-upload-test.csv");
+        givenCallToClientToInitiateTransferFails("my-token", "dataset-token", 500);
+
+        // When
+        whenSDKAPIUploaderIsCalledToUploadFileFromPathAndExceptionIsRaised(
+                "common", "test-dataset", "2023-03-01", "2023-03-02", "2023-03-03", APICallException.class);
+
+        // Then
+        thenApiCallExceptionShouldHaveHttpStatus(500);
+    }
+
+    @Test
+    void multipartUploadFailsToUploadPart() {
+        // given
+        givenSha256DigestProducer();
+        givenUploadPartSize(8);
+        givenSdkAPIUploader();
+        givenApiPath(
+                "http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
+        givenUploadFile("large-upload-test.csv");
+        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPartFails(
+                3,
+                "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                404);
+        givenCallToClientToUploadPart(
+                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToAbortMultipartUpload("some-operation-id-aa", "my-token", "dataset-token");
+
+        // When
+        whenSDKAPIUploaderIsCalledToUploadFileFromPathAndExceptionIsRaised(
+                "common", "test-dataset", "2023-03-01", "2023-03-02", "2023-03-03", APICallException.class);
+
+        // Then
+        thenApiCallExceptionShouldHaveHttpStatus(404);
+    }
+
+    @Test
+    void multipartUploadFailsToComplete() {
+        // given
+        givenSha256DigestProducer();
+        givenUploadPartSize(8);
+        givenSdkAPIUploader();
+        givenApiPath(
+                "http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
+        givenSessionBearerToken("my-token");
+        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
+        givenUploadFile("large-upload-test.csv");
+        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToCompleteMultipartUploadFails(
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                "2023-05-18",
+                "2023-05-18",
+                "2023-05-18",
+                "IASqXk2/aZRMT2siJkzc/3Mg6DSG2oil5IwkMeb4KgE=",
+                504);
+        givenCallToClientToAbortMultipartUpload("some-operation-id-aa", "my-token", "dataset-token");
+
+        // when
+        whenSDKAPIUploaderIsCalledToUploadFileFromPathAndExceptionIsRaised(
+                "common", "test-dataset", "2023-05-18", "2023-05-18", "2023-05-18", APICallException.class);
+
+        // then
+        thenApiCallExceptionShouldHaveHttpStatus(504);
+    }
+
+    @Test
+    void multipartUploadFailsToAbort() {
+        // given
         givenSha256DigestProducer();
         givenUploadPartSize(8);
         givenSdkAPIUploader();
@@ -183,60 +410,37 @@ class FusionAPIUploaderTest {
         givenDatasetBearerToken("common", "test-dataset", "dataset-token");
         givenUploadFile("large-upload-test.csv");
 
-        givenRequestHeader("accept", "*/*");
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
-        givenRequestHeader("Content-Type", "application/octet-stream");
+        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToUploadPart(
+                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "some-operation-id-aa", "my-token", "dataset-token");
+        givenCallToClientToCompleteMultipartUploadFails(
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                "2023-05-18",
+                "2023-05-18",
+                "2023-05-18",
+                "IASqXk2/aZRMT2siJkzc/3Mg6DSG2oil5IwkMeb4KgE=",
+                504);
+        givenCallToClientToAbortMultipartUploadFails("some-operation-id-aa", "my-token", "dataset-token", 500);
 
-        givenMultipartTransferContextStatusIsStarted("my-op-id");
+        // when
+        whenSDKAPIUploaderIsCalledToUploadFileFromPathAndExceptionIsRaised(
+                "common", "test-dataset", "2023-05-18", "2023-05-18", "2023-05-18", APICallException.class);
 
-        givenCallToClientToUploadPart(1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=");
-        givenCallToClientToUploadPart(2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=");
-        givenCallToClientToUploadPart(3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=");
-        givenCallToClientToUploadPart(4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=");
-
-        givenUploadRequest("2023-03-19");
-
-        whenFusionApiManagerIsCalledToUploadParts();
-
-        thenMultipartTransferContextStatusShouldBeTransferred();
-    }
-
-    @Test
-    void successfullyCompleteMultipartUpload() {
-
-        givenSha256DigestProducer();
-        givenSdkAPIUploader();
-        givenApiPath(
-                "http://localhost:8080/test/catalogs/common/datasets/test-dataset/datasetseries/2023-03-19/distributions/csv");
-        givenSessionBearerToken("my-token");
-        givenDatasetBearerToken("common", "test-dataset", "dataset-token");
-        givenUploadFile("large-upload-test.csv");
-
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
-        givenRequestHeader("x-jpmc-distribution-from-date", "2023-05-18");
-        givenRequestHeader("x-jpmc-distribution-to-date", "2023-05-18");
-        givenRequestHeader("x-jpmc-distribution-created-date", "2023-05-18");
-        givenRequestHeader("Digest", "SHA-256=kdNJFWpnN7XnQx02fsMYlZ5CxZzdCXvI4GEBIoqh/Wk=");
-
-        givenMultipartTransferContextStatusIsStarted("my-op-id");
-        givenPartHasBeenUploaded(1, "provider-gen-part-id-1", "base64-checksum-1", "digest-as-bytes-1".getBytes());
-        givenPartHasBeenUploaded(2, "provider-gen-part-id-2", "base64-checksum-2", "digest-as-bytes-2".getBytes());
-        givenPartHasBeenUploaded(3, "provider-gen-part-id-3", "base64-checksum-3", "digest-as-bytes-3".getBytes());
-        givenPartHasBeenUploaded(4, "provider-gen-part-id-4", "base64-checksum-4", "digest-as-bytes-4".getBytes());
-        givenMultipartTransferContextStatusIsTransferred(8 * (1024 * 1024), 33554432, 4);
-        givenCallToClientToCompleteMultipartUpload();
-        givenUploadRequest("2023-05-18");
-
-        whenFusionApiManagerIsCalledToCompleteMultipartTransfer();
-
-        thenMultipartTransferStatusShouldBeComplete();
+        // then
+        thenApiCallExceptionShouldHaveHttpStatus(500);
     }
 
     @Test
     void successfullyAbortMultipartUpload() {
-
+        // given
         givenSha256DigestProducer();
         givenSdkAPIUploader();
         givenApiPath(
@@ -245,16 +449,14 @@ class FusionAPIUploaderTest {
         givenDatasetBearerToken("common", "test-dataset", "dataset-token");
         givenUploadFile("large-upload-test.csv");
         givenUploadRequest("2023-03-19");
-
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
-
         givenMultipartTransferContextStatusIsStarted("my-op-id");
         givenPartHasBeenUploaded(1, "provider-gen-part-id-1", "base64-checksum-1", "digest-as-bytes-1".getBytes());
-        givenCallToClientToAbortMultipartUpload();
+        givenCallToClientToAbortMultipartUpload("my-op-id", "my-token", "dataset-token");
 
+        // when
         whenFusionApiManagerIsCalledToAbortMultipartTransfer();
 
+        // then
         thenMultipartTransferStatusShouldBeAborted();
     }
 
@@ -302,25 +504,84 @@ class FusionAPIUploaderTest {
                 is(equalTo(MultipartTransferContext.MultipartTransferStatus.ABORTED)));
     }
 
-    private void givenCallToClientToCompleteMultipartUpload() {
+    private void givenCallToClientToCompleteMultipartUpload(
+            String operationId,
+            String token,
+            String fusionToken,
+            String fDate,
+            String tDate,
+            String cDate,
+            String digest) {
 
-        String body = new GsonBuilder().create().toJson(multipartTransferContext.uploadedParts());
-        String path = String.format(
-                "/operations/upload?operationId=%s",
-                multipartTransferContext.getOperation().getOperationId());
+        Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "Authorization", "Bearer " + token);
+        givenRequestHeader(headers, "Fusion-Authorization", "Bearer " + fusionToken);
+        givenRequestHeader(headers, "x-jpmc-distribution-from-date", fDate);
+        givenRequestHeader(headers, "x-jpmc-distribution-to-date", tDate);
+        givenRequestHeader(headers, "x-jpmc-distribution-created-date", cDate);
+        givenRequestHeader(headers, "Digest", "SHA-256=" + digest);
 
-        when(client.post(eq(apiPath + path), eq(requestHeaders), eq(body)))
+        String body = new GsonBuilder()
+                .create()
+                .toJson(UploadedParts.builder().parts(uploadedParts).build());
+        String path = String.format("/operations/upload?operationId=%s", operationId);
+
+        when(client.post(eq(apiPath + path), eq(headers), eq(body)))
                 .thenReturn(HttpResponse.<String>builder().statusCode(200).build());
     }
 
-    private void givenCallToClientToAbortMultipartUpload() {
+    private void givenCallToClientToCompleteMultipartUploadFails(
+            String operationId,
+            String token,
+            String fusionToken,
+            String fDate,
+            String tDate,
+            String cDate,
+            String digest,
+            int failureStatus) {
 
-        String path = String.format(
-                "/operations/upload?operationId=%s",
-                multipartTransferContext.getOperation().getOperationId());
+        Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "Authorization", "Bearer " + token);
+        givenRequestHeader(headers, "Fusion-Authorization", "Bearer " + fusionToken);
+        givenRequestHeader(headers, "x-jpmc-distribution-from-date", fDate);
+        givenRequestHeader(headers, "x-jpmc-distribution-to-date", tDate);
+        givenRequestHeader(headers, "x-jpmc-distribution-created-date", cDate);
+        givenRequestHeader(headers, "Digest", "SHA-256=" + digest);
 
-        when(client.delete(eq(apiPath + path), eq(requestHeaders), isNull()))
+        String body = new GsonBuilder()
+                .create()
+                .toJson(UploadedParts.builder().parts(uploadedParts).build());
+        String path = String.format("/operations/upload?operationId=%s", operationId);
+
+        when(client.post(eq(apiPath + path), eq(headers), eq(body)))
+                .thenReturn(
+                        HttpResponse.<String>builder().statusCode(failureStatus).build());
+    }
+
+    private void givenCallToClientToAbortMultipartUpload(String operationId, String token, String fusionToken) {
+
+        String path = String.format("/operations/upload?operationId=%s", operationId);
+
+        Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "Authorization", "Bearer " + token);
+        givenRequestHeader(headers, "Fusion-Authorization", "Bearer " + fusionToken);
+
+        when(client.delete(eq(apiPath + path), eq(headers), isNull()))
                 .thenReturn(HttpResponse.<String>builder().statusCode(200).build());
+    }
+
+    private void givenCallToClientToAbortMultipartUploadFails(
+            String operationId, String token, String fusionToken, int failureStatus) {
+
+        String path = String.format("/operations/upload?operationId=%s", operationId);
+
+        Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "Authorization", "Bearer " + token);
+        givenRequestHeader(headers, "Fusion-Authorization", "Bearer " + fusionToken);
+
+        when(client.delete(eq(apiPath + path), eq(headers), isNull()))
+                .thenReturn(
+                        HttpResponse.<String>builder().statusCode(failureStatus).build());
     }
 
     private void whenFusionApiManagerIsCalledToCompleteMultipartTransfer() {
@@ -339,15 +600,24 @@ class FusionAPIUploaderTest {
 
     private void givenPartHasBeenUploaded(
             int partCnt, String partIdentifier, String partChecksum, byte[] partChecksumBytes) {
+
+        UploadedPart up = UploadedPart.builder()
+                .partNumber(String.valueOf(partCnt))
+                .partIdentifier(partIdentifier)
+                .partDigest(partChecksum)
+                .build();
+
+        uploadedParts.add(up);
+
         multipartTransferContext.partUploaded(UploadedPartContext.builder()
-                .part(UploadedPart.builder()
-                        .partNumber(String.valueOf(partCnt))
-                        .partIdentifier(partIdentifier)
-                        .partDigest(partIdentifier)
-                        .build())
+                .part(up)
                 .digest(partChecksumBytes)
-                .partCount(partCnt)
+                .partNo(partCnt)
                 .build());
+    }
+
+    private void thenApiCallExceptionShouldHaveHttpStatus(int expected) {
+        assertThat(((APICallException) thrown).getResponseCode(), is(equalTo(expected)));
     }
 
     private void givenSha256DigestProducer() {
@@ -359,18 +629,22 @@ class FusionAPIUploaderTest {
         multipartTransferContext = MultipartTransferContext.started(op);
     }
 
-    private void givenCallToClientToUploadPart(int partCnt, String digest) {
+    private void givenCallToClientToUploadPart(
+            int partNo, String digest, String operationId, String authToken, String fusionToken) {
 
-        String path = String.format(
-                "/operations/upload?operationId=%s&partNumber=%d",
-                multipartTransferContext.getOperation().getOperationId(), partCnt);
+        String path = String.format("/operations/upload?operationId=%s&partNumber=%d", operationId, partNo);
 
-        Map<String, String> headers = new HashMap<>(requestHeaders);
+        Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "accept", "*/*");
+        givenRequestHeader(headers, "Authorization", "Bearer " + authToken);
+        givenRequestHeader(headers, "Fusion-Authorization", "Bearer " + fusionToken);
+        givenRequestHeader(headers, "Content-Type", "application/octet-stream");
+
         headers.put("Digest", "SHA-256=" + digest);
 
         UploadedPart uploadedPart = UploadedPart.builder()
-                .partNumber(String.valueOf(partCnt))
-                .partIdentifier("provider-gen-part-id-" + partCnt)
+                .partNumber(String.valueOf(partNo))
+                .partIdentifier("provider-gen-part-id-" + partNo)
                 .partDigest(digest)
                 .build();
 
@@ -381,6 +655,26 @@ class FusionAPIUploaderTest {
                         .body(body)
                         .statusCode(200)
                         .build());
+
+        uploadedParts.add(uploadedPart);
+    }
+
+    private void givenCallToClientToUploadPartFails(
+            int partNo, String digest, String operationId, String authToken, String fusionToken, int failureStatus) {
+
+        String path = String.format("/operations/upload?operationId=%s&partNumber=%d", operationId, partNo);
+
+        Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "accept", "*/*");
+        givenRequestHeader(headers, "Authorization", "Bearer " + authToken);
+        givenRequestHeader(headers, "Fusion-Authorization", "Bearer " + fusionToken);
+        givenRequestHeader(headers, "Content-Type", "application/octet-stream");
+
+        headers.put("Digest", "SHA-256=" + digest);
+
+        when(client.put(eq(apiPath + path), eq(headers), isNotNull()))
+                .thenReturn(
+                        HttpResponse.<String>builder().statusCode(failureStatus).build());
     }
 
     private void thenMultipartTransferContextStatusShouldBeTransferred() {
@@ -406,12 +700,31 @@ class FusionAPIUploaderTest {
         multipartTransferContext = fusionAPIUploader.callAPIToInitiateMultiPartUpload(uploadRequest);
     }
 
-    private void givenCallToClientToInitiateTransferIsSuccessful(String operationId) {
-        when(client.post(eq(apiPath + "/operationType/upload"), eq(requestHeaders), isNull()))
+    private void givenCallToClientToInitiateTransferIsSuccessful(
+            String operationId, String authToken, String fusionToken) {
+
+        Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "accept", "*/*");
+        givenRequestHeader(headers, "Authorization", "Bearer " + authToken);
+        givenRequestHeader(headers, "Fusion-Authorization", "Bearer " + fusionToken);
+
+        when(client.post(eq(apiPath + "/operationType/upload"), eq(headers), isNull()))
                 .thenReturn(HttpResponse.<String>builder()
                         .body("{\"operationId\": \"" + operationId + "\"}")
                         .statusCode(200)
                         .build());
+    }
+
+    private void givenCallToClientToInitiateTransferFails(String authToken, String fusionToken, int failureStatus) {
+
+        Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "accept", "*/*");
+        givenRequestHeader(headers, "Authorization", "Bearer " + authToken);
+        givenRequestHeader(headers, "Fusion-Authorization", "Bearer " + fusionToken);
+
+        when(client.post(eq(apiPath + "/operationType/upload"), eq(headers), isNull()))
+                .thenReturn(
+                        HttpResponse.<String>builder().statusCode(failureStatus).build());
     }
 
     private void givenDatasetBearerToken(String catalog, String dataset, String token) {
@@ -426,30 +739,56 @@ class FusionAPIUploaderTest {
         this.fileName = getPathFromResource(resource);
     }
 
-    private void whenSDKAPIUploaderIsCalledToUploadFileFromPath(String fromDate, String toDate, String createdDate) {
-        // TODO : Fix these tests - they need to define catalog and dataset
-        fusionAPIUploader.callAPIFileUpload(
-                apiPath, fileName, "common", "simple_dataset", fromDate, toDate, createdDate);
+    @SneakyThrows
+    private void givenUploadStream(String resource) {
+        this.fileName = getPathFromResource(resource);
+        this.uploadStream = new FileInputStream(this.fileName);
     }
 
-    private void whenSDKAPIUploaderIsCalledToUploadFileFromStream(String fromDate, String toDate, String createdDate) {
-        fusionAPIUploader.callAPIFileUpload(
-                apiPath,
-                new ByteArrayInputStream(uploadBody),
-                "common",
-                "simple_dataset",
-                fromDate,
-                toDate,
-                createdDate);
+    private void whenSDKAPIUploaderIsCalledToUploadFileFromPath(
+            String catalog, String dataset, String fromDate, String toDate, String createdDate) {
+        fusionAPIUploader.callAPIFileUpload(apiPath, fileName, catalog, dataset, fromDate, toDate, createdDate);
     }
 
-    private void givenCallToClientToUploadIsSuccessful() {
-        when(client.put(eq(apiPath), eq(requestHeaders), argThat(bodyEquals(uploadBody))))
+    private void whenSDKAPIUploaderIsCalledToUploadFileFromPathAndExceptionIsRaised(
+            String catalog,
+            String dataset,
+            String fromDate,
+            String toDate,
+            String createdDate,
+            Class<? extends Throwable> throwable) {
+        this.thrown = Assertions.assertThrows(
+                throwable,
+                () -> fusionAPIUploader.callAPIFileUpload(
+                        apiPath, fileName, catalog, dataset, fromDate, toDate, createdDate));
+    }
+
+    private void whenSDKAPIUploaderIsCalledToUploadFileFromStream(
+            String catalog, String dataset, String fromDate, String toDate, String createdDate) {
+        fusionAPIUploader.callAPIFileUpload(apiPath, uploadStream, catalog, dataset, fromDate, toDate, createdDate);
+    }
+
+    private void givenCallToClientToUploadIsSuccessful(
+            String token, String fToken, String fDate, String tDate, String cDate, String digest, String length) {
+
+        Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "accept", "*/*");
+        givenRequestHeader(headers, "Authorization", "Bearer my-token");
+        givenRequestHeader(headers, "Fusion-Authorization", "Bearer dataset-token");
+        givenRequestHeader(headers, "Content-Type", "application/octet-stream");
+        givenRequestHeader(headers, "x-jpmc-distribution-from-date", "2023-03-01");
+        givenRequestHeader(headers, "x-jpmc-distribution-to-date", "2023-03-02");
+        givenRequestHeader(headers, "x-jpmc-distribution-created-date", "2023-03-03");
+        givenRequestHeader(headers, "Digest", "SHA-256=k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=");
+        givenRequestHeader(headers, "Content-Length", "23");
+
+        when(client.put(eq(apiPath), eq(headers), argThat(bodyEquals(uploadBody))))
                 .thenReturn(HttpResponse.<String>builder().statusCode(200).build());
     }
 
     private void givenUploadBody(String uploadbody) {
         this.uploadBody = uploadbody.getBytes();
+        this.uploadStream = new ByteArrayInputStream(this.uploadBody);
     }
 
     private void givenCallToProduceDigestReturnsDigestDescriptor(String digest) {
@@ -462,8 +801,8 @@ class FusionAPIUploaderTest {
         when(digestProducer.execute(argThat(bodyEquals(uploadBody)))).thenReturn(digestDescriptor);
     }
 
-    private void givenRequestHeader(String headerKey, String headerValue) {
-        requestHeaders.put(headerKey, headerValue);
+    private void givenRequestHeader(Map<String, String> headers, String headerKey, String headerValue) {
+        headers.put(headerKey, headerValue);
     }
 
     private void givenSdkAPIUploader() {
@@ -474,6 +813,7 @@ class FusionAPIUploaderTest {
                 .datasetTokenProvider(datasetTokenProvider)
                 .digestProducer(digestProducer)
                 .uploadPartSize(uploadPartSize)
+                .singlePartUploadSizeLimit(singlePartUploadSizeLimit)
                 .build();
     }
 

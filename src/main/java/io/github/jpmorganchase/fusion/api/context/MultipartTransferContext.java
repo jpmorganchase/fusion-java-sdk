@@ -27,7 +27,7 @@ public class MultipartTransferContext {
     }
 
     public MultipartTransferContext transferred(int chunkSize, int totalBytes, int totalPartsCount) {
-        this.parts.sort(Comparator.comparingInt(UploadedPartContext::getPartCount));
+        this.parts.sort(Comparator.comparingInt(UploadedPartContext::getPartNo));
         this.status = TRANSFERRED;
         this.chunkSize = chunkSize;
         this.totalBytes = totalBytes;
@@ -79,6 +79,7 @@ public class MultipartTransferContext {
         for (UploadedPartContext ctx : parts) {
             uploadedParts.add(ctx.getPart());
         }
+
         return UploadedParts.builder()
                 .parts(Collections.unmodifiableList(uploadedParts))
                 .build();

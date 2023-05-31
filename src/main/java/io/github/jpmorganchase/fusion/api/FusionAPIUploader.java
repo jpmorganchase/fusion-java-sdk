@@ -7,6 +7,7 @@ import io.github.jpmorganchase.fusion.api.request.UploadRequest;
 import io.github.jpmorganchase.fusion.api.response.UploadedParts;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
+import io.github.jpmorganchase.fusion.exception.FusionException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
@@ -26,6 +27,9 @@ import lombok.Getter;
 @Builder
 @Getter
 public class FusionAPIUploader implements APIUploader {
+
+    private static final String UPLOAD_FAILED_EXCEPTION_MSG =
+            "Exception encountered while attempting to upload part, please try again";
 
     private static final String INITIATE_MULTIPART_UPLOAD_PATH = "/operationType/upload";
 
@@ -58,7 +62,7 @@ public class FusionAPIUploader implements APIUploader {
      * If a value such as 8MB is required, then client would set this value to 8
      */
     @Builder.Default
-    int uploadPartSize = 16;
+    int uploadPartSize = 8;
 
     /**
      * Size of Thread-Pool to be used for uploading chunks of a multipart file
@@ -218,7 +222,7 @@ public class FusionAPIUploader implements APIUploader {
             }
 
         } catch (IOException | InterruptedException | ExecutionException e) {
-            throw new FileUploadException("Exception encountered while attempting to upload part, please try again", e);
+            throw handleExceptionThrownWhenAttemptingToUploadParts(e);
         } finally {
             executor.shutdown();
         }
@@ -227,10 +231,10 @@ public class FusionAPIUploader implements APIUploader {
     }
 
     protected UploadedPartContext callAPIToUploadPart(
-            MultipartTransferContext mtx, UploadRequest ur, byte[] part, int read, int partCnt) {
+            MultipartTransferContext mtx, UploadRequest ur, byte[] part, int read, int partNo) {
 
         String partTransferPath = String.format(
-                PART_UPLOAD_PATH, ur.getApiPath(), mtx.getOperation().getOperationId(), partCnt);
+                PART_UPLOAD_PATH, ur.getApiPath(), mtx.getOperation().getOperationId(), partNo);
 
         DigestDescriptor digestOfPart = digestProducer.execute(
                 new ByteArrayInputStream(ByteBuffer.wrap(part, 0, read).array()));
@@ -249,6 +253,7 @@ public class FusionAPIUploader implements APIUploader {
         return UploadedPartContext.builder()
                 .digest(digestOfPart.getRawChecksum())
                 .part(responseParser.parseUploadPartResponse(partResponse.getBody()))
+                .partNo(partNo)
                 .build();
     }
 
@@ -285,6 +290,15 @@ public class FusionAPIUploader implements APIUploader {
 
         checkResponseStatus(completeResponse);
         return mtx.aborted();
+    }
+
+    private FusionException handleExceptionThrownWhenAttemptingToUploadParts(Exception ex) {
+        if (ex.getCause() instanceof FusionException) {
+            return (FusionException) ex.getCause();
+        }
+
+        Throwable cause = (null != ex.getCause() ? ex.getCause() : ex);
+        return new FileDownloadException(UPLOAD_FAILED_EXCEPTION_MSG, cause);
     }
 
     private void setSecurityHeaders(UploadRequest ur, Map<String, String> requestHeaders) {

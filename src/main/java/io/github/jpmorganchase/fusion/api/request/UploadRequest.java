@@ -111,7 +111,6 @@ public class UploadRequest {
                 while ((bytesRead = bufferedInputStream.read(buffer)) != -1) {
                     totalBytes += bytesRead;
                     if (totalBytes >= (maxSinglePartFileSize * (1024.0 * 1024.0))) {
-                        System.out.println("total bytes is gt max single part file size");
                         this.isMultiPartUploadCandidate = true;
                         break;
                     }
@@ -130,7 +129,6 @@ public class UploadRequest {
             try {
 
                 if (file.length() > (maxSinglePartFileSize * (1024.0 * 1024.0))) {
-                    System.out.println("total bytes is gt max single part file size");
                     this.isMultiPartUploadCandidate = true;
                 }
 
