@@ -8,6 +8,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+import io.github.jpmorganchase.fusion.api.exception.APICallException;
+import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
 import io.github.jpmorganchase.fusion.api.request.DownloadRequest;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
@@ -641,16 +643,16 @@ class FusionAPIDownloaderTest {
         if (Objects.nonNull(partCount))
             responseHeaders.put("x-jpmc-mp-parts-count", Collections.singletonList(partCount));
 
-        when(client.get(eq(apiPath + "/operationType/download"), eq(requestHeaders)))
-                .thenReturn(HttpResponse.<String>builder()
+        when(client.getInputStream(eq(apiPath + "/operationType/download"), eq(requestHeaders)))
+                .thenReturn(HttpResponse.<InputStream>builder()
                         .statusCode(200)
                         .headers(responseHeaders)
                         .build());
     }
 
     private void givenCallToClientToGetHeadFails(int failureStatusCode) {
-        when(client.get(eq(apiPath + "/operationType/download"), eq(requestHeaders)))
-                .thenReturn(HttpResponse.<String>builder()
+        when(client.getInputStream(eq(apiPath + "/operationType/download"), eq(requestHeaders)))
+                .thenReturn(HttpResponse.<InputStream>builder()
                         .statusCode(failureStatusCode)
                         .build());
     }

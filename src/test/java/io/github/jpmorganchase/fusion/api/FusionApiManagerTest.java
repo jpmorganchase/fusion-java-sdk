@@ -7,11 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
+import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
-import java.io.*;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;

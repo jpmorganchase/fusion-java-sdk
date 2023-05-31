@@ -1,13 +1,16 @@
 package io.github.jpmorganchase.fusion.api;
 
 import com.google.gson.GsonBuilder;
+import io.github.jpmorganchase.fusion.FusionException;
 import io.github.jpmorganchase.fusion.api.context.MultipartTransferContext;
 import io.github.jpmorganchase.fusion.api.context.UploadedPartContext;
+import io.github.jpmorganchase.fusion.api.exception.APICallException;
+import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
+import io.github.jpmorganchase.fusion.api.exception.FileUploadException;
 import io.github.jpmorganchase.fusion.api.request.UploadRequest;
 import io.github.jpmorganchase.fusion.api.response.UploadedParts;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
-import io.github.jpmorganchase.fusion.exception.FusionException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
@@ -275,6 +278,7 @@ public class FusionAPIUploader implements APIUploader {
         DigestDescriptor digestOfDigests = digestProducer.execute(mtx.digests());
 
         Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Content-Type", "application/json");
         setSecurityHeaders(ur, requestHeaders);
         setDistributionHeaders(ur, digestOfDigests, requestHeaders);
 

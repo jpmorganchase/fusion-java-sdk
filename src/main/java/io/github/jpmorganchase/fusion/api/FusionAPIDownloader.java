@@ -1,10 +1,12 @@
 package io.github.jpmorganchase.fusion.api;
 
+import io.github.jpmorganchase.fusion.FusionException;
+import io.github.jpmorganchase.fusion.api.exception.APICallException;
+import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
 import io.github.jpmorganchase.fusion.api.request.DownloadRequest;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
-import io.github.jpmorganchase.fusion.exception.FusionException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
@@ -267,7 +269,7 @@ public class FusionAPIDownloader implements APIDownloader {
         Map<String, String> requestHeaders = new HashMap<>();
         setSecurityHeaders(dr, requestHeaders);
 
-        HttpResponse<String> headResponse = httpClient.get(headPath, requestHeaders);
+        HttpResponse<InputStream> headResponse = httpClient.getInputStream(headPath, requestHeaders);
         checkResponseStatus(headResponse);
 
         return Head.builder().fromHeaders(headResponse.getHeaders()).build();
