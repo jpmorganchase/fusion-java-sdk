@@ -1,6 +1,8 @@
 package io.github.jpmorganchase.fusion.oauth.exception;
 
-public class OAuthException extends RuntimeException {
+import io.github.jpmorganchase.fusion.FusionException;
+
+public class OAuthException extends FusionException {
 
     private final String response;
 
