@@ -400,7 +400,7 @@ public class Fusion {
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @param path         the absolute file path where the file should be written.
      * @throws APICallException if the call to the Fusion API fails
-     * @throws FusionException  if the downloaded file cannot be saved to the specified target path
+     * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, String seriesMember, String distribution, String path) {
@@ -425,7 +425,7 @@ public class Fusion {
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @throws APICallException if the call to the Fusion API fails
-     * @throws FusionException  if the downloaded file cannot be saved to the default path
+     * @throws FileDownloadException  if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, String seriesMember, String distribution) {
@@ -441,7 +441,7 @@ public class Fusion {
      * @param seriesMembers a List of Strings representing the series member identifiers.
      * @param distribution  a String representing the distribution identifier, this is the file extension.
      * @throws APICallException if the call to the Fusion API fails
-     * @throws FusionException  if the downloaded file cannot be saved to the default path
+     * @throws FileDownloadException  if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, List<String> seriesMembers, String distribution) {
@@ -458,6 +458,7 @@ public class Fusion {
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
      * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution) {
@@ -480,6 +481,7 @@ public class Fusion {
      * @param createdDate  the creation date for the distribution
      * @throws ApiInputValidationException if the specified file cannot be read
      * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      **/
     public void upload(
@@ -512,6 +514,7 @@ public class Fusion {
      * @param dataDate     the earliest, latest, and created date are all the same.
      * @throws ApiInputValidationException if the specified file cannot be read
      * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      **/
     public void upload(
@@ -537,6 +540,7 @@ public class Fusion {
      * @param createdDate  the creation date for the distribution
      * @throws ApiInputValidationException if the specified stream cannot be read
      * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      **/
     public void upload(

@@ -79,6 +79,10 @@ public class FusionAPIUploader implements APIUploader {
      * @param fromDate    the earliest date that data is contained in the upload (in form yyyy-MM-dd).
      * @param toDate      the latest date that data is contained in the upload (in form yyyy-MM-dd).
      * @param createdDate the creation date for the data is contained in the upload (in form yyyy-MM-dd).
+     * @throws ApiInputValidationException if the specified file cannot be read
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     @Override
     public void callAPIFileUpload(
@@ -111,6 +115,10 @@ public class FusionAPIUploader implements APIUploader {
      * @param fromDate    the earliest date that data is contained in the upload (in form yyyy-MM-dd).
      * @param toDate      the latest date that data is contained in the upload (in form yyyy-MM-dd).
      * @param createdDate the creation date for the data is contained in the upload (in form yyyy-MM-dd).
+     * @throws ApiInputValidationException if the specified file cannot be read
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     @Override
     public void callAPIFileUpload(
@@ -298,7 +306,7 @@ public class FusionAPIUploader implements APIUploader {
         }
 
         Throwable cause = (null != ex.getCause() ? ex.getCause() : ex);
-        return new FileDownloadException(UPLOAD_FAILED_EXCEPTION_MSG, cause);
+        return new FileUploadException(UPLOAD_FAILED_EXCEPTION_MSG, cause);
     }
 
     private void setSecurityHeaders(UploadRequest ur, Map<String, String> requestHeaders) {

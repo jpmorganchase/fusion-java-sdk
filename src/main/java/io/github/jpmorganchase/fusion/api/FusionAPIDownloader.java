@@ -7,6 +7,7 @@ import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.exception.FusionException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
+import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
 import java.io.*;
@@ -52,6 +53,11 @@ public class FusionAPIDownloader implements APIDownloader {
      *
      * @param apiPath  the URL of the API endpoint to call
      * @param filePath the absolute path where the file will be persisted.
+     * @param catalog the catalog the distribution to be downloaded is part of
+     * @param dataset the dataset the distribution to be downloaded is a member of
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     @Override
     public void callAPIFileDownload(String apiPath, String filePath, String catalog, String dataset)
@@ -71,6 +77,11 @@ public class FusionAPIDownloader implements APIDownloader {
      * Calls the API to retrieve file data and returns as an InputStream
      *
      * @param apiPath the URL of the API endpoint to call
+     * @param catalog the catalog the distribution to be downloaded is part of
+     * @param dataset the dataset the distribution to be downloaded is a member of
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
      */
     @Override
     public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset)
