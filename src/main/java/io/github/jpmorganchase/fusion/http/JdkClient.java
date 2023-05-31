@@ -42,9 +42,6 @@ public class JdkClient implements Client {
 
     @Override
     public HttpResponse<String> post(String path, Map<String, String> headers, String body) {
-        if (body == null) {
-            throw new ClientException("No request body specified for POST operation");
-        }
         return executeMethod(METHOD_POST, path, headers, body);
     }
 
@@ -58,9 +55,6 @@ public class JdkClient implements Client {
 
     @Override
     public HttpResponse<String> delete(String path, Map<String, String> headers, String body) {
-        if (body == null) {
-            throw new ClientException("No request body specified for POST operation");
-        }
         return executeMethod(METHOD_DELETE, path, headers, body);
     }
 

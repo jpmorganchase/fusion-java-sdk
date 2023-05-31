@@ -13,7 +13,7 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import io.github.jpmorganchase.fusion.Fusion;
-import io.github.jpmorganchase.fusion.api.APICallException;
+import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.pact.util.FileHelper;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;

@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
@@ -460,12 +461,10 @@ public class JdkClientTest {
     }
 
     @Test
-    void noRequestBodyForPostRequestResultsInException() {
-        ClientException thrown = assertThrows(
-                ClientException.class,
+    void noRequestBodyForPostRequestDoesNotResultInException() {
+        assertDoesNotThrow(
                 () -> httpClient.post(API_URL, Collections.emptyMap(), null),
                 "Expected ClientException but none thrown");
-        assertThat(thrown.getMessage(), is(equalTo("No request body specified for POST operation")));
     }
 
     @Test
