@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.BDDMockito.given;
 
-import io.github.jpmorganchase.fusion.api.ApiInputValidationException;
+import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
 import io.github.jpmorganchase.fusion.oauth.credential.OAuthPasswordBasedCredentials;

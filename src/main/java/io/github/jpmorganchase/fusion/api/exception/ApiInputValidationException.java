@@ -1,6 +1,6 @@
-package io.github.jpmorganchase.fusion.api;
+package io.github.jpmorganchase.fusion.api.exception;
 
-import io.github.jpmorganchase.fusion.exception.FusionException;
+import io.github.jpmorganchase.fusion.FusionException;
 
 public class ApiInputValidationException extends FusionException {
 

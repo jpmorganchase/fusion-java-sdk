@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.google.gson.GsonBuilder;
 import io.github.jpmorganchase.fusion.api.context.MultipartTransferContext;
 import io.github.jpmorganchase.fusion.api.context.UploadedPartContext;
+import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.request.UploadRequest;
 import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.api.response.UploadedParts;
@@ -514,6 +515,7 @@ class FusionAPIUploaderTest {
             String digest) {
 
         Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "Content-Type", "application/json");
         givenRequestHeader(headers, "Authorization", "Bearer " + token);
         givenRequestHeader(headers, "Fusion-Authorization", "Bearer " + fusionToken);
         givenRequestHeader(headers, "x-jpmc-distribution-from-date", fDate);
@@ -541,6 +543,7 @@ class FusionAPIUploaderTest {
             int failureStatus) {
 
         Map<String, String> headers = new HashMap<>();
+        givenRequestHeader(headers, "Content-Type", "application/json");
         givenRequestHeader(headers, "Authorization", "Bearer " + token);
         givenRequestHeader(headers, "Fusion-Authorization", "Bearer " + fusionToken);
         givenRequestHeader(headers, "x-jpmc-distribution-from-date", fDate);

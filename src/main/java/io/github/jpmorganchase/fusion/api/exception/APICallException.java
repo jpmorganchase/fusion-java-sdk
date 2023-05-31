@@ -1,6 +1,6 @@
-package io.github.jpmorganchase.fusion.api;
+package io.github.jpmorganchase.fusion.api.exception;
 
-import io.github.jpmorganchase.fusion.exception.FusionException;
+import io.github.jpmorganchase.fusion.FusionException;
 
 /**
  * A custom exception to provide useful information on the response of an API call
