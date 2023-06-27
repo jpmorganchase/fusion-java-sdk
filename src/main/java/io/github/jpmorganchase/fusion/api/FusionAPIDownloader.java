@@ -6,6 +6,7 @@ import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
 import io.github.jpmorganchase.fusion.api.request.DownloadRequest;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
+import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
@@ -13,6 +14,7 @@ import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
 import java.io.*;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -213,38 +215,18 @@ public class FusionAPIDownloader implements APIDownloader {
                 futures.add(CompletableFuture.supplyAsync(() -> callToAPIToGetPart(dr, part), executor));
             }
 
-            // TODO :: Build a InputStream wrapper - which verifies each stream based on the digest
-            List<InputStream> inputStreams = futures.stream()
+            List<GetPartResponse> inputStreams = futures.stream()
                     .map(CompletableFuture::join)
                     .sorted(Comparator.comparingInt(gpr -> gpr.getHead().getPartCount()))
-                    .map(GetPartResponse::getContent)
                     .collect(Collectors.toList());
 
-            return consolidateMultiPartStreams(inputStreams);
+            return IntegrityCheckingInputStream.of(inputStreams);
 
-        } catch (CompletionException | CancellationException e) {
+        } catch (CompletionException | CancellationException | IOException | NoSuchAlgorithmException e) {
             throw handleExceptionThrownWhenAttemptingToGetParts(e);
         } finally {
             executor.shutdown();
         }
-    }
-
-    private ByteArrayInputStream consolidateMultiPartStreams(List<InputStream> inputStreams) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[8192];
-        int bytesRead;
-
-        for (InputStream is : inputStreams) {
-            try (InputStream closableStream = is) {
-                while ((bytesRead = closableStream.read(buffer)) != -1) {
-                    baos.write(buffer, 0, bytesRead);
-                }
-            } catch (IOException e) {
-                throw new FileDownloadException(WRITE_TO_STREAM_EXCEPTION_MSG, e);
-            }
-        }
-
-        return new ByteArrayInputStream(baos.toByteArray());
     }
 
     public InputStream performSinglePartDownloadToStream(DownloadRequest dr) throws APICallException {

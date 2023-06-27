@@ -344,11 +344,16 @@ class FusionAPIDownloaderTest {
         givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
 
         givenCallToClientToGetHeadReturns("a1", "5", "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", "23");
-        givenCallToClientToGetPartReturns("A,B,C", "1", "a1", "c1", "4", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartReturns("\r1,2,", "2", "a1", "c2", "4", "23", "bytes 5-9/23");
-        givenCallToClientToGetPartReturns("3\r4,5", "3", "a1", "c3", "4", "23", "bytes 10-14/23");
-        givenCallToClientToGetPartReturns(",6\r7,", "4", "a1", "c4", "4", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns("8,9", "5", "a1", "c5", "4", "23", "bytes 20-23/23");
+        givenCallToClientToGetPartReturns(
+                "A,B,C", "1", "a1", "KPD9WTOuUoQrDwpugLaHblJS+OdUnXaML3YWXla28Rg=", "4", "23", "bytes 0-4/23");
+        givenCallToClientToGetPartReturns(
+                "\r1,2,", "2", "a1", "KyQR+rbMkYVdfMHW+tHYfTOmpszv9gHWVn1Ec9yj7lA=", "4", "23", "bytes 5-9/23");
+        givenCallToClientToGetPartReturns(
+                "3\r4,5", "3", "a1", "qMnQo29rnj1iA37dWzSBFCKSctoJe8AX5mgmexxvh4A=", "4", "23", "bytes 10-14/23");
+        givenCallToClientToGetPartReturns(
+                ",6\r7,", "4", "a1", "RjKiTp8KSSXM64sjp5uHtPXF/uwjh8VNVaCvgDAwrkA=", "4", "23", "bytes 15-19/23");
+        givenCallToClientToGetPartReturns(
+                "8,9", "5", "a1", "GI3Dn4384xRI1aZfvWIpkSDzDQbYwKaK4yCy3oBZm/U=", "4", "23", "bytes 20-23/23");
         givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
 
         // When
@@ -386,36 +391,6 @@ class FusionAPIDownloaderTest {
 
         // then
         thenAPICallExceptionShouldMatch(400);
-    }
-
-    @Test
-    void multiPartDownloadToStreamFailsToConsoldiateStreams() throws Exception {
-        // given
-        givenFusionApiManager();
-        givenApiPath(
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
-        givenCatalog("common");
-        givenDataset("API_TEST");
-        givenFolder("downloads");
-        givenFilePath("common-API_TEST-20230319.csv");
-        givenSessionBearerToken("my-token");
-        givenDatasetBearerToken("common", "API_TEST", "dataset-token");
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
-
-        givenCallToClientToGetHeadReturns("a1", "5", "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", "23");
-        givenCallToClientToGetPartReturns("A,B,C", "1", "a1", "c1", "5", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartReturnsBadStream("A,B,C", "2", "a1", "c2", "5", "23", "bytes 5-9/23");
-        givenCallToClientToGetPartReturns("3\r4,5", "3", "a1", "c3", "5", "23", "bytes 10-14/23");
-        givenCallToClientToGetPartReturns(",6\r7,", "4", "a1", "c4", "5", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns("8,9", "5", "a1", "c5", "5", "23", "bytes 20-23/23");
-        givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
-
-        // When
-        whenApiIsCalledToDownloadFileAsStreamFailsWith(FileDownloadException.class);
-
-        // then
-        thenExceptionMessageShouldMatch("Problem encountered attempting to write downloaded distribution to stream");
     }
 
     @Test
@@ -702,7 +677,10 @@ class FusionAPIDownloaderTest {
 
     private void thenTheDownloadBodyShouldMatchExpected() throws Exception {
         byte[] outputBytes = new byte[(int) downloadBody.length];
-        responseStream.read(outputBytes);
+        StringBuilder sb = new StringBuilder();
+        int bytesRead = 0;
+
+        while ((bytesRead = responseStream.read(outputBytes)) != -1) {}
 
         assertThat(outputBytes, is(equalTo(downloadBody)));
     }
