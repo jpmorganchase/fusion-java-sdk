@@ -19,9 +19,11 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 @Builder
 @Getter
+@Slf4j
 public class FusionAPIDownloader implements APIDownloader {
 
     private static final String WRITE_TO_FILE_EXCEPTION_MSG =
@@ -265,6 +267,9 @@ public class FusionAPIDownloader implements APIDownloader {
     }
 
     private FusionException handleExceptionThrownWhenAttemptingToGetParts(Exception ex) {
+
+        log.error("Exception encountered downloading parts, cause is " + ex.getCause());
+
         if (ex.getCause() instanceof FusionException) {
             return (FusionException) ex.getCause();
         }
