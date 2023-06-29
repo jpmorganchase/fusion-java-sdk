@@ -143,7 +143,7 @@ public class FusionAPIDownloader implements APIDownloader {
     private void writePartToFile(GetPartResponse gpr, RandomAccessFile raf) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (InputStream input = gpr.getContent()) {
+        try (InputStream input = IntegrityCheckingInputStream.of(gpr)) {
 
             byte[] buffer = new byte[8192];
             int bytesRead;

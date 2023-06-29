@@ -176,11 +176,16 @@ class FusionAPIDownloaderTest {
 
         givenCallToClientToGetHeadReturns("a1", "5", "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", "23");
 
-        givenCallToClientToGetPartReturns("A,B,C", "1", "a1", "c1", "4", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartReturns("\r1,2,", "2", "a1", "c2", "4", "23", "bytes 5-9/23");
-        givenCallToClientToGetPartReturns("3\r4,5", "3", "a1", "c3", "4", "23", "bytes 10-14/23");
-        givenCallToClientToGetPartReturns(",6\r7,", "4", "a1", "c4", "4", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns("8,9", "5", "a1", "c5", "4", "23", "bytes 20-23/23");
+        givenCallToClientToGetPartReturns(
+                "A,B,C", "1", "a1", "KPD9WTOuUoQrDwpugLaHblJS+OdUnXaML3YWXla28Rg=", "4", "23", "bytes 0-4/23");
+        givenCallToClientToGetPartReturns(
+                "\r1,2,", "2", "a1", "KyQR+rbMkYVdfMHW+tHYfTOmpszv9gHWVn1Ec9yj7lA=", "4", "23", "bytes 5-9/23");
+        givenCallToClientToGetPartReturns(
+                "3\r4,5", "3", "a1", "qMnQo29rnj1iA37dWzSBFCKSctoJe8AX5mgmexxvh4A=", "4", "23", "bytes 10-14/23");
+        givenCallToClientToGetPartReturns(
+                ",6\r7,", "4", "a1", "RjKiTp8KSSXM64sjp5uHtPXF/uwjh8VNVaCvgDAwrkA=", "4", "23", "bytes 15-19/23");
+        givenCallToClientToGetPartReturns(
+                "8,9", "5", "a1", "GI3Dn4384xRI1aZfvWIpkSDzDQbYwKaK4yCy3oBZm/U=", "4", "23", "bytes 20-23/23");
         givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
 
         // When
@@ -230,11 +235,15 @@ class FusionAPIDownloaderTest {
 
         givenCallToClientToGetHeadReturns("a1", "5", "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", "23");
 
-        givenCallToClientToGetPartReturns("A,B,C", "1", "a1", "c1", "4", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartReturns("\r1,2,", "2", "a1", "c2", "4", "23", "bytes 5-9/23");
+        givenCallToClientToGetPartReturns(
+                "A,B,C", "1", "a1", "KPD9WTOuUoQrDwpugLaHblJS+OdUnXaML3YWXla28Rg=", "4", "23", "bytes 0-4/23");
+        givenCallToClientToGetPartReturns(
+                "\r1,2,", "2", "a1", "KyQR+rbMkYVdfMHW+tHYfTOmpszv9gHWVn1Ec9yj7lA=", "4", "23", "bytes 5-9/23");
         givenCallToClientToGetPartFails("3", 504);
-        givenCallToClientToGetPartReturns(",6\r7,", "4", "a1", "c4", "4", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns("8,9", "5", "a1", "c5", "4", "23", "bytes 20-23/23");
+        givenCallToClientToGetPartReturns(
+                ",6\r7,", "4", "a1", "RjKiTp8KSSXM64sjp5uHtPXF/uwjh8VNVaCvgDAwrkA=", "4", "23", "bytes 15-19/23");
+        givenCallToClientToGetPartReturns(
+                "8,9", "5", "a1", "GI3Dn4384xRI1aZfvWIpkSDzDQbYwKaK4yCy3oBZm/U=", "4", "23", "bytes 20-23/23");
         givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
 
         // When
@@ -465,11 +474,16 @@ class FusionAPIDownloaderTest {
         givenDownloadRequest(false);
         givenHead("a1", "c", 23L, 5);
 
-        givenCallToClientToGetPartReturns("A,B,C", "1", "a1", "c1", "4", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartReturns("\r1,2,", "2", "a1", "c2", "4", "23", "bytes 5-9/23");
-        givenCallToClientToGetPartReturns("3\r4,5", "3", "a1", "c3", "4", "23", "bytes 10-14/23");
-        givenCallToClientToGetPartReturns(",6\r7,", "4", "a1", "c4", "4", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns("8,9", "5", "a1", "c5", "4", "23", "bytes 20-23/23");
+        givenCallToClientToGetPartReturns(
+                "A,B,C", "1", "a1", "KPD9WTOuUoQrDwpugLaHblJS+OdUnXaML3YWXla28Rg=", "4", "23", "bytes 0-4/23");
+        givenCallToClientToGetPartReturns(
+                "\r1,2,", "2", "a1", "KyQR+rbMkYVdfMHW+tHYfTOmpszv9gHWVn1Ec9yj7lA=", "4", "23", "bytes 5-9/23");
+        givenCallToClientToGetPartReturns(
+                "3\r4,5", "3", "a1", "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=", "4", "23", "bytes 10-14/23");
+        givenCallToClientToGetPartReturns(
+                ",6\r7,", "4", "a1", "RjKiTp8KSSXM64sjp5uHtPXF/uwjh8VNVaCvgDAwrkA=", "4", "23", "bytes 15-19/23");
+        givenCallToClientToGetPartReturns(
+                "8,9", "5", "a1", "GI3Dn4384xRI1aZfvWIpkSDzDQbYwKaK4yCy3oBZm/U=", "4", "23", "bytes 20-23/23");
         givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
 
         // When

@@ -14,8 +14,13 @@ public class IntegrityCheckingInputStream extends InputStream {
     private final LinkedList<GetPartResponse> orderedResponses;
     GetPartResponse currentResponse;
     MessageDigest currentDigest;
-
     String digestAlgo;
+
+    public static IntegrityCheckingInputStream of(GetPartResponse response) throws IOException {
+        LinkedList<GetPartResponse> responses = new LinkedList<>();
+        responses.add(response);
+        return new IntegrityCheckingInputStream(responses, DEFAULT_DIGEST_ALGO);
+    }
 
     public static IntegrityCheckingInputStream of(List<GetPartResponse> orderedResponses) throws IOException {
         return new IntegrityCheckingInputStream(new LinkedList<>(orderedResponses), DEFAULT_DIGEST_ALGO);
@@ -37,19 +42,20 @@ public class IntegrityCheckingInputStream extends InputStream {
     @Override
     public int read() throws IOException {
 
-        int byteRead;
         if (isEndOfStream()) {
-            byteRead = -1;
-        } else {
-            byteRead = currentResponse.getContent().read();
-            if (byteRead > -1) {
-                currentDigest.update(Integer.valueOf(byteRead).byteValue());
-            } else {
-                if (verifyResetAndGetNextResponse()) {
-                    byteRead = this.read();
-                }
-            }
+            return -1;
         }
+
+        int byteRead = currentResponse.getContent().read();
+
+        if (-1 == byteRead) {
+            if (verifyResetAndGetNextResponse()) {
+                return this.read();
+            }
+            return -1;
+        }
+
+        currentDigest.update(Integer.valueOf(byteRead).byteValue());
         return byteRead;
     }
 
