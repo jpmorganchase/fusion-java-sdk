@@ -267,10 +267,6 @@ public class FusionAPIDownloader implements APIDownloader {
     }
 
     private FusionException handleExceptionThrownWhenAttemptingToGetParts(Exception ex) {
-        log.error("Exception encountered downloading parts, ex is " + ex.getClass() + "::" + ex.getMessage());
-        log.error("Exception encountered downloading parts, ex toString " + ex);
-        log.error("Exception encountered downloading parts, cause is " + ex.getCause());
-
         if (ex.getCause() instanceof FusionException) {
             return (FusionException) ex.getCause();
         }

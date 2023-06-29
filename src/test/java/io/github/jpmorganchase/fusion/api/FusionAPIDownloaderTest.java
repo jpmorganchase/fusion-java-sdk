@@ -19,6 +19,11 @@ import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
 import java.io.*;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
@@ -218,6 +223,7 @@ class FusionAPIDownloaderTest {
                 "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
         givenCatalog("common");
         givenDataset("API_TEST");
+        givenDirectoryExists("downloads");
         givenFilePath("downloads/common-API_TEST-20230319.csv");
         givenSessionBearerToken("my-token");
         givenDatasetBearerToken("common", "API_TEST", "dataset-token");
@@ -452,6 +458,7 @@ class FusionAPIDownloaderTest {
                 "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
         givenCatalog("common");
         givenDataset("API_TEST");
+        givenDirectoryExists("downloads");
         givenFilePath("downloads/common-API_TEST-20230319.csv");
         givenSessionBearerToken("my-token");
         givenDatasetBearerToken("common", "API_TEST", "dataset-token");
@@ -472,6 +479,13 @@ class FusionAPIDownloaderTest {
 
         // then
         thenTheFileShouldMatchExpected();
+    }
+
+    private void givenDirectoryExists(String directory) throws IOException {
+        Path dir = FileSystems.getDefault().getPath(directory);
+        if (!Files.isDirectory(dir)) {
+            Files.createDirectory(dir);
+        }
     }
 
     private void whenFusionApiDownloaderIsCalledToPerformMultiPartDownload() {
