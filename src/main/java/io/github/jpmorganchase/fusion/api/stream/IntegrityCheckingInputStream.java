@@ -38,7 +38,7 @@ public class IntegrityCheckingInputStream extends InputStream {
     public int read() throws IOException {
 
         int byteRead;
-        if (isEndOfStream()){
+        if (isEndOfStream()) {
             byteRead = -1;
         } else {
             byteRead = currentResponse.getContent().read();
@@ -51,7 +51,6 @@ public class IntegrityCheckingInputStream extends InputStream {
             }
         }
         return byteRead;
-
     }
 
     @Override
@@ -96,7 +95,7 @@ public class IntegrityCheckingInputStream extends InputStream {
         }
     }
 
-    private boolean isEndOfStream(){
+    private boolean isEndOfStream() {
         return Objects.isNull(currentResponse);
     }
 }
