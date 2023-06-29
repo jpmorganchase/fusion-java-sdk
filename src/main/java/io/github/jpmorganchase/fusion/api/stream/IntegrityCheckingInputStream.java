@@ -19,8 +19,7 @@ public class IntegrityCheckingInputStream extends InputStream {
 
     boolean isEndOfStream = false;
 
-    public static IntegrityCheckingInputStream of(List<GetPartResponse> orderedResponses)
-            throws IOException {
+    public static IntegrityCheckingInputStream of(List<GetPartResponse> orderedResponses) throws IOException {
         return new IntegrityCheckingInputStream(new LinkedList<>(orderedResponses), DEFAULT_DIGEST_ALGO);
     }
 
@@ -93,7 +92,7 @@ public class IntegrityCheckingInputStream extends InputStream {
         try {
             currentDigest = MessageDigest.getInstance(digestAlgo);
         } catch (NoSuchAlgorithmException e) {
-            throw new IOException("Unable to read from stream, invalid digest algorithm provided",e);
+            throw new IOException("Unable to read from stream, invalid digest algorithm provided", e);
         }
     }
 
