@@ -222,7 +222,7 @@ public class FusionAPIDownloader implements APIDownloader {
 
             return IntegrityCheckingInputStream.of(inputStreams);
 
-        } catch (CompletionException | CancellationException | IOException | NoSuchAlgorithmException e) {
+        } catch (CompletionException | CancellationException | IOException e) {
             throw handleExceptionThrownWhenAttemptingToGetParts(e);
         } finally {
             executor.shutdown();

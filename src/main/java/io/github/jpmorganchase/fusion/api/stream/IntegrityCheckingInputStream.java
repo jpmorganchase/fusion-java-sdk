@@ -15,26 +15,26 @@ public class IntegrityCheckingInputStream extends InputStream {
     GetPartResponse currentResponse;
     MessageDigest currentDigest;
 
+    String digestAlgo;
+
     boolean isEndOfStream = false;
 
     public static IntegrityCheckingInputStream of(List<GetPartResponse> orderedResponses)
-            throws IOException, NoSuchAlgorithmException {
+            throws IOException {
         return new IntegrityCheckingInputStream(new LinkedList<>(orderedResponses), DEFAULT_DIGEST_ALGO);
     }
 
     public static IntegrityCheckingInputStream of(List<GetPartResponse> orderedResponses, String digestAlgo)
-            throws IOException, NoSuchAlgorithmException {
+            throws IOException {
         return new IntegrityCheckingInputStream(new LinkedList<>(orderedResponses), digestAlgo);
     }
 
     private IntegrityCheckingInputStream(LinkedList<GetPartResponse> orderedResponses, String digestAlgo)
-            throws IOException, NoSuchAlgorithmException {
+            throws IOException {
         this.orderedResponses = orderedResponses;
-        this.currentResponse = orderedResponses.poll();
-        if (null == currentResponse) {
-            throw new IOException();
-        }
-        currentDigest = MessageDigest.getInstance(digestAlgo);
+        this.digestAlgo = digestAlgo;
+        nextResponse();
+        resetDigest();
     }
 
     @Override
@@ -59,68 +59,6 @@ public class IntegrityCheckingInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
-
-        if (isEndOfStream) {
-            return -1;
-        }
-
-        int bytesRead = currentResponse.getContent().read(b);
-        if (-1 == bytesRead) {
-
-            if (verifyResetAndGetNextResponse() < 0) {
-                return -1;
-            }
-            return this.read(b);
-        }
-
-        this.currentDigest.update(b, 0, bytesRead);
-        return readFromStreamsUntilByteArrayFilled(b, b.length, bytesRead);
-    }
-
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-
-        if (isEndOfStream) {
-            return -1;
-        }
-
-        int bytesRead = currentResponse.getContent().read(b, off, len);
-        if (-1 == bytesRead) {
-
-            if (verifyResetAndGetNextResponse() < 0) {
-                return -1;
-            }
-            return this.read(b, off, len);
-        }
-
-        this.currentDigest.update(b, off, bytesRead);
-        return readFromStreamsUntilByteArrayFilled(b, len, bytesRead);
-    }
-
-    private int readFromStreamsUntilByteArrayFilled(byte[] b, int len, int bytesRead) throws IOException {
-        while (bytesRead < len) {
-
-            if (verifyResetAndGetNextResponse() < 0) {
-                return bytesRead;
-            }
-
-            byte[] fromNextStream = new byte[len - bytesRead];
-            int nextStreamBytesRead = currentResponse.getContent().read(fromNextStream);
-
-            if (nextStreamBytesRead < 0) {
-                return bytesRead;
-            }
-
-            this.currentDigest.update(fromNextStream, 0, nextStreamBytesRead);
-
-            System.arraycopy(fromNextStream, 0, b, bytesRead, fromNextStream.length);
-            bytesRead += nextStreamBytesRead;
-        }
-        return bytesRead;
-    }
-
-    @Override
     public void close() throws IOException {
         currentResponse.getContent().close();
         nextResponse();
@@ -135,10 +73,7 @@ public class IntegrityCheckingInputStream extends InputStream {
         resetDigest();
         closeCurrentResponse();
         nextResponse();
-        if (null == currentResponse) {
-            isEndOfStream = true;
-        }
-        return (!isEndOfStream ? 1 : -1);
+        return (isEndOfStream ? -1 : 1);
     }
 
     private void closeCurrentResponse() throws IOException {
@@ -149,19 +84,21 @@ public class IntegrityCheckingInputStream extends InputStream {
 
     private void nextResponse() {
         currentResponse = orderedResponses.poll();
+        if (null == currentResponse) {
+            isEndOfStream = true;
+        }
     }
 
     private void resetDigest() throws IOException {
         try {
-            currentDigest = MessageDigest.getInstance(currentDigest.getAlgorithm());
+            currentDigest = MessageDigest.getInstance(digestAlgo);
         } catch (NoSuchAlgorithmException e) {
-            throw new IOException(e);
+            throw new IOException("Unable to read from stream, invalid digest algorithm provided",e);
         }
     }
 
     private void verifyDigest() throws IOException {
         String encodedDigest = Base64.getEncoder().encodeToString(currentDigest.digest());
-        System.out.println("digest is : " + encodedDigest);
         if (Objects.isNull(currentResponse.getHead())
                 || !currentResponse.getHead().getChecksum().equals(encodedDigest)) {
             throw new IOException("Corrupted stream, verification of checksum failed");
