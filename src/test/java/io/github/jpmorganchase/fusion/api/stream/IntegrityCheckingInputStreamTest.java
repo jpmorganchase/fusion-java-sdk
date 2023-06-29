@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("SameParameterValue")
-@Slf4j
 class IntegrityCheckingInputStreamTest {
 
     List<GetPartResponse> responses = new ArrayList<>();
@@ -433,7 +432,6 @@ class IntegrityCheckingInputStreamTest {
 
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         md.update(data.getBytes());
-        log.info("data size is : {}", data.getBytes().length);
         ByteArrayInputStream is = new ByteArrayInputStream(data.getBytes());
         responses.add(GetPartResponse.builder()
                 .content(is)
@@ -445,7 +443,6 @@ class IntegrityCheckingInputStreamTest {
 
     private void givenPartResponse(String data, String checksum) {
         ByteArrayInputStream is = new ByteArrayInputStream(data.getBytes());
-        log.info("data size is : {}", data.getBytes().length);
         responses.add(GetPartResponse.builder()
                 .content(is)
                 .head(Head.builder().checksum(checksum).build())

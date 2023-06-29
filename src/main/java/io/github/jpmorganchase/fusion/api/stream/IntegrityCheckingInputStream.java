@@ -17,8 +17,6 @@ public class IntegrityCheckingInputStream extends InputStream {
 
     String digestAlgo;
 
-    boolean isEndOfStream = false;
-
     public static IntegrityCheckingInputStream of(List<GetPartResponse> orderedResponses) throws IOException {
         return new IntegrityCheckingInputStream(new LinkedList<>(orderedResponses), DEFAULT_DIGEST_ALGO);
     }
@@ -32,60 +30,54 @@ public class IntegrityCheckingInputStream extends InputStream {
             throws IOException {
         this.orderedResponses = orderedResponses;
         this.digestAlgo = digestAlgo;
-        nextResponse();
         resetDigest();
+        nextResponse();
     }
 
     @Override
     public int read() throws IOException {
 
-        if (isEndOfStream) {
-            return -1;
-        }
-
-        int byteRead = currentResponse.getContent().read();
-        if (-1 == byteRead) {
-
-            if (verifyResetAndGetNextResponse() < 0) {
-                return -1;
+        int byteRead;
+        if (isEndOfStream()){
+            byteRead = -1;
+        } else {
+            byteRead = currentResponse.getContent().read();
+            if (byteRead > -1) {
+                currentDigest.update(Integer.valueOf(byteRead).byteValue());
+            } else {
+                if (verifyResetAndGetNextResponse()) {
+                    byteRead = this.read();
+                }
             }
-
-            return this.read();
         }
-
-        currentDigest.update(Integer.valueOf(byteRead).byteValue());
         return byteRead;
+
     }
 
     @Override
     public void close() throws IOException {
-        currentResponse.getContent().close();
-        nextResponse();
-        while (null != currentResponse) {
+        if (!isEndOfStream()) {
             currentResponse.getContent().close();
-            nextResponse();
+            while (nextResponse()) {
+                currentResponse.getContent().close();
+            }
         }
     }
 
-    private int verifyResetAndGetNextResponse() throws IOException {
+    private boolean verifyResetAndGetNextResponse() throws IOException {
         verifyDigest();
         resetDigest();
         closeCurrentResponse();
-        nextResponse();
-        return (isEndOfStream ? -1 : 1);
+        return nextResponse();
     }
 
     private void closeCurrentResponse() throws IOException {
-        if (!isEndOfStream) {
-            currentResponse.getContent().close();
-        }
+        currentResponse.getContent().close();
     }
 
-    private void nextResponse() {
+    private boolean nextResponse() {
         currentResponse = orderedResponses.poll();
-        if (null == currentResponse) {
-            isEndOfStream = true;
-        }
+        return !isEndOfStream();
     }
 
     private void resetDigest() throws IOException {
@@ -102,5 +94,9 @@ public class IntegrityCheckingInputStream extends InputStream {
                 || !currentResponse.getHead().getChecksum().equals(encodedDigest)) {
             throw new IOException("Corrupted stream, verification of checksum failed");
         }
+    }
+
+    private boolean isEndOfStream(){
+        return Objects.isNull(currentResponse);
     }
 }
