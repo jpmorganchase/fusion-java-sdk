@@ -1,5 +1,7 @@
 package io.github.jpmorganchase.fusion.api;
 
+import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
+
 import io.github.jpmorganchase.fusion.FusionException;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
@@ -108,7 +110,7 @@ public class FusionAPIDownloader implements APIDownloader {
         if (head.isMultipart()) {
             performMultiPartDownloadToFile(dr, head);
         } else {
-            performSinglePartDownloadToFile(dr);
+            performSinglePartDownloadToFile(dr, head);
         }
     }
 
@@ -143,7 +145,8 @@ public class FusionAPIDownloader implements APIDownloader {
     private void writePartToFile(GetPartResponse gpr, RandomAccessFile raf) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (InputStream input = IntegrityCheckingInputStream.of(gpr)) {
+        try (InputStream input =
+                IntegrityCheckingInputStream.builder().part(gpr).build()) {
 
             byte[] buffer = new byte[8192];
             int bytesRead;
@@ -172,17 +175,15 @@ public class FusionAPIDownloader implements APIDownloader {
 
         checkResponseStatus(response);
 
-        // TODO :: knighto - this is a good place to verify the digest
-
         return GetPartResponse.builder()
                 .content(response.getBody())
                 .head(Head.builder().fromHeaders(response.getHeaders()).build())
                 .build();
     }
 
-    public void performSinglePartDownloadToFile(DownloadRequest dr) throws APICallException {
+    public void performSinglePartDownloadToFile(DownloadRequest dr, Head head) throws APICallException {
 
-        try (InputStream input = performSinglePartDownloadToStream(dr)) {
+        try (InputStream input = performSinglePartDownloadToStream(dr, head)) {
             try (FileOutputStream fileOutput = new FileOutputStream(dr.getFilePath())) {
                 byte[] buf = new byte[8192];
                 int len;
@@ -200,7 +201,7 @@ public class FusionAPIDownloader implements APIDownloader {
         if (head.isMultipart()) {
             return performMultiPartDownloadToStream(dr, head);
         } else {
-            return performSinglePartDownloadToStream(dr);
+            return performSinglePartDownloadToStream(dr, head);
         }
     }
 
@@ -216,12 +217,12 @@ public class FusionAPIDownloader implements APIDownloader {
                 futures.add(CompletableFuture.supplyAsync(() -> callToAPIToGetPart(dr, part), executor));
             }
 
-            List<GetPartResponse> inputStreams = futures.stream()
+            List<GetPartResponse> parts = futures.stream()
                     .map(CompletableFuture::join)
                     .sorted(Comparator.comparingInt(gpr -> gpr.getHead().getPartCount()))
                     .collect(Collectors.toList());
 
-            return IntegrityCheckingInputStream.of(inputStreams);
+            return IntegrityCheckingInputStream.builder().parts(parts).build();
 
         } catch (CompletionException | CancellationException | IOException e) {
             throw handleExceptionThrownWhenAttemptingToGetParts(e);
@@ -230,14 +231,23 @@ public class FusionAPIDownloader implements APIDownloader {
         }
     }
 
-    public InputStream performSinglePartDownloadToStream(DownloadRequest dr) throws APICallException {
+    public InputStream performSinglePartDownloadToStream(DownloadRequest dr, Head head) throws APICallException {
         Map<String, String> requestHeaders = new HashMap<>();
         setSecurityHeaders(dr, requestHeaders);
 
         HttpResponse<InputStream> response = httpClient.getInputStream(dr.getApiPath(), requestHeaders);
 
         checkResponseStatus(response);
-        return response.getBody();
+        try {
+            return IntegrityCheckingInputStream.builder()
+                    .part(GetPartResponse.builder()
+                            .content(response.getBody())
+                            .head(head)
+                            .build())
+                    .build();
+        } catch (IOException ex) {
+            throw handleExceptionThrownWhenAttemptingToGetParts(ex);
+        }
     }
 
     /**
@@ -279,25 +289,6 @@ public class FusionAPIDownloader implements APIDownloader {
         return Executors.newFixedThreadPool(downloadThreadPoolSize);
     }
 
-    /**
-     * TODO : Definite duplication - this needs to be moved
-     *
-     * @param response to be verified
-     * @param <T> type expected in the body of the response
-     * @throws APICallException indicating a failure to communicate with Fusion API
-     */
-    private <T> void checkResponseStatus(HttpResponse<T> response) throws APICallException {
-        if (response.isError()) {
-            throw new APICallException(response.getStatusCode());
-        }
-    }
-
-    /**
-     * TODO : This is a candidate to extract out to its own class to be used by upload & download
-     *
-     * @param dr The {@link DownloadRequest} requiring security
-     * @param requestHeaders pertaining to the request
-     */
     private void setSecurityHeaders(DownloadRequest dr, Map<String, String> requestHeaders) {
         requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
         requestHeaders.put(

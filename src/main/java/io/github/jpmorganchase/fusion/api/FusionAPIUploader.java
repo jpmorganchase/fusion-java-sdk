@@ -1,5 +1,7 @@
 package io.github.jpmorganchase.fusion.api;
 
+import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.*;
+
 import com.google.gson.GsonBuilder;
 import io.github.jpmorganchase.fusion.FusionException;
 import io.github.jpmorganchase.fusion.api.context.MultipartTransferContext;
@@ -325,12 +327,6 @@ public class FusionAPIUploader implements APIUploader {
         requestHeaders.put("x-jpmc-distribution-to-date", ur.getToDate());
         requestHeaders.put("x-jpmc-distribution-created-date", ur.getCreatedDate());
         requestHeaders.put("Digest", "SHA-256=" + digest.getChecksum());
-    }
-
-    private <T> void checkResponseStatus(HttpResponse<T> response) throws APICallException {
-        if (response.isError()) {
-            throw new APICallException(response.getStatusCode());
-        }
     }
 
     private String serializeToJson(UploadedParts parts) {

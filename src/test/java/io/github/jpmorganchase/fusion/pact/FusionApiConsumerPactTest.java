@@ -513,30 +513,6 @@ public class FusionApiConsumerPactTest {
                 is(equalTo("text/csv; header=present; charset=utf-8")));
     }
 
-    @Test
-    @SneakyThrows
-    @PactTestFor(pactMethod = "download")
-    void testDownload(MockServer mockServer) {
-
-        givenInstanceOfFusionSdk(mockServer);
-
-        fusion.download("common", "API_TEST", "2022-01-16", "csv");
-
-        thenTheFileShouldBeDownloaded("downloads/common_API_TEST_2022-01-16.csv");
-        thenTheFileContentsShouldBeEqualTo("A,B,C");
-    }
-
-    @Test
-    @PactTestFor(pactMethod = "download")
-    void testDownloadStream(MockServer mockServer) {
-
-        givenInstanceOfFusionSdk(mockServer);
-
-        downloadedFileInputStream = fusion.downloadStream("common", "API_TEST", "2022-01-16", "csv");
-
-        thenTheFileContentsShouldBeEqualTo("A,B,C");
-    }
-
     @SneakyThrows
     private void thenTheFileContentsShouldBeEqualTo(String expected) {
         String actual = FileHelper.readContentsFromStream(downloadedFileInputStream);

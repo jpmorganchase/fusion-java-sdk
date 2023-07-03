@@ -423,8 +423,8 @@ class IntegrityCheckingInputStreamTest {
         this.bytesToRead = bytesToRead;
     }
 
-    private void givenTheDigestAwareInputStreamCreatedWithResponses() throws IOException, NoSuchAlgorithmException {
-        dais = IntegrityCheckingInputStream.of(responses);
+    private void givenTheDigestAwareInputStreamCreatedWithResponses() throws IOException {
+        dais = IntegrityCheckingInputStream.builder().parts(responses).build();
     }
 
     private void givenPartResponse(String data) throws NoSuchAlgorithmException {

@@ -1,5 +1,7 @@
 package io.github.jpmorganchase.fusion.api;
 
+import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
+
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
@@ -35,11 +37,5 @@ public class FusionAPIManager implements APIManager {
         HttpResponse<String> response = httpClient.get(apiPath, requestHeaders);
         checkResponseStatus(response);
         return response.getBody();
-    }
-
-    private <T> void checkResponseStatus(HttpResponse<T> response) throws APICallException {
-        if (response.isError()) {
-            throw new APICallException(response.getStatusCode());
-        }
     }
 }

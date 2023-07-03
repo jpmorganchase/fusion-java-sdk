@@ -100,7 +100,7 @@ class FusionAPIDownloaderTest {
         givenDownloadBody("A,B,C\n1,2,3");
         givenResponseHeader("Content-Type", "text/csv");
         givenResponseHeader("Content-Disposition", "attachment; filename=test-testFile.csv");
-        givenCallToClientToGetHeadReturns("version-123", null, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=", "5");
+        givenCallToClientToGetHeadReturns("version-123", null, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=", "5");
         givenCallToClientToGetInputStreamIsSuccessfully();
 
         // when
@@ -306,7 +306,7 @@ class FusionAPIDownloaderTest {
         givenDownloadBody("A,B,C\n1,2,3");
         givenResponseHeader("Content-Type", "text/csv");
         givenResponseHeader("Content-Disposition", "attachment; filename=test-testFile.csv");
-        givenCallToClientToGetHeadReturns("version-123", null, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=", "5");
+        givenCallToClientToGetHeadReturns("version-123", null, "U9Wqny3Wh4uvBG7jlJ249WgvG/A+Ue2C+iQ7P8r22G8=", "5");
         givenCallToClientToGetInputStreamIsSuccessfully();
 
         // when

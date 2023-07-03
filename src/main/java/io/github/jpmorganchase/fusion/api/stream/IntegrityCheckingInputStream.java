@@ -6,34 +6,21 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import lombok.Builder;
 
+@Builder
 public class IntegrityCheckingInputStream extends InputStream {
 
     private static final String DEFAULT_DIGEST_ALGO = "SHA-256";
 
-    private final LinkedList<GetPartResponse> orderedResponses;
-    GetPartResponse currentResponse;
+    private final LinkedList<GetPartResponse> orderedParts;
+    GetPartResponse currentPart;
     MessageDigest currentDigest;
     String digestAlgo;
 
-    public static IntegrityCheckingInputStream of(GetPartResponse response) throws IOException {
-        LinkedList<GetPartResponse> responses = new LinkedList<>();
-        responses.add(response);
-        return new IntegrityCheckingInputStream(responses, DEFAULT_DIGEST_ALGO);
-    }
-
-    public static IntegrityCheckingInputStream of(List<GetPartResponse> orderedResponses) throws IOException {
-        return new IntegrityCheckingInputStream(new LinkedList<>(orderedResponses), DEFAULT_DIGEST_ALGO);
-    }
-
-    public static IntegrityCheckingInputStream of(List<GetPartResponse> orderedResponses, String digestAlgo)
+    private IntegrityCheckingInputStream(LinkedList<GetPartResponse> orderedParts, String digestAlgo)
             throws IOException {
-        return new IntegrityCheckingInputStream(new LinkedList<>(orderedResponses), digestAlgo);
-    }
-
-    private IntegrityCheckingInputStream(LinkedList<GetPartResponse> orderedResponses, String digestAlgo)
-            throws IOException {
-        this.orderedResponses = orderedResponses;
+        this.orderedParts = orderedParts;
         this.digestAlgo = digestAlgo;
         resetDigest();
         nextResponse();
@@ -46,7 +33,7 @@ public class IntegrityCheckingInputStream extends InputStream {
             return -1;
         }
 
-        int byteRead = currentResponse.getContent().read();
+        int byteRead = currentPart.getContent().read();
 
         if (-1 == byteRead) {
             if (verifyResetAndGetNextResponse()) {
@@ -62,9 +49,9 @@ public class IntegrityCheckingInputStream extends InputStream {
     @Override
     public void close() throws IOException {
         if (!isEndOfStream()) {
-            currentResponse.getContent().close();
+            currentPart.getContent().close();
             while (nextResponse()) {
-                currentResponse.getContent().close();
+                currentPart.getContent().close();
             }
         }
     }
@@ -77,11 +64,11 @@ public class IntegrityCheckingInputStream extends InputStream {
     }
 
     private void closeCurrentResponse() throws IOException {
-        currentResponse.getContent().close();
+        currentPart.getContent().close();
     }
 
     private boolean nextResponse() {
-        currentResponse = orderedResponses.poll();
+        currentPart = orderedParts.poll();
         return !isEndOfStream();
     }
 
@@ -95,13 +82,70 @@ public class IntegrityCheckingInputStream extends InputStream {
 
     private void verifyDigest() throws IOException {
         String encodedDigest = Base64.getEncoder().encodeToString(currentDigest.digest());
-        if (Objects.isNull(currentResponse.getHead())
-                || !currentResponse.getHead().getChecksum().equals(encodedDigest)) {
+        System.out.println(encodedDigest);
+        if (Objects.isNull(currentPart.getHead())
+                || !currentPart.getHead().getChecksum().equals(encodedDigest)) {
             throw new IOException("Corrupted stream, verification of checksum failed");
         }
     }
 
     private boolean isEndOfStream() {
-        return Objects.isNull(currentResponse);
+        return Objects.isNull(currentPart);
+    }
+
+    /**
+     * Builder to be used to construct the {@link IntegrityCheckingInputStream}
+     *
+     * if digest algorithm is not specified, it will default to "SHA-256".
+     * <p>
+     * If both a list of parts and a single part is provided, the ordered parts will first
+     * of all be constructed with the list and then the single part will be added to tail.
+     *
+     */
+    public static class IntegrityCheckingInputStreamBuilder {
+
+        private GetPartResponse part;
+        private List<GetPartResponse> parts;
+
+        public IntegrityCheckingInputStreamBuilder part(GetPartResponse part) {
+            this.part = part;
+            return this;
+        }
+
+        public IntegrityCheckingInputStreamBuilder parts(List<GetPartResponse> parts) {
+            this.parts = parts;
+            return this;
+        }
+
+        public IntegrityCheckingInputStreamBuilder algorithm(String algorithm) {
+            return this;
+        }
+
+        private IntegrityCheckingInputStreamBuilder orderedParts(LinkedList<GetPartResponse> orderedParts) {
+            return this;
+        }
+
+        private IntegrityCheckingInputStreamBuilder currentPart(GetPartResponse currentPart) {
+            return this;
+        }
+
+        public IntegrityCheckingInputStream build() throws IOException {
+
+            LinkedList<GetPartResponse> orderedParts = new LinkedList<>();
+
+            if (Objects.isNull(digestAlgo)) {
+                this.digestAlgo = DEFAULT_DIGEST_ALGO;
+            }
+
+            if (Objects.nonNull(parts)) {
+                orderedParts.addAll(parts);
+            }
+
+            if (Objects.nonNull(part)) {
+                orderedParts.add(part);
+            }
+
+            return new IntegrityCheckingInputStream(orderedParts, digestAlgo);
+        }
     }
 }
