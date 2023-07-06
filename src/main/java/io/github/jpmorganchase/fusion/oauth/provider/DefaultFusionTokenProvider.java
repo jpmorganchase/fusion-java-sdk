@@ -49,16 +49,6 @@ public class DefaultFusionTokenProvider implements FusionTokenProvider {
         protected FusionConfiguration configuration =
                 FusionConfiguration.builder().build();
 
-        @SuppressWarnings("PIT")
-        private DefaultFusionTokenProviderBuilder sessionTokenProvider(SessionTokenProvider sessionTokenProvider) {
-            return this;
-        }
-
-        @SuppressWarnings("PIT")
-        private DefaultFusionTokenProviderBuilder datasetTokenProvider(DatasetTokenProvider datasetTokenProvider) {
-            return this;
-        }
-
         public DefaultFusionTokenProviderBuilder client(Client client) {
             this.client = client;
             return this;
@@ -84,7 +74,7 @@ public class DefaultFusionTokenProvider implements FusionTokenProvider {
                 client = JdkClient.builder().noProxy().build();
             }
 
-            if (null == credentials) {
+            if (null == sessionTokenProvider && null == credentials) {
                 Gson gson = new GsonBuilder().create();
                 try {
                     // Java 8 doesn't allow specification of the charset if we use a FileReader
@@ -101,13 +91,18 @@ public class DefaultFusionTokenProvider implements FusionTokenProvider {
                 }
             }
 
-            if (null == credentials) {
+            if (null == sessionTokenProvider && null == credentials) {
                 throw new FusionInitialisationException("Failed to initialise, no credentials defined");
             }
 
-            this.sessionTokenProvider = new OAuthSessionTokenProvider(credentials, client);
-            this.datasetTokenProvider =
-                    new OAuthDatasetTokenProvider(configuration.getRootURL(), sessionTokenProvider, client);
+            if (null == sessionTokenProvider) {
+                this.sessionTokenProvider = new OAuthSessionTokenProvider(credentials, client);
+            }
+
+            if (null == datasetTokenProvider) {
+                this.datasetTokenProvider =
+                        new OAuthDatasetTokenProvider(configuration.getRootURL(), sessionTokenProvider, client);
+            }
 
             return super.build();
         }
