@@ -228,6 +228,25 @@ class IntegrityCheckingInputStreamTest {
         }
 
         @Test
+        void canHandleRequestToCloseStream() throws IOException, NoSuchAlgorithmException {
+
+            // given
+            givenPartResponse("A,B,C" + System.lineSeparator() + "1,2,3" + System.lineSeparator() + "4,5,6"
+                    + System.lineSeparator() + "7,8,9" + System.lineSeparator());
+            givenPartResponse("10,11,12" + System.lineSeparator() + "13,14,15" + System.lineSeparator() + "16,17,18"
+                    + System.lineSeparator() + "19,20,21" + System.lineSeparator());
+            givenPartResponse("22,23,24" + System.lineSeparator() + "25,26,27" + System.lineSeparator() + "28,29,30"
+                    + System.lineSeparator() + "31,32,33" + System.lineSeparator());
+            givenTheDigestAwareInputStreamCreatedWithResponses();
+
+            // when
+            whenCloseIsCalledOnTheStream();
+
+            // then
+            thenCallToReadShouldReturnMinusOne();
+        }
+
+        @Test
         void canHandleIntegrityCheckFailure() throws IOException, NoSuchAlgorithmException {
 
             // given
@@ -265,6 +284,10 @@ class IntegrityCheckingInputStreamTest {
                 sb.append(new String(new byte[] {(byte) byteRead}));
             }
             actualDataRead = sb.toString();
+        }
+
+        private void whenCloseIsCalledOnTheStream() throws IOException {
+            dais.close();
         }
     }
 

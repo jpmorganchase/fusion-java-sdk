@@ -49,10 +49,12 @@ public class DefaultFusionTokenProvider implements FusionTokenProvider {
         protected FusionConfiguration configuration =
                 FusionConfiguration.builder().build();
 
+        @SuppressWarnings("PIT")
         private DefaultFusionTokenProviderBuilder sessionTokenProvider(SessionTokenProvider sessionTokenProvider) {
             return this;
         }
 
+        @SuppressWarnings("PIT")
         private DefaultFusionTokenProviderBuilder datasetTokenProvider(DatasetTokenProvider datasetTokenProvider) {
             return this;
         }

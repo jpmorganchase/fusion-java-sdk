@@ -351,16 +351,19 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
             return this;
         }
 
+        @SuppressWarnings("PIT")
         private FusionAPIUploadOperationsBuilder singlePartUploadSizeLimit(int singlePartUploadSizeLimit) {
             this.singlePartUploadSizeLimit = singlePartUploadSizeLimit;
             return this;
         }
 
+        @SuppressWarnings("PIT")
         private FusionAPIUploadOperationsBuilder uploadPartSize(int uploadPartSize) {
             this.uploadPartSize = uploadPartSize;
             return this;
         }
 
+        @SuppressWarnings("PIT")
         private FusionAPIUploadOperationsBuilder uploadThreadPoolSize(int uploadThreadPoolSize) {
             this.uploadThreadPoolSize = uploadThreadPoolSize;
             return this;

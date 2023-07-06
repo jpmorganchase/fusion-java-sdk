@@ -82,7 +82,6 @@ public class IntegrityCheckingInputStream extends InputStream {
 
     private void verifyDigest() throws IOException {
         String encodedDigest = Base64.getEncoder().encodeToString(currentDigest.digest());
-        System.out.println(encodedDigest);
         if (Objects.isNull(currentPart.getHead())
                 || !currentPart.getHead().getChecksum().equals(encodedDigest)) {
             throw new IOException("Corrupted stream, verification of checksum failed");

@@ -307,6 +307,7 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
             return this;
         }
 
+        @SuppressWarnings("PIT")
         private FusionAPIDownloadOperationsBuilder downloadThreadPoolSize(int downloadThreadPoolSize) {
             this.downloadThreadPoolSize = downloadThreadPoolSize;
             return this;

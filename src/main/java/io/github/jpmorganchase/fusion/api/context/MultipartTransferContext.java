@@ -1,5 +1,6 @@
 package io.github.jpmorganchase.fusion.api.context;
 
+import static io.github.jpmorganchase.fusion.api.context.MultipartTransferContext.MultipartTransferStatus.INITIATED;
 import static io.github.jpmorganchase.fusion.api.context.MultipartTransferContext.MultipartTransferStatus.TRANSFERRED;
 
 import io.github.jpmorganchase.fusion.api.response.UploadedPart;
@@ -65,12 +66,11 @@ public class MultipartTransferContext {
     }
 
     public boolean canProceedToComplete() {
-        // TODO : knighto : This is one for the future once better re-try logic has been implemented
-        return TRANSFERRED.equals(this.status) && parts.size() > 0;
+        return (this.status == TRANSFERRED) && (parts.size() > 0);
     }
 
     public boolean canProceedToTransfer() {
-        return MultipartTransferStatus.INITIATED.equals(status);
+        return this.status == INITIATED;
     }
 
     public UploadedParts uploadedParts() {
