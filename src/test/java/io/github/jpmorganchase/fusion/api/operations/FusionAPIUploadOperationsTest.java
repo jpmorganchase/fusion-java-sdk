@@ -688,9 +688,7 @@ class FusionAPIUploadOperationsTest {
     }
 
     private void thenMultipartTransferContextStatusShouldSetTotalBytes(long expected) {
-        assertThat(
-                multipartTransferContext.getTotalBytes(),
-                is(equalTo(expected)));
+        assertThat(multipartTransferContext.getTotalBytes(), is(equalTo(expected)));
     }
 
     @SneakyThrows
