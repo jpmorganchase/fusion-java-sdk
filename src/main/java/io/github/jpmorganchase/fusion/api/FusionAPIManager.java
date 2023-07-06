@@ -3,6 +3,7 @@ package io.github.jpmorganchase.fusion.api;
 import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
 
 import io.github.jpmorganchase.fusion.FusionConfiguration;
+import io.github.jpmorganchase.fusion.FusionInitialisationException;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
 import io.github.jpmorganchase.fusion.api.operations.APIDownloadOperations;
@@ -13,13 +14,11 @@ import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.http.JdkClient;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
-
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import lombok.Builder;
 
 /**
@@ -53,22 +52,40 @@ public class FusionAPIManager implements APIManager {
     }
 
     @Override
-    public void callAPIFileDownload(String apiPath, String fileName, String catalog, String dataset) throws APICallException, FileDownloadException {
+    public void callAPIFileDownload(String apiPath, String fileName, String catalog, String dataset)
+            throws APICallException, FileDownloadException {
         downloader.callAPIFileDownload(apiPath, fileName, catalog, dataset);
     }
 
     @Override
-    public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset) throws APICallException, FileDownloadException {
+    public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset)
+            throws APICallException, FileDownloadException {
         return downloader.callAPIFileDownload(apiPath, catalog, dataset);
     }
 
     @Override
-    public void callAPIFileUpload(String apiPath, String fileName, String catalogName, String dataset, String fromDate, String toDate, String createdDate) throws APICallException {
+    public void callAPIFileUpload(
+            String apiPath,
+            String fileName,
+            String catalogName,
+            String dataset,
+            String fromDate,
+            String toDate,
+            String createdDate)
+            throws APICallException {
         uploader.callAPIFileUpload(apiPath, fileName, catalogName, dataset, fromDate, toDate, createdDate);
     }
 
     @Override
-    public void callAPIFileUpload(String apiPath, InputStream data, String catalogName, String dataset, String fromDate, String toDate, String createdDate) throws APICallException {
+    public void callAPIFileUpload(
+            String apiPath,
+            InputStream data,
+            String catalogName,
+            String dataset,
+            String fromDate,
+            String toDate,
+            String createdDate)
+            throws APICallException {
         uploader.callAPIFileUpload(apiPath, data, catalogName, dataset, fromDate, toDate, createdDate);
     }
 
@@ -83,24 +100,28 @@ public class FusionAPIManager implements APIManager {
         protected APIDownloadOperations downloader;
         protected APIUploadOperations uploader;
 
-        protected FusionConfiguration configuration = FusionConfiguration.builder().build();
+        protected FusionConfiguration configuration =
+                FusionConfiguration.builder().build();
 
         public FusionAPIManagerBuilder configuration(FusionConfiguration configuration) {
             this.configuration = configuration;
             return this;
         }
-
     }
 
     public static class CustomFusionAPIManagerBuilder extends FusionAPIManagerBuilder {
         @Override
         public FusionAPIManager build() {
 
-            if (Objects.isNull(httpClient)){
+            if (Objects.isNull(tokenProvider)) {
+                throw new FusionInitialisationException("No Fusion credentials provided, cannot build Fusion instance");
+            }
+
+            if (Objects.isNull(httpClient)) {
                 this.httpClient = JdkClient.builder().noProxy().build();
             }
 
-            if (Objects.isNull(downloader)){
+            if (Objects.isNull(downloader)) {
                 this.downloader = FusionAPIDownloadOperations.builder()
                         .configuration(configuration)
                         .httpClient(httpClient)
@@ -108,7 +129,7 @@ public class FusionAPIManager implements APIManager {
                         .build();
             }
 
-            if (Objects.isNull(uploader)){
+            if (Objects.isNull(uploader)) {
                 this.uploader = FusionAPIUploadOperations.builder()
                         .configuration(configuration)
                         .httpClient(httpClient)
@@ -118,6 +139,4 @@ public class FusionAPIManager implements APIManager {
             return super.build();
         }
     }
-
-
 }

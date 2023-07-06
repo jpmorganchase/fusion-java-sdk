@@ -7,11 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
+import io.github.jpmorganchase.fusion.FusionInitialisationException;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
-import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class FusionApiManagerTest {
 
     private final Map<String, String> requestHeaders = new HashMap<>();
 
-    private APICallException thrown;
+    private Throwable thrown;
 
     private String responseBody;
 
@@ -65,8 +65,17 @@ public class FusionApiManagerTest {
         givenSessionBearerToken("my-token");
         givenRequestHeader("Authorization", "Bearer my-token");
         givenCallToClientToGetReturnsNotFound();
-        whenFusionApiManagerIsCalledThenExceptionShouldBeThrown();
+        whenFusionApiManagerIsCalledThenExceptionShouldBeThrown(APICallException.class);
         thenExceptionMessageShouldMatchExpected("The requested resource does not exist.");
+    }
+
+    @Test
+    public void constructionWithNoCredentialsThrowsException() {
+        FusionInitialisationException thrown = assertThrows(
+                FusionInitialisationException.class,
+                () -> FusionAPIManager.builder().build(),
+                "Expected FusionInitialisationException but none thrown");
+        assertThat(thrown.getMessage(), is(equalTo("No Fusion credentials provided, cannot build Fusion instance")));
     }
 
     private void thenTheResponseBodyShouldMatchExpected() {
@@ -93,11 +102,9 @@ public class FusionApiManagerTest {
         assertThat(thrown.getMessage(), is(equalTo(message)));
     }
 
-    private void whenFusionApiManagerIsCalledThenExceptionShouldBeThrown() {
+    private void whenFusionApiManagerIsCalledThenExceptionShouldBeThrown(Class<? extends Throwable> exceptionClass) {
         thrown = assertThrows(
-                APICallException.class,
-                () -> fusionAPIManager.callAPI(apiPath),
-                "Expected APICallException but none thrown");
+                exceptionClass, () -> fusionAPIManager.callAPI(apiPath), "Expected Exception but none thrown");
     }
 
     private void givenCallToClientToGetReturnsNotFound() {

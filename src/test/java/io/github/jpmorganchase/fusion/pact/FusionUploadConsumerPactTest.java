@@ -9,6 +9,8 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import io.github.jpmorganchase.fusion.Fusion;
+import io.github.jpmorganchase.fusion.FusionConfiguration;
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,9 +20,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-
-import io.github.jpmorganchase.fusion.FusionConfiguration;
-import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -132,12 +131,12 @@ public class FusionUploadConsumerPactTest {
     private static class DummyFusionTokenProvider implements FusionTokenProvider {
         @Override
         public String getDatasetBearerToken(String catalog, String dataset) {
-            return "my-bearer-token";
+            return "my-fusion-bearer";
         }
 
         @Override
         public String getSessionBearerToken() {
-            return "my-fusion-bearer";
+            return "my-bearer-token";
         }
     }
 }

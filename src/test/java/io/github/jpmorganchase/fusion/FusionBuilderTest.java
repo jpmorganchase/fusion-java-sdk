@@ -15,23 +15,26 @@ public class FusionBuilderTest {
                 FusionInitialisationException.class,
                 () -> Fusion.builder().build(),
                 "Expected FusionInitialisationException but none thrown");
-        assertThat(thrown.getMessage(), is(equalTo("No Fusion credentials provided, cannot build Fusion instance")));
+        assertThat(
+                thrown.getMessage(),
+                is(equalTo("Failed to load credential file from path: config/client_credentials.json")));
     }
 
     @Test
     public void constructionWithNoUrlUsesDefaultUrl() {
-        Fusion f = Fusion.builder()
-                .bearerToken("my token")
-                .build();
+        Fusion f = Fusion.builder().bearerToken("my token").build();
 
-        assertThat(f.getRootURL(), is(equalTo(FusionConfiguration.builder().build().getRootURL())));
+        assertThat(
+                f.getRootURL(), is(equalTo(FusionConfiguration.builder().build().getRootURL())));
     }
 
     @Test
     public void constructionWithUrlDoesNotUseDefaultUrl() {
         String newRootUrl = "https://my-api.domain.com/api";
         Fusion f = Fusion.builder()
-                .configuration(FusionConfiguration.builder().rootURL("https://my-api.domain.com/api").build())
+                .configuration(FusionConfiguration.builder()
+                        .rootURL("https://my-api.domain.com/api")
+                        .build())
                 .bearerToken("my token")
                 .build();
         assertThat(f.getRootURL(), is(equalTo(newRootUrl)));
@@ -39,18 +42,20 @@ public class FusionBuilderTest {
 
     @Test
     public void constructionWithNoPathUsesDefaultPath() {
-        Fusion f = Fusion.builder()
-                .bearerToken("my token")
-                .build();
+        Fusion f = Fusion.builder().bearerToken("my token").build();
 
-        assertThat(f.getDefaultPath(), is(equalTo(FusionConfiguration.builder().build().getDownloadPath())));
+        assertThat(
+                f.getDefaultPath(),
+                is(equalTo(FusionConfiguration.builder().build().getDownloadPath())));
     }
 
     @Test
     public void constructionWithPathDoesNotUseDefaultPath() {
         String newPath = "/download/to/here";
         Fusion f = Fusion.builder()
-                .configuration(FusionConfiguration.builder().downloadPath("/download/to/here").build())
+                .configuration(FusionConfiguration.builder()
+                        .downloadPath("/download/to/here")
+                        .build())
                 .bearerToken("my token")
                 .build();
         assertThat(f.getDefaultPath(), is(equalTo(newPath)));
@@ -58,16 +63,17 @@ public class FusionBuilderTest {
 
     @Test
     public void constructionWithNoCatalogDefaultsToCommon() {
-        Fusion f = Fusion.builder()
-                .bearerToken("my token")
-                .build();
-        assertThat(f.getDefaultCatalog(), is(equalTo(FusionConfiguration.builder().build().getDefaultCatalog())));
+        Fusion f = Fusion.builder().bearerToken("my token").build();
+        assertThat(
+                f.getDefaultCatalog(),
+                is(equalTo(FusionConfiguration.builder().build().getDefaultCatalog())));
     }
 
     @Test
     public void constructionWithCatalogUsesCorrectDefaultCatalog() {
         Fusion f = Fusion.builder()
-                .configuration(FusionConfiguration.builder().defaultCatalog("test").build())
+                .configuration(
+                        FusionConfiguration.builder().defaultCatalog("test").build())
                 .bearerToken("my token")
                 .build();
         assertThat(f.getDefaultCatalog(), is(equalTo("test")));
@@ -75,15 +81,15 @@ public class FusionBuilderTest {
 
     @Test
     public void constructWithBearerToken() {
-        //TODO : Should be moved to FusionTokenProvider
-/*        Fusion f = Fusion.builder().bearerToken("my-token").build();
+        // TODO : Should be moved to FusionTokenProvider
+        /*        Fusion f = Fusion.builder().bearerToken("my-token").build();
         assertThat(f.getCredentials() instanceof BearerTokenCredentials, is(true));*/
     }
 
     @Test
     public void constructWithSecretBasedCredentials() {
-        //TODO : Should be moved to FusionTokenProvider
-/*        Fusion f = Fusion.builder()
+        // TODO : Should be moved to FusionTokenProvider
+        /*        Fusion f = Fusion.builder()
                 .secretBasedCredentials("aClientId", "aSecret", "aResource", "https://oauth-api.domain.com")
                 .build();
         assertThat(f.getCredentials() instanceof OAuthSecretBasedCredentials, is(true));
@@ -96,8 +102,8 @@ public class FusionBuilderTest {
 
     @Test
     public void constructWithPasswordBasedCredentials() {
-        //TODO : Should be moved to FusionTokenProvider
-/*        Fusion f = Fusion.builder()
+        // TODO : Should be moved to FusionTokenProvider
+        /*        Fusion f = Fusion.builder()
                 .passwordBasedCredentials(
                         "aClientId", "aUsername", "aPassword", "aResource", "https://oauth-api.domain.com")
                 .build();
@@ -112,8 +118,8 @@ public class FusionBuilderTest {
 
     @Test
     public void constructWithCredentialFile() {
-        //TODO : Should be moved to FusionTokenProvider
-  /*      URL url = FusionBuilderTest.class.getResource("test-user-credential.json");
+        // TODO : Should be moved to FusionTokenProvider
+        /*      URL url = FusionBuilderTest.class.getResource("test-user-credential.json");
         Path path;
         try {
             path = Paths.get(url.toURI());
@@ -133,8 +139,8 @@ public class FusionBuilderTest {
 
     @Test
     public void constructWithInvalidCredentialFileThrowsException() {
-        //TODO : Should be moved to FusionTokenProvider
-/*        FusionInitialisationException thrown = assertThrows(
+        // TODO : Should be moved to FusionTokenProvider
+        /*        FusionInitialisationException thrown = assertThrows(
                 FusionInitialisationException.class,
                 () -> {
                     Fusion.builder().credentialFile("/not/a/valid/file/path").build();
@@ -145,14 +151,14 @@ public class FusionBuilderTest {
 
     @Test
     public void constructWithProxy() {
-        //TODO : Remove, doesn't anything useful;
-/*        Fusion f = Fusion.builder()
-                .bearerToken("my-token")
-                .proxy("http://myproxy.domain.com", 8080)
-                .build();*/
+        // TODO : Remove, doesn't anything useful;
+        /*        Fusion f = Fusion.builder()
+        .bearerToken("my-token")
+        .proxy("http://myproxy.domain.com", 8080)
+        .build();*/
 
-        //TODO IK : Once constructed; I don't want to return the credentials; protect them
-        //assertThat(f.getCredentials() instanceof BearerTokenCredentials, is(true));
+        // TODO IK : Once constructed; I don't want to return the credentials; protect them
+        // assertThat(f.getCredentials() instanceof BearerTokenCredentials, is(true));
         // TODO: this is somewhat useless unless we can validate that the proxy was actually configured
     }
 }

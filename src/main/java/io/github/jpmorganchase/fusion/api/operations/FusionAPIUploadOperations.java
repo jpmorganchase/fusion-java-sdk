@@ -18,7 +18,6 @@ import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
-import io.github.jpmorganchase.fusion.oauth.provider.DefaultFusionTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
@@ -337,7 +336,8 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
 
     public static class FusionAPIUploadOperationsBuilder {
 
-        protected FusionConfiguration configuration = FusionConfiguration.builder().build();
+        protected FusionConfiguration configuration =
+                FusionConfiguration.builder().build();
         protected Client httpClient;
         protected FusionTokenProvider fusionTokenProvider;
         protected DigestProducer digestProducer;
@@ -346,26 +346,25 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
         int uploadPartSize;
         int uploadThreadPoolSize;
 
-        public FusionAPIUploadOperationsBuilder configuration(FusionConfiguration configuration){
+        public FusionAPIUploadOperationsBuilder configuration(FusionConfiguration configuration) {
             this.configuration = configuration;
             return this;
         }
 
-        private FusionAPIUploadOperationsBuilder singlePartUploadSizeLimit(int singlePartUploadSizeLimit){
+        private FusionAPIUploadOperationsBuilder singlePartUploadSizeLimit(int singlePartUploadSizeLimit) {
             this.singlePartUploadSizeLimit = singlePartUploadSizeLimit;
             return this;
         }
 
-        private FusionAPIUploadOperationsBuilder uploadPartSize(int uploadPartSize){
+        private FusionAPIUploadOperationsBuilder uploadPartSize(int uploadPartSize) {
             this.uploadPartSize = uploadPartSize;
             return this;
         }
 
-        private FusionAPIUploadOperationsBuilder uploadThreadPoolSize(int uploadThreadPoolSize){
+        private FusionAPIUploadOperationsBuilder uploadThreadPoolSize(int uploadThreadPoolSize) {
             this.uploadThreadPoolSize = uploadThreadPoolSize;
             return this;
         }
-
     }
 
     private static class CustomFusionAPIUploadOperationsBuilder extends FusionAPIUploadOperationsBuilder {
@@ -384,5 +383,4 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
             return super.build();
         }
     }
-
 }

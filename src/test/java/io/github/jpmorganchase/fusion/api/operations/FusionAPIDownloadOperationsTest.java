@@ -17,9 +17,7 @@ import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import io.github.jpmorganchase.fusion.oauth.provider.DefaultFusionTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
-
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -32,9 +30,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @SuppressWarnings("ALL")
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class FusionAPIDownloadOperationsTest {
 
     private FusionAPIDownloadOperations apiDownloader;

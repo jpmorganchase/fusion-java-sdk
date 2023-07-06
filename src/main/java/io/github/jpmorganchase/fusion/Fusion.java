@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import lombok.Builder;
 
 /**
@@ -561,19 +560,20 @@ public class Fusion {
         protected String defaultPath;
         protected FusionTokenProvider fusionTokenProvider;
         protected Credentials credentials;
-        protected FusionConfiguration configuration = FusionConfiguration.builder().build();
+        protected FusionConfiguration configuration =
+                FusionConfiguration.builder().build();
 
-        public FusionBuilder configuration(FusionConfiguration configuration){
+        public FusionBuilder configuration(FusionConfiguration configuration) {
             this.configuration = configuration;
             return this;
         }
 
-        public FusionBuilder fusionTokenProvider(FusionTokenProvider fusionTokenProvider){
+        public FusionBuilder fusionTokenProvider(FusionTokenProvider fusionTokenProvider) {
             this.fusionTokenProvider = fusionTokenProvider;
             return this;
         }
 
-        public FusionBuilder secretBasedCredentials (
+        public FusionBuilder secretBasedCredentials(
                 String clientId, String clientSecret, String resource, String authServerUrl) {
             this.credentials = new OAuthSecretBasedCredentials(clientId, resource, authServerUrl, clientSecret);
             return this;
@@ -581,8 +581,7 @@ public class Fusion {
 
         public FusionBuilder passwordBasedCredentials(
                 String clientId, String username, String password, String resource, String authServerUrl) {
-            this.credentials =
-                    new OAuthPasswordBasedCredentials(clientId, resource, authServerUrl, username, password);
+            this.credentials = new OAuthPasswordBasedCredentials(clientId, resource, authServerUrl, username, password);
             return this;
         }
 
@@ -601,12 +600,17 @@ public class Fusion {
             return this;
         }
 
-        private FusionBuilder rootURL(String rootURL) { return this;}
+        private FusionBuilder rootURL(String rootURL) {
+            return this;
+        }
 
-        private FusionBuilder defaultCatalog(String defaultCatalog){ return this;}
+        private FusionBuilder defaultCatalog(String defaultCatalog) {
+            return this;
+        }
 
-        private FusionBuilder defaultPath(String defaultPath){ return this;}
-
+        private FusionBuilder defaultPath(String defaultPath) {
+            return this;
+        }
     }
 
     private static class CustomFusionBuilder extends FusionBuilder {
@@ -622,7 +626,7 @@ public class Fusion {
                 client = JdkClient.builder().noProxy().build();
             }
 
-            if (Objects.isNull(fusionTokenProvider)){
+            if (Objects.isNull(fusionTokenProvider)) {
                 fusionTokenProvider = DefaultFusionTokenProvider.builder()
                         .configuration(configuration)
                         .credentials(credentials)

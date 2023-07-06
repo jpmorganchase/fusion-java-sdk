@@ -71,5 +71,4 @@ public class FusionConfiguration {
      */
     @Builder.Default
     String digestAlgorithm = "SHA-256";
-
 }

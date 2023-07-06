@@ -24,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Map;
-
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.hamcrest.core.Is;
@@ -182,16 +181,6 @@ public class FusionApiConsumerPactTest {
                 "a request to list available distributions belonging to a dataset member",
                 "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions",
                 distributions());
-    }
-
-    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
-    public RequestResponsePact download(PactDslWithProvider builder) {
-        return downloadExpectation(
-                builder,
-                "a distribution that is available for download",
-                "a request is made to download the distribution",
-                "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions/csv",
-                "A,B,C");
     }
 
     @AfterEach
@@ -550,7 +539,6 @@ public class FusionApiConsumerPactTest {
         private String sessionBearerToken;
         private String datasetBearerToken;
 
-
         public String getDatasetBearerToken(String catalog, String dataset) {
             return datasetBearerToken;
         }
@@ -558,7 +546,5 @@ public class FusionApiConsumerPactTest {
         public String getSessionBearerToken() {
             return sessionBearerToken;
         }
-
     }
-
 }

@@ -6,9 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import io.github.jpmorganchase.fusion.api.operations.APIDownloadOperations;
 import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.operations.APIUploadOperations;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
@@ -35,12 +33,6 @@ public class FusionTest {
 
     @Mock
     private APIManager apiManager;
-
-    @Mock
-    private APIUploadOperations apiUploadOperations;
-
-    @Mock
-    private APIDownloadOperations apiDownloadOperations;
 
     @Mock
     private APIResponseParser responseParser;
@@ -122,8 +114,7 @@ public class FusionTest {
         stubResponse.put("first", DatasetSeries.builder().identifier("dataset1").build());
 
         when(apiManager.callAPI(String.format(
-                        "%1scatalogs/%2s/datasets/%3s/datasetseries",
-                        config.getRootURL(), "common", "sample_dataset")))
+                        "%1scatalogs/%2s/datasets/%3s/datasetseries", config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseDatasetSeriesResponse("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -139,8 +130,7 @@ public class FusionTest {
         stubResponse.put("first", Attribute.builder().identifier("attribute1").build());
 
         when(apiManager.callAPI(String.format(
-                        "%1scatalogs/%2s/datasets/%3s/attributes",
-                        config.getRootURL(), "common", "sample_dataset")))
+                        "%1scatalogs/%2s/datasets/%3s/attributes", config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseAttributeResponse("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -159,8 +149,7 @@ public class FusionTest {
         stubResponse.put("attribute1", attribute1);
 
         when(apiManager.callAPI(String.format(
-                        "%1scatalogs/%2s/datasets/%3s/attributes",
-                        config.getRootURL(), "common", "sample_dataset")))
+                        "%1scatalogs/%2s/datasets/%3s/attributes", config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -191,7 +180,7 @@ public class FusionTest {
         Fusion f = stubFusion();
 
         doNothing()
-                .when(apiDownloadOperations)
+                .when(apiManager)
                 .callAPIFileDownload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
@@ -208,7 +197,7 @@ public class FusionTest {
         Fusion f = stubFusion();
 
         doNothing()
-                .when(apiDownloadOperations)
+                .when(apiManager)
                 .callAPIFileDownload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
@@ -224,7 +213,7 @@ public class FusionTest {
     public void testFileDownloadAsStreamInteraction() throws Exception {
         Fusion f = stubFusion();
 
-        when(apiDownloadOperations.callAPIFileDownload(
+        when(apiManager.callAPIFileDownload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                                 config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
@@ -247,7 +236,7 @@ public class FusionTest {
 
         f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", d);
 
-        verify(apiUploadOperations)
+        verify(apiManager)
                 .callAPIFileUpload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
@@ -269,7 +258,7 @@ public class FusionTest {
 
         f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, d, d);
 
-        verify(apiUploadOperations)
+        verify(apiManager)
                 .callAPIFileUpload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
@@ -341,8 +330,8 @@ public class FusionTest {
         dataset1.put("dataset1", Dataset.builder().identifier("dataset1").build());
         stubResponse.put("dataset1", dataset1);
 
-        when(apiManager.callAPI(String.format(
-                        "%1scatalogs/%2s/datasets/%3s", config.getRootURL(), "common", "sample_dataset")))
+        when(apiManager.callAPI(
+                        String.format("%1scatalogs/%2s/datasets/%3s", config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
 

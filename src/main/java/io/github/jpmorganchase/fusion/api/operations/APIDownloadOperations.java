@@ -10,5 +10,7 @@ public interface APIDownloadOperations {
             throws APICallException, FileDownloadException {}
 
     default InputStream callAPIFileDownload(String apiPath, String catalog, String dataset)
-            throws APICallException, FileDownloadException {return null;}
+            throws APICallException, FileDownloadException {
+        return null;
+    }
 }

@@ -23,9 +23,7 @@ import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.model.Operation;
-import io.github.jpmorganchase.fusion.oauth.provider.DefaultFusionTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -74,6 +72,8 @@ class FusionAPIUploadOperationsTest {
     private UploadRequest uploadRequest;
 
     private List<UploadedPart> uploadedParts = new ArrayList<>();
+
+    private FusionConfiguration fusionConfiguration;
 
     private int uploadPartSize = 16;
 
@@ -801,7 +801,7 @@ class FusionAPIUploadOperationsTest {
                 .content(uploadBody)
                 .build();
 
-        when(digestProducer.execute(argThat(bodyEquals(uploadBody)))).thenReturn(digestDescriptor);
+        when(this.digestProducer.execute(argThat(bodyEquals(uploadBody)))).thenReturn(digestDescriptor);
     }
 
     private void givenRequestHeader(Map<String, String> headers, String headerKey, String headerValue) {
@@ -812,7 +812,10 @@ class FusionAPIUploadOperationsTest {
 
         fusionAPIUploader = FusionAPIUploadOperations.builder()
                 .httpClient(client)
-                .configuration(FusionConfiguration.builder().build())
+                .configuration(FusionConfiguration.builder()
+                        .uploadPartSize(uploadPartSize)
+                        .singlePartUploadSizeLimit(singlePartUploadSizeLimit)
+                        .build())
                 .fusionTokenProvider(fusionTokenProvider)
                 .digestProducer(digestProducer)
                 .build();

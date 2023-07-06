@@ -56,8 +56,8 @@ public class FusionReadMeExampleVerification {
         Fusion.builder()
                 .configuration(FusionConfiguration.builder()
                         .credentialsPath(CREDENTIAL_FILE_PATH)
-                        .build()
-                ).build();
+                        .build())
+                .build();
     }
 
     @Test

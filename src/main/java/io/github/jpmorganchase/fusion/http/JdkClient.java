@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-
 import lombok.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,7 +175,7 @@ public class JdkClient implements Client {
                 .log();
     }
 
-    public static JdkClientBuilder builder(){
+    public static JdkClientBuilder builder() {
         return new CustomJdkClientBuilder();
     }
 
@@ -186,34 +185,31 @@ public class JdkClient implements Client {
         int port;
         Proxy proxy = Proxy.NO_PROXY;
 
-        public JdkClientBuilder url(String url){
+        public JdkClientBuilder url(String url) {
             this.url = url;
             return this;
         }
 
-        public JdkClientBuilder port(int port){
+        public JdkClientBuilder port(int port) {
             this.port = port;
             return this;
         }
 
-        public JdkClientBuilder noProxy(){
+        public JdkClientBuilder noProxy() {
             this.proxy = Proxy.NO_PROXY;
             return this;
         }
-
     }
 
     private static class CustomJdkClientBuilder extends JdkClientBuilder {
         @Override
         public JdkClient build() {
 
-            if ( Objects.nonNull(url) ){
+            if (Objects.nonNull(url)) {
                 this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(url, port));
             }
 
             return super.build();
         }
     }
-
-
 }

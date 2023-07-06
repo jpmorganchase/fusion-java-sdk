@@ -13,14 +13,11 @@ import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
-import io.github.jpmorganchase.fusion.oauth.provider.DefaultFusionTokenProvider;
-
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
-
-import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +46,6 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
      * Size of Thread-Pool to be used for uploading chunks of a multipart file
      * See {@link FusionConfiguration} for defaults.
      */
-
     int downloadThreadPoolSize;
 
     private final Object lock = new Object();
@@ -301,21 +297,22 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
 
     public static class FusionAPIDownloadOperationsBuilder {
 
-        protected FusionConfiguration configuration = FusionConfiguration.builder().build();
+        protected FusionConfiguration configuration =
+                FusionConfiguration.builder().build();
 
         int downloadThreadPoolSize;
 
-        public FusionAPIDownloadOperationsBuilder configuration(FusionConfiguration configuration){
+        public FusionAPIDownloadOperationsBuilder configuration(FusionConfiguration configuration) {
             this.configuration = configuration;
             return this;
         }
 
-        private FusionAPIDownloadOperationsBuilder downloadThreadPoolSize(int downloadThreadPoolSize){
+        private FusionAPIDownloadOperationsBuilder downloadThreadPoolSize(int downloadThreadPoolSize) {
             this.downloadThreadPoolSize = downloadThreadPoolSize;
             return this;
         }
-
     }
+
     private static class CustomFusionAPIDownloadOperationsBuilder extends FusionAPIDownloadOperationsBuilder {
         @Override
         public FusionAPIDownloadOperations build() {
