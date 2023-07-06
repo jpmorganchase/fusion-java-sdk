@@ -39,7 +39,7 @@ public class JdkClientTest {
             .options(wireMockConfig().dynamicPort().notifier(new Slf4jNotifier(true)))
             .build();
 
-    private static final Client httpClient = new JdkClient();
+    private static final Client httpClient = JdkClient.builder().noProxy().build();
     private static Client httpClientWithProxy;
 
     private static final String SAMPLE_RESPONSE_BODY = "sample response";

@@ -1,11 +1,11 @@
-package io.github.jpmorganchase.fusion.api;
+package io.github.jpmorganchase.fusion.api.operations;
 
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import java.io.InputStream;
 
-public interface APIUploader {
+public interface APIUploadOperations {
 
-    void callAPIFileUpload(
+    default void callAPIFileUpload(
             String apiPath,
             String fileName,
             String catalogName,
@@ -13,9 +13,9 @@ public interface APIUploader {
             String fromDate,
             String toDate,
             String createdDate)
-            throws APICallException;
+            throws APICallException {}
 
-    void callAPIFileUpload(
+    default void callAPIFileUpload(
             String apiPath,
             InputStream data,
             String catalogName,
@@ -23,5 +23,5 @@ public interface APIUploader {
             String fromDate,
             String toDate,
             String createdDate)
-            throws APICallException;
+            throws APICallException {}
 }

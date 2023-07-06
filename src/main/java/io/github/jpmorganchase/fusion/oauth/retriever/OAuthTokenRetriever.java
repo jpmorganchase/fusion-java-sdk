@@ -26,7 +26,7 @@ public class OAuthTokenRetriever implements TokenRetriever {
     private final TimeProvider timeProvider;
 
     public OAuthTokenRetriever() {
-        this(new JdkClient(), new SystemTimeProvider());
+        this(JdkClient.builder().noProxy().build(), new SystemTimeProvider());
     }
 
     public OAuthTokenRetriever(Client httpClient) {

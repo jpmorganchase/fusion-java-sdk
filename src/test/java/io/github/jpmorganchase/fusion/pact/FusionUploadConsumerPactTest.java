@@ -18,6 +18,9 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.github.jpmorganchase.fusion.FusionConfiguration;
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -108,9 +111,10 @@ public class FusionUploadConsumerPactTest {
 
     private void givenInstanceOfFusionSdk(MockServer mockServer) {
         fusion = Fusion.builder()
-                .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
-                .bearerToken("my-bearer-token")
-                .datasetBearerToken("common", "API_TEST", "my-fusion-bearer")
+                .configuration(FusionConfiguration.builder()
+                        .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
+                        .build())
+                .fusionTokenProvider(new DummyFusionTokenProvider())
                 .build();
     }
 
@@ -123,5 +127,17 @@ public class FusionUploadConsumerPactTest {
         uploadHeaders.put("Content-Length", length);
         uploadHeaders.put("Digest", "SHA-256=" + digest);
         return uploadHeaders;
+    }
+
+    private static class DummyFusionTokenProvider implements FusionTokenProvider {
+        @Override
+        public String getDatasetBearerToken(String catalog, String dataset) {
+            return "my-bearer-token";
+        }
+
+        @Override
+        public String getSessionBearerToken() {
+            return "my-fusion-bearer";
+        }
     }
 }

@@ -1,8 +1,9 @@
-package io.github.jpmorganchase.fusion.api;
+package io.github.jpmorganchase.fusion.api.operations;
 
 import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.*;
 
 import com.google.gson.GsonBuilder;
+import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.FusionException;
 import io.github.jpmorganchase.fusion.api.context.MultipartTransferContext;
 import io.github.jpmorganchase.fusion.api.context.UploadedPartContext;
@@ -11,13 +12,14 @@ import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.api.exception.FileUploadException;
 import io.github.jpmorganchase.fusion.api.request.UploadRequest;
 import io.github.jpmorganchase.fusion.api.response.UploadedParts;
+import io.github.jpmorganchase.fusion.digest.AlgoSpecificDigestProducer;
 import io.github.jpmorganchase.fusion.digest.DigestDescriptor;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
-import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
-import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.DefaultFusionTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import java.io.ByteArrayInputStream;
@@ -31,7 +33,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class FusionAPIUploader implements APIUploader {
+public class FusionAPIUploadOperations implements APIUploadOperations {
 
     private static final String UPLOAD_FAILED_EXCEPTION_MSG =
             "Exception encountered while attempting to upload part, please try again";
@@ -44,9 +46,7 @@ public class FusionAPIUploader implements APIUploader {
 
     private final Client httpClient;
 
-    private final SessionTokenProvider sessionTokenProvider;
-
-    private final DatasetTokenProvider datasetTokenProvider;
+    private final FusionTokenProvider fusionTokenProvider;
 
     private final DigestProducer digestProducer;
 
@@ -57,24 +57,22 @@ public class FusionAPIUploader implements APIUploader {
      * Max size in MB of data allowed for a single part upload.
      * if 32MB was the max size then 32 would be provided.
      * <p>
-     * Defaults to 50MB aka 50.
+     * See {@link FusionConfiguration} for default values.
      */
-    @Builder.Default
-    int singlePartUploadSizeLimit = 50;
+    int singlePartUploadSizeLimit;
 
     /**
      * Upload part chunk size. Defaults to 16MB.
      * If a value such as 8MB is required, then client would set this value to 8
+     * See {@link FusionConfiguration} for default values.
      */
-    @Builder.Default
-    int uploadPartSize = 8;
+    int uploadPartSize;
 
     /**
      * Size of Thread-Pool to be used for uploading chunks of a multipart file
-     * Defaults to number of available processors.
+     * See {@link FusionConfiguration} for default values.
      */
-    @Builder.Default
-    int uploadThreadPoolSize = Runtime.getRuntime().availableProcessors();
+    int uploadThreadPoolSize;
 
     /**
      * Call the API upload endpoint to load a distribution
@@ -316,10 +314,10 @@ public class FusionAPIUploader implements APIUploader {
     }
 
     private void setSecurityHeaders(UploadRequest ur, Map<String, String> requestHeaders) {
-        requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
+        requestHeaders.put("Authorization", "Bearer " + fusionTokenProvider.getSessionBearerToken());
         requestHeaders.put(
                 "Fusion-Authorization",
-                "Bearer " + datasetTokenProvider.getDatasetBearerToken(ur.getCatalog(), ur.getDataset()));
+                "Bearer " + fusionTokenProvider.getDatasetBearerToken(ur.getCatalog(), ur.getDataset()));
     }
 
     private void setDistributionHeaders(UploadRequest ur, DigestDescriptor digest, Map<String, String> requestHeaders) {
@@ -332,4 +330,59 @@ public class FusionAPIUploader implements APIUploader {
     private String serializeToJson(UploadedParts parts) {
         return new GsonBuilder().create().toJson(parts);
     }
+
+    public static FusionAPIUploadOperationsBuilder builder() {
+        return new CustomFusionAPIUploadOperationsBuilder();
+    }
+
+    public static class FusionAPIUploadOperationsBuilder {
+
+        protected FusionConfiguration configuration = FusionConfiguration.builder().build();
+        protected Client httpClient;
+        protected FusionTokenProvider fusionTokenProvider;
+        protected DigestProducer digestProducer;
+        protected APIResponseParser responseParser;
+        int singlePartUploadSizeLimit;
+        int uploadPartSize;
+        int uploadThreadPoolSize;
+
+        public FusionAPIUploadOperationsBuilder configuration(FusionConfiguration configuration){
+            this.configuration = configuration;
+            return this;
+        }
+
+        private FusionAPIUploadOperationsBuilder singlePartUploadSizeLimit(int singlePartUploadSizeLimit){
+            this.singlePartUploadSizeLimit = singlePartUploadSizeLimit;
+            return this;
+        }
+
+        private FusionAPIUploadOperationsBuilder uploadPartSize(int uploadPartSize){
+            this.uploadPartSize = uploadPartSize;
+            return this;
+        }
+
+        private FusionAPIUploadOperationsBuilder uploadThreadPoolSize(int uploadThreadPoolSize){
+            this.uploadThreadPoolSize = uploadThreadPoolSize;
+            return this;
+        }
+
+    }
+
+    private static class CustomFusionAPIUploadOperationsBuilder extends FusionAPIUploadOperationsBuilder {
+        @Override
+        public FusionAPIUploadOperations build() {
+            this.singlePartUploadSizeLimit = configuration.getSinglePartUploadSizeLimit();
+            this.uploadPartSize = configuration.getUploadPartSize();
+            this.uploadThreadPoolSize = configuration.getUploadThreadPoolSize();
+
+            if (Objects.isNull(digestProducer)) {
+                this.digestProducer = AlgoSpecificDigestProducer.builder()
+                        .digestAlgorithm(configuration.getDigestAlgorithm())
+                        .build();
+            }
+
+            return super.build();
+        }
+    }
+
 }

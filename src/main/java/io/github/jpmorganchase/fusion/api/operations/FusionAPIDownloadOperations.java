@@ -1,7 +1,8 @@
-package io.github.jpmorganchase.fusion.api;
+package io.github.jpmorganchase.fusion.api.operations;
 
 import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
 
+import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.FusionException;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
@@ -9,16 +10,17 @@ import io.github.jpmorganchase.fusion.api.request.DownloadRequest;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
-import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
-import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
-import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.DefaultFusionTokenProvider;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Builder
 @Getter
 @Slf4j
-public class FusionAPIDownloader implements APIDownloader {
+public class FusionAPIDownloadOperations implements APIDownloadOperations {
 
     private static final String WRITE_TO_FILE_EXCEPTION_MSG =
             "Problem encountered attempting to write downloaded distribution to file";
@@ -35,23 +37,20 @@ public class FusionAPIDownloader implements APIDownloader {
     private static final String DOWNLOAD_FAILED_EXCEPTION_MSG =
             "Problem encountered attempting to download distribution";
 
-    private static final String DEFAULT_FOLDER = "downloads";
     private static final String HEAD_PATH = "%s/operationType/download";
     private static final String HEAD_PATH_FOR_PART = "%s?downloadPartNumber=%d";
 
     private static final String FILE_RW_MODE = "rw";
 
     private final Client httpClient;
-    private final SessionTokenProvider sessionTokenProvider;
-    private final DatasetTokenProvider datasetTokenProvider;
-    private final DigestProducer digestProducer;
+    private final FusionTokenProvider fusionTokenProvider;
 
     /**
      * Size of Thread-Pool to be used for uploading chunks of a multipart file
-     * Defaults to number of available processors.
+     * See {@link FusionConfiguration} for defaults.
      */
-    @Builder.Default
-    int downloadThreadPoolSize = Runtime.getRuntime().availableProcessors();
+
+    int downloadThreadPoolSize;
 
     private final Object lock = new Object();
 
@@ -290,9 +289,38 @@ public class FusionAPIDownloader implements APIDownloader {
     }
 
     private void setSecurityHeaders(DownloadRequest dr, Map<String, String> requestHeaders) {
-        requestHeaders.put("Authorization", "Bearer " + sessionTokenProvider.getSessionBearerToken());
+        requestHeaders.put("Authorization", "Bearer " + fusionTokenProvider.getSessionBearerToken());
         requestHeaders.put(
                 "Fusion-Authorization",
-                "Bearer " + datasetTokenProvider.getDatasetBearerToken(dr.getCatalog(), dr.getDataset()));
+                "Bearer " + fusionTokenProvider.getDatasetBearerToken(dr.getCatalog(), dr.getDataset()));
+    }
+
+    public static FusionAPIDownloadOperationsBuilder builder() {
+        return new CustomFusionAPIDownloadOperationsBuilder();
+    }
+
+    public static class FusionAPIDownloadOperationsBuilder {
+
+        protected FusionConfiguration configuration = FusionConfiguration.builder().build();
+
+        int downloadThreadPoolSize;
+
+        public FusionAPIDownloadOperationsBuilder configuration(FusionConfiguration configuration){
+            this.configuration = configuration;
+            return this;
+        }
+
+        private FusionAPIDownloadOperationsBuilder downloadThreadPoolSize(int downloadThreadPoolSize){
+            this.downloadThreadPoolSize = downloadThreadPoolSize;
+            return this;
+        }
+
+    }
+    private static class CustomFusionAPIDownloadOperationsBuilder extends FusionAPIDownloadOperationsBuilder {
+        @Override
+        public FusionAPIDownloadOperations build() {
+            this.downloadThreadPoolSize = configuration.getDownloadThreadPoolSize();
+            return super.build();
+        }
     }
 }

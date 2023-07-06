@@ -10,6 +10,7 @@ import static org.mockito.Mockito.*;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class FusionApiManagerTest {
     private Client client;
 
     @Mock
-    private SessionTokenProvider sessionTokenProvider;
+    private FusionTokenProvider fusionTokenProvider;
 
     private String apiPath;
 
@@ -54,7 +55,7 @@ public class FusionApiManagerTest {
     }
 
     private void givenSessionBearerToken(String token) {
-        given(sessionTokenProvider.getSessionBearerToken()).willReturn(token);
+        given(fusionTokenProvider.getSessionBearerToken()).willReturn(token);
     }
 
     @Test
@@ -115,6 +116,9 @@ public class FusionApiManagerTest {
     }
 
     private void givenFusionApiManager() {
-        fusionAPIManager = new FusionAPIManager(client, sessionTokenProvider);
+        fusionAPIManager = FusionAPIManager.builder()
+                .httpClient(client)
+                .tokenProvider(fusionTokenProvider)
+                .build();
     }
 }

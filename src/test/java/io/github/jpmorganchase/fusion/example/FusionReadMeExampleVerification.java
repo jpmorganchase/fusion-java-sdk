@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import io.github.jpmorganchase.fusion.Fusion;
+import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.model.*;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -52,7 +53,11 @@ public class FusionReadMeExampleVerification {
     @Test
     @Disabled("Disabling temporarily")
     void loadCredentialsFromFile() {
-        Fusion.builder().credentialFile(CREDENTIAL_FILE_PATH).build();
+        Fusion.builder()
+                .configuration(FusionConfiguration.builder()
+                        .credentialsPath(CREDENTIAL_FILE_PATH)
+                        .build()
+                ).build();
     }
 
     @Test

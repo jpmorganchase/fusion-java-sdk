@@ -6,9 +6,9 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import io.github.jpmorganchase.fusion.api.APIDownloader;
+import io.github.jpmorganchase.fusion.api.operations.APIDownloadOperations;
 import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.APIUploader;
+import io.github.jpmorganchase.fusion.api.operations.APIUploadOperations;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
@@ -37,16 +37,18 @@ public class FusionTest {
     private APIManager apiManager;
 
     @Mock
-    private APIUploader apiUploader;
+    private APIUploadOperations apiUploadOperations;
 
     @Mock
-    private APIDownloader apiDownloader;
+    private APIDownloadOperations apiDownloadOperations;
 
     @Mock
     private APIResponseParser responseParser;
 
     @Mock
     private Client httpClient;
+
+    private final FusionConfiguration config = FusionConfiguration.builder().build();
 
     @Test
     public void testListDatasetsInteraction() throws Exception {
@@ -73,7 +75,7 @@ public class FusionTest {
         Map<String, Dataset> stubResponse = new HashMap<>();
         stubResponse.put("first", Dataset.builder().identifier("dataset1").build());
 
-        when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets", Fusion.DEFAULT_ROOT_URL, catalog)))
+        when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets", config.getRootURL(), catalog)))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseDatasetResponse("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -105,7 +107,7 @@ public class FusionTest {
         Map<String, DataProduct> stubResponse = new HashMap<>();
         stubResponse.put("first", DataProduct.builder().identifier("product1").build());
 
-        when(apiManager.callAPI(String.format("%1scatalogs/%2s/products", Fusion.DEFAULT_ROOT_URL, catalog)))
+        when(apiManager.callAPI(String.format("%1scatalogs/%2s/products", config.getRootURL(), catalog)))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseDataProductResponse("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -121,7 +123,7 @@ public class FusionTest {
 
         when(apiManager.callAPI(String.format(
                         "%1scatalogs/%2s/datasets/%3s/datasetseries",
-                        Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset")))
+                        config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseDatasetSeriesResponse("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -138,7 +140,7 @@ public class FusionTest {
 
         when(apiManager.callAPI(String.format(
                         "%1scatalogs/%2s/datasets/%3s/attributes",
-                        Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset")))
+                        config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseAttributeResponse("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -158,7 +160,7 @@ public class FusionTest {
 
         when(apiManager.callAPI(String.format(
                         "%1scatalogs/%2s/datasets/%3s/attributes",
-                        Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset")))
+                        config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -176,7 +178,7 @@ public class FusionTest {
 
         when(apiManager.callAPI(String.format(
                         "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
-                        Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308")))
+                        config.getRootURL(), "common", "sample_dataset", "20230308")))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseDistributionResponse("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -189,11 +191,11 @@ public class FusionTest {
         Fusion f = stubFusion();
 
         doNothing()
-                .when(apiDownloader)
+                .when(apiDownloadOperations)
                 .callAPIFileDownload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                                Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
                         String.format("%s/%s_%s_%s.%s", TMP_PATH, "common", "sample_dataset", "20230308", "csv"),
                         "common",
                         "sample_dataset");
@@ -206,11 +208,11 @@ public class FusionTest {
         Fusion f = stubFusion();
 
         doNothing()
-                .when(apiDownloader)
+                .when(apiDownloadOperations)
                 .callAPIFileDownload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                                Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
                         String.format("%s/%s_%s_%s.%s", "downloads", "common", "sample_dataset", "20230308", "csv"),
                         "common",
                         "sample_dataset");
@@ -222,10 +224,10 @@ public class FusionTest {
     public void testFileDownloadAsStreamInteraction() throws Exception {
         Fusion f = stubFusion();
 
-        when(apiDownloader.callAPIFileDownload(
+        when(apiDownloadOperations.callAPIFileDownload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                                Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
                         "common",
                         "sample_dataset"))
                 .thenReturn(new ByteArrayInputStream("A,B,C\nD,E,F".getBytes()));
@@ -245,11 +247,11 @@ public class FusionTest {
 
         f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", d);
 
-        verify(apiUploader)
+        verify(apiUploadOperations)
                 .callAPIFileUpload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                                Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
                         "/tmp/file.csv",
                         "common",
                         "sample_dataset",
@@ -267,11 +269,11 @@ public class FusionTest {
 
         f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, d, d);
 
-        verify(apiUploader)
+        verify(apiUploadOperations)
                 .callAPIFileUpload(
                         String.format(
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                                Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "20230308", "csv"),
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
                         requestBodyStream,
                         "common",
                         "sample_dataset",
@@ -291,11 +293,10 @@ public class FusionTest {
 
     private Fusion stubFusion() {
         return Fusion.builder()
-                .credentials(new BearerTokenCredentials("my token"))
+                .configuration(config)
+                .bearerToken("my token")
                 .api(apiManager)
                 .responseParser(responseParser)
-                .uploader(apiUploader)
-                .downloader(apiDownloader)
                 .build();
     }
 
@@ -306,7 +307,7 @@ public class FusionTest {
         Map<String, Catalog> stubResponse = new HashMap<>();
         stubResponse.put("first", Catalog.builder().identifier("catalog1").build());
 
-        when(apiManager.callAPI(String.format("%1scatalogs", Fusion.DEFAULT_ROOT_URL)))
+        when(apiManager.callAPI(String.format("%1scatalogs", config.getRootURL())))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseCatalogResponse("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -323,7 +324,7 @@ public class FusionTest {
         catalog1.put("catalog1", Catalog.builder().identifier("catalog1").build());
         stubResponse.put("catalog1", catalog1);
 
-        when(apiManager.callAPI(String.format("%1scatalogs/common", Fusion.DEFAULT_ROOT_URL)))
+        when(apiManager.callAPI(String.format("%1scatalogs/common", config.getRootURL())))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -341,7 +342,7 @@ public class FusionTest {
         stubResponse.put("dataset1", dataset1);
 
         when(apiManager.callAPI(String.format(
-                        "%1scatalogs/%2s/datasets/%3s", Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset")))
+                        "%1scatalogs/%2s/datasets/%3s", config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
 
@@ -361,7 +362,7 @@ public class FusionTest {
 
         when(apiManager.callAPI(String.format(
                         "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s",
-                        Fusion.DEFAULT_ROOT_URL, "common", "sample_dataset", "1")))
+                        config.getRootURL(), "common", "sample_dataset", "1")))
                 .thenReturn("{\"key\":value}");
         when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
 

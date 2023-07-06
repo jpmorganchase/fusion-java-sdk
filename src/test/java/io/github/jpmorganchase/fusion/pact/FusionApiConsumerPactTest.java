@@ -13,8 +13,10 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import io.github.jpmorganchase.fusion.Fusion;
+import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.model.*;
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.pact.util.FileHelper;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
 import java.io.InputStream;
@@ -22,6 +24,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Map;
+
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.AfterEach;
@@ -531,10 +535,30 @@ public class FusionApiConsumerPactTest {
     }
 
     private void givenInstanceOfFusionSdk(MockServer mockServer, String bearerToken) {
+
         fusion = Fusion.builder()
-                .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
-                .bearerToken(bearerToken)
-                .datasetBearerToken("common", "API_TEST", "my-fusion-bearer")
+                .configuration(FusionConfiguration.builder()
+                        .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
+                        .build())
+                .fusionTokenProvider(new DummyFusionTokenProvider(bearerToken, "my-fusion-bearer"))
                 .build();
     }
+
+    @AllArgsConstructor
+    private static class DummyFusionTokenProvider implements FusionTokenProvider {
+
+        private String sessionBearerToken;
+        private String datasetBearerToken;
+
+
+        public String getDatasetBearerToken(String catalog, String dataset) {
+            return datasetBearerToken;
+        }
+
+        public String getSessionBearerToken() {
+            return sessionBearerToken;
+        }
+
+    }
+
 }

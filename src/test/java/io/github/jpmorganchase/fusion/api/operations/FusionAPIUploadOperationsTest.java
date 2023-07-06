@@ -1,4 +1,4 @@
-package io.github.jpmorganchase.fusion.api;
+package io.github.jpmorganchase.fusion.api.operations;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -9,6 +9,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.GsonBuilder;
+import io.github.jpmorganchase.fusion.FusionConfiguration;
+import io.github.jpmorganchase.fusion.api.FusionApiManagerTest;
 import io.github.jpmorganchase.fusion.api.context.MultipartTransferContext;
 import io.github.jpmorganchase.fusion.api.context.UploadedPartContext;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
@@ -21,8 +23,9 @@ import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.model.Operation;
-import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
-import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.DefaultFusionTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -41,9 +44,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("SameParameterValue")
 @ExtendWith(MockitoExtension.class)
-class FusionAPIUploaderTest {
+class FusionAPIUploadOperationsTest {
 
-    private FusionAPIUploader fusionAPIUploader;
+    private FusionAPIUploadOperations fusionAPIUploader;
 
     @Mock
     private Client client;
@@ -52,10 +55,7 @@ class FusionAPIUploaderTest {
     private DigestProducer digestProducer;
 
     @Mock
-    private SessionTokenProvider sessionTokenProvider;
-
-    @Mock
-    private DatasetTokenProvider datasetTokenProvider;
+    private FusionTokenProvider fusionTokenProvider;
 
     private String apiPath;
 
@@ -80,7 +80,7 @@ class FusionAPIUploaderTest {
     private int singlePartUploadSizeLimit = 16;
 
     private void givenSessionBearerToken(String token) {
-        given(sessionTokenProvider.getSessionBearerToken()).willReturn(token);
+        given(fusionTokenProvider.getSessionBearerToken()).willReturn(token);
     }
 
     @Test
@@ -731,7 +731,7 @@ class FusionAPIUploaderTest {
     }
 
     private void givenDatasetBearerToken(String catalog, String dataset, String token) {
-        given(datasetTokenProvider.getDatasetBearerToken(catalog, dataset)).willReturn(token);
+        given(fusionTokenProvider.getDatasetBearerToken(catalog, dataset)).willReturn(token);
     }
 
     private void givenApiPath(String apiPath) {
@@ -810,13 +810,11 @@ class FusionAPIUploaderTest {
 
     private void givenSdkAPIUploader() {
 
-        fusionAPIUploader = FusionAPIUploader.builder()
+        fusionAPIUploader = FusionAPIUploadOperations.builder()
                 .httpClient(client)
-                .sessionTokenProvider(sessionTokenProvider)
-                .datasetTokenProvider(datasetTokenProvider)
+                .configuration(FusionConfiguration.builder().build())
+                .fusionTokenProvider(fusionTokenProvider)
                 .digestProducer(digestProducer)
-                .uploadPartSize(uploadPartSize)
-                .singlePartUploadSizeLimit(singlePartUploadSizeLimit)
                 .build();
     }
 

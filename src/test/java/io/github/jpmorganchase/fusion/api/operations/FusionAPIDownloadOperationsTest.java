@@ -1,4 +1,4 @@
-package io.github.jpmorganchase.fusion.api;
+package io.github.jpmorganchase.fusion.api.operations;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
+import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
 import io.github.jpmorganchase.fusion.api.request.DownloadRequest;
@@ -16,8 +17,9 @@ import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.digest.DigestProducer;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
-import io.github.jpmorganchase.fusion.oauth.provider.DatasetTokenProvider;
-import io.github.jpmorganchase.fusion.oauth.provider.SessionTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.DefaultFusionTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
+
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -33,18 +35,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("ALL")
 @ExtendWith(MockitoExtension.class)
-class FusionAPIDownloaderTest {
+class FusionAPIDownloadOperationsTest {
 
-    private FusionAPIDownloader apiDownloader;
+    private FusionAPIDownloadOperations apiDownloader;
 
     @Mock
     private Client client;
 
     @Mock
-    private SessionTokenProvider sessionTokenProvider;
-
-    @Mock
-    private DatasetTokenProvider datasetTokenProvider;
+    private FusionTokenProvider fusionTokenProvider;
 
     @Mock
     private DigestProducer digestProducer;
@@ -667,7 +666,7 @@ class FusionAPIDownloaderTest {
     }
 
     private void givenDatasetBearerToken(String catalog, String dataset, String token) {
-        given(datasetTokenProvider.getDatasetBearerToken(catalog, dataset)).willReturn(token);
+        given(fusionTokenProvider.getDatasetBearerToken(catalog, dataset)).willReturn(token);
     }
 
     private void finallyDeleteFile() {
@@ -738,7 +737,7 @@ class FusionAPIDownloaderTest {
     }
 
     private void givenSessionBearerToken(String token) {
-        given(sessionTokenProvider.getSessionBearerToken()).willReturn(token);
+        given(fusionTokenProvider.getSessionBearerToken()).willReturn(token);
     }
 
     private void givenApiPath(String apiPath) {
@@ -763,12 +762,10 @@ class FusionAPIDownloaderTest {
 
     private void givenFusionApiManager() {
 
-        apiDownloader = FusionAPIDownloader.builder()
+        apiDownloader = FusionAPIDownloadOperations.builder()
                 .httpClient(client)
-                .sessionTokenProvider(sessionTokenProvider)
-                .datasetTokenProvider(datasetTokenProvider)
-                .digestProducer(digestProducer)
-                .downloadThreadPoolSize(Runtime.getRuntime().availableProcessors())
+                .configuration(FusionConfiguration.builder().build())
+                .fusionTokenProvider(fusionTokenProvider)
                 .build();
     }
 
