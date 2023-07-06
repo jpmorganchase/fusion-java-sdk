@@ -170,6 +170,7 @@ class FusionAPIUploadOperationsTest {
 
         // then
         thenMultipartTransferContextStatusShouldBeTransferred();
+        thenMultipartTransferContextStatusShouldSetTotalBytes(27000006L);
     }
 
     @Test
@@ -684,6 +685,12 @@ class FusionAPIUploadOperationsTest {
         assertThat(
                 multipartTransferContext.getStatus(),
                 is(equalTo(MultipartTransferContext.MultipartTransferStatus.TRANSFERRED)));
+    }
+
+    private void thenMultipartTransferContextStatusShouldSetTotalBytes(long expected) {
+        assertThat(
+                multipartTransferContext.getTotalBytes(),
+                is(equalTo(expected)));
     }
 
     @SneakyThrows

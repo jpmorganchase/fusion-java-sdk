@@ -20,14 +20,14 @@ public class MultipartTransferContext {
     MultipartTransferStatus status;
     final List<UploadedPartContext> parts;
     int chunkSize;
-    int totalBytes;
+    long totalBytes;
     int totalPartsCount;
 
     public static MultipartTransferContext started(Operation operation) {
         return new MultipartTransferContext(operation, MultipartTransferStatus.INITIATED, new ArrayList<>(), 0, 0, 0);
     }
 
-    public MultipartTransferContext transferred(int chunkSize, int totalBytes, int totalPartsCount) {
+    public MultipartTransferContext transferred(int chunkSize, long totalBytes, int totalPartsCount) {
         this.parts.sort(Comparator.comparingInt(UploadedPartContext::getPartNo));
         this.status = TRANSFERRED;
         this.chunkSize = chunkSize;
