@@ -45,22 +45,27 @@ public class UploadRequest {
             return this;
         }
 
+        @SuppressWarnings("PIT")
         private UploadRequestBuilder isFromStream(boolean isFromStream) {
             return this;
         }
 
+        @SuppressWarnings("PIT")
         private UploadRequestBuilder isMultiPartUploadCandidate(boolean isMultiPartUploadCandidate) {
             return this;
         }
 
+        @SuppressWarnings("PIT")
         private UploadRequestBuilder size(long size) {
             return this;
         }
 
+        @SuppressWarnings("PIT")
         private UploadRequestBuilder file(File file) {
             return this;
         }
 
+        @SuppressWarnings("PIT")
         private UploadRequestBuilder data(InputStream data) {
             return this;
         }

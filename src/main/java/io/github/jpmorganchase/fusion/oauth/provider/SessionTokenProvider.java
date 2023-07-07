@@ -3,7 +3,9 @@ package io.github.jpmorganchase.fusion.oauth.provider;
 import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
 
 public interface SessionTokenProvider {
-    String getSessionBearerToken();
+    default String getSessionBearerToken() {
+        return null;
+    }
 
-    void updateCredentials(Credentials credentials);
+    default void updateCredentials(Credentials credentials) {}
 }
