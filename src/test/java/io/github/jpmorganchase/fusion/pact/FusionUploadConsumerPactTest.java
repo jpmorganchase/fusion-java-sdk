@@ -9,6 +9,8 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import io.github.jpmorganchase.fusion.Fusion;
+import io.github.jpmorganchase.fusion.FusionConfiguration;
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -108,9 +110,10 @@ public class FusionUploadConsumerPactTest {
 
     private void givenInstanceOfFusionSdk(MockServer mockServer) {
         fusion = Fusion.builder()
-                .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
-                .bearerToken("my-bearer-token")
-                .datasetBearerToken("common", "API_TEST", "my-fusion-bearer")
+                .configuration(FusionConfiguration.builder()
+                        .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
+                        .build())
+                .fusionTokenProvider(new DummyFusionTokenProvider())
                 .build();
     }
 
@@ -123,5 +126,17 @@ public class FusionUploadConsumerPactTest {
         uploadHeaders.put("Content-Length", length);
         uploadHeaders.put("Digest", "SHA-256=" + digest);
         return uploadHeaders;
+    }
+
+    private static class DummyFusionTokenProvider implements FusionTokenProvider {
+        @Override
+        public String getDatasetBearerToken(String catalog, String dataset) {
+            return "my-fusion-bearer";
+        }
+
+        @Override
+        public String getSessionBearerToken() {
+            return "my-bearer-token";
+        }
     }
 }

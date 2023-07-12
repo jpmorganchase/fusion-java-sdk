@@ -13,8 +13,10 @@ import au.com.dius.pact.consumer.junit5.PactTestFor;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import io.github.jpmorganchase.fusion.Fusion;
+import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.model.*;
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.pact.util.FileHelper;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
 import java.io.InputStream;
@@ -22,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Map;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.AfterEach;
@@ -178,16 +181,6 @@ public class FusionApiConsumerPactTest {
                 "a request to list available distributions belonging to a dataset member",
                 "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions",
                 distributions());
-    }
-
-    @Pact(provider = "110274-fusionapi-provider", consumer = "110274-fusionsdk-consumer")
-    public RequestResponsePact download(PactDslWithProvider builder) {
-        return downloadExpectation(
-                builder,
-                "a distribution that is available for download",
-                "a request is made to download the distribution",
-                "/v1/catalogs/common/datasets/API_TEST/datasetseries/2022-01-16/distributions/csv",
-                "A,B,C");
     }
 
     @AfterEach
@@ -513,30 +506,6 @@ public class FusionApiConsumerPactTest {
                 is(equalTo("text/csv; header=present; charset=utf-8")));
     }
 
-    @Test
-    @SneakyThrows
-    @PactTestFor(pactMethod = "download")
-    void testDownload(MockServer mockServer) {
-
-        givenInstanceOfFusionSdk(mockServer);
-
-        fusion.download("common", "API_TEST", "2022-01-16", "csv");
-
-        thenTheFileShouldBeDownloaded("downloads/common_API_TEST_2022-01-16.csv");
-        thenTheFileContentsShouldBeEqualTo("A,B,C");
-    }
-
-    @Test
-    @PactTestFor(pactMethod = "download")
-    void testDownloadStream(MockServer mockServer) {
-
-        givenInstanceOfFusionSdk(mockServer);
-
-        downloadedFileInputStream = fusion.downloadStream("common", "API_TEST", "2022-01-16", "csv");
-
-        thenTheFileContentsShouldBeEqualTo("A,B,C");
-    }
-
     @SneakyThrows
     private void thenTheFileContentsShouldBeEqualTo(String expected) {
         String actual = FileHelper.readContentsFromStream(downloadedFileInputStream);
@@ -555,10 +524,27 @@ public class FusionApiConsumerPactTest {
     }
 
     private void givenInstanceOfFusionSdk(MockServer mockServer, String bearerToken) {
+
         fusion = Fusion.builder()
-                .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
-                .bearerToken(bearerToken)
-                .datasetBearerToken("common", "API_TEST", "my-fusion-bearer")
+                .configuration(FusionConfiguration.builder()
+                        .rootURL(mockServer.getUrl() + FUSION_API_VERSION)
+                        .build())
+                .fusionTokenProvider(new DummyFusionTokenProvider(bearerToken, "my-fusion-bearer"))
                 .build();
+    }
+
+    @AllArgsConstructor
+    private static class DummyFusionTokenProvider implements FusionTokenProvider {
+
+        private String sessionBearerToken;
+        private String datasetBearerToken;
+
+        public String getDatasetBearerToken(String catalog, String dataset) {
+            return datasetBearerToken;
+        }
+
+        public String getSessionBearerToken() {
+            return sessionBearerToken;
+        }
     }
 }

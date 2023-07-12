@@ -2,5 +2,7 @@ package io.github.jpmorganchase.fusion.oauth.provider;
 
 public interface DatasetTokenProvider {
 
-    String getDatasetBearerToken(String catalog, String dataset);
+    default String getDatasetBearerToken(String catalog, String dataset) {
+        return null;
+    }
 }
