@@ -89,10 +89,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
                         Function.identity(),
                         // resolve any duplicate keys, for now just skip the duplicates
                         (r1, r2) -> {
-                            logger.atWarn()
-                                    .setMessage("Duplicate key '{}' found, will be ignored")
-                                    .addArgument(r2.getIdentifier())
-                                    .log();
+                            logger.warn("Duplicate key '{}' found, will be ignored", r2.getIdentifier());
                             return r1;
                         }));
     }
