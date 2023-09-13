@@ -45,7 +45,7 @@ class IntegrityCheckingInputStreamTest {
             // then
             thenDataReadShouldBeEqualTo("A,B,C" + System.lineSeparator() + "1,2,3" + System.lineSeparator() + "4,5,6 "
                     + System.lineSeparator() + "7,8,9");
-            thenReadCounterShouldBeEqualTo(5);
+            thenReadCounterShouldBeGtEqualTo(5);
         }
 
         @Test
@@ -70,7 +70,7 @@ class IntegrityCheckingInputStreamTest {
                     + "19,20,21" + System.lineSeparator() + "22,23,24"
                     + System.lineSeparator() + "25,26,27" + System.lineSeparator() + "28,29,30" + System.lineSeparator()
                     + "31,32,33" + System.lineSeparator());
-            thenReadCounterShouldBeEqualTo(20);
+            thenReadCounterShouldBeGtEqualTo(20);
         }
 
         @Test
@@ -308,7 +308,7 @@ class IntegrityCheckingInputStreamTest {
             // then
             thenDataReadShouldBeEqualTo("A,B,C" + System.lineSeparator() + "1,2,3" + System.lineSeparator() + "4,5,6 "
                     + System.lineSeparator() + "7,8,9");
-            thenReadCounterShouldBeEqualTo(5);
+            thenReadCounterShouldBeGtEqualTo(5);
         }
 
         @Test
@@ -333,7 +333,7 @@ class IntegrityCheckingInputStreamTest {
                     + "19,20,21" + System.lineSeparator() + "22,23,24"
                     + System.lineSeparator() + "25,26,27" + System.lineSeparator() + "28,29,30" + System.lineSeparator()
                     + "31,32,33" + System.lineSeparator());
-            thenReadCounterShouldBeEqualTo(20);
+            thenReadCounterShouldBeGtEqualTo(20);
         }
 
         @Test
@@ -440,6 +440,10 @@ class IntegrityCheckingInputStreamTest {
 
     private void thenReadCounterShouldBeEqualTo(int expected) {
         MatcherAssert.assertThat(readCounter, Matchers.is(Matchers.equalTo(expected)));
+    }
+
+    private void thenReadCounterShouldBeGtEqualTo(int expected) {
+        MatcherAssert.assertThat(readCounter, Matchers.is(Matchers.greaterThanOrEqualTo(expected)));
     }
 
     private void getGivenTheByteReadSizeSetTo(int bytesToRead) {

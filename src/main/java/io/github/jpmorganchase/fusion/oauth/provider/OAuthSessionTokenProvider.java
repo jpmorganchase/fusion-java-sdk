@@ -57,19 +57,11 @@ public class OAuthSessionTokenProvider implements SessionTokenProvider {
     public final synchronized String getSessionBearerToken() {
 
         if (Objects.isNull(bearerToken) || bearerToken.hasTokenExpired(timeProvider.currentTimeMillis())) {
-
             bearerToken = tokenRetriever.retrieve(credentials);
 
             sessionTokenRefreshes++;
-            logger.atInfo()
-                    .setMessage("Token expires at: {}")
-                    // TODO: This wont necessarily be accurate for a non-standard TimeProvider implementation
-                    .addArgument(bearerToken.getPrettyExpiryTime())
-                    .log();
-            logger.atInfo()
-                    .setMessage("Number of token refreshes: {}")
-                    .addArgument(this.sessionTokenRefreshes)
-                    .log();
+            logger.info("Token expires at: {}", bearerToken.getPrettyExpiryTime());
+            logger.info("Number of token refreshes: {}", this.sessionTokenRefreshes);
         }
         return bearerToken.getToken();
     }

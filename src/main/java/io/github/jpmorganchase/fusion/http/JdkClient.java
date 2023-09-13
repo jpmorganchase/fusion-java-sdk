@@ -86,7 +86,7 @@ public class JdkClient implements Client {
                     .headers(connection.getHeaderFields())
                     .statusCode(httpCode)
                     .build();
-            logger.atDebug().setMessage("Response: {}").addArgument(response).log();
+            logger.debug("Response: {}", response);
             return response;
         } finally {
             if (closeConnection) {
@@ -168,11 +168,7 @@ public class JdkClient implements Client {
     }
 
     private void logRequest(HttpURLConnection connection, String method) {
-        logger.atDebug()
-                .setMessage("Executing {} request for URL: {}")
-                .addArgument(method)
-                .addArgument(connection.getURL())
-                .log();
+        logger.debug("Executing {} request for URL: {}", method, connection.getURL());
     }
 
     public static JdkClientBuilder builder() {
