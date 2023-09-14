@@ -16,6 +16,7 @@ public class JdkClient implements Client {
 
     private static final Logger logger =
             LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final String DEFAULT_ERROR = "{\"error\": \"Unable to perform requested action\"}";
     public static final String METHOD_GET = "GET";
     public static final String METHOD_POST = "POST";
     public static final String METHOD_PUT = "PUT";
@@ -134,11 +135,18 @@ public class JdkClient implements Client {
             if (100 <= httpCode && httpCode <= 399) {
                 return connection.getInputStream();
             } else {
-                return connection.getErrorStream();
+                return errorStream(connection);
             }
         } catch (IOException e) {
             throw new ClientException("Failed to get InputStream from response", e);
         }
+    }
+
+    private InputStream errorStream(final HttpURLConnection connection) {
+        if (null == connection.getErrorStream()) {
+            return new ByteArrayInputStream(DEFAULT_ERROR.getBytes(StandardCharsets.UTF_8));
+        }
+        return connection.getErrorStream();
     }
 
     private int executeRequest(HttpURLConnection connection, String httpMethod) {
