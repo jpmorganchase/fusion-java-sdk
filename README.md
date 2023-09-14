@@ -20,7 +20,7 @@ The Fusion SDK is published to Maven Central and can be retrieved from there usi
   <dependency>
     <groupId>io.github.jpmorganchase.fusion</groupId>
     <artifactId>fusion-sdk</artifactId>
-    <version>0.0.6-SNAPSHOT</version>
+    <version>0.0.6</version>
   </dependency>
 ```
 
@@ -56,7 +56,10 @@ When configured in this way, the SDK will retrieve the token from the OAuth serv
 ##### Loading the OAuth configuration from a file
 
 ```java
-Fusion fusion = Fusion.builder().credentialFile(CREDENTIAL_FILE_PATH).build();
+Fusion fusion = Fusion.builder().configuration(FusionConfiguration.builder()
+            .credentialsPath(CREDENTIALS_FILE_PATH)
+            .build())
+        .build();
 ```
 
 This will configure the SDK to retrieve a bearer token from an OAuth server using configuration details stored in a file at the supplied path _CREDENTIAL_FILE_PATH_
@@ -90,7 +93,25 @@ Fusion fusion = Fusion.builder().bearerToken(BEARER_TOKEN).build();
 
 Here _BEARER_TOKEN_ is the String value of a bearer token you have retrieved which provides access to the Fusion API. You can use this mechanism in cases where you already have a means to retrieve the token and would prefer to manage that within your application than having the SDK manage that on your behalf.
 
-Note than when your token has expired, you will need to pass a new token to the Fusion object by calling _updateBearerToken_, passing the new value. 
+Note than when your token has expired, you will need to pass a new token to the Fusion object by calling _updateBearerToken_, passing the new value.
+
+##### Overriding attributes using FusionConfiguration
+
+```java
+Fusion fusion = Fusion.builder().configuration(FusionConfiguration.builder()
+         .build())
+        .build();
+```
+
+* _rootURL_ - Defines the fusion root url to be used with api interactions.  Defaults to "https://fusion-api.jpmorgan.com/fusion/v1/".
+* _credentialsPath_ - Defines the path to the credentials file for auth/authz. Defaults to "config/client_credentials.json".
+* _defaultCatalog_ - Set the default catalog to be used with simplified API calls. Defaults to "common"
+* _downloadPath_ - Configures the path where distributions should be downloaded to. Defaults to "downloads"
+* _singlePartUploadSizeLimit_ - Max size in MB of data allowed for a single part upload.  if 32MB was the max size then 32 would be provided. Defaults to 50.
+* _uploadPartSize_ - Upload part chunk size. If a value such as 8MB is required, then client would set this value to 8.  Defaults to 16MB.
+* _uploadThreadPoolSize_ - Size of Thread-Pool to be used for uploading chunks of a multipart file. Defaults to number of available processors.
+* _downloadThreadPoolSize_ - Size of Thread-Pool to be used for uploading chunks of a multipart file. Defaults to number of available processors.
+* _digestAlgorithm_ - Digest algorithm used by fusion to verify the integrity of upload/downloads. Defaults to SHA-256.
 
 #### Using the SDK
 
