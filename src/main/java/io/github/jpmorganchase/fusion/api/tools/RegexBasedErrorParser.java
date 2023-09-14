@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  */
 public class RegexBasedErrorParser {
     private static final String PATTERN = "\"error\"\\s*:\\s*\"([^\"]+)\"";
-    public static final String UNKNOWN = "unknown";
+    public static final String UNKNOWN = "Unknown";
 
     public static String get(final String json) {
         Pattern regex = Pattern.compile(PATTERN);

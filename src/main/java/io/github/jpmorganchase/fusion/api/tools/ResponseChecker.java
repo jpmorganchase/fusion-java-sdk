@@ -12,7 +12,14 @@ public class ResponseChecker {
      */
     public static <T> void checkResponseStatus(HttpResponse<T> response) throws APICallException {
         if (response.isError()) {
-            throw new APICallException(response.getStatusCode());
+            throw new APICallException(response.getStatusCode(), extractErrorDetailFromBody(response));
         }
+    }
+
+    private static <T> String extractErrorDetailFromBody(final HttpResponse<T> response){
+        if (null != response.getBody()) {
+            return RegexBasedErrorParser.get(response.getBody().toString());
+        }
+        return RegexBasedErrorParser.UNKNOWN;
     }
 }

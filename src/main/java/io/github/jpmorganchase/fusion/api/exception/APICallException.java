@@ -7,10 +7,13 @@ import io.github.jpmorganchase.fusion.FusionException;
  */
 public class APICallException extends FusionException {
 
+    private static final String UNKNOWN = "Unknown";
     private final int responseCode;
+    private final String responseDetail;
 
-    public APICallException(int responseCode) {
+    public APICallException(int responseCode, String responseDetail) {
         this.responseCode = responseCode;
+        this.responseDetail = responseDetail;
     }
 
     /**
@@ -29,6 +32,9 @@ public class APICallException extends FusionException {
 
         String errorMsg;
         switch (this.responseCode) {
+            case 400:
+                errorMsg = getBadRequestMessage();
+                break;
             case 401:
                 errorMsg = "The bearer token is missing or an invalid bearer token was provided";
                 break;
@@ -48,8 +54,16 @@ public class APICallException extends FusionException {
                 errorMsg = "Request timed out. Please try again.";
                 break;
             default:
-                errorMsg = "Unknown";
+                errorMsg = UNKNOWN;
         }
         return errorMsg;
+    }
+
+
+    private String getBadRequestMessage() {
+        if (UNKNOWN.equalsIgnoreCase(responseDetail)){
+            return "Bad Request.  Please verify the correct data has been provided.";
+        }
+        return responseDetail;
     }
 }

@@ -26,13 +26,13 @@ class RegexBasedErrorParserTest {
     public void testJsonWithoutError() {
         String json = "{\"detail\": \"blah\"}";
         String actual = RegexBasedErrorParser.get(json);
-        assertThat(actual, equalTo("unknown"));
+        assertThat(actual, equalTo("Unknown"));
     }
 
     @Test
     public void testJsonWithoutErrorButWithErrorInSentence() {
         String json = "{\"detail\": \"there is an error\"}";
         String actual = RegexBasedErrorParser.get(json);
-        assertThat(actual, equalTo("unknown"));
+        assertThat(actual, equalTo("Unknown"));
     }
 }
