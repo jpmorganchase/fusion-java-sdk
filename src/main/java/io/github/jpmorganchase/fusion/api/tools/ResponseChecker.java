@@ -16,7 +16,7 @@ public class ResponseChecker {
         }
     }
 
-    private static <T> String extractErrorDetailFromBody(final HttpResponse<T> response){
+    private static <T> String extractErrorDetailFromBody(final HttpResponse<T> response) {
         if (null != response.getBody()) {
             return RegexBasedErrorParser.get(response.getBody().toString());
         }
