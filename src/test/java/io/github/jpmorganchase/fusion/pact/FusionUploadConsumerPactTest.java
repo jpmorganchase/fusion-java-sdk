@@ -1,6 +1,6 @@
 package io.github.jpmorganchase.fusion.pact;
 
-import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.*;
+import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.uploadExpectation;
 
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;

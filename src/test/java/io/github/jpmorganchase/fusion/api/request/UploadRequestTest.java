@@ -1,6 +1,6 @@
 package io.github.jpmorganchase.fusion.api.request;
 
-import java.io.*;
+import java.io.InputStream;
 import java.net.URL;
 import lombok.SneakyThrows;
 import org.hamcrest.MatcherAssert;

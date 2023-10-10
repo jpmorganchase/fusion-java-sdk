@@ -3,7 +3,7 @@ package io.github.jpmorganchase.fusion.api.operations;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.mockito.stubbing.OngoingStubbing;
 
 @SuppressWarnings("ALL")
 @ExtendWith(MockitoExtension.class)
@@ -79,6 +80,8 @@ class FusionAPIDownloadOperationsTest {
 
     private GetPartResponse getPartResponse;
 
+    OngoingStubbing<HttpResponse<InputStream>> httpResponseStub;
+
     @AfterEach
     void cleanUp() {
         finallyDeleteFile();
@@ -101,7 +104,8 @@ class FusionAPIDownloadOperationsTest {
         givenResponseHeader("Content-Type", "text/csv");
         givenResponseHeader("Content-Disposition", "attachment; filename=test-testFile.csv");
         givenCallToClientToGetHeadReturns("version-123", null, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=", "5");
-        givenCallToClientToGetInputStreamIsSuccessfully();
+        givenCallForSinglePartReturns(
+                "A,B,C\n1,2,3", "version-123", "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=", "5");
 
         // when
         whenFusionApiManagerIsCalledToDownloadFileToPath();
@@ -176,15 +180,15 @@ class FusionAPIDownloadOperationsTest {
 
         givenCallToClientToGetHeadReturns("a1", "5", "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", "23");
 
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "A,B,C", "1", "a1", "KPD9WTOuUoQrDwpugLaHblJS+OdUnXaML3YWXla28Rg=", "4", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "\r1,2,", "2", "a1", "KyQR+rbMkYVdfMHW+tHYfTOmpszv9gHWVn1Ec9yj7lA=", "4", "23", "bytes 5-9/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "3\r4,5", "3", "a1", "qMnQo29rnj1iA37dWzSBFCKSctoJe8AX5mgmexxvh4A=", "4", "23", "bytes 10-14/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 ",6\r7,", "4", "a1", "RjKiTp8KSSXM64sjp5uHtPXF/uwjh8VNVaCvgDAwrkA=", "4", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "8,9", "5", "a1", "GI3Dn4384xRI1aZfvWIpkSDzDQbYwKaK4yCy3oBZm/U=", "4", "23", "bytes 20-23/23");
         givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
 
@@ -235,14 +239,14 @@ class FusionAPIDownloadOperationsTest {
 
         givenCallToClientToGetHeadReturns("a1", "5", "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", "23");
 
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "A,B,C", "1", "a1", "KPD9WTOuUoQrDwpugLaHblJS+OdUnXaML3YWXla28Rg=", "4", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "\r1,2,", "2", "a1", "KyQR+rbMkYVdfMHW+tHYfTOmpszv9gHWVn1Ec9yj7lA=", "4", "23", "bytes 5-9/23");
         givenCallToClientToGetPartFails("3", 504);
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 ",6\r7,", "4", "a1", "RjKiTp8KSSXM64sjp5uHtPXF/uwjh8VNVaCvgDAwrkA=", "4", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "8,9", "5", "a1", "GI3Dn4384xRI1aZfvWIpkSDzDQbYwKaK4yCy3oBZm/U=", "4", "23", "bytes 20-23/23");
         givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
 
@@ -269,11 +273,11 @@ class FusionAPIDownloadOperationsTest {
 
         givenCallToClientToGetHeadReturns("a1", "5", "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", "23");
 
-        givenCallToClientToGetPartReturns("A,B,C", "1", "a1", "c1", "4", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartReturns("\r1,2,", "2", "a1", "c2", "4", "23", "bytes 5-9/23");
-        givenCallToClientToGetPartReturns("3\r4,5", "3", "a1", "c3", "4", "23", "bytes -1-14/23");
-        givenCallToClientToGetPartReturns(",6\r7,", "4", "a1", "c4", "4", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns("8,9", "5", "a1", "c5", "4", "23", "bytes 20-23/23");
+        givenCallToPartFetcher("A,B,C", "1", "a1", "c1", "4", "23", "bytes 0-4/23");
+        givenCallToPartFetcher("\r1,2,", "2", "a1", "c2", "4", "23", "bytes 5-9/23");
+        givenCallToPartFetcher("3\r4,5", "3", "a1", "c3", "4", "23", "bytes -1-14/23");
+        givenCallToPartFetcher(",6\r7,", "4", "a1", "c4", "4", "23", "bytes 15-19/23");
+        givenCallToPartFetcher("8,9", "5", "a1", "c5", "4", "23", "bytes 20-23/23");
         givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
 
         // When
@@ -307,7 +311,9 @@ class FusionAPIDownloadOperationsTest {
         givenResponseHeader("Content-Type", "text/csv");
         givenResponseHeader("Content-Disposition", "attachment; filename=test-testFile.csv");
         givenCallToClientToGetHeadReturns("version-123", null, "U9Wqny3Wh4uvBG7jlJ249WgvG/A+Ue2C+iQ7P8r22G8=", "5");
-        givenCallToClientToGetInputStreamIsSuccessfully();
+
+        givenCallForSinglePartReturns(
+                "A,B,C\n1,2,3", "version-123", "U9Wqny3Wh4uvBG7jlJ249WgvG/A+Ue2C+iQ7P8r22G8=", "5");
 
         // when
         whenApiIsCalledToDownloadFileAsStream();
@@ -357,15 +363,15 @@ class FusionAPIDownloadOperationsTest {
         givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
 
         givenCallToClientToGetHeadReturns("a1", "5", "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", "23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "A,B,C", "1", "a1", "KPD9WTOuUoQrDwpugLaHblJS+OdUnXaML3YWXla28Rg=", "4", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "\r1,2,", "2", "a1", "KyQR+rbMkYVdfMHW+tHYfTOmpszv9gHWVn1Ec9yj7lA=", "4", "23", "bytes 5-9/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "3\r4,5", "3", "a1", "qMnQo29rnj1iA37dWzSBFCKSctoJe8AX5mgmexxvh4A=", "4", "23", "bytes 10-14/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 ",6\r7,", "4", "a1", "RjKiTp8KSSXM64sjp5uHtPXF/uwjh8VNVaCvgDAwrkA=", "4", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "8,9", "5", "a1", "GI3Dn4384xRI1aZfvWIpkSDzDQbYwKaK4yCy3oBZm/U=", "4", "23", "bytes 20-23/23");
         givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
 
@@ -374,36 +380,6 @@ class FusionAPIDownloadOperationsTest {
 
         // then
         thenTheDownloadBodyShouldMatchExpected();
-    }
-
-    @Test
-    void multiPartDownloadToStreamFailsToGetPart() throws Exception {
-        // given
-        givenFusionApiManager();
-        givenApiPath(
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
-        givenCatalog("common");
-        givenDataset("API_TEST");
-        givenFolder("downloads");
-        givenFilePath("common-API_TEST-20230319.csv");
-        givenSessionBearerToken("my-token");
-        givenDatasetBearerToken("common", "API_TEST", "dataset-token");
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
-
-        givenCallToClientToGetHeadReturns("a1", "5", "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", "23");
-        givenCallToClientToGetPartReturns("A,B,C", "1", "a1", "c1", "4", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartFails("2", 400);
-        givenCallToClientToGetPartReturns("3\r4,5", "3", "a1", "c3", "4", "23", "bytes 10-14/23");
-        givenCallToClientToGetPartReturns(",6\r7,", "4", "a1", "c4", "4", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns("8,9", "5", "a1", "c5", "4", "23", "bytes 20-23/23");
-        givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
-
-        // When
-        whenApiIsCalledToDownloadFileAsStreamFailsWith(APICallException.class);
-
-        // then
-        thenAPICallExceptionShouldMatch(400);
     }
 
     @Test
@@ -431,33 +407,6 @@ class FusionAPIDownloadOperationsTest {
     }
 
     @Test
-    void successfulCallToGetPartHead() {
-
-        // given
-        givenFusionApiManager();
-        givenApiPath(
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
-        givenCatalog("common");
-        givenDataset("API_TEST");
-        givenFolder("downloads");
-        givenFilePath("common-API_TEST-20230319.csv");
-        givenSessionBearerToken("my-token");
-        givenDatasetBearerToken("common", "API_TEST", "dataset-token");
-        givenRequestHeader("Authorization", "Bearer my-token");
-        givenRequestHeader("Fusion-Authorization", "Bearer dataset-token");
-        givenDownloadRequest(false);
-
-        givenCallToClientToGetPartReturns("A,B,C", "2", "a1", "c1", "3", "17", "bytes 10-15/17");
-
-        // when
-        whenFusionApiDownloaderIsCalledToGetPart(2);
-
-        // then
-        thenContentShouldEqual("A,B,C".getBytes());
-        thenStartPosShouldEqual(10L);
-    }
-
-    @Test
     void successfulCallToPerformMultiPartDownload() throws Exception {
         // given
         givenFusionApiManager();
@@ -474,15 +423,15 @@ class FusionAPIDownloadOperationsTest {
         givenDownloadRequest(false);
         givenHead("a1", "c", 23L, 5);
 
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "A,B,C", "1", "a1", "KPD9WTOuUoQrDwpugLaHblJS+OdUnXaML3YWXla28Rg=", "4", "23", "bytes 0-4/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "\r1,2,", "2", "a1", "KyQR+rbMkYVdfMHW+tHYfTOmpszv9gHWVn1Ec9yj7lA=", "4", "23", "bytes 5-9/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "3\r4,5", "3", "a1", "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=", "4", "23", "bytes 10-14/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 ",6\r7,", "4", "a1", "RjKiTp8KSSXM64sjp5uHtPXF/uwjh8VNVaCvgDAwrkA=", "4", "23", "bytes 15-19/23");
-        givenCallToClientToGetPartReturns(
+        givenCallToPartFetcher(
                 "8,9", "5", "a1", "GI3Dn4384xRI1aZfvWIpkSDzDQbYwKaK4yCy3oBZm/U=", "4", "23", "bytes 20-23/23");
         givenDownloadBody("A,B,C\r1,2,3\r4,5,6\r7,8,9");
 
@@ -513,7 +462,7 @@ class FusionAPIDownloadOperationsTest {
                 .build();
     }
 
-    private void givenCallToClientToGetPartReturns(
+    private void givenCallToPartFetcher(
             String content,
             String partNumber,
             String version,
@@ -587,10 +536,6 @@ class FusionAPIDownloadOperationsTest {
         }
 
         assertThat(actual.toByteArray(), is(equalTo(expected)));
-    }
-
-    private void whenFusionApiDownloaderIsCalledToGetPart(int partNumber) {
-        getPartResponse = apiDownloader.callToAPIToGetPart(downloadRequest, partNumber);
     }
 
     private void givenDownloadRequest(boolean isDownloadToStream) {
@@ -728,6 +673,21 @@ class FusionAPIDownloadOperationsTest {
                 .build();
 
         when(client.getInputStream(apiPath, requestHeaders)).thenReturn(expectedHttpResponse);
+    }
+
+    private void givenCallForSinglePartReturns(String content, String version, String checksum, String contentLength) {
+
+        Map<String, List<String>> responseHeaders = new HashMap<>();
+        givenResponseHeader(responseHeaders, "x-jpmc-version-id", version);
+        givenResponseHeader(responseHeaders, "x-jpmc-checksum-sha256", checksum);
+        givenResponseHeader(responseHeaders, "Content-Length", contentLength);
+
+        when(client.getInputStream(eq(apiPath), eq(requestHeaders)))
+                .thenReturn(HttpResponse.<InputStream>builder()
+                        .statusCode(200)
+                        .headers(responseHeaders)
+                        .body(new ByteArrayInputStream(content.getBytes()))
+                        .build());
     }
 
     private void givenCallToClientToGetInputStreamFails(int status) {
