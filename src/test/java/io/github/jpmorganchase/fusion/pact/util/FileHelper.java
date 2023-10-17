@@ -1,6 +1,9 @@
 package io.github.jpmorganchase.fusion.pact.util;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 public class FileHelper {

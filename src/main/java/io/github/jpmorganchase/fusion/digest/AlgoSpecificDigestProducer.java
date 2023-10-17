@@ -1,7 +1,9 @@
 package io.github.jpmorganchase.fusion.digest;
 
 import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
