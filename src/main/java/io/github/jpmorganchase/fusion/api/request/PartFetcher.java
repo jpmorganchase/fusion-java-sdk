@@ -33,7 +33,7 @@ public class PartFetcher {
      * If optional {@link Head} is not specified, the {@link Head} from the response will be
      * returned.  For single part downloads, {@link Head} should always be specified in the {@link} PartRequest to
      * ensure the correct checksum is used to verify the download.
-     * </p>
+     * <p>
      * To simply return the head object of a download, part number should be provided as 0.
      *
      * @param pr - {@link PartRequest}
