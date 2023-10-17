@@ -25,26 +25,38 @@ class CallablePartTest {
 
     GetPartResponse expected;
 
+    DownloadRequest dr;
+
     InputStream actual;
 
     @Test
     public void testInvokesFetcher() {
 
         // Given
-        givenCallablePart("foo/bar/1");
+        givenDownloadRequest("/foo/bar/1", "foo", "bar");
+        givenCallablePart(1);
         givenExpectedResponse("foobar", "foo-checksum-bar");
-        givenExpectedCallToPartFetcher("foo/bar/1");
+        givenExpectedCallToPartFetcher(1);
 
         // When
         whenCallablePartCallMethodIsInvoked();
 
         // Then
         thenGetPartResponseShouldMatchExpected();
-        thenPartFetcherShouldHaveBeenCalledOnce("foo/bar/1");
+        thenPartFetcherShouldHaveBeenCalledOnce(1);
     }
 
-    private void thenPartFetcherShouldHaveBeenCalledOnce(String path) {
-        Mockito.verify(fetcher, times(1)).fetch(path);
+    private void givenDownloadRequest(String path, String catalog, String dataset) {
+        dr = DownloadRequest.builder()
+                .apiPath(path)
+                .catalog(catalog)
+                .dataset(dataset)
+                .build();
+    }
+
+    private void thenPartFetcherShouldHaveBeenCalledOnce(int partNo) {
+        Mockito.verify(fetcher, times(1))
+                .fetch(PartRequest.builder().partNo(partNo).downloadRequest(dr).build());
     }
 
     private void thenGetPartResponseShouldMatchExpected() {
@@ -55,8 +67,10 @@ class CallablePartTest {
         actual = testee.call();
     }
 
-    private void givenExpectedCallToPartFetcher(String path) {
-        Mockito.when(fetcher.fetch(path)).thenReturn(expected);
+    private void givenExpectedCallToPartFetcher(int partNo) {
+        Mockito.when(fetcher.fetch(
+                        PartRequest.builder().partNo(partNo).downloadRequest(dr).build()))
+                .thenReturn(expected);
     }
 
     private void givenExpectedResponse(String data, String checksum) {
@@ -66,7 +80,11 @@ class CallablePartTest {
                 .build();
     }
 
-    private void givenCallablePart(String path) {
-        testee = CallablePart.builder().path(path).partFetcher(fetcher).build();
+    private void givenCallablePart(int partNo) {
+        testee = CallablePart.builder()
+                .partNo(partNo)
+                .downloadRequest(dr)
+                .partFetcher(fetcher)
+                .build();
     }
 }

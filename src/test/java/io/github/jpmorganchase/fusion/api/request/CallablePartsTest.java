@@ -34,8 +34,8 @@ class CallablePartsTest {
     public void testFutureIsReturned() throws Exception {
 
         // Given
-        givenPart("foo/bar/1");
-        givenPart("foo/bar/3");
+        givenPart(1);
+        givenPart(2);
         givenCallToExecutorForPartReturns(0, "foobar1");
         givenCallToExecutorForPartReturns(1, "foobar2");
         givenCallablePartsIsConstructed();
@@ -75,8 +75,8 @@ class CallablePartsTest {
         expected.add(idx, is);
     }
 
-    private void givenPart(String path) {
-        CallablePart cp1 = CallablePart.builder().path(path).build();
+    private void givenPart(int partNumber) {
+        CallablePart cp1 = CallablePart.builder().partNo(partNumber).build();
         callableParts.add(cp1);
     }
 }

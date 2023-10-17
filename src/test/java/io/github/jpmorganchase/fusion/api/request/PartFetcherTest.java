@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
+import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
@@ -36,9 +37,13 @@ class PartFetcherTest {
 
     DownloadRequest dr;
 
+    PartRequest pr;
+
     PartFetcher testee;
 
     GetPartResponse actual;
+
+    Map<String, List<String>> responseHeaders = new HashMap<>();
 
     HttpResponse<InputStream> httpResponse;
     HttpResponse badResponse;
@@ -46,18 +51,68 @@ class PartFetcherTest {
     APICallException exception;
 
     @Test
-    public void testFetchReturnsStreamAsExpected() throws Exception {
+    public void testFetchPartForSinglePartDownload() throws Exception {
 
         // Given
-        givenDownloadRequest("foo", "bar");
         givenPartFetcher();
+        givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
+        givenPartRequestForSinglePartDownload("Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=");
         givenCallToGetSessionBearerReturns("session-token");
         givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
-        givenCallToGetInputStreamReturnsSuccess(
-                "data", "Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=", "foo/bar/1", "session-token", "dataset-token");
+        givenSinglePartResponseHeaders("3");
+        givenCallToGetInputStreamForSinglePartDownload(
+                "data", "http://foobar.com/v1/some/resource", "session-token", "dataset-token");
 
         // when
-        whenFetchIsInvoked("foo/bar/1");
+        whenFetchIsInvoked();
+
+        // Then
+        thenStreamShouldBeAsExpected();
+        thenStreamDataShouldBeAsExpected("data");
+        thenChecksumInHeadShouldBeAsExpected("Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=");
+    }
+
+    @Test
+    public void testFetchPartForMultipartDownload() throws Exception {
+
+        // Given
+        givenPartFetcher();
+        givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
+        givenPartRequestForMultiPartDownload(2);
+        givenCallToGetSessionBearerReturns("session-token");
+        givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
+        givenResponseHeadersForMultipart(
+                "version-1", "Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=", "5", "23", "bytes 0-4/23");
+        givenCallToGetInputStreamReturnsSuccess(
+                "data",
+                "http://foobar.com/v1/some/resource/operationType/download?downloadPartNumber=2",
+                "session-token",
+                "dataset-token");
+
+        // when
+        whenFetchIsInvoked();
+
+        // Then
+        thenStreamShouldBeAsExpected();
+        thenStreamDataShouldBeAsExpected("data");
+        thenChecksumInHeadShouldBeAsExpected("Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=");
+    }
+
+    @Test
+    public void testFetchPartForHead() throws Exception {
+
+        // Given
+        givenPartFetcher();
+        givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
+        givenPartRequestForHead();
+        givenCallToGetSessionBearerReturns("session-token");
+        givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
+        givenResponseHeadersForHead("version-1", "Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=", "5", "23");
+        givenCallToGetInputStreamReturnsSuccess(
+                "data", "http://foobar.com/v1/some/resource/operationType/download", "session-token", "dataset-token");
+
+        // when
+        whenFetchIsInvoked();
 
         // Then
         thenStreamShouldBeAsExpected();
@@ -69,17 +124,38 @@ class PartFetcherTest {
     public void testFetchThrowsExceptionWhenHttpResponseInError() {
 
         // Given
-        givenDownloadRequest("foo", "bar");
         givenPartFetcher();
+        givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
+        givenPartRequestForMultiPartDownload(2);
         givenCallToGetSessionBearerReturns("session-token");
         givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
-        givenCallToGetInputStreamReturnsFailure("bad-data", "foo/bar/1", "session-token", "dataset-token");
+        givenCallToGetInputStreamReturnsFailure(
+                "bad-data",
+                "http://foobar.com/v1/some/resource/operationType/download?downloadPartNumber=2",
+                "session-token",
+                "dataset-token");
 
         // when
-        whenFetchIsInvokedWithException("foo/bar/1");
+        whenFetchIsInvokedWithException();
 
         // Then
         thenTheExceptionShouldBeAsExpected("bad-data", 400);
+    }
+
+    private void givenPartRequestForSinglePartDownload(String checksum) {
+        pr = PartRequest.builder()
+                .partNo(1)
+                .downloadRequest(dr)
+                .head(Head.builder().checksum(checksum).build())
+                .build();
+    }
+
+    private void givenPartRequestForMultiPartDownload(int partNo) {
+        pr = PartRequest.builder().partNo(partNo).downloadRequest(dr).build();
+    }
+
+    private void givenPartRequestForHead() {
+        pr = PartRequest.builder().partNo(0).downloadRequest(dr).build();
     }
 
     private void thenChecksumInHeadShouldBeAsExpected(String checksum) {
@@ -102,19 +178,32 @@ class PartFetcherTest {
         assertThat(this.actual.getContent(), instanceOf(IntegrityCheckingInputStream.class));
     }
 
-    private void whenFetchIsInvoked(String path) {
-        actual = testee.fetch(path);
+    private void whenFetchIsInvoked() {
+        actual = testee.fetch(pr);
     }
 
-    private void whenFetchIsInvokedWithException(String path) {
-        exception = Assertions.assertThrows(APICallException.class, () -> testee.fetch(path));
+    private void whenFetchIsInvokedWithException() {
+        exception = Assertions.assertThrows(APICallException.class, () -> testee.fetch(pr));
     }
 
     private void givenCallToGetInputStreamReturnsSuccess(
-            String data, String checksum, String path, String sessionToken, String datasetToken) {
+            String data, String path, String sessionToken, String datasetToken) {
 
         Map<String, String> requestHeaders = givenRequestHeaders(sessionToken, datasetToken);
-        Map<String, List<String>> responseHeaders = givenResponseHeaders(checksum);
+
+        httpResponse = HttpResponse.<InputStream>builder()
+                .body(new ByteArrayInputStream(data.getBytes()))
+                .headers(responseHeaders)
+                .statusCode(200)
+                .build();
+
+        Mockito.when(client.getInputStream(path, requestHeaders)).thenReturn(httpResponse);
+    }
+
+    private void givenCallToGetInputStreamForSinglePartDownload(
+            String data, String path, String sessionToken, String datasetToken) {
+
+        Map<String, String> requestHeaders = givenRequestHeaders(sessionToken, datasetToken);
 
         httpResponse = HttpResponse.<InputStream>builder()
                 .body(new ByteArrayInputStream(data.getBytes()))
@@ -138,13 +227,30 @@ class PartFetcherTest {
         Mockito.when(client.getInputStream(path, requestHeaders)).thenReturn(badResponse);
     }
 
-    @NotNull
-    private static Map<String, List<String>> givenResponseHeaders(String checksum) {
-        Map<String, List<String>> responseHeaders = new HashMap<>();
-        List<String> checksumValues = new ArrayList<>();
-        checksumValues.add(checksum);
-        responseHeaders.put("x-jpmc-checksum-sha256", checksumValues);
-        return responseHeaders;
+    private void givenResponseHeadersForHead(String version, String checksum, String partCount, String contentLength) {
+        addResponseHeader("x-jpmc-version-id", version);
+        addResponseHeader("x-jpmc-checksum-sha256", checksum);
+        addResponseHeader("x-jpmc-mp-parts-count", partCount);
+        addResponseHeader("Content-Length", contentLength);
+    }
+
+    private void givenResponseHeadersForMultipart(
+            String version, String checksum, String partCount, String contentLength, String contentRange) {
+        addResponseHeader("x-jpmc-version-id", version);
+        addResponseHeader("x-jpmc-checksum-sha256", checksum);
+        addResponseHeader("x-jpmc-mp-parts-count", partCount);
+        addResponseHeader("Content-Length", contentLength);
+        addResponseHeader("Content-Range", contentRange);
+    }
+
+    private void givenSinglePartResponseHeaders(String contentLength) {
+        addResponseHeader("Content-Length", contentLength);
+    }
+
+    private void addResponseHeader(String key, String value) {
+        List<String> values = new ArrayList<>();
+        values.add(value);
+        responseHeaders.put(key, values);
     }
 
     @NotNull
@@ -164,14 +270,14 @@ class PartFetcherTest {
     }
 
     private void givenPartFetcher() {
-        testee = PartFetcher.builder()
-                .client(client)
-                .credentials(credentials)
-                .request(dr)
-                .build();
+        testee = PartFetcher.builder().client(client).credentials(credentials).build();
     }
 
-    private void givenDownloadRequest(String catalog, String dataset) {
-        dr = DownloadRequest.builder().catalog(catalog).dataset(dataset).build();
+    private void givenDownloadRequest(String catalog, String dataset, String apiPath) {
+        dr = DownloadRequest.builder()
+                .catalog(catalog)
+                .dataset(dataset)
+                .apiPath(apiPath)
+                .build();
     }
 }

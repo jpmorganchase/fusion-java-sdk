@@ -11,12 +11,18 @@ import lombok.extern.slf4j.Slf4j;
 @ToString
 public class CallablePart implements Callable<InputStream> {
 
-    String path;
+    int partNo;
+    DownloadRequest downloadRequest;
     PartFetcher partFetcher;
 
     @Override
     public InputStream call() {
-        log.info("Preparing to make a call to download part from path {}", path);
-        return partFetcher.fetch(path).getContent();
+        log.info("Preparing to make a call to download part {} for download request {}", partNo, downloadRequest);
+        return partFetcher
+                .fetch(PartRequest.builder()
+                        .partNo(partNo)
+                        .downloadRequest(downloadRequest)
+                        .build())
+                .getContent();
     }
 }
