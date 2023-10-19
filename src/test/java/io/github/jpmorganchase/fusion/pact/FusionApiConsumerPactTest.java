@@ -1,7 +1,8 @@
 package io.github.jpmorganchase.fusion.pact;
 
 import static io.github.jpmorganchase.fusion.pact.util.BodyBuilders.*;
-import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.*;
+import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.failedGetExpectation;
+import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.getExpectation;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;

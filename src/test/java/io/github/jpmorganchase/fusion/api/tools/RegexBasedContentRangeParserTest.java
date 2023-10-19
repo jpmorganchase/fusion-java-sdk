@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.api.tools;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.github.jpmorganchase.fusion.api.response.ContentRange;
 import org.junit.jupiter.api.Test;

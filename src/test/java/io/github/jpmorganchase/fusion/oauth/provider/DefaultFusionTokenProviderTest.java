@@ -1,6 +1,6 @@
 package io.github.jpmorganchase.fusion.oauth.provider;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import io.github.jpmorganchase.fusion.oauth.credential.Credentials;

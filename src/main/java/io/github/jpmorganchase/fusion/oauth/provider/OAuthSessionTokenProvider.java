@@ -1,6 +1,6 @@
 package io.github.jpmorganchase.fusion.oauth.provider;
 
-import static io.github.jpmorganchase.fusion.oauth.credential.Credentials.CredentialType.*;
+import static io.github.jpmorganchase.fusion.oauth.credential.Credentials.CredentialType.BEARER;
 
 import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.http.Client;

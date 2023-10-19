@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion;
 
-import io.github.jpmorganchase.fusion.api.*;
+import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.api.FusionAPIManager;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
@@ -8,9 +9,13 @@ import io.github.jpmorganchase.fusion.api.exception.FileUploadException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.JdkClient;
 import io.github.jpmorganchase.fusion.model.*;
-import io.github.jpmorganchase.fusion.oauth.credential.*;
+import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
+import io.github.jpmorganchase.fusion.oauth.credential.Credentials;
+import io.github.jpmorganchase.fusion.oauth.credential.OAuthPasswordBasedCredentials;
+import io.github.jpmorganchase.fusion.oauth.credential.OAuthSecretBasedCredentials;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
-import io.github.jpmorganchase.fusion.oauth.provider.*;
+import io.github.jpmorganchase.fusion.oauth.provider.DefaultFusionTokenProvider;
+import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;

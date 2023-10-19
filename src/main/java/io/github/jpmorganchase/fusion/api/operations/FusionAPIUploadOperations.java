@@ -1,6 +1,6 @@
 package io.github.jpmorganchase.fusion.api.operations;
 
-import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.*;
+import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
 
 import com.google.gson.GsonBuilder;
 import io.github.jpmorganchase.fusion.FusionConfiguration;
@@ -26,7 +26,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -1,23 +1,19 @@
 package io.github.jpmorganchase.fusion.api.operations;
 
-import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
-
 import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.FusionException;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
-import io.github.jpmorganchase.fusion.api.request.DownloadRequest;
+import io.github.jpmorganchase.fusion.api.request.*;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
-import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
+import io.github.jpmorganchase.fusion.api.stream.DeferredMultiPartInputStream;
 import io.github.jpmorganchase.fusion.http.Client;
-import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +30,9 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
     private static final String DOWNLOAD_FAILED_EXCEPTION_MSG =
             "Problem encountered attempting to download distribution";
 
-    private static final String HEAD_PATH = "%s/operationType/download";
-    private static final String HEAD_PATH_FOR_PART = "%s?downloadPartNumber=%d";
-
     private static final String FILE_RW_MODE = "rw";
 
-    private final Client httpClient;
-    private final FusionTokenProvider fusionTokenProvider;
+    private PartFetcher partFetcher;
 
     /**
      * Size of Thread-Pool to be used for uploading chunks of a multipart file
@@ -112,6 +104,7 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
     protected void performMultiPartDownloadToFile(DownloadRequest dr, Head head) {
 
         ExecutorService executor = getExecutor();
+
         try (RandomAccessFile raf = new RandomAccessFile(dr.getFilePath(), FILE_RW_MODE)) {
 
             raf.setLength(head.getContentLength());
@@ -121,7 +114,10 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
                 final int part = p;
                 futures.add(CompletableFuture.runAsync(
                         () -> {
-                            GetPartResponse getPartResponse = callToAPIToGetPart(dr, part);
+                            GetPartResponse getPartResponse = partFetcher.fetch(PartRequest.builder()
+                                    .partNo(part)
+                                    .downloadRequest(dr)
+                                    .build());
                             writePartToFile(getPartResponse, raf);
                         },
                         executor));
@@ -135,13 +131,13 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
         } finally {
             executor.shutdown();
         }
+        log.info("Distribution downloaded to file {}", dr.getFilePath());
     }
 
     private void writePartToFile(GetPartResponse gpr, RandomAccessFile raf) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (InputStream input =
-                IntegrityCheckingInputStream.builder().part(gpr).build()) {
+        try (InputStream input = gpr.getContent()) {
 
             byte[] buffer = new byte[8192];
             int bytesRead;
@@ -159,25 +155,7 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
         }
     }
 
-    protected GetPartResponse callToAPIToGetPart(DownloadRequest dr, int partNumber) {
-
-        String getPartPath = getPathForHeadAndGet(dr, partNumber);
-
-        Map<String, String> requestHeaders = new HashMap<>();
-        setSecurityHeaders(dr, requestHeaders);
-
-        HttpResponse<InputStream> response = httpClient.getInputStream(getPartPath, requestHeaders);
-
-        checkResponseStatus(response);
-
-        return GetPartResponse.builder()
-                .content(response.getBody())
-                .head(Head.builder().fromHeaders(response.getHeaders()).build())
-                .build();
-    }
-
     public void performSinglePartDownloadToFile(DownloadRequest dr, Head head) throws APICallException {
-
         try (InputStream input = performSinglePartDownloadToStream(dr, head)) {
             try (FileOutputStream fileOutput = new FileOutputStream(dr.getFilePath())) {
                 byte[] buf = new byte[8192];
@@ -189,6 +167,7 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
         } catch (IOException e) {
             throw new FileDownloadException(WRITE_TO_FILE_EXCEPTION_MSG, e);
         }
+        log.info("Distribution downloaded to file {}", dr.getFilePath());
     }
 
     protected InputStream downloadToStream(DownloadRequest dr) {
@@ -200,75 +179,42 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
         }
     }
 
+    private Head callAPIToGetHead(DownloadRequest dr) {
+        return partFetcher
+                .fetch(PartRequest.builder().partNo(0).downloadRequest(dr).build())
+                .getHead();
+    }
+
     protected InputStream performMultiPartDownloadToStream(DownloadRequest dr, Head head) {
 
-        ExecutorService executor = getExecutor();
-        List<CompletableFuture<GetPartResponse>> futures = new ArrayList<>();
-
+        LinkedList<CallablePart> parts = new LinkedList<>();
         try {
 
             for (int p = 1; p <= head.getPartCount(); p++) {
-                final int part = p;
-                futures.add(CompletableFuture.supplyAsync(() -> callToAPIToGetPart(dr, part), executor));
+                parts.add(CallablePart.builder()
+                        .partNo(p)
+                        .partFetcher(partFetcher)
+                        .downloadRequest(dr)
+                        .build());
             }
 
-            List<GetPartResponse> parts = futures.stream()
-                    .map(CompletableFuture::join)
-                    .sorted(Comparator.comparingInt(gpr -> gpr.getHead().getPartCount()))
-                    .collect(Collectors.toList());
+            return DeferredMultiPartInputStream.builder()
+                    .parts(CallableParts.builder().parts(parts).build())
+                    .build();
 
-            return IntegrityCheckingInputStream.builder().parts(parts).build();
-
-        } catch (CompletionException | CancellationException | IOException e) {
+        } catch (IOException e) {
             throw handleExceptionThrownWhenAttemptingToGetParts(e);
-        } finally {
-            executor.shutdown();
         }
     }
 
     public InputStream performSinglePartDownloadToStream(DownloadRequest dr, Head head) throws APICallException {
-        Map<String, String> requestHeaders = new HashMap<>();
-        setSecurityHeaders(dr, requestHeaders);
-
-        HttpResponse<InputStream> response = httpClient.getInputStream(dr.getApiPath(), requestHeaders);
-
-        checkResponseStatus(response);
-        try {
-            return IntegrityCheckingInputStream.builder()
-                    .part(GetPartResponse.builder()
-                            .content(response.getBody())
-                            .head(head)
-                            .build())
-                    .build();
-        } catch (IOException ex) {
-            throw handleExceptionThrownWhenAttemptingToGetParts(ex);
-        }
-    }
-
-    /**
-     * Returns the Head object representing the entire file
-     *
-     * @param dr {@link DownloadRequest}
-     * @return {@link Head} object describing the file
-     */
-    protected Head callAPIToGetHead(DownloadRequest dr) {
-        String headPath = getPathForHeadAndGet(dr, 0);
-
-        Map<String, String> requestHeaders = new HashMap<>();
-        setSecurityHeaders(dr, requestHeaders);
-
-        HttpResponse<InputStream> headResponse = httpClient.getInputStream(headPath, requestHeaders);
-        checkResponseStatus(headResponse);
-
-        return Head.builder().fromHeaders(headResponse.getHeaders()).build();
-    }
-
-    private String getPathForHeadAndGet(DownloadRequest dr, int partNumber) {
-        String headPath = String.format(HEAD_PATH, dr.getApiPath());
-        if (partNumber > 0) {
-            headPath = String.format(HEAD_PATH_FOR_PART, headPath, partNumber);
-        }
-        return headPath;
+        return partFetcher
+                .fetch(PartRequest.builder()
+                        .partNo(1)
+                        .head(head)
+                        .downloadRequest(dr)
+                        .build())
+                .getContent();
     }
 
     private FusionException handleExceptionThrownWhenAttemptingToGetParts(Exception ex) {
@@ -284,13 +230,6 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
         return Executors.newFixedThreadPool(downloadThreadPoolSize);
     }
 
-    private void setSecurityHeaders(DownloadRequest dr, Map<String, String> requestHeaders) {
-        requestHeaders.put("Authorization", "Bearer " + fusionTokenProvider.getSessionBearerToken());
-        requestHeaders.put(
-                "Fusion-Authorization",
-                "Bearer " + fusionTokenProvider.getDatasetBearerToken(dr.getCatalog(), dr.getDataset()));
-    }
-
     public static FusionAPIDownloadOperationsBuilder builder() {
         return new CustomFusionAPIDownloadOperationsBuilder();
     }
@@ -301,9 +240,24 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
                 FusionConfiguration.builder().build();
 
         int downloadThreadPoolSize;
+        Client httpClient;
+
+        FusionTokenProvider fusionTokenProvider;
+
+        PartFetcher partFetcher;
 
         public FusionAPIDownloadOperationsBuilder configuration(FusionConfiguration configuration) {
             this.configuration = configuration;
+            return this;
+        }
+
+        public FusionAPIDownloadOperationsBuilder httpClient(Client httpClient) {
+            this.httpClient = httpClient;
+            return this;
+        }
+
+        public FusionAPIDownloadOperationsBuilder fusionTokenProvider(FusionTokenProvider fusionTokenProvider) {
+            this.fusionTokenProvider = fusionTokenProvider;
             return this;
         }
 
@@ -312,12 +266,24 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
             this.downloadThreadPoolSize = downloadThreadPoolSize;
             return this;
         }
+
+        public FusionAPIDownloadOperationsBuilder partFetcher(PartFetcher partFetcher) {
+            this.partFetcher = partFetcher;
+            return this;
+        }
     }
 
     private static class CustomFusionAPIDownloadOperationsBuilder extends FusionAPIDownloadOperationsBuilder {
         @Override
         public FusionAPIDownloadOperations build() {
             this.downloadThreadPoolSize = configuration.getDownloadThreadPoolSize();
+
+            if (Objects.isNull(partFetcher))
+                this.partFetcher = PartFetcher.builder()
+                        .client(httpClient)
+                        .credentials(fusionTokenProvider)
+                        .build();
+
             return super.build();
         }
     }

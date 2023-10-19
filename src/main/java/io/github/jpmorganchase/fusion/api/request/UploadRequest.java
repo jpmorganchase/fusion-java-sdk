@@ -1,9 +1,15 @@
 package io.github.jpmorganchase.fusion.api.request;
 
 import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
-import lombok.*;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @Builder
