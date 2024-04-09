@@ -52,6 +52,13 @@ public class FusionConfiguration {
     int uploadPartSize = 8;
 
     /**
+     * Max in flux data to be read at a given time.  Defaults to 500MB.
+     * If a value such as 1gb is required, then client would set this value to 1000;
+     */
+    @Builder.Default
+    long maxInFluxDataSize = 500;
+
+    /**
      * Size of Thread-Pool to be used for uploading chunks of a multipart file
      * Defaults to number of available processors.
      */
