@@ -40,7 +40,8 @@ import org.slf4j.LoggerFactory;
 @Getter
 public class FusionAPIUploadOperations implements APIUploadOperations {
 
-    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger =
+            LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private static final String UPLOAD_FAILED_EXCEPTION_MSG =
             "Exception encountered while attempting to upload part, please try again";
@@ -219,7 +220,6 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
         int chunkSize = uploadPartSize * (1024 * 1024);
         long maxInFluxBytes = maxInFluxDataSize * (1024L * 1024L);
 
-
         byte[] buffer = new byte[chunkSize];
         int partCnt = 1;
         int totalBytes = 0;
@@ -232,7 +232,8 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
             int bytesRead;
             while ((bytesRead = ur.getData().read(buffer)) != -1) {
 
-                logger.debug("Creating upload task for part number {}, bytes read for this part {}", partCnt, bytesRead);
+                logger.debug(
+                        "Creating upload task for part number {}, bytes read for this part {}", partCnt, bytesRead);
 
                 final int currentPartCnt = partCnt;
                 final int currentBytesRead = bytesRead;
@@ -264,7 +265,8 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
         return mtx.transferred(chunkSize, totalBytes, partCnt);
     }
 
-    private int easeDataPressure(List<CompletableFuture<Void>> futures) throws InterruptedException, ExecutionException {
+    private int easeDataPressure(List<CompletableFuture<Void>> futures)
+            throws InterruptedException, ExecutionException {
 
         logger.debug("Reached max in-flux bytes - easing pressure");
         for (CompletableFuture<Void> future : futures) {
