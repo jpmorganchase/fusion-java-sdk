@@ -250,6 +250,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
 
                 partCnt++;
                 totalBytes += bytesRead;
+                inFluxBytes += bytesRead;
             }
 
             for (CompletableFuture<Void> future : futures) {
