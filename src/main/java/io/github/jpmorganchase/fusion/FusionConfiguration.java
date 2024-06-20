@@ -9,10 +9,10 @@ public class FusionConfiguration {
 
     /**
      * Defines the fusion root url to be used with api interactions.
-     * Defaults to "https://fusion-api.jpmorgan.com/fusion/v1/".
+     * Defaults to "https://fusion.jpmorgan.com/api/v1/".
      */
     @Builder.Default
-    String rootURL = "https://fusion-api.jpmorgan.com/fusion/v1/";
+    String rootURL = "https://fusion.jpmorgan.com/api/v1/";
 
     /**
      * Defines the path to the credentials file for auth/authz.
