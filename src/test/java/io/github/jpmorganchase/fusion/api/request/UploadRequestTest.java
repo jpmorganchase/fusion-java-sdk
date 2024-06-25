@@ -2,6 +2,10 @@ package io.github.jpmorganchase.fusion.api.request;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import lombok.SneakyThrows;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -19,6 +23,7 @@ class UploadRequestTest {
     private String fromDate;
     private String toDate;
     private int maxSinglePartFileSize;
+    private Map<String, String> headers;
 
     @Test
     public void shouldBuildFromFile() {
@@ -31,6 +36,7 @@ class UploadRequestTest {
         givenFromDate("20230520");
         givenToDate("20230521");
         givenMaxSinglePartFileSize(25);
+        givenHeaders("header-key-0", "header-value-0", "header-key-1", "header-value-1");
 
         whenUploadRequestBuildIsCalledForFileResource();
 
@@ -42,6 +48,9 @@ class UploadRequestTest {
         thenIsFromStreamShouldEqual(false);
         thenAPIPathShouldEqual(
                 "https://fusion.com/v1/catalogs/common/datset/API_TEST/datasetseries/20230522/distributions/csv");
+        thenHeadersShouldContain("header-key-0", "header-value-0");
+        thenHeadersShouldContain("header-key-1", "header-value-1");
+
     }
 
     @Test
@@ -55,6 +64,7 @@ class UploadRequestTest {
         givenFromDate("20230520");
         givenToDate("20230521");
         givenMaxSinglePartFileSize(25);
+        givenHeaders("header-key-0", "header-value-0", "header-key-1", "header-value-1");
 
         whenUploadRequestBuildIsCalledForStream();
 
@@ -66,6 +76,8 @@ class UploadRequestTest {
         thenIsFromStreamShouldEqual(true);
         thenAPIPathShouldEqual(
                 "https://fusion.com/v1/catalogs/common/datset/API_TEST/datasetseries/20230522/distributions/csv");
+        thenHeadersShouldContain("header-key-0", "header-value-0");
+        thenHeadersShouldContain("header-key-1", "header-value-1");
     }
 
     @Test
@@ -154,6 +166,45 @@ class UploadRequestTest {
         thenEntireFileShouldBeAvailable(27000006);
     }
 
+    @Test
+    public void shouldReturnCopyOfProvidedHeaders() {
+
+        givenResource("/io/github/jpmorganchase/fusion/api/large-upload-test.csv");
+        givenCatalog("common");
+        givenDataset("API_TEST");
+        givenAPIPath("https://fusion.com/v1/catalogs/common/datset/API_TEST/datasetseries/20230522/distributions/csv");
+        givenCreatedDate("20230522");
+        givenFromDate("20230520");
+        givenToDate("20230521");
+        givenMaxSinglePartFileSize(25);
+        givenHeaders("header-key-0", "header-value-0", "header-key-1", "header-value-1");
+
+        whenUploadRequestBuildIsCalledForFileResource();
+
+        thenHeadersShouldNotBeObjectEquals();
+        thenHeadersShouldContain("header-key-0", "header-value-0");
+        thenHeadersShouldContain("header-key-1", "header-value-1");
+
+    }
+
+    @Test
+    public void shouldHandleNoHeadersProvidedFromClient() {
+
+        givenResource("/io/github/jpmorganchase/fusion/api/large-upload-test.csv");
+        givenCatalog("common");
+        givenDataset("API_TEST");
+        givenAPIPath("https://fusion.com/v1/catalogs/common/datset/API_TEST/datasetseries/20230522/distributions/csv");
+        givenCreatedDate("20230522");
+        givenFromDate("20230520");
+        givenToDate("20230521");
+        givenMaxSinglePartFileSize(25);
+
+        whenUploadRequestBuildIsCalledForFileResource();
+
+        thenHeadersShouldBeNonNull();
+        thenHeadersShouldBeEmpty();
+    }
+
     @SneakyThrows
     private void thenEntireFileShouldBeAvailable(int expected) {
         InputStream is = ur.getData();
@@ -182,6 +233,7 @@ class UploadRequestTest {
                 .createdDate(this.createdDate)
                 .fromDate(this.fromDate)
                 .toDate(this.toDate)
+                .headers(this.headers)
                 .build();
     }
 
@@ -196,6 +248,7 @@ class UploadRequestTest {
                 .createdDate(this.createdDate)
                 .fromDate(this.fromDate)
                 .toDate(this.toDate)
+                .headers(this.headers)
                 .build();
     }
 
@@ -227,6 +280,13 @@ class UploadRequestTest {
         this.maxSinglePartFileSize = maxSinglePartFileSize;
     }
 
+    private void givenHeaders(String key, String value, String key1, String value1){
+        headers = new HashMap<>();
+        headers.put(key, value);
+        headers.put(key1, value1);
+    }
+
+
     private void thenAPIPathShouldEqual(String expected) {
         MatcherAssert.assertThat(ur.getApiPath(), Matchers.is(Matchers.equalTo(expected)));
     }
@@ -253,6 +313,22 @@ class UploadRequestTest {
 
     private void thenCatalogShouldEqual(String expected) {
         MatcherAssert.assertThat(ur.getCatalog(), Matchers.is(Matchers.equalTo(expected)));
+    }
+
+    private void thenHeadersShouldNotBeObjectEquals(){
+        MatcherAssert.assertThat(ur.getHeaders()==this.headers, Matchers.is(Matchers.equalTo(false)));
+    }
+
+    private void thenHeadersShouldBeNonNull(){
+        MatcherAssert.assertThat(ur.getHeaders(), Matchers.notNullValue());
+    }
+
+    private void thenHeadersShouldBeEmpty(){
+        MatcherAssert.assertThat(ur.getHeaders().isEmpty(), Matchers.is(Matchers.equalTo(true)));
+    }
+
+    private void thenHeadersShouldContain(String key, String value){
+        MatcherAssert.assertThat(ur.getHeaders().get(key), Matchers.is(Matchers.equalTo(value)));
     }
 
     private void givenResource(String fileName) {

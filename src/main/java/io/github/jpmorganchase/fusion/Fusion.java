@@ -26,6 +26,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -469,6 +470,43 @@ public class Fusion {
      * @param fromDate     the earliest date for which there is data in the distribution
      * @param toDate       the latest date for which there is data in the distribution
      * @param createdDate  the creation date for the distribution
+     * @param headers      http headers to be provided in the request.  For the headers with multiple instances, the value should be a comm-separated list
+     * @throws ApiInputValidationException if the specified file cannot be read
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     **/
+    public void upload(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            String filename,
+            LocalDate fromDate,
+            LocalDate toDate,
+            LocalDate createdDate,
+            Map<String, String> headers) {
+
+        String url = String.format(
+                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                this.rootURL, catalogName, dataset, seriesMember, distribution);
+        String strFromDate = fromDate.format(dateTimeFormatter);
+        String strToDate = toDate.format(dateTimeFormatter);
+        String strCreatedDate = createdDate.format(dateTimeFormatter);
+        this.api.callAPIFileUpload(url, filename, catalogName, dataset, strFromDate, strToDate, strCreatedDate, headers);
+    }
+
+    /**
+     * Upload a new dataset series member to a catalog.
+     *
+     * @param catalogName  identifier of the catalog to upload data into
+     * @param dataset      the dataset identifier to upload against.
+     * @param seriesMember the series member identifier to add or replace
+     * @param distribution the distribution identifier, this is the file extension.
+     * @param filename     a path to the file containing the data to upload
+     * @param fromDate     the earliest date for which there is data in the distribution
+     * @param toDate       the latest date for which there is data in the distribution
+     * @param createdDate  the creation date for the distribution
      * @throws ApiInputValidationException if the specified file cannot be read
      * @throws APICallException if the call to the Fusion API fails
      * @throws FileUploadException if there is an issue handling the response from Fusion API
@@ -483,14 +521,7 @@ public class Fusion {
             LocalDate fromDate,
             LocalDate toDate,
             LocalDate createdDate) {
-
-        String url = String.format(
-                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                this.rootURL, catalogName, dataset, seriesMember, distribution);
-        String strFromDate = fromDate.format(dateTimeFormatter);
-        String strToDate = toDate.format(dateTimeFormatter);
-        String strCreatedDate = createdDate.format(dateTimeFormatter);
-        this.api.callAPIFileUpload(url, filename, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
+        this.upload(catalogName, dataset, seriesMember, distribution, filename, fromDate, toDate, createdDate, new HashMap<>());
     }
 
     /**
@@ -514,7 +545,70 @@ public class Fusion {
             String distribution,
             String filename,
             LocalDate dataDate) {
-        this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate);
+        this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate, new HashMap<>());
+    }
+
+    /**
+     * Upload a new dataset series member to a catalog.
+     *
+     * @param catalogName  identifier of the catalog to upload data into
+     * @param dataset      the dataset identifier to upload against.
+     * @param seriesMember the series member identifier to add or replace
+     * @param distribution the distribution identifier, this is the file extension.
+     * @param filename     a path to the file containing the data to upload
+     * @param dataDate     the earliest, latest, and created date are all the same.
+     * @param headers      http headers to be provided in the request.  For the headers with multiple instances, the value should be a comm-separated list
+     * @throws ApiInputValidationException if the specified file cannot be read
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     **/
+    public void upload(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            String filename,
+            LocalDate dataDate,
+            Map<String, String> headers) {
+        this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate, headers);
+    }
+
+    /**
+     * Upload a new dataset series member to a catalog.
+     *
+     * @param catalogName  identifier of the catalog to upload data into
+     * @param dataset      the dataset identifier to upload against.
+     * @param seriesMember the series member identifier to add or replace
+     * @param distribution the distribution identifier, this is the file extension.
+     * @param data         am InputStream of the data to be uploaded
+     * @param fromDate     the earliest date for which there is data in the distribution
+     * @param toDate       the latest date for which there is data in the distribution
+     * @param createdDate  the creation date for the distribution
+     * @param headers      http headers to be provided in the request.  For the headers with multiple instances, the value should be a comm-separated list
+     * @throws ApiInputValidationException if the specified stream cannot be read
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     **/
+    public void upload(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            InputStream data,
+            LocalDate fromDate,
+            LocalDate toDate,
+            LocalDate createdDate,
+            Map<String, String> headers) {
+
+        String url = String.format(
+                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                this.rootURL, catalogName, dataset, seriesMember, distribution);
+        String strFromDate = fromDate.format(dateTimeFormatter);
+        String strToDate = toDate.format(dateTimeFormatter);
+        String strCreatedDate = createdDate.format(dateTimeFormatter);
+        this.api.callAPIFileUpload(url, data, catalogName, dataset, strFromDate, strToDate, strCreatedDate, headers);
     }
 
     /**
@@ -542,14 +636,57 @@ public class Fusion {
             LocalDate fromDate,
             LocalDate toDate,
             LocalDate createdDate) {
+        this.upload(catalogName, dataset, seriesMember, distribution, data, fromDate, toDate, createdDate, new HashMap<>());
+    }
 
-        String url = String.format(
-                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                this.rootURL, catalogName, dataset, seriesMember, distribution);
-        String strFromDate = fromDate.format(dateTimeFormatter);
-        String strToDate = toDate.format(dateTimeFormatter);
-        String strCreatedDate = createdDate.format(dateTimeFormatter);
-        this.api.callAPIFileUpload(url, data, catalogName, dataset, strFromDate, strToDate, strCreatedDate);
+    /**
+     * Upload a new dataset series member to a catalog.
+     *
+     * @param catalogName  identifier of the catalog to upload data into
+     * @param dataset      the dataset identifier to upload against.
+     * @param seriesMember the series member identifier to add or replace
+     * @param distribution the distribution identifier, this is the file extension.
+     * @param data         am InputStream of the data to be uploaded
+     * @param dataDate     the earliest, latest, and created date are all the same.
+     * @throws ApiInputValidationException if the specified stream cannot be read
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     **/
+    public void upload(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            InputStream data,
+            LocalDate dataDate) {
+        this.upload(catalogName, dataset, seriesMember, distribution, data, dataDate, dataDate, dataDate, new HashMap<>());
+    }
+
+    /**
+     * Upload a new dataset series member to a catalog.
+     *
+     * @param catalogName  identifier of the catalog to upload data into
+     * @param dataset      the dataset identifier to upload against.
+     * @param seriesMember the series member identifier to add or replace
+     * @param distribution the distribution identifier, this is the file extension.
+     * @param data         am InputStream of the data to be uploaded
+     * @param dataDate     the earliest, latest, and created date are all the same.
+     * @param headers      http headers to be provided in the request.  For the headers with multiple instances, the value should be a comm-separated list
+     * @throws ApiInputValidationException if the specified stream cannot be read
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileUploadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     **/
+    public void upload(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            InputStream data,
+            LocalDate dataDate,
+            Map<String, String> headers) {
+        this.upload(catalogName, dataset, seriesMember, distribution, data, dataDate, dataDate, dataDate, headers);
     }
 
     public static FusionBuilder builder() {

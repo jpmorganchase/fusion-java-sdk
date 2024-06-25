@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -31,10 +34,21 @@ public class UploadRequest {
     private boolean isFromStream;
     private boolean isMultiPartUploadCandidate;
 
+    private Map<String, String> headers;
+
+    /**
+     * Returns a copy of the header map that was provided by the client
+     * @return headers
+     */
+    public Map<String, String> getHeaders(){
+        return new HashMap<>(headers);
+    }
+
     public static class UploadRequestBuilder {
         private String fileName;
         private InputStream fromStream;
         private int maxSinglePartFileSize;
+        private Map<String, String> headers;
 
         public UploadRequestBuilder fromFile(String fileName) {
             this.fileName = fileName;
@@ -95,6 +109,8 @@ public class UploadRequest {
                 buildFromStream();
             }
 
+            Map<String, String> copyOfHeaders = copyHeaderMap();
+
             return new UploadRequest(
                     apiPath,
                     catalog,
@@ -104,7 +120,15 @@ public class UploadRequest {
                     createdDate,
                     data,
                     isFromStream,
-                    isMultiPartUploadCandidate);
+                    isMultiPartUploadCandidate,
+                    copyOfHeaders);
+        }
+
+        private Map<String, String> copyHeaderMap(){
+            if (null==this.headers){
+                return new HashMap<>();
+            }
+            return new HashMap<>(this.headers);
         }
 
         private void buildFromStream() {

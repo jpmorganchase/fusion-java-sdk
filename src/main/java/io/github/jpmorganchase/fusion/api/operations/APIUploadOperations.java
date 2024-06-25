@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.api.operations;
 
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import java.io.InputStream;
+import java.util.Map;
 
 public interface APIUploadOperations {
 
@@ -12,7 +13,8 @@ public interface APIUploadOperations {
             String dataset,
             String fromDate,
             String toDate,
-            String createdDate)
+            String createdDate,
+            Map<String, String> headers)
             throws APICallException {}
 
     default void callAPIFileUpload(
@@ -22,6 +24,7 @@ public interface APIUploadOperations {
             String dataset,
             String fromDate,
             String toDate,
-            String createdDate)
+            String createdDate,
+            Map<String, String> headers)
             throws APICallException {}
 }
