@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
-
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -40,7 +39,7 @@ public class UploadRequest {
      * Returns a copy of the header map that was provided by the client
      * @return headers
      */
-    public Map<String, String> getHeaders(){
+    public Map<String, String> getHeaders() {
         return new HashMap<>(headers);
     }
 
@@ -124,8 +123,8 @@ public class UploadRequest {
                     copyOfHeaders);
         }
 
-        private Map<String, String> copyHeaderMap(){
-            if (null==this.headers){
+        private Map<String, String> copyHeaderMap() {
+            if (null == this.headers) {
                 return new HashMap<>();
             }
             return new HashMap<>(this.headers);

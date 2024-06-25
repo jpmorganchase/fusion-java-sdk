@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-
 import lombok.SneakyThrows;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -50,7 +48,6 @@ class UploadRequestTest {
                 "https://fusion.com/v1/catalogs/common/datset/API_TEST/datasetseries/20230522/distributions/csv");
         thenHeadersShouldContain("header-key-0", "header-value-0");
         thenHeadersShouldContain("header-key-1", "header-value-1");
-
     }
 
     @Test
@@ -184,7 +181,6 @@ class UploadRequestTest {
         thenHeadersShouldNotBeObjectEquals();
         thenHeadersShouldContain("header-key-0", "header-value-0");
         thenHeadersShouldContain("header-key-1", "header-value-1");
-
     }
 
     @Test
@@ -280,12 +276,11 @@ class UploadRequestTest {
         this.maxSinglePartFileSize = maxSinglePartFileSize;
     }
 
-    private void givenHeaders(String key, String value, String key1, String value1){
+    private void givenHeaders(String key, String value, String key1, String value1) {
         headers = new HashMap<>();
         headers.put(key, value);
         headers.put(key1, value1);
     }
-
 
     private void thenAPIPathShouldEqual(String expected) {
         MatcherAssert.assertThat(ur.getApiPath(), Matchers.is(Matchers.equalTo(expected)));
@@ -315,19 +310,19 @@ class UploadRequestTest {
         MatcherAssert.assertThat(ur.getCatalog(), Matchers.is(Matchers.equalTo(expected)));
     }
 
-    private void thenHeadersShouldNotBeObjectEquals(){
-        MatcherAssert.assertThat(ur.getHeaders()==this.headers, Matchers.is(Matchers.equalTo(false)));
+    private void thenHeadersShouldNotBeObjectEquals() {
+        MatcherAssert.assertThat(ur.getHeaders() == this.headers, Matchers.is(Matchers.equalTo(false)));
     }
 
-    private void thenHeadersShouldBeNonNull(){
+    private void thenHeadersShouldBeNonNull() {
         MatcherAssert.assertThat(ur.getHeaders(), Matchers.notNullValue());
     }
 
-    private void thenHeadersShouldBeEmpty(){
+    private void thenHeadersShouldBeEmpty() {
         MatcherAssert.assertThat(ur.getHeaders().isEmpty(), Matchers.is(Matchers.equalTo(true)));
     }
 
-    private void thenHeadersShouldContain(String key, String value){
+    private void thenHeadersShouldContain(String key, String value) {
         MatcherAssert.assertThat(ur.getHeaders().get(key), Matchers.is(Matchers.equalTo(value)));
     }
 

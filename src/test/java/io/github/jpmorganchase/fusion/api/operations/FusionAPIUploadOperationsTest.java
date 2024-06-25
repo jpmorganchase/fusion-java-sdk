@@ -103,7 +103,8 @@ class FusionAPIUploadOperationsTest {
                 "2023-03-02",
                 "2023-03-03",
                 "k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=",
-                "23", new HashMap<>(this.headers));
+                "23",
+                new HashMap<>(this.headers));
         // when
         whenSDKAPIUploaderIsCalledToUploadFileFromPath(
                 "common", "simple_dataset", "2023-03-01", "2023-03-02", "2023-03-03", new HashMap<>(this.headers));
@@ -127,7 +128,8 @@ class FusionAPIUploadOperationsTest {
                 "2023-03-02",
                 "2023-03-03",
                 "k0IH+I4DpJla6wabZBNCUEMSBZtS2seC/9ixCa3KnZE=",
-                "23", new HashMap<>(this.headers));
+                "23",
+                new HashMap<>(this.headers));
         // when
         whenSDKAPIUploaderIsCalledToUploadFileFromStream(
                 "common", "simple_dataset", "2023-03-01", "2023-03-02", "2023-03-03", new HashMap<>(this.headers));
@@ -144,7 +146,8 @@ class FusionAPIUploadOperationsTest {
         givenUploadFile("large-upload-test.csv");
         givenClientHeader("client-header-key", "client-header-val");
 
-        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+        givenCallToClientToInitiateTransferIsSuccessful(
+                "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
         givenUploadRequest(copyOfHeaders());
         // when
         whenFusionApiManagerIsCalledToInitiateMultipartUpload();
@@ -166,9 +169,19 @@ class FusionAPIUploadOperationsTest {
         givenUploadFile("large-upload-test.csv");
         givenMultipartTransferContextStatusIsStarted("my-op-id");
         givenCallToClientToUploadPart(
-                1, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=", "my-op-id", "my-token", "dataset-token", copyOfHeaders());
+                1,
+                "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=",
+                "my-op-id",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                2, "Vlrqh/mN2FJfct6E4Ah5UhnwPQ2tIoyQW4vmUBVD+lw=", "my-op-id", "my-token", "dataset-token", copyOfHeaders());
+                2,
+                "Vlrqh/mN2FJfct6E4Ah5UhnwPQ2tIoyQW4vmUBVD+lw=",
+                "my-op-id",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenUploadRequest("2023-03-19", copyOfHeaders());
 
         // when
@@ -194,13 +207,33 @@ class FusionAPIUploadOperationsTest {
 
         givenMultipartTransferContextStatusIsStarted("my-op-id");
         givenCallToClientToUploadPart(
-                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "my-op-id", "my-token", "dataset-token", copyOfHeaders());
+                1,
+                "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=",
+                "my-op-id",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "my-op-id", "my-token", "dataset-token", copyOfHeaders());
+                2,
+                "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=",
+                "my-op-id",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=", "my-op-id", "my-token", "dataset-token", copyOfHeaders());
+                3,
+                "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=",
+                "my-op-id",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "my-op-id", "my-token", "dataset-token", copyOfHeaders());
+                4,
+                "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=",
+                "my-op-id",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenUploadRequest("2023-03-19", copyOfHeaders());
 
         // when
@@ -222,7 +255,6 @@ class FusionAPIUploadOperationsTest {
         givenUploadFile("large-upload-test.csv");
         givenClientHeaders("client-header-key", "client-header-val", "client-header-key1", "client-header-value1");
         givenUploadRequest("2023-05-18", copyOfHeaders());
-
 
         givenMultipartTransferContextStatusIsStarted("my-op-id");
         givenPartHasBeenUploaded(1, "provider-gen-part-id-1", "base64-checksum-1", "digest-as-bytes-1".getBytes());
@@ -260,15 +292,36 @@ class FusionAPIUploadOperationsTest {
         givenUploadFile("large-upload-test.csv");
         givenClientHeader("client-header-key", "client-header-val");
 
-        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+        givenCallToClientToInitiateTransferIsSuccessful(
+                "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
         givenCallToClientToUploadPart(
-                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                1,
+                "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                2,
+                "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                3,
+                "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                4,
+                "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToCompleteMultipartUpload(
                 "some-operation-id-aa",
                 "my-token",
@@ -297,15 +350,36 @@ class FusionAPIUploadOperationsTest {
         givenUploadStream("large-upload-test.csv");
         givenClientHeaders("client-header-key", "client-header-val", "client-header-key1", "client-header-value1");
 
-        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+        givenCallToClientToInitiateTransferIsSuccessful(
+                "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
         givenCallToClientToUploadPart(
-                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                1,
+                "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                2,
+                "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                3,
+                "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                4,
+                "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToCompleteMultipartUpload(
                 "some-operation-id-aa",
                 "my-token",
@@ -363,11 +437,22 @@ class FusionAPIUploadOperationsTest {
         givenUploadFile("large-upload-test.csv");
         givenClientHeaders("client-header-key", "client-header-val", "client-header-key1", "client-header-value1");
 
-        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+        givenCallToClientToInitiateTransferIsSuccessful(
+                "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
         givenCallToClientToUploadPart(
-                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                1,
+                "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                2,
+                "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPartFails(
                 3,
                 "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=",
@@ -377,7 +462,12 @@ class FusionAPIUploadOperationsTest {
                 copyOfHeaders(),
                 404);
         givenCallToClientToUploadPart(
-                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                4,
+                "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToAbortMultipartUpload("some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
 
         // When
@@ -407,15 +497,36 @@ class FusionAPIUploadOperationsTest {
         givenUploadFile("large-upload-test.csv");
         givenClientHeaders("client-header-key", "client-header-val", "client-header-key1", "client-header-value1");
 
-        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+        givenCallToClientToInitiateTransferIsSuccessful(
+                "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
         givenCallToClientToUploadPart(
-                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                1,
+                "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                2,
+                "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                3,
+                "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                4,
+                "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToCompleteMultipartUploadFails(
                 "some-operation-id-aa",
                 "my-token",
@@ -430,7 +541,13 @@ class FusionAPIUploadOperationsTest {
 
         // when
         whenSDKAPIUploaderIsCalledToUploadFileFromPathAndExceptionIsRaised(
-                "common", "test-dataset", "2023-05-18", "2023-05-18", "2023-05-18", copyOfHeaders(), APICallException.class);
+                "common",
+                "test-dataset",
+                "2023-05-18",
+                "2023-05-18",
+                "2023-05-18",
+                copyOfHeaders(),
+                APICallException.class);
 
         // then
         thenApiCallExceptionShouldHaveHttpStatus(504);
@@ -449,15 +566,36 @@ class FusionAPIUploadOperationsTest {
         givenUploadFile("large-upload-test.csv");
         givenClientHeader("client-header-key", "client-header-val");
 
-        givenCallToClientToInitiateTransferIsSuccessful("some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+        givenCallToClientToInitiateTransferIsSuccessful(
+                "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
         givenCallToClientToUploadPart(
-                1, "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                1,
+                "QOFxhmCbpMEDsB6ZWpQGstjqGYrKbSx6FsStJgTK5HA=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                2, "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                2,
+                "BrRfmO2ryteC4a6+HeOMDwuxXOif0z3qRJ5BDWXKrXg=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                3, "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                3,
+                "TuKiXOkmJKwfK6luEz3XTKkevrsn2WC8YukQ/pEa6MA=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToUploadPart(
-                4, "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=", "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders());
+                4,
+                "G6RtAEGJqAKL1PaJNRRCgT2AXceURap43HJ4oaWXYdo=",
+                "some-operation-id-aa",
+                "my-token",
+                "dataset-token",
+                copyOfHeaders());
         givenCallToClientToCompleteMultipartUploadFails(
                 "some-operation-id-aa",
                 "my-token",
@@ -468,11 +606,18 @@ class FusionAPIUploadOperationsTest {
                 "IASqXk2/aZRMT2siJkzc/3Mg6DSG2oil5IwkMeb4KgE=",
                 copyOfHeaders(),
                 504);
-        givenCallToClientToAbortMultipartUploadFails("some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders(), 500);
+        givenCallToClientToAbortMultipartUploadFails(
+                "some-operation-id-aa", "my-token", "dataset-token", copyOfHeaders(), 500);
 
         // when
         whenSDKAPIUploaderIsCalledToUploadFileFromPathAndExceptionIsRaised(
-                "common", "test-dataset", "2023-05-18", "2023-05-18", "2023-05-18", copyOfHeaders(), APICallException.class);
+                "common",
+                "test-dataset",
+                "2023-05-18",
+                "2023-05-18",
+                "2023-05-18",
+                copyOfHeaders(),
+                APICallException.class);
 
         // then
         thenApiCallExceptionShouldHaveHttpStatus(500);
@@ -602,7 +747,8 @@ class FusionAPIUploadOperationsTest {
                         HttpResponse.<String>builder().statusCode(failureStatus).build());
     }
 
-    private void givenCallToClientToAbortMultipartUpload(String operationId, String token, String fusionToken, Map<String, String> headers) {
+    private void givenCallToClientToAbortMultipartUpload(
+            String operationId, String token, String fusionToken, Map<String, String> headers) {
 
         String path = String.format("/operations/upload?operationId=%s", operationId);
 
@@ -672,7 +818,12 @@ class FusionAPIUploadOperationsTest {
     }
 
     private void givenCallToClientToUploadPart(
-            int partNo, String digest, String operationId, String authToken, String fusionToken, Map<String, String> headers) {
+            int partNo,
+            String digest,
+            String operationId,
+            String authToken,
+            String fusionToken,
+            Map<String, String> headers) {
 
         String path = String.format("/operations/upload?operationId=%s&partNumber=%d", operationId, partNo);
 
@@ -701,7 +852,13 @@ class FusionAPIUploadOperationsTest {
     }
 
     private void givenCallToClientToUploadPartFails(
-            int partNo, String digest, String operationId, String authToken, String fusionToken, Map<String, String> headers, int failureStatus) {
+            int partNo,
+            String digest,
+            String operationId,
+            String authToken,
+            String fusionToken,
+            Map<String, String> headers,
+            int failureStatus) {
 
         String path = String.format("/operations/upload?operationId=%s&partNumber=%d", operationId, partNo);
 
@@ -758,7 +915,8 @@ class FusionAPIUploadOperationsTest {
                         .build());
     }
 
-    private void givenCallToClientToInitiateTransferFails(String authToken, String fusionToken, Map<String, String> headers, int failureStatus) {
+    private void givenCallToClientToInitiateTransferFails(
+            String authToken, String fusionToken, Map<String, String> headers, int failureStatus) {
 
         givenRequestHeader(headers, "accept", "*/*");
         givenRequestHeader(headers, "Authorization", "Bearer " + authToken);
@@ -788,8 +946,14 @@ class FusionAPIUploadOperationsTest {
     }
 
     private void whenSDKAPIUploaderIsCalledToUploadFileFromPath(
-            String catalog, String dataset, String fromDate, String toDate, String createdDate, Map<String, String> headers) {
-        fusionAPIUploader.callAPIFileUpload(apiPath, fileName, catalog, dataset, fromDate, toDate, createdDate, headers);
+            String catalog,
+            String dataset,
+            String fromDate,
+            String toDate,
+            String createdDate,
+            Map<String, String> headers) {
+        fusionAPIUploader.callAPIFileUpload(
+                apiPath, fileName, catalog, dataset, fromDate, toDate, createdDate, headers);
     }
 
     private void whenSDKAPIUploaderIsCalledToUploadFileFromPathAndExceptionIsRaised(
@@ -807,12 +971,25 @@ class FusionAPIUploadOperationsTest {
     }
 
     private void whenSDKAPIUploaderIsCalledToUploadFileFromStream(
-            String catalog, String dataset, String fromDate, String toDate, String createdDate, Map<String, String> headers) {
-        fusionAPIUploader.callAPIFileUpload(apiPath, uploadStream, catalog, dataset, fromDate, toDate, createdDate, headers);
+            String catalog,
+            String dataset,
+            String fromDate,
+            String toDate,
+            String createdDate,
+            Map<String, String> headers) {
+        fusionAPIUploader.callAPIFileUpload(
+                apiPath, uploadStream, catalog, dataset, fromDate, toDate, createdDate, headers);
     }
 
     private void givenCallToClientToUploadIsSuccessful(
-            String token, String fToken, String fDate, String tDate, String cDate, String digest, String length, Map<String, String> headers) {
+            String token,
+            String fToken,
+            String fDate,
+            String tDate,
+            String cDate,
+            String digest,
+            String length,
+            Map<String, String> headers) {
 
         givenRequestHeader(headers, "accept", "*/*");
         givenRequestHeader(headers, "Authorization", "Bearer my-token");
@@ -833,8 +1010,8 @@ class FusionAPIUploadOperationsTest {
         this.uploadStream = new ByteArrayInputStream(this.uploadBody);
     }
 
-    private Map<String, String> copyOfHeaders(){
-        if (null==this.headers){
+    private Map<String, String> copyOfHeaders() {
+        if (null == this.headers) {
             return new HashMap<>();
         }
         return new HashMap<>(this.headers);

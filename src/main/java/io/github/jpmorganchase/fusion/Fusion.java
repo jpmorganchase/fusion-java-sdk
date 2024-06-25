@@ -493,7 +493,8 @@ public class Fusion {
         String strFromDate = fromDate.format(dateTimeFormatter);
         String strToDate = toDate.format(dateTimeFormatter);
         String strCreatedDate = createdDate.format(dateTimeFormatter);
-        this.api.callAPIFileUpload(url, filename, catalogName, dataset, strFromDate, strToDate, strCreatedDate, headers);
+        this.api.callAPIFileUpload(
+                url, filename, catalogName, dataset, strFromDate, strToDate, strCreatedDate, headers);
     }
 
     /**
@@ -521,7 +522,16 @@ public class Fusion {
             LocalDate fromDate,
             LocalDate toDate,
             LocalDate createdDate) {
-        this.upload(catalogName, dataset, seriesMember, distribution, filename, fromDate, toDate, createdDate, new HashMap<>());
+        this.upload(
+                catalogName,
+                dataset,
+                seriesMember,
+                distribution,
+                filename,
+                fromDate,
+                toDate,
+                createdDate,
+                new HashMap<>());
     }
 
     /**
@@ -545,7 +555,16 @@ public class Fusion {
             String distribution,
             String filename,
             LocalDate dataDate) {
-        this.upload(catalogName, dataset, seriesMember, distribution, filename, dataDate, dataDate, dataDate, new HashMap<>());
+        this.upload(
+                catalogName,
+                dataset,
+                seriesMember,
+                distribution,
+                filename,
+                dataDate,
+                dataDate,
+                dataDate,
+                new HashMap<>());
     }
 
     /**
@@ -636,7 +655,8 @@ public class Fusion {
             LocalDate fromDate,
             LocalDate toDate,
             LocalDate createdDate) {
-        this.upload(catalogName, dataset, seriesMember, distribution, data, fromDate, toDate, createdDate, new HashMap<>());
+        this.upload(
+                catalogName, dataset, seriesMember, distribution, data, fromDate, toDate, createdDate, new HashMap<>());
     }
 
     /**
@@ -660,7 +680,8 @@ public class Fusion {
             String distribution,
             InputStream data,
             LocalDate dataDate) {
-        this.upload(catalogName, dataset, seriesMember, distribution, data, dataDate, dataDate, dataDate, new HashMap<>());
+        this.upload(
+                catalogName, dataset, seriesMember, distribution, data, dataDate, dataDate, dataDate, new HashMap<>());
     }
 
     /**
