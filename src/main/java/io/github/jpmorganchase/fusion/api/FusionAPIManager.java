@@ -71,9 +71,10 @@ public class FusionAPIManager implements APIManager {
             String dataset,
             String fromDate,
             String toDate,
-            String createdDate)
+            String createdDate,
+            Map<String, String> headers)
             throws APICallException {
-        uploader.callAPIFileUpload(apiPath, fileName, catalogName, dataset, fromDate, toDate, createdDate);
+        uploader.callAPIFileUpload(apiPath, fileName, catalogName, dataset, fromDate, toDate, createdDate, headers);
     }
 
     @Override
@@ -84,9 +85,10 @@ public class FusionAPIManager implements APIManager {
             String dataset,
             String fromDate,
             String toDate,
-            String createdDate)
+            String createdDate,
+            Map<String, String> headers)
             throws APICallException {
-        uploader.callAPIFileUpload(apiPath, data, catalogName, dataset, fromDate, toDate, createdDate);
+        uploader.callAPIFileUpload(apiPath, data, catalogName, dataset, fromDate, toDate, createdDate, headers);
     }
 
     public static FusionAPIManagerBuilder builder() {

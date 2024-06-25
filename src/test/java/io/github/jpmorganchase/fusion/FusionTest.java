@@ -246,7 +246,79 @@ public class FusionTest {
                         "sample_dataset",
                         "2023-03-09",
                         "2023-03-09",
-                        "2023-03-09");
+                        "2023-03-09",
+                        new HashMap<>());
+    }
+
+    @Test
+    public void testFileUploadInteractionWithHeaders() throws Exception {
+        Fusion f = stubFusion();
+        LocalDate d = LocalDate.of(2023, 3, 9);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("my-header-0", "my-value-0");
+
+        f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", d, headers);
+
+        verify(apiManager)
+                .callAPIFileUpload(
+                        String.format(
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
+                        "/tmp/file.csv",
+                        "common",
+                        "sample_dataset",
+                        "2023-03-09",
+                        "2023-03-09",
+                        "2023-03-09",
+                        headers);
+    }
+
+    @Test
+    public void testFileUploadInteractionWithAllDates() throws Exception {
+        Fusion f = stubFusion();
+        LocalDate fDate = LocalDate.of(2023, 3, 9);
+        LocalDate tDate = LocalDate.of(2023, 3, 10);
+        LocalDate cDate = LocalDate.of(2023, 3, 11);
+
+        f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", fDate, tDate, cDate);
+
+        verify(apiManager)
+                .callAPIFileUpload(
+                        String.format(
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
+                        "/tmp/file.csv",
+                        "common",
+                        "sample_dataset",
+                        "2023-03-09",
+                        "2023-03-10",
+                        "2023-03-11",
+                        new HashMap<>());
+    }
+
+    @Test
+    public void testFileUploadInteractionWithAllDatesAndHeaders() throws Exception {
+        Fusion f = stubFusion();
+        LocalDate fDate = LocalDate.of(2023, 3, 9);
+        LocalDate tDate = LocalDate.of(2023, 3, 10);
+        LocalDate cDate = LocalDate.of(2023, 3, 11);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("my-header-0", "my-value-0");
+
+        f.upload("common", "sample_dataset", "20230308", "csv", "/tmp/file.csv", fDate, tDate, cDate, headers);
+
+        verify(apiManager)
+                .callAPIFileUpload(
+                        String.format(
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
+                        "/tmp/file.csv",
+                        "common",
+                        "sample_dataset",
+                        "2023-03-09",
+                        "2023-03-10",
+                        "2023-03-11",
+                        headers);
     }
 
     @Test
@@ -256,7 +328,7 @@ public class FusionTest {
 
         InputStream requestBodyStream = new ByteArrayInputStream("A,B,C\nD,E,F".getBytes());
 
-        f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, d, d);
+        f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d);
 
         verify(apiManager)
                 .callAPIFileUpload(
@@ -268,7 +340,85 @@ public class FusionTest {
                         "sample_dataset",
                         "2023-03-09",
                         "2023-03-09",
-                        "2023-03-09");
+                        "2023-03-09",
+                        new HashMap<>());
+    }
+
+    @Test
+    public void testFileUploadAsStreamInteractionWithHeaders() throws Exception {
+        Fusion f = stubFusion();
+        LocalDate d = LocalDate.of(2023, 3, 9);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("my-header-0", "my-value-0");
+
+        InputStream requestBodyStream = new ByteArrayInputStream("A,B,C\nD,E,F".getBytes());
+
+        f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, d, headers);
+
+        verify(apiManager)
+                .callAPIFileUpload(
+                        String.format(
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
+                        requestBodyStream,
+                        "common",
+                        "sample_dataset",
+                        "2023-03-09",
+                        "2023-03-09",
+                        "2023-03-09",
+                        headers);
+    }
+
+    @Test
+    public void testFileUploadAsStreamInteractionWithHeadersAllDates() throws Exception {
+        Fusion f = stubFusion();
+        LocalDate fDate = LocalDate.of(2023, 3, 9);
+        LocalDate tDate = LocalDate.of(2023, 3, 10);
+        LocalDate cDate = LocalDate.of(2023, 3, 11);
+
+        InputStream requestBodyStream = new ByteArrayInputStream("A,B,C\nD,E,F".getBytes());
+
+        f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, fDate, tDate, cDate);
+
+        verify(apiManager)
+                .callAPIFileUpload(
+                        String.format(
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
+                        requestBodyStream,
+                        "common",
+                        "sample_dataset",
+                        "2023-03-09",
+                        "2023-03-10",
+                        "2023-03-11",
+                        new HashMap<>());
+    }
+
+    @Test
+    public void testFileUploadAsStreamInteractionWithHeadersAllDatesAndHeaders() throws Exception {
+        Fusion f = stubFusion();
+        LocalDate fDate = LocalDate.of(2023, 3, 9);
+        LocalDate tDate = LocalDate.of(2023, 3, 10);
+        LocalDate cDate = LocalDate.of(2023, 3, 11);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("my-header-0", "my-value-0");
+
+        InputStream requestBodyStream = new ByteArrayInputStream("A,B,C\nD,E,F".getBytes());
+
+        f.upload("common", "sample_dataset", "20230308", "csv", requestBodyStream, fDate, tDate, cDate, headers);
+
+        verify(apiManager)
+                .callAPIFileUpload(
+                        String.format(
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
+                        requestBodyStream,
+                        "common",
+                        "sample_dataset",
+                        "2023-03-09",
+                        "2023-03-10",
+                        "2023-03-11",
+                        headers);
     }
 
     @Test

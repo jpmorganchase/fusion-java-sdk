@@ -96,6 +96,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
      * @param fromDate    the earliest date that data is contained in the upload (in form yyyy-MM-dd).
      * @param toDate      the latest date that data is contained in the upload (in form yyyy-MM-dd).
      * @param createdDate the creation date for the data is contained in the upload (in form yyyy-MM-dd).
+     * @param headers      http headers to be provided in the request.  For the headers with multiple instances, the value should be a comm-separated list
      * @throws ApiInputValidationException if the specified file cannot be read
      * @throws APICallException if the call to the Fusion API fails
      * @throws FileUploadException if there is an issue handling the response from Fusion API
@@ -109,7 +110,8 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
             String dataset,
             String fromDate,
             String toDate,
-            String createdDate)
+            String createdDate,
+            Map<String, String> headers)
             throws APICallException {
 
         callAPIFileUpload(UploadRequest.builder()
@@ -121,6 +123,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
                 .toDate(toDate)
                 .createdDate(createdDate)
                 .maxSinglePartFileSize(singlePartUploadSizeLimit)
+                .headers(headers)
                 .build());
     }
 
@@ -132,6 +135,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
      * @param fromDate    the earliest date that data is contained in the upload (in form yyyy-MM-dd).
      * @param toDate      the latest date that data is contained in the upload (in form yyyy-MM-dd).
      * @param createdDate the creation date for the data is contained in the upload (in form yyyy-MM-dd).
+     * @param headers      http headers to be provided in the request.  For the headers with multiple instances, the value should be a comm-separated list
      * @throws ApiInputValidationException if the specified file cannot be read
      * @throws APICallException if the call to the Fusion API fails
      * @throws FileUploadException if there is an issue handling the response from Fusion API
@@ -145,7 +149,8 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
             String dataset,
             String fromDate,
             String toDate,
-            String createdDate)
+            String createdDate,
+            Map<String, String> headers)
             throws APICallException {
 
         callAPIFileUpload(UploadRequest.builder()
@@ -157,6 +162,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
                 .toDate(toDate)
                 .createdDate(createdDate)
                 .maxSinglePartFileSize(singlePartUploadSizeLimit)
+                .headers(headers)
                 .build());
     }
 
@@ -172,7 +178,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
 
         DigestDescriptor upload = digestProducer.execute(ur.getData());
 
-        Map<String, String> requestHeaders = new HashMap<>();
+        Map<String, String> requestHeaders = ur.getHeaders();
         requestHeaders.put("accept", "*/*");
         requestHeaders.put("Content-Type", "application/octet-stream");
         requestHeaders.put("Content-Length", String.valueOf(upload.getSize()));
@@ -204,7 +210,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
     protected MultipartTransferContext callAPIToInitiateMultiPartUpload(UploadRequest ur) {
         String startUploadPath = ur.getApiPath() + INITIATE_MULTIPART_UPLOAD_PATH;
 
-        Map<String, String> requestHeaders = new HashMap<>();
+        Map<String, String> requestHeaders = ur.getHeaders();
         requestHeaders.put("accept", "*/*");
         setSecurityHeaders(ur, requestHeaders);
 
@@ -287,7 +293,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
         DigestDescriptor digestOfPart = digestProducer.execute(
                 new ByteArrayInputStream(ByteBuffer.wrap(part, 0, read).array()));
 
-        Map<String, String> requestHeaders = new HashMap<>();
+        Map<String, String> requestHeaders = ur.getHeaders();
         setSecurityHeaders(ur, requestHeaders);
         requestHeaders.put("accept", "*/*");
         requestHeaders.put("Content-Type", "application/octet-stream");
@@ -314,7 +320,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
                 mtx.getOperation().getOperationId());
         DigestDescriptor digestOfDigests = digestProducer.execute(mtx.digests());
 
-        Map<String, String> requestHeaders = new HashMap<>();
+        Map<String, String> requestHeaders = ur.getHeaders();
         requestHeaders.put("Content-Type", "application/json");
         setSecurityHeaders(ur, requestHeaders);
         setDistributionHeaders(ur, digestOfDigests, requestHeaders);
@@ -332,7 +338,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
                 ur.getApiPath(),
                 mtx.getOperation().getOperationId());
 
-        Map<String, String> requestHeaders = new HashMap<>();
+        Map<String, String> requestHeaders = ur.getHeaders();
         setSecurityHeaders(ur, requestHeaders);
 
         HttpResponse<String> completeResponse = httpClient.delete(completeTransferPath, requestHeaders, null);
