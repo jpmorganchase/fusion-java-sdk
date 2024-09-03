@@ -411,7 +411,13 @@ public class Fusion {
      * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public void download(String catalogName, String dataset, String seriesMember, String distribution, String path, Map<String, String> headers) {
+    public void download(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            String path,
+            Map<String, String> headers) {
 
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
@@ -452,7 +458,8 @@ public class Fusion {
      * @throws FileDownloadException  if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public void download(String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers) {
+    public void download(
+            String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers) {
         this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath());
     }
 
@@ -506,7 +513,8 @@ public class Fusion {
      * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers) {
+    public InputStream downloadStream(
+            String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers) {
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                 this.rootURL, catalogName, dataset, seriesMember, distribution);

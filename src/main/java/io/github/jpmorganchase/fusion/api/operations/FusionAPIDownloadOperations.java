@@ -55,7 +55,8 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     @Override
-    public void callAPIFileDownload(String apiPath, String filePath, String catalog, String dataset, Map<String, String> headers)
+    public void callAPIFileDownload(
+            String apiPath, String filePath, String catalog, String dataset, Map<String, String> headers)
             throws APICallException, FileDownloadException {
 
         DownloadRequest dr = DownloadRequest.builder()

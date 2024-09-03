@@ -332,7 +332,8 @@ class FusionAPIDownloadOperationsTest {
         thenTheFileShouldMatchExpected();
     }
 
-    private void givenDownloadRequestForStream(String catalog, String dataset, String apiPath, Map<String, String> headers) {
+    private void givenDownloadRequestForStream(
+            String catalog, String dataset, String apiPath, Map<String, String> headers) {
         downloadRequest = DownloadRequest.builder()
                 .catalog(catalog)
                 .dataset(dataset)
@@ -431,7 +432,8 @@ class FusionAPIDownloadOperationsTest {
                 .willThrow(new APICallException(failureStatus, "broken response"));
     }
 
-    private void givenDownloadRequestForFile(String catalog, String dataset, String fileName, String apiPath, Map<String, String> headers) {
+    private void givenDownloadRequestForFile(
+            String catalog, String dataset, String fileName, String apiPath, Map<String, String> headers) {
         this.downloadRequest = DownloadRequest.builder()
                 .apiPath(apiPath)
                 .catalog(catalog)
@@ -522,14 +524,20 @@ class FusionAPIDownloadOperationsTest {
 
     private void whenApiIsCalledToDownloadFileAsStream() {
         responseStream = apiDownloader.callAPIFileDownload(
-                downloadRequest.getApiPath(), downloadRequest.getCatalog(), downloadRequest.getDataset(), downloadRequest.getHeaders());
+                downloadRequest.getApiPath(),
+                downloadRequest.getCatalog(),
+                downloadRequest.getDataset(),
+                downloadRequest.getHeaders());
     }
 
     private void whenApiIsCalledToDownloadFileAsStreamFailsWith(Class<? extends Throwable> expected) {
         throwable = Assertions.assertThrows(
                 expected,
                 () -> apiDownloader.callAPIFileDownload(
-                        downloadRequest.getApiPath(), downloadRequest.getCatalog(), downloadRequest.getDataset(), downloadRequest.getHeaders()));
+                        downloadRequest.getApiPath(),
+                        downloadRequest.getCatalog(),
+                        downloadRequest.getDataset(),
+                        downloadRequest.getHeaders()));
     }
 
     private void givenCallToPartFetcherForSinglePartReturns(String content) {

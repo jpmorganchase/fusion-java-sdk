@@ -137,7 +137,8 @@ class PartFetcherTest {
                 "data",
                 "http://foobar.com/v1/some/resource/operationType/download?downloadPartNumber=2",
                 "session-token",
-                "dataset-token", headers);
+                "dataset-token",
+                headers);
 
         // when
         whenFetchIsInvoked();
@@ -192,8 +193,12 @@ class PartFetcherTest {
         thenTheExceptionShouldBeAsExpected("bad-data", 400);
     }
 
-    private Map<String, String> givenHeader(String key, String value){
-        return new HashMap<String, String>(){{put(key, value);}};
+    private Map<String, String> givenHeader(String key, String value) {
+        return new HashMap<String, String>() {
+            {
+                put(key, value);
+            }
+        };
     }
 
     private void givenPartRequestForSinglePartDownload(String checksum) {
@@ -317,7 +322,8 @@ class PartFetcherTest {
         return requestHeaders;
     }
 
-    private static Map<String, String> givenAuthHeaders(String sessionToken, String datasetToken, Map<String, String> requestHeaders) {
+    private static Map<String, String> givenAuthHeaders(
+            String sessionToken, String datasetToken, Map<String, String> requestHeaders) {
         requestHeaders.put("Authorization", "Bearer " + sessionToken);
         requestHeaders.put("Fusion-Authorization", "Bearer " + datasetToken);
         return requestHeaders;
