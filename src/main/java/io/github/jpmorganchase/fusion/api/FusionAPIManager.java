@@ -52,15 +52,15 @@ public class FusionAPIManager implements APIManager {
     }
 
     @Override
-    public void callAPIFileDownload(String apiPath, String fileName, String catalog, String dataset)
+    public void callAPIFileDownload(String apiPath, String fileName, String catalog, String dataset, Map<String, String> headers)
             throws APICallException, FileDownloadException {
-        downloader.callAPIFileDownload(apiPath, fileName, catalog, dataset);
+        downloader.callAPIFileDownload(apiPath, fileName, catalog, dataset, headers);
     }
 
     @Override
-    public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset)
+    public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset, Map<String, String> headers)
             throws APICallException, FileDownloadException {
-        return downloader.callAPIFileDownload(apiPath, catalog, dataset);
+        return downloader.callAPIFileDownload(apiPath, catalog, dataset, headers);
     }
 
     @Override

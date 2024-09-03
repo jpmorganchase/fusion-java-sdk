@@ -11,6 +11,8 @@ import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
@@ -70,7 +72,7 @@ public class PartFetcher {
 
     private Map<String, String> getSecurityHeaders(PartRequest pr) {
         DownloadRequest dr = pr.getDownloadRequest();
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = Optional.ofNullable(dr.getHeaders()).orElse(new HashMap<>());
         headers.put("Authorization", "Bearer " + credentials.getSessionBearerToken());
         headers.put(
                 "Fusion-Authorization",

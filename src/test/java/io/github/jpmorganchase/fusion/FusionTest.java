@@ -187,7 +187,7 @@ public class FusionTest {
                                 config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
                         String.format("%s/%s_%s_%s.%s", TMP_PATH, "common", "sample_dataset", "20230308", "csv"),
                         "common",
-                        "sample_dataset");
+                        "sample_dataset", new HashMap<>());
 
         f.download("common", "sample_dataset", "20230308", "csv", TMP_PATH);
     }
@@ -204,7 +204,7 @@ public class FusionTest {
                                 config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
                         String.format("%s/%s_%s_%s.%s", "downloads", "common", "sample_dataset", "20230308", "csv"),
                         "common",
-                        "sample_dataset");
+                        "sample_dataset", new HashMap<>());
 
         f.download("common", "sample_dataset", "20230308", "csv");
     }
@@ -218,7 +218,7 @@ public class FusionTest {
                                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                                 config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
                         "common",
-                        "sample_dataset"))
+                        "sample_dataset", new HashMap<>()))
                 .thenReturn(new ByteArrayInputStream("A,B,C\nD,E,F".getBytes()));
 
         InputStream response = f.downloadStream("common", "sample_dataset", "20230308", "csv");

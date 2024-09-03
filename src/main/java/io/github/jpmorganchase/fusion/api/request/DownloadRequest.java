@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.Map;
+
 @Getter
 @Builder
 @ToString
@@ -18,4 +20,5 @@ public class DownloadRequest {
     private String dataset;
     private String filePath;
     private boolean isDownloadToStream;
+    private Map<String, String> headers;
 }

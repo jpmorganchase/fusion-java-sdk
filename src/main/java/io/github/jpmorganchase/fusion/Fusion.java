@@ -395,6 +395,23 @@ public class Fusion {
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, String seriesMember, String distribution, String path) {
+        download(catalogName, dataset, seriesMember, distribution, path, new HashMap<>());
+    }
+
+    /**
+     * Download a single distribution to the local filesystem
+     *
+     * @param catalogName  identifier of the catalog to be queried
+     * @param dataset      a String representing the dataset identifier to download.
+     * @param seriesMember a String representing the series member identifier.
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param path         the absolute file path where the file should be written.
+     * @param headers       http headers to be provided in the request.  For headers with multiple instances, the value should be a csv list
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public void download(String catalogName, String dataset, String seriesMember, String distribution, String path, Map<String, String> headers) {
 
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
@@ -405,7 +422,7 @@ public class Fusion {
             throw new FusionException(String.format("Unable to save to target path %s", path), e);
         }
         String filepath = String.format("%s/%s_%s_%s.%s", path, catalogName, dataset, seriesMember, distribution);
-        this.api.callAPIFileDownload(url, filepath, catalogName, dataset);
+        this.api.callAPIFileDownload(url, filepath, catalogName, dataset, headers);
     }
 
     /**
@@ -420,6 +437,22 @@ public class Fusion {
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, String seriesMember, String distribution) {
+        this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath(), new HashMap<>());
+    }
+
+    /**
+     * Download a single distribution to the local filesystem. By default, this will write to downloads folder.
+     *
+     * @param catalogName  identifier of the catalog to be queried
+     * @param dataset      a String representing the dataset identifier to download.
+     * @param seriesMember a String representing the series member identifier.
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param headers       http headers to be provided in the request.  For headers with multiple instances, the value should be a csv list
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException  if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public void download(String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers) {
         this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath());
     }
 
@@ -456,7 +489,28 @@ public class Fusion {
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                 this.rootURL, catalogName, dataset, seriesMember, distribution);
-        return this.api.callAPIFileDownload(url, catalogName, dataset);
+        return downloadStream(catalogName, dataset, seriesMember, distribution, new HashMap<>());
+    }
+
+    /**
+     * Download a single distribution and return the data as an InputStream
+     * Note that users of this method are required to close the returned InputStream. Failure to do so will
+     * result in resource leaks, including the Http connection used to communicate with Fusion
+     *
+     * @param catalogName  identifier of the catalog to be queried
+     * @param dataset      a String representing the dataset identifier to download.
+     * @param seriesMember a String representing the series member identifier.
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param headers       http headers to be provided in the request.  For headers with multiple instances, the value should be a csv list
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers) {
+        String url = String.format(
+                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                this.rootURL, catalogName, dataset, seriesMember, distribution);
+        return this.api.callAPIFileDownload(url, catalogName, dataset, headers);
     }
 
     /**

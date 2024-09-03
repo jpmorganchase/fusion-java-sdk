@@ -63,7 +63,8 @@ class FusionAPIDownloadOperationsTest {
                 "common",
                 "API_TEST",
                 "downloads/common-API_TEST-20230319.csv",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
         givenCallToPartFetcherToGetHeadReturns("version-123", 1, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=", 5);
         givenCallToPartFetcherForSinglePartReturns("A,B,C\n1,2,3");
 
@@ -83,7 +84,8 @@ class FusionAPIDownloadOperationsTest {
                 "common",
                 "API_TEST",
                 "downloads/common-API_TEST-20230319.csv",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
         givenCallToPartFetcherToGetHeadReturns("version-123", 1, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=", 5);
         givenCallToPartFetcherForSinglePartFails(500);
 
@@ -103,7 +105,8 @@ class FusionAPIDownloadOperationsTest {
                 "common",
                 "API_TEST",
                 "downloads///common/-API_TEST-20230319.csv",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
 
         givenCallToPartFetcherToGetHeadReturns("version-123", 1, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=", 5);
         givenCallToPartFetcherForSinglePartReturns("A,B,C\n1,2,3");
@@ -123,7 +126,8 @@ class FusionAPIDownloadOperationsTest {
                 "common",
                 "API_TEST",
                 "downloads/common-API_TEST-20230319.csv",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
         givenCallToPartFetcherToGetHeadReturns("a1", 5, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", 23);
 
         givenCallToPartFetcherSuccess(
@@ -154,7 +158,8 @@ class FusionAPIDownloadOperationsTest {
                 "commob",
                 "API_TST",
                 "downloads/common-API_TEST-20230319.csv",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
         givenCallToClientToGetHeadFails(500);
 
         // When
@@ -174,7 +179,8 @@ class FusionAPIDownloadOperationsTest {
                 "common",
                 "API_TEST",
                 "downloads/common-API_TEST-20230319.csv",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
         givenCallToPartFetcherToGetHeadReturns("a1", 5, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", 23);
 
         givenCallToPartFetcherSuccess(
@@ -203,7 +209,8 @@ class FusionAPIDownloadOperationsTest {
                 "common",
                 "API_TEST",
                 "downloads/common-API_TEST-20230319.csv",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
         givenCallToPartFetcherToGetHeadReturns("a1", 5, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", 23);
 
         givenCallToPartFetcherSuccess("A,B,C", 1, "a1", "c1", 5, 23, 0, 4, 23);
@@ -229,7 +236,8 @@ class FusionAPIDownloadOperationsTest {
         givenDownloadRequestForStream(
                 "common",
                 "API_TEST",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
         givenCallToPartFetcherToGetHeadReturns("version-123", 1, "U9Wqny3Wh4uvBG7jlJ249WgvG/A+Ue2C+iQ7P8r22G8=", 5);
 
         givenCallToPartFetcherForSinglePartReturns("A,B,C\n1,2,3");
@@ -249,7 +257,8 @@ class FusionAPIDownloadOperationsTest {
         givenDownloadRequestForStream(
                 "common",
                 "API_TEST",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
         givenDownloadBody("A,B,C\n1,2,3");
         givenCallToPartFetcherToGetHeadReturns("version-123", 1, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=", 5);
         givenCallToPartFetcherForSinglePartFails(504);
@@ -269,7 +278,8 @@ class FusionAPIDownloadOperationsTest {
         givenDownloadRequestForStream(
                 "common",
                 "API_TEST",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
 
         givenCallToPartFetcherToGetHeadReturns("a1", 5, "SFiERkoisri4Xv+MPlq3mtarmxbkmHPSaeLAXeNDk6A=-5", 23);
         givenCallToPartFetcherSuccess(
@@ -300,7 +310,8 @@ class FusionAPIDownloadOperationsTest {
                 "common",
                 "API_TEST",
                 "downloads/common-API_TEST-20230319.csv",
-                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv");
+                "http://localhost:8080/test/catalogs/common/datasets/API_TEST/datasetseries/20230319/distributions/csv",
+                Collections.singletonMap("fusion-e2e", "rootId/Id"));
         givenHead("a1", "c", 23L, 5);
 
         givenCallToPartFetcherSuccess(
@@ -321,12 +332,13 @@ class FusionAPIDownloadOperationsTest {
         thenTheFileShouldMatchExpected();
     }
 
-    private void givenDownloadRequestForStream(String catalog, String dataset, String apiPath) {
+    private void givenDownloadRequestForStream(String catalog, String dataset, String apiPath, Map<String, String> headers) {
         downloadRequest = DownloadRequest.builder()
                 .catalog(catalog)
                 .dataset(dataset)
                 .apiPath(apiPath)
                 .isDownloadToStream(true)
+                .headers(headers)
                 .build();
     }
 
@@ -419,13 +431,14 @@ class FusionAPIDownloadOperationsTest {
                 .willThrow(new APICallException(failureStatus, "broken response"));
     }
 
-    private void givenDownloadRequestForFile(String catalog, String dataset, String fileName, String apiPath) {
+    private void givenDownloadRequestForFile(String catalog, String dataset, String fileName, String apiPath, Map<String, String> headers) {
         this.downloadRequest = DownloadRequest.builder()
                 .apiPath(apiPath)
                 .catalog(catalog)
                 .dataset(dataset)
                 .filePath(fileName)
                 .isDownloadToStream(false)
+                .headers(headers)
                 .build();
     }
 
@@ -482,7 +495,8 @@ class FusionAPIDownloadOperationsTest {
                 downloadRequest.getApiPath(),
                 downloadRequest.getFilePath(),
                 downloadRequest.getCatalog(),
-                downloadRequest.getDataset());
+                downloadRequest.getDataset(),
+                downloadRequest.getHeaders());
     }
 
     private void whenFusionApiManagerIsCalledToDownloadFileToPathAndExceptionIsExcepted(
@@ -493,7 +507,8 @@ class FusionAPIDownloadOperationsTest {
                         downloadRequest.getApiPath(),
                         downloadRequest.getFilePath(),
                         downloadRequest.getCatalog(),
-                        downloadRequest.getDataset()));
+                        downloadRequest.getDataset(),
+                        downloadRequest.getHeaders()));
     }
 
     private void thenTheDownloadBodyShouldMatchExpected() throws Exception {
@@ -507,14 +522,14 @@ class FusionAPIDownloadOperationsTest {
 
     private void whenApiIsCalledToDownloadFileAsStream() {
         responseStream = apiDownloader.callAPIFileDownload(
-                downloadRequest.getApiPath(), downloadRequest.getCatalog(), downloadRequest.getDataset());
+                downloadRequest.getApiPath(), downloadRequest.getCatalog(), downloadRequest.getDataset(), downloadRequest.getHeaders());
     }
 
     private void whenApiIsCalledToDownloadFileAsStreamFailsWith(Class<? extends Throwable> expected) {
         throwable = Assertions.assertThrows(
                 expected,
                 () -> apiDownloader.callAPIFileDownload(
-                        downloadRequest.getApiPath(), downloadRequest.getCatalog(), downloadRequest.getDataset()));
+                        downloadRequest.getApiPath(), downloadRequest.getCatalog(), downloadRequest.getDataset(), downloadRequest.getHeaders()));
     }
 
     private void givenCallToPartFetcherForSinglePartReturns(String content) {
