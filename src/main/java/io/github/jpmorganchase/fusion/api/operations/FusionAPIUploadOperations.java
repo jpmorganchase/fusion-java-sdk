@@ -27,10 +27,7 @@ import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import lombok.Builder;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -81,12 +78,6 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
      * See {@link FusionConfiguration} for default values.
      */
     int uploadThreadPoolSize;
-
-    /**
-     * Max size of in-flux data that can be read at a given time.
-     * See {@link FusionConfiguration} for default values.
-     */
-    long maxInFluxDataSize;
 
     /**
      * Call the API upload endpoint to load a distribution
@@ -224,19 +215,22 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
     protected MultipartTransferContext callAPIToUploadParts(MultipartTransferContext mtx, UploadRequest ur) {
 
         int chunkSize = uploadPartSize * (1024 * 1024);
-        long maxInFluxBytes = maxInFluxDataSize * (1024L * 1024L);
 
         byte[] buffer = new byte[chunkSize];
         int partCnt = 1;
         int totalBytes = 0;
-        int inFluxBytes = 0;
 
         ExecutorService executor = Executors.newFixedThreadPool(uploadThreadPoolSize);
+        Semaphore semaphore = new Semaphore(uploadThreadPoolSize);
+
         try {
             List<CompletableFuture<Void>> futures = new ArrayList<>();
 
             int bytesRead;
             while ((bytesRead = ur.getData().read(buffer)) != -1) {
+                semaphore.acquire();
+
+                bytesRead = ensureBufferIsFilledToChunkSize(ur, chunkSize, buffer, bytesRead);
 
                 logger.debug(
                         "Creating upload task for part number {}, bytes read for this part {}", partCnt, bytesRead);
@@ -245,18 +239,12 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
                 final int currentBytesRead = bytesRead;
                 byte[] taskBuffer = Arrays.copyOf(buffer, bytesRead);
 
-                if (inFluxBytes > maxInFluxBytes) {
-                    inFluxBytes = easeDataPressure(futures);
-                }
-
                 futures.add(CompletableFuture.runAsync(
-                        () -> mtx.partUploaded(
-                                callAPIToUploadPart(mtx, ur, taskBuffer, currentBytesRead, currentPartCnt)),
+                        createRunnableToUploadPart(mtx, ur, semaphore, currentPartCnt, currentBytesRead, taskBuffer),
                         executor));
 
                 partCnt++;
                 totalBytes += bytesRead;
-                inFluxBytes += bytesRead;
             }
 
             for (CompletableFuture<Void> future : futures) {
@@ -272,16 +260,30 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
         return mtx.transferred(chunkSize, totalBytes, partCnt);
     }
 
-    private int easeDataPressure(List<CompletableFuture<Void>> futures)
-            throws InterruptedException, ExecutionException {
+    private Runnable createRunnableToUploadPart(
+            MultipartTransferContext mtx,
+            UploadRequest ur,
+            Semaphore semaphore,
+            int currentPartCnt,
+            int currentBytesRead,
+            byte[] taskBuffer) {
+        return () -> {
+            try {
+                mtx.partUploaded(callAPIToUploadPart(mtx, ur, taskBuffer, currentBytesRead, currentPartCnt));
+            } finally {
+                semaphore.release();
+            }
+        };
+    }
 
-        logger.debug("Reached max in-flux bytes - easing pressure");
-        for (CompletableFuture<Void> future : futures) {
-            future.get();
+    private int ensureBufferIsFilledToChunkSize(UploadRequest ur, int chunkSize, byte[] buffer, int bytesRead)
+            throws IOException {
+        while (bytesRead < buffer.length) {
+            int tempBytesRead = ur.getData().read(buffer, bytesRead, (chunkSize - bytesRead));
+            if (-1 == tempBytesRead) break;
+            bytesRead += tempBytesRead;
         }
-        logger.debug("Max in-flux bytes handled - pressure eased");
-        futures.clear();
-        return 0;
+        return bytesRead;
     }
 
     protected UploadedPartContext callAPIToUploadPart(
@@ -389,7 +391,6 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
         int singlePartUploadSizeLimit;
         int uploadPartSize;
         int uploadThreadPoolSize;
-        long maxInFluxDataSize;
 
         public FusionAPIUploadOperationsBuilder configuration(FusionConfiguration configuration) {
             this.configuration = configuration;
@@ -413,12 +414,6 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
             this.uploadThreadPoolSize = uploadThreadPoolSize;
             return this;
         }
-
-        @SuppressWarnings("PIT")
-        private FusionAPIUploadOperationsBuilder maxInFluxDataSize(long maxInFluxDataSize) {
-            this.maxInFluxDataSize = maxInFluxDataSize;
-            return this;
-        }
     }
 
     private static class CustomFusionAPIUploadOperationsBuilder extends FusionAPIUploadOperationsBuilder {
@@ -427,7 +422,6 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
             this.singlePartUploadSizeLimit = configuration.getSinglePartUploadSizeLimit();
             this.uploadPartSize = configuration.getUploadPartSize();
             this.uploadThreadPoolSize = configuration.getUploadThreadPoolSize();
-            this.maxInFluxDataSize = configuration.getMaxInFluxDataSize();
 
             if (Objects.isNull(digestProducer)) {
                 this.digestProducer = AlgoSpecificDigestProducer.builder()
