@@ -230,7 +230,11 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
             while ((bytesRead = ur.getData().read(buffer)) != -1) {
                 semaphore.acquire();
 
-                bytesRead = ensureBufferIsFilledToChunkSize(ur, chunkSize, buffer, bytesRead);
+                while (bytesRead < buffer.length) {
+                    int tempBytesRead = ur.getData().read(buffer, bytesRead, (chunkSize - bytesRead));
+                    if (-1 == tempBytesRead) break;
+                    bytesRead += tempBytesRead;
+                }
 
                 logger.debug(
                         "Creating upload task for part number {}, bytes read for this part {}", partCnt, bytesRead);
@@ -240,7 +244,14 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
                 byte[] taskBuffer = Arrays.copyOf(buffer, bytesRead);
 
                 futures.add(CompletableFuture.runAsync(
-                        createRunnableToUploadPart(mtx, ur, semaphore, currentPartCnt, currentBytesRead, taskBuffer),
+                        () -> {
+                            try {
+                                mtx.partUploaded(
+                                        callAPIToUploadPart(mtx, ur, taskBuffer, currentBytesRead, currentPartCnt));
+                            } finally {
+                                semaphore.release();
+                            }
+                        },
                         executor));
 
                 partCnt++;
@@ -258,32 +269,6 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
         }
 
         return mtx.transferred(chunkSize, totalBytes, partCnt);
-    }
-
-    private Runnable createRunnableToUploadPart(
-            MultipartTransferContext mtx,
-            UploadRequest ur,
-            Semaphore semaphore,
-            int currentPartCnt,
-            int currentBytesRead,
-            byte[] taskBuffer) {
-        return () -> {
-            try {
-                mtx.partUploaded(callAPIToUploadPart(mtx, ur, taskBuffer, currentBytesRead, currentPartCnt));
-            } finally {
-                semaphore.release();
-            }
-        };
-    }
-
-    private int ensureBufferIsFilledToChunkSize(UploadRequest ur, int chunkSize, byte[] buffer, int bytesRead)
-            throws IOException {
-        while (bytesRead < buffer.length) {
-            int tempBytesRead = ur.getData().read(buffer, bytesRead, (chunkSize - bytesRead));
-            if (-1 == tempBytesRead) break;
-            bytesRead += tempBytesRead;
-        }
-        return bytesRead;
     }
 
     protected UploadedPartContext callAPIToUploadPart(
