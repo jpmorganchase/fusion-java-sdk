@@ -6,7 +6,7 @@
     <groupId>io.github.jpmorganchase.fusion</groupId>
     <artifactId>fusion-sdk</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.12-SNAPSHOT</version>
+    <version>0.0.13</version>
 
     <name>fusion-sdk</name>
     <description>A Java SDK for the Fusion platform API</description>
@@ -45,7 +45,7 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>ossrh</id>
+            <id>central</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
@@ -397,10 +397,9 @@
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>ossrh</serverId>
+                    <serverId>central</serverId>
                     <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                    <!-- this can be changed to true once we are comfortable with the release process being correct -->
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
         </plugins>

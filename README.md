@@ -20,7 +20,7 @@ The Fusion SDK is published to Maven Central and can be retrieved from there usi
   <dependency>
     <groupId>io.github.jpmorganchase.fusion</groupId>
     <artifactId>fusion-sdk</artifactId>
-    <version>0.0.12-SNAPSHOT</version>
+    <version>0.0.13</version>
   </dependency>
 ```
 
@@ -109,7 +109,6 @@ Fusion fusion = Fusion.builder().configuration(FusionConfiguration.builder()
 * _downloadPath_ - Configures the path where distributions should be downloaded to. Defaults to "downloads"
 * _singlePartUploadSizeLimit_ - Max size in MB of data allowed for a single part upload.  if 32MB was the max size then 32 would be provided. Defaults to 50.
 * _uploadPartSize_ - Upload part chunk size. If a value such as 8MB is required, then client would set this value to 8.  Defaults to 16MB.
-* _maxInFluxDataSize_ - Max in flux data to be read at a given time.  Use this to protect data read to heap during upload.  If a value such as 100MB is required, set to 100. Defaults to 500MB.
 * _uploadThreadPoolSize_ - Size of Thread-Pool to be used for uploading chunks of a multipart file. Defaults to number of available processors.
 * _downloadThreadPoolSize_ - Size of Thread-Pool to be used for uploading chunks of a multipart file. Defaults to number of available processors.
 * _digestAlgorithm_ - Digest algorithm used by fusion to verify the integrity of upload/downloads. Defaults to SHA-256.
