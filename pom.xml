@@ -7,7 +7,6 @@
     <artifactId>fusion-sdk</artifactId>
     <packaging>jar</packaging>
     <version>0.0.13</version>
-
     <name>fusion-sdk</name>
     <description>A Java SDK for the Fusion platform API</description>
     <url>https://github.com/jpmorganchase/fusion-java-sdk</url>
