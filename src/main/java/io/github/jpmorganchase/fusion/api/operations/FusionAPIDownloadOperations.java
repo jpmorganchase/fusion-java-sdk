@@ -49,12 +49,14 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
      * @param filePath the absolute path where the file will be persisted.
      * @param catalog the catalog the distribution to be downloaded is part of
      * @param dataset the dataset the distribution to be downloaded is a member of
+     * @param headers http headers to be provided in the request.  For headers with multiple instances, the value should be a csv list
      * @throws APICallException if the call to the Fusion API fails
      * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     @Override
-    public void callAPIFileDownload(String apiPath, String filePath, String catalog, String dataset)
+    public void callAPIFileDownload(
+            String apiPath, String filePath, String catalog, String dataset, Map<String, String> headers)
             throws APICallException, FileDownloadException {
 
         DownloadRequest dr = DownloadRequest.builder()
@@ -62,6 +64,7 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
                 .filePath(filePath)
                 .catalog(catalog)
                 .dataset(dataset)
+                .headers(headers)
                 .build();
 
         downloadToFile(dr);
@@ -73,12 +76,13 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
      * @param apiPath the URL of the API endpoint to call
      * @param catalog the catalog the distribution to be downloaded is part of
      * @param dataset the dataset the distribution to be downloaded is a member of
+     * @param headers http headers to be provided in the request.  For headers with multiple instances, the value should be a csv list
      * @throws APICallException if the call to the Fusion API fails
      * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     @Override
-    public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset)
+    public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset, Map<String, String> headers)
             throws APICallException, FileDownloadException {
 
         DownloadRequest dr = DownloadRequest.builder()
@@ -86,6 +90,7 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
                 .catalog(catalog)
                 .dataset(dataset)
                 .isDownloadToStream(true)
+                .headers(headers)
                 .build();
 
         return downloadToStream(dr);

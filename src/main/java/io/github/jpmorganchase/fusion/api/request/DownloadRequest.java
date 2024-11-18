@@ -1,5 +1,6 @@
 package io.github.jpmorganchase.fusion.api.request;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -18,4 +19,5 @@ public class DownloadRequest {
     private String dataset;
     private String filePath;
     private boolean isDownloadToStream;
+    private Map<String, String> headers;
 }

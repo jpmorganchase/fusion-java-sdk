@@ -51,7 +51,7 @@ class PartFetcherTest {
     APICallException exception;
 
     @Test
-    public void testFetchPartForSinglePartDownload() throws Exception {
+    public void testFetchPartForSinglePartDownloadWithoutHeaders() throws Exception {
 
         // Given
         givenPartFetcher();
@@ -73,7 +73,30 @@ class PartFetcherTest {
     }
 
     @Test
-    public void testFetchPartForMultipartDownload() throws Exception {
+    public void testFetchPartForSinglePartDownloadWithHeaders() throws Exception {
+
+        // Given
+        givenPartFetcher();
+        Map<String, String> headers = givenHeader("foo", "bar");
+        givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource", headers);
+        givenPartRequestForSinglePartDownload("Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=");
+        givenCallToGetSessionBearerReturns("session-token");
+        givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
+        givenSinglePartResponseHeaders("3");
+        givenCallToGetInputStreamForSinglePartDownload(
+                "data", "http://foobar.com/v1/some/resource", "session-token", "dataset-token", headers);
+
+        // when
+        whenFetchIsInvoked();
+
+        // Then
+        thenStreamShouldBeAsExpected();
+        thenStreamDataShouldBeAsExpected("data");
+        thenChecksumInHeadShouldBeAsExpected("Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=");
+    }
+
+    @Test
+    public void testFetchPartForMultipartDownloadWithoutHeaders() throws Exception {
 
         // Given
         givenPartFetcher();
@@ -88,6 +111,34 @@ class PartFetcherTest {
                 "http://foobar.com/v1/some/resource/operationType/download?downloadPartNumber=2",
                 "session-token",
                 "dataset-token");
+
+        // when
+        whenFetchIsInvoked();
+
+        // Then
+        thenStreamShouldBeAsExpected();
+        thenStreamDataShouldBeAsExpected("data");
+        thenChecksumInHeadShouldBeAsExpected("Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=");
+    }
+
+    @Test
+    public void testFetchPartForMultipartDownloadWithHeaders() throws Exception {
+
+        // Given
+        givenPartFetcher();
+        Map<String, String> headers = givenHeader("foo", "bar");
+        givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource", headers);
+        givenPartRequestForMultiPartDownload(2);
+        givenCallToGetSessionBearerReturns("session-token");
+        givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
+        givenResponseHeadersForMultipart(
+                "version-1", "Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=", "5", "23", "bytes 0-4/23");
+        givenCallToGetInputStreamReturnsSuccess(
+                "data",
+                "http://foobar.com/v1/some/resource/operationType/download?downloadPartNumber=2",
+                "session-token",
+                "dataset-token",
+                headers);
 
         // when
         whenFetchIsInvoked();
@@ -142,6 +193,14 @@ class PartFetcherTest {
         thenTheExceptionShouldBeAsExpected("bad-data", 400);
     }
 
+    private Map<String, String> givenHeader(String key, String value) {
+        return new HashMap<String, String>() {
+            {
+                put(key, value);
+            }
+        };
+    }
+
     private void givenPartRequestForSinglePartDownload(String checksum) {
         pr = PartRequest.builder()
                 .partNo(1)
@@ -188,23 +247,25 @@ class PartFetcherTest {
 
     private void givenCallToGetInputStreamReturnsSuccess(
             String data, String path, String sessionToken, String datasetToken) {
+        givenCallToGetInputStream(data, path, givenAuthHeaders(sessionToken, datasetToken));
+    }
 
-        Map<String, String> requestHeaders = givenRequestHeaders(sessionToken, datasetToken);
-
-        httpResponse = HttpResponse.<InputStream>builder()
-                .body(new ByteArrayInputStream(data.getBytes()))
-                .headers(responseHeaders)
-                .statusCode(200)
-                .build();
-
-        Mockito.when(client.getInputStream(path, requestHeaders)).thenReturn(httpResponse);
+    private void givenCallToGetInputStreamReturnsSuccess(
+            String data, String path, String sessionToken, String datasetToken, Map<String, String> headers) {
+        givenCallToGetInputStream(data, path, givenAuthHeaders(sessionToken, datasetToken, headers));
     }
 
     private void givenCallToGetInputStreamForSinglePartDownload(
             String data, String path, String sessionToken, String datasetToken) {
+        givenCallToGetInputStream(data, path, givenAuthHeaders(sessionToken, datasetToken));
+    }
 
-        Map<String, String> requestHeaders = givenRequestHeaders(sessionToken, datasetToken);
+    private void givenCallToGetInputStreamForSinglePartDownload(
+            String data, String path, String sessionToken, String datasetToken, Map<String, String> headers) {
+        givenCallToGetInputStream(data, path, givenAuthHeaders(sessionToken, datasetToken, headers));
+    }
 
+    private void givenCallToGetInputStream(String data, String path, Map<String, String> requestHeaders) {
         httpResponse = HttpResponse.<InputStream>builder()
                 .body(new ByteArrayInputStream(data.getBytes()))
                 .headers(responseHeaders)
@@ -217,7 +278,7 @@ class PartFetcherTest {
     private void givenCallToGetInputStreamReturnsFailure(
             String error, String path, String sessionToken, String datasetToken) {
 
-        Map<String, String> requestHeaders = givenRequestHeaders(sessionToken, datasetToken);
+        Map<String, String> requestHeaders = givenAuthHeaders(sessionToken, datasetToken);
 
         badResponse = HttpResponse.builder()
                 .body("{\"error\":\"" + error + "\"}")
@@ -254,8 +315,15 @@ class PartFetcherTest {
     }
 
     @NotNull
-    private static Map<String, String> givenRequestHeaders(String sessionToken, String datasetToken) {
+    private static Map<String, String> givenAuthHeaders(String sessionToken, String datasetToken) {
         Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + sessionToken);
+        requestHeaders.put("Fusion-Authorization", "Bearer " + datasetToken);
+        return requestHeaders;
+    }
+
+    private static Map<String, String> givenAuthHeaders(
+            String sessionToken, String datasetToken, Map<String, String> requestHeaders) {
         requestHeaders.put("Authorization", "Bearer " + sessionToken);
         requestHeaders.put("Fusion-Authorization", "Bearer " + datasetToken);
         return requestHeaders;
@@ -278,6 +346,15 @@ class PartFetcherTest {
                 .catalog(catalog)
                 .dataset(dataset)
                 .apiPath(apiPath)
+                .build();
+    }
+
+    private void givenDownloadRequest(String catalog, String dataset, String apiPath, Map<String, String> headers) {
+        dr = DownloadRequest.builder()
+                .catalog(catalog)
+                .dataset(dataset)
+                .apiPath(apiPath)
+                .headers(headers)
                 .build();
     }
 }
