@@ -1,5 +1,6 @@
 package io.github.jpmorganchase.fusion.parsing;
 
+import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -27,6 +28,31 @@ public class GsonAPIResponseParserDatasetTest {
             .title("Sample Dataset 1 | North America")
             .build();
 
+    private static final Dataset testDatasetWithVarArgs = Dataset.builder()
+            .identifier("SD0001")
+            .description("Sample dataset description 1")
+            .linkedEntity("SD0001/")
+            .frequency("Daily")
+            .title("Sample Dataset 1 | North America")
+            .varArg("category", listOf("Category 1"))
+            .varArg("createdDate", "2022-02-05")
+            .varArg("coverageStartDate", "2022-02-05")
+            .varArg("coverageEndDate", "2023-03-08")
+            .varArg("isThirdPartyData", Boolean.FALSE)
+            .varArg("isInternalOnlyDataset", Boolean.FALSE)
+            .varArg("language", "English")
+            .varArg("maintainer", "Maintainer 1")
+            .varArg("modifiedDate", "2023-03-08")
+            .varArg("publisher", "Publisher 1")
+            .varArg("region", listOf("North America"))
+            .varArg("source", listOf("Source System 1"))
+            .varArg("subCategory", listOf("Subcategory 1"))
+            .varArg("tag", listOf("Tag1"))
+            .varArg("isRestricted", Boolean.FALSE)
+            .varArg("isRawData", Boolean.FALSE)
+            .varArg("hasSample", Boolean.FALSE)
+            .build();
+
     private static final Dataset testDataset2 = Dataset.builder()
             .identifier("SD0002")
             .description("Sample dataset description 2")
@@ -52,6 +78,15 @@ public class GsonAPIResponseParserDatasetTest {
 
         Dataset testDatasetResponse = datasetMap.get("SD0001");
         assertThat(testDatasetResponse, is(equalTo(testDataset)));
+    }
+
+    public void singleDatasetInResourcesParsesCorrectlyWithVarArgs() {
+        Map<String, Dataset> datasetMap =
+                responseParser.parseResourcesFromResponseWithVarArgs(singleDatasetJson, Dataset.class);
+        assertThat(datasetMap.size(), is(1));
+
+        Dataset testDatasetResponse = datasetMap.get("SD0001");
+        assertThat(testDatasetResponse, is(equalTo(testDatasetWithVarArgs)));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
+import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -24,11 +25,23 @@ public class Catalog extends CatalogResource {
 
     @Builder
     public Catalog(
-            String identifier, Map<String, Object> varArgs, String description, String linkedEntity, String title) {
-        super(identifier, varArgs);
+            String identifier,
+            Map<String, Object> varArgs,
+            String rootUrl,
+            String catalogIdentifier,
+            APIManager apiManager,
+            String description,
+            String linkedEntity,
+            String title) {
+        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
         this.title = title;
+    }
+
+    @Override
+    protected String getApiPath() {
+        throw new UnsupportedOperationException("Operation not yet supported for Catalog");
     }
 
     public static class CatalogBuilder {

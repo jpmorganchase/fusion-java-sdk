@@ -5,13 +5,12 @@ import com.google.gson.reflect.TypeToken;
 import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.model.*;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -76,6 +75,22 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
+    public <T extends CatalogResource> Map<String, T> parseResourcesFromResponseWithVarArgs(
+            String json, Class<T> resourceClass) {
+
+        JsonArray resources = getResources(json);
+        List<T> resourceList = new ArrayList<>();
+
+        List<String> excludes = varArgsExclusions(resourceClass);
+
+        for (JsonElement element : resources) {
+            resourceList.add(parseResourceWithVarArgs(resourceClass, excludes, element));
+        }
+
+        return collectMapOfUniqueResources(resourceList);
+    }
+
+    @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass) {
         // TODO: handle varArgs
 
@@ -83,15 +98,8 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
         Type listType = TypeToken.getParameterized(List.class, resourceClass).getType();
         List<T> resourceList = gson.fromJson(resources, listType);
-        return resourceList.stream()
-                .collect(Collectors.toMap(
-                        T::getIdentifier,
-                        Function.identity(),
-                        // resolve any duplicate keys, for now just skip the duplicates
-                        (r1, r2) -> {
-                            logger.warn("Duplicate key '{}' found, will be ignored", r2.getIdentifier());
-                            return r1;
-                        }));
+
+        return collectMapOfUniqueResources(resourceList);
     }
 
     @Override
@@ -132,6 +140,51 @@ public class GsonAPIResponseParser implements APIResponseParser {
         String message = "Failed to parse resources from JSON, none found";
         logger.error(message);
         return new ParsingException(message);
+    }
+
+    private <T extends CatalogResource> T parseResourceWithVarArgs(
+            Class<T> resourceClass, List<String> excludes, JsonElement element) {
+        JsonObject jsonObject = element.getAsJsonObject();
+        T obj = gson.fromJson(element, resourceClass);
+
+        Map<String, Object> varArgs = extractFieldsAsMap(jsonObject, excludes);
+
+        obj.setVarArgs(varArgs);
+        return obj;
+    }
+
+    private static <T extends CatalogResource> List<String> varArgsExclusions(Class<T> resourceClass) {
+        // TODO :: Should this be returned by the Model Object ?
+        List<String> excludes = new ArrayList<>();
+        List<String> excludeFromType = Arrays.stream(resourceClass.getDeclaredFields())
+                .map(Field::getName)
+                .collect(Collectors.toList());
+        List<String> excludeFromCatalogResource = Arrays.stream(CatalogResource.class.getDeclaredFields())
+                .map(Field::getName)
+                .collect(Collectors.toList());
+        List<String> staticExcludes = Collections.singletonList("@id");
+        excludes.addAll(excludeFromType);
+        excludes.addAll(excludeFromCatalogResource);
+        excludes.addAll(staticExcludes);
+        return excludes;
+    }
+
+    private static <T extends CatalogResource> Map<String, T> collectMapOfUniqueResources(List<T> resourceList) {
+        return resourceList.stream()
+                .collect(Collectors.toMap(
+                        T::getIdentifier,
+                        Function.identity(),
+                        // resolve any duplicate keys, for now just skip the duplicates
+                        (r1, r2) -> {
+                            logger.warn("Duplicate key '{}' found, will be ignored", r2.getIdentifier());
+                            return r1;
+                        }));
+    }
+
+    private Map<String, Object> extractFieldsAsMap(JsonObject jsonObject, List<String> exclusionList) {
+        return jsonObject.entrySet().stream()
+                .filter(entry -> !exclusionList.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> (Object) entry.getValue()));
     }
 
     private static final class LocalDateDeserializer implements JsonDeserializer<LocalDate> {

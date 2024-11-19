@@ -1,9 +1,9 @@
 package io.github.jpmorganchase.fusion.serializing;
 
+import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.jpmorganchase.fusion.model.Dataset;
 import java.net.URL;
@@ -11,11 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class GsonAPIRequestSerializerTest {
+class DatasetGsonAPIRequestSerializerTest {
 
     @Test
     public void testDatasetSerializesCorrectly() {
@@ -48,7 +46,7 @@ class GsonAPIRequestSerializerTest {
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
 
         // When
-        String actual = serializer.serializeDatasetRequest(dataset);
+        String actual = serializer.serialize(dataset);
 
         // Then
         String expected = loadTestResource("dataset-request.json");
@@ -69,17 +67,11 @@ class GsonAPIRequestSerializerTest {
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
 
         // When
-        String actual = serializer.serializeDatasetRequest(dataset);
+        String actual = serializer.serialize(dataset);
 
         // Then
         String expected = loadTestResource("dataset-no-varags-request.json");
         assertThat(actual, is(equalTo(expected)));
-    }
-
-    private List<Object> listOf(Object arg) {
-        List<Object> dataList = new ArrayList<>();
-        dataList.add(arg);
-        return dataList;
     }
 
     private static String loadTestResource(String resourceName) {

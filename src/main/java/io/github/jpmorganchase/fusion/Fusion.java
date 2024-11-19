@@ -6,6 +6,9 @@ import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
 import io.github.jpmorganchase.fusion.api.exception.FileUploadException;
+import io.github.jpmorganchase.fusion.builders.APIConfiguredBuilders;
+import io.github.jpmorganchase.fusion.builders.Builders;
+import io.github.jpmorganchase.fusion.filter.DatasetFilter;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.JdkClient;
 import io.github.jpmorganchase.fusion.model.*;
@@ -43,6 +46,7 @@ public class Fusion {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private APIManager api;
+    private Builders builders;
     private String defaultCatalog;
     private String defaultPath;
     private String rootURL;
@@ -192,11 +196,10 @@ public class Fusion {
      * @throws ParsingException if the response from Fusion could not be parsed successfully
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    // TODO: Search parameters
     public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) {
         String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
-        return responseParser.parseDatasetResponse(json);
+        return DatasetFilter.filterDatasets(responseParser.parseDatasetResponse(json), contains, idContains);
     }
 
     /**
@@ -310,26 +313,6 @@ public class Fusion {
     public Map<String, Map<String, Object>> datasetMemberResources(String dataset, String seriesMember) {
 
         return this.datasetMemberResources(this.getDefaultCatalog(), dataset, seriesMember);
-    }
-
-    /**
-     * Creates a dataset, using the default catalog.
-     *
-     * @param dataset  {@link Dataset} to be created
-     */
-    public void create(Dataset dataset) {
-        this.create(this.getDefaultCatalog(), dataset);
-    }
-
-    /**
-     * Creates a dataset, using the specified catalog.
-     *
-     * @param dataset   {@link Dataset} to be created
-     */
-    public void create(String catalogName, Dataset dataset) {
-
-        String url = String.format("%1scatalogs/%2s/datasets/%3s", this.rootURL, catalogName, dataset.getIdentifier());
-        this.api.callAPIPost(url, requestSerializer.serializeDatasetRequest(dataset));
     }
 
     /**
@@ -797,6 +780,16 @@ public class Fusion {
         this.upload(catalogName, dataset, seriesMember, distribution, data, dataDate, dataDate, dataDate, headers);
     }
 
+    /**
+     * Returns a builder for creating a {@link io.github.jpmorganchase.fusion.model.Dataset} object.
+     * The builder can be used to set properties and then create or update an instance of {@link io.github.jpmorganchase.fusion.model.Dataset}.
+     *
+     * @return {@link Builders} The object that provides access to specific model builders for different types of datasets.
+     */
+    public Builders builders() {
+        return this.builders;
+    }
+
     public static FusionBuilder builder() {
         return new CustomFusionBuilder();
     }
@@ -805,6 +798,7 @@ public class Fusion {
 
         protected Client client;
         protected APIManager api;
+        protected Builders builders;
         protected String rootURL;
         protected String defaultCatalog;
         protected String defaultPath;
@@ -888,6 +882,13 @@ public class Fusion {
                 api = FusionAPIManager.builder()
                         .httpClient(client)
                         .tokenProvider(fusionTokenProvider)
+                        .configuration(configuration)
+                        .build();
+            }
+
+            if (Objects.isNull(builders)) {
+                builders = APIConfiguredBuilders.builder()
+                        .apiManager(api)
                         .configuration(configuration)
                         .build();
             }

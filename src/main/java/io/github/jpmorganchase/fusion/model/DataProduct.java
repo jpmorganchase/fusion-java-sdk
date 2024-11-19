@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
+import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -27,15 +28,23 @@ public class DataProduct extends CatalogResource {
     public DataProduct(
             String identifier,
             Map<String, Object> varArgs,
+            APIManager apiManager,
+            String rootUrl,
+            String catalogIdentifier,
             String description,
             String linkedEntity,
             String title,
             String status) {
-        super(identifier, varArgs);
+        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
         this.title = title;
         this.status = status;
+    }
+
+    @Override
+    protected String getApiPath() {
+        throw new UnsupportedOperationException("Operation not yet supported for DataProduct");
     }
 
     public static class DataProductBuilder {

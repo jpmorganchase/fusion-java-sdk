@@ -1,12 +1,10 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
+import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
 import java.util.Objects;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import lombok.Value;
+import lombok.*;
 
 /**
  * An object representing a dataset. Object properties hold dataset metadata attributes
@@ -28,15 +26,24 @@ public class Dataset extends CatalogResource {
     public Dataset(
             String identifier,
             Map<String, Object> varArgs,
+            APIManager apiManager,
+            String rootUrl,
+            String catalogIdentifier,
             String description,
             String linkedEntity,
             String title,
             String frequency) {
-        super(identifier, varArgs);
+        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
         this.title = title;
         this.frequency = frequency;
+    }
+
+    @Override
+    protected String getApiPath() {
+        return String.format(
+                "%1scatalogs/%2s/datasets/%3s", this.getRootUrl(), this.getCatalogIdentifier(), this.getIdentifier());
     }
 
     public static class DatasetBuilder {
