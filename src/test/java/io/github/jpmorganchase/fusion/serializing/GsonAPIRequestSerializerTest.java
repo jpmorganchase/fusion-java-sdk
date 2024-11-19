@@ -5,13 +5,14 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.sun.tools.javac.util.List;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class GsonAPIRequestSerializerTest {
@@ -25,7 +26,7 @@ class GsonAPIRequestSerializerTest {
                 .linkedEntity("SD0001/")
                 .title("Sample Dataset 1 | North America")
                 .frequency("Daily")
-                .varArg("category", List.of("Category 1"))
+                .varArg("category", listOf("Category 1"))
                 .varArg("createdDate", "2022-02-05")
                 .varArg("coverageStartDate", "2022-02-05")
                 .varArg("coverageEndDate", "2023-03-08")
@@ -35,10 +36,10 @@ class GsonAPIRequestSerializerTest {
                 .varArg("maintainer", "Maintainer 1")
                 .varArg("modifiedDate", "2023-03-08")
                 .varArg("publisher", "Publisher 1")
-                .varArg("region", List.of("North America"))
-                .varArg("source", List.of("Source System 1"))
-                .varArg("subCategory", List.of("Subcategory 1"))
-                .varArg("tag", List.of("Tag1"))
+                .varArg("region", listOf("North America"))
+                .varArg("source", listOf("Source System 1"))
+                .varArg("subCategory", listOf("Subcategory 1"))
+                .varArg("tag", listOf("Tag1"))
                 .varArg("isRestricted", Boolean.FALSE)
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
@@ -73,6 +74,12 @@ class GsonAPIRequestSerializerTest {
         // Then
         String expected = loadTestResource("dataset-no-varags-request.json");
         assertThat(actual, is(equalTo(expected)));
+    }
+
+    private List<Object> listOf(Object arg) {
+        List<Object> dataList = new ArrayList<>();
+        dataList.add(arg);
+        return dataList;
     }
 
     private static String loadTestResource(String resourceName) {

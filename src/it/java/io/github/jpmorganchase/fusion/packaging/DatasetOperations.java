@@ -14,6 +14,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+
 public class DatasetOperations {
 
     // WireMock server running on port 8080
@@ -24,14 +26,18 @@ public class DatasetOperations {
 
     @BeforeEach
     public void setUp() {
-        sdk = Fusion.builder().configuration(FusionConfiguration.builder()
-                        .rootURL("http://localhost:8080/v1")
+        sdk = Fusion.builder()
+                .bearerToken("my-token")
+                .configuration(FusionConfiguration.builder()
+                        .rootURL("http://localhost:8080/")
                 .build()).build();
     }
 
-    public void testGetDataFromApi() throws IOException, InterruptedException {
+    @Test
+    public void testCreateDataset() throws IOException, InterruptedException {
         // Stub WireMock to respond with a custom JSON
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo("/api/data"))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SD0001"))
+                //.withRequestBody(equalToJson("{ \"key\": \"value\" }"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)
