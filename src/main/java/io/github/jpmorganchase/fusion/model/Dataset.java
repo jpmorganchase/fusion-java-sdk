@@ -3,7 +3,6 @@ package io.github.jpmorganchase.fusion.model;
 import com.google.gson.annotations.SerializedName;
 import java.util.Map;
 import java.util.Objects;
-
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

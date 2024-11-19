@@ -2,17 +2,11 @@ package io.github.jpmorganchase.fusion.serializing;
 
 import com.google.gson.*;
 import io.github.jpmorganchase.fusion.model.Dataset;
-import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
-import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GsonAPIRequestSerializer implements APIRequestSerializer {
 
@@ -51,14 +45,11 @@ public class GsonAPIRequestSerializer implements APIRequestSerializer {
                 varArgs.forEach((key, value) -> jsonObject.add(key, context.serialize(value)));
             }
 
-
-            if (jsonObject.has("varArgs")){
+            if (jsonObject.has("varArgs")) {
                 jsonObject.remove("varArgs");
             }
 
             return jsonObject;
         }
     }
-
-
 }

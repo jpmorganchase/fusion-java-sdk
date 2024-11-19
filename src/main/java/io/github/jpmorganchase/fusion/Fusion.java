@@ -19,6 +19,8 @@ import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
+import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
+import io.github.jpmorganchase.fusion.serializing.GsonAPIRequestSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -30,9 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
-import io.github.jpmorganchase.fusion.serializing.GsonAPIRequestSerializer;
 import lombok.Builder;
 
 /**
@@ -318,7 +317,7 @@ public class Fusion {
      *
      * @param dataset  {@link Dataset} to be created
      */
-    public void create(Dataset dataset){
+    public void create(Dataset dataset) {
         this.create(this.getDefaultCatalog(), dataset);
     }
 
@@ -327,7 +326,7 @@ public class Fusion {
      *
      * @param dataset   {@link Dataset} to be created
      */
-    public void create(String catalogName, Dataset dataset){
+    public void create(String catalogName, Dataset dataset) {
 
         String url = String.format("%1scatalogs/%2s/datasets/%3s", this.rootURL, catalogName, dataset.getIdentifier());
         this.api.callAPIPost(url, requestSerializer.serializeDatasetRequest(dataset));

@@ -5,5 +5,4 @@ import io.github.jpmorganchase.fusion.model.Dataset;
 public interface APIRequestSerializer {
 
     String serializeDatasetRequest(Dataset dataset);
-
 }

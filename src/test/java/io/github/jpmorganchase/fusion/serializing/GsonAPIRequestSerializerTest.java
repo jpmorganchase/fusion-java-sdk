@@ -1,30 +1,24 @@
 package io.github.jpmorganchase.fusion.serializing;
 
-import com.sun.tools.javac.util.List;
-import io.github.jpmorganchase.fusion.model.Dataset;
-import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.Test;
-
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.sun.tools.javac.util.List;
+import io.github.jpmorganchase.fusion.model.Dataset;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.junit.jupiter.api.Test;
+
 class GsonAPIRequestSerializerTest {
 
-
     @Test
-    public void testDatasetSerializesCorrectly(){
-        //Given
+    public void testDatasetSerializesCorrectly() {
+        // Given
         Dataset dataset = Dataset.builder()
                 .identifier("SD0001")
                 .description("Sample dataset description 1")
@@ -52,17 +46,17 @@ class GsonAPIRequestSerializerTest {
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
 
-        //When
+        // When
         String actual = serializer.serializeDatasetRequest(dataset);
 
-        //Then
+        // Then
         String expected = loadTestResource("dataset-request.json");
         assertThat(actual, is(equalTo(expected)));
     }
 
     @Test
-    public void testDatasetWithoutVarArgsSerializesCorrectly(){
-        //Given
+    public void testDatasetWithoutVarArgsSerializesCorrectly() {
+        // Given
         Dataset dataset = Dataset.builder()
                 .identifier("SD0001")
                 .description("Sample dataset description 1")
@@ -73,10 +67,10 @@ class GsonAPIRequestSerializerTest {
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
 
-        //When
+        // When
         String actual = serializer.serializeDatasetRequest(dataset);
 
-        //Then
+        // Then
         String expected = loadTestResource("dataset-no-varags-request.json");
         assertThat(actual, is(equalTo(expected)));
     }
@@ -90,5 +84,4 @@ class GsonAPIRequestSerializerTest {
             throw new RuntimeException("Failed to load test data", e);
         }
     }
-
 }

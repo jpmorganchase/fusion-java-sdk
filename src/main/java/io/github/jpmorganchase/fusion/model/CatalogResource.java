@@ -34,7 +34,6 @@ public abstract class CatalogResource {
         return target;
     }
 
-
     static Map<String, Object> initializeMap() {
         return new HashMap<>();
     }
