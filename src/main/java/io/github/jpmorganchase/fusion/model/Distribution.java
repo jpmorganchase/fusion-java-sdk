@@ -27,7 +27,7 @@ public class Distribution extends CatalogResource {
     @Builder
     public Distribution(
             String identifier,
-            Map<String, String> varArgs,
+            Map<String, Object> varArgs,
             String description,
             String linkedEntity,
             String title,
@@ -43,9 +43,9 @@ public class Distribution extends CatalogResource {
 
     public static class DistributionBuilder {
         @SuppressWarnings("FieldCanBeLocal")
-        private Map<String, String> varArgs;
+        private Map<String, Object> varArgs;
 
-        public DistributionBuilder varArgs(Map<String, String> varArgs) {
+        public DistributionBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = copyMap(varArgs);
             return this;
         }

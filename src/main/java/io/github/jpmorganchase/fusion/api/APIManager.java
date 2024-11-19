@@ -6,4 +6,5 @@ import io.github.jpmorganchase.fusion.api.operations.APIUploadOperations;
 
 public interface APIManager extends APIDownloadOperations, APIUploadOperations {
     String callAPI(String apiPath) throws APICallException;
+    String callAPIPost(String apiPath, String body);
 }

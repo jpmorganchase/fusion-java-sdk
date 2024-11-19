@@ -23,7 +23,7 @@ public class DatasetSeries extends CatalogResource {
     @Builder
     public DatasetSeries(
             String identifier,
-            Map<String, String> varArgs,
+            Map<String, Object> varArgs,
             LocalDate fromDate,
             LocalDate toDate,
             LocalDate createdDate,
@@ -37,9 +37,9 @@ public class DatasetSeries extends CatalogResource {
 
     public static class DatasetSeriesBuilder {
         @SuppressWarnings("FieldCanBeLocal")
-        private Map<String, String> varArgs;
+        private Map<String, Object> varArgs;
 
-        public DatasetSeriesBuilder varArgs(Map<String, String> varArgs) {
+        public DatasetSeriesBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = copyMap(varArgs);
             return this;
         }

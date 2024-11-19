@@ -24,7 +24,7 @@ public class Catalog extends CatalogResource {
 
     @Builder
     public Catalog(
-            String identifier, Map<String, String> varArgs, String description, String linkedEntity, String title) {
+            String identifier, Map<String, Object> varArgs, String description, String linkedEntity, String title) {
         super(identifier, varArgs);
         this.description = description;
         this.linkedEntity = linkedEntity;
@@ -33,9 +33,9 @@ public class Catalog extends CatalogResource {
 
     public static class CatalogBuilder {
         @SuppressWarnings("FieldCanBeLocal")
-        private Map<String, String> varArgs;
+        private Map<String, Object> varArgs;
 
-        public CatalogBuilder varArgs(Map<String, String> varArgs) {
+        public CatalogBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = copyMap(varArgs);
             return this;
         }

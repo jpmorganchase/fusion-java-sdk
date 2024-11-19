@@ -23,7 +23,7 @@ public class Attribute extends CatalogResource {
     @Builder
     public Attribute(
             String identifier,
-            Map<String, String> varArgs,
+            Map<String, Object> varArgs,
             boolean key,
             String dataType,
             long index,
@@ -38,9 +38,9 @@ public class Attribute extends CatalogResource {
     }
 
     public static class AttributeBuilder {
-        private Map<String, String> varArgs;
+        private Map<String, Object> varArgs;
 
-        public AttributeBuilder varArgs(Map<String, String> varArgs) {
+        public AttributeBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = copyMap(varArgs);
             return this;
         }

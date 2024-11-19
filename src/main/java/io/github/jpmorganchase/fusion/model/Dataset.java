@@ -2,6 +2,8 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.Map;
+import java.util.Objects;
+
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -26,7 +28,7 @@ public class Dataset extends CatalogResource {
     @Builder
     public Dataset(
             String identifier,
-            Map<String, String> varArgs,
+            Map<String, Object> varArgs,
             String description,
             String linkedEntity,
             String title,
@@ -40,9 +42,17 @@ public class Dataset extends CatalogResource {
 
     public static class DatasetBuilder {
         @SuppressWarnings("FieldCanBeLocal")
-        private Map<String, String> varArgs;
+        private Map<String, Object> varArgs;
 
-        public DatasetBuilder varArgs(Map<String, String> varArgs) {
+        public DatasetBuilder varArg(String key, Object value) {
+            if (Objects.isNull(varArgs)) {
+                this.varArgs = initializeMap();
+            }
+            this.varArgs.put(key, value);
+            return this;
+        }
+
+        public DatasetBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = copyMap(varArgs);
             return this;
         }

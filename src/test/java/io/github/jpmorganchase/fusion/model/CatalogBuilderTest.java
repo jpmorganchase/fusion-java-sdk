@@ -12,7 +12,7 @@ public class CatalogBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
-        Map<String, String> varArgs = new HashMap<>();
+        Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         Catalog c = Catalog.builder()
                 .identifier("The identifier")

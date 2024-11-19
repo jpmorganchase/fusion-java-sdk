@@ -51,6 +51,22 @@ public class FusionAPIManager implements APIManager {
         return response.getBody();
     }
 
+    /**
+     * Call the API to POST with the path and body provided and return the JSON response.
+     *
+     * @param apiPath appended to the base URL
+     * @param body  json body to be posted
+     */
+    @Override
+    public String callAPIPost(String apiPath, String body) throws APICallException {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+
+        HttpResponse<String> response = httpClient.post(apiPath, requestHeaders, body);
+        checkResponseStatus(response);
+        return response.getBody();
+    }
+
     @Override
     public void callAPIFileDownload(
             String apiPath, String fileName, String catalog, String dataset, Map<String, String> headers)

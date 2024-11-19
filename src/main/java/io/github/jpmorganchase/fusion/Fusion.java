@@ -30,6 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
+import io.github.jpmorganchase.fusion.serializing.GsonAPIRequestSerializer;
 import lombok.Builder;
 
 /**
@@ -47,6 +50,9 @@ public class Fusion {
 
     @Builder.Default
     private APIResponseParser responseParser = new GsonAPIResponseParser();
+
+    @Builder.Default
+    private APIRequestSerializer requestSerializer = new GsonAPIRequestSerializer();
 
     /**
      * Get the default download path - Please see default {@link FusionConfiguration}
@@ -305,6 +311,26 @@ public class Fusion {
     public Map<String, Map<String, Object>> datasetMemberResources(String dataset, String seriesMember) {
 
         return this.datasetMemberResources(this.getDefaultCatalog(), dataset, seriesMember);
+    }
+
+    /**
+     * Creates a dataset, using the default catalog.
+     *
+     * @param dataset  {@link Dataset} to be created
+     */
+    public void create(Dataset dataset){
+        this.create(this.getDefaultCatalog(), dataset);
+    }
+
+    /**
+     * Creates a dataset, using the specified catalog.
+     *
+     * @param dataset   {@link Dataset} to be created
+     */
+    public void create(String catalogName, Dataset dataset){
+
+        String url = String.format("%1scatalogs/%2s/datasets/%3s", this.rootURL, catalogName, dataset.getIdentifier());
+        this.api.callAPIPost(url, requestSerializer.serializeDatasetRequest(dataset));
     }
 
     /**

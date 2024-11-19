@@ -15,22 +15,27 @@ import lombok.ToString;
 public abstract class CatalogResource {
 
     private final String identifier;
-    private final Map<String, String> varArgs;
+    private final Map<String, Object> varArgs;
 
-    public CatalogResource(String identifier, Map<String, String> varArgs) {
+    public CatalogResource(String identifier, Map<String, Object> varArgs) {
         this.varArgs = copyMap(varArgs);
         this.identifier = identifier;
     }
 
-    public Map<String, String> getVarArgs() {
+    public Map<String, Object> getVarArgs() {
         return copyMap(varArgs);
     }
 
-    static Map<String, String> copyMap(Map<String, String> source) {
-        Map<String, String> target = null;
+    static Map<String, Object> copyMap(Map<String, Object> source) {
+        Map<String, Object> target = null;
         if (source != null) {
             target = new HashMap<>(source);
         }
         return target;
+    }
+
+
+    static Map<String, Object> initializeMap() {
+        return new HashMap<>();
     }
 }

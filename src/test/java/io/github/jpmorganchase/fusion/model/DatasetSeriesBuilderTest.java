@@ -13,7 +13,7 @@ public class DatasetSeriesBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
-        Map<String, String> varArgs = new HashMap<>();
+        Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         DatasetSeries d = DatasetSeries.builder()
                 .identifier("The identifier")

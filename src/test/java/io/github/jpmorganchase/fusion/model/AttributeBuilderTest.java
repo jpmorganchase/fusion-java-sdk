@@ -12,7 +12,7 @@ public class AttributeBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
-        Map<String, String> varArgs = new HashMap<>();
+        Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         Attribute a = Attribute.builder()
                 .identifier("The identifier")
