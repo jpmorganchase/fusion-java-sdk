@@ -127,7 +127,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
         }
     }
 
-
     private JsonArray getResources(String json) {
         JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
         JsonArray array = obj.getAsJsonArray("resources");
@@ -144,7 +143,10 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     private <T extends CatalogResource> T parseResourceWithVarArgs(
-            Class<T> resourceClass, Set<String> excludes, JsonElement element, Map<String, Map<String, Object>> untypedResources) {
+            Class<T> resourceClass,
+            Set<String> excludes,
+            JsonElement element,
+            Map<String, Map<String, Object>> untypedResources) {
         T obj = gson.fromJson(element, resourceClass);
 
         Map<String, Object> varArgs = getVarArgsToInclude(untypedResources.get(obj.getIdentifier()), excludes);
