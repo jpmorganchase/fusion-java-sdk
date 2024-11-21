@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 
-class DatasetGsonAPIRequestSerializerTest {
+class GsonAPIRequestSerializerDatasetTest {
 
     @Test
     public void testDatasetSerializesCorrectly() {
