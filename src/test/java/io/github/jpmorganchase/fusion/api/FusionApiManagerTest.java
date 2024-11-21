@@ -79,6 +79,21 @@ public class FusionApiManagerTest {
         thenTheResponseBodyShouldMatchExpected();
     }
 
+    @Test
+    void successfulPutCall() {
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
+        givenResponseBody("sample response");
+        givenCatalogResource("dataset_one");
+        givenSerializedCatalogResource("dataset_one");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenCallToClientToPutIsSuccessful();
+        givenCallToSerializeCatalogResource();
+        WhenFusionApiManagerIsCalledToPut();
+        thenTheResponseBodyShouldMatchExpected();
+    }
+
     private void givenSerializedCatalogResource(String identifier) {
         serializedCatalogResource = String.format("{\"identifier\":\"%s\"}", identifier);
     }
@@ -127,6 +142,10 @@ public class FusionApiManagerTest {
         actualResponse = fusionAPIManager.callAPIToPost(apiPath, catalogResource);
     }
 
+    private void WhenFusionApiManagerIsCalledToPut() {
+        actualResponse = fusionAPIManager.callAPIToPut(apiPath, catalogResource);
+    }
+
     private void givenResponseBody(String responseBody) {
         this.responseBody = responseBody;
     }
@@ -145,6 +164,14 @@ public class FusionApiManagerTest {
                 .body(responseBody)
                 .build();
         when(client.post(apiPath, requestHeaders, serializedCatalogResource)).thenReturn(expectedHttpResponse);
+    }
+
+    private void givenCallToClientToPutIsSuccessful() {
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body(responseBody)
+                .build();
+        when(client.put(apiPath, serializedCatalogResource, requestHeaders)).thenReturn(expectedHttpResponse);
     }
 
     private void thenExceptionMessageShouldMatchExpected(String message) {

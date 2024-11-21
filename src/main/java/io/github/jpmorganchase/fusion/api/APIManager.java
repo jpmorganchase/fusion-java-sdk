@@ -25,4 +25,14 @@ public interface APIManager extends APIDownloadOperations, APIUploadOperations {
      * @throws APICallException if the response status indicates an error or the request fails
      */
     String callAPIToPost(String apiPath, CatalogResource catalogResource);
+
+    /**
+     * Sends a PUT request to the specified API endpoint with the provided catalog resource.
+     *
+     * @param apiPath         the API endpoint path to which the PUT request will be sent
+     * @param catalogResource the resource object to be serialized and sent as the request body
+     * @return the response body as a {@code String} if the request is successful
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    String callAPIToPut(String apiPath, CatalogResource catalogResource);
 }

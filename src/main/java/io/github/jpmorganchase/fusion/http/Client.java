@@ -13,5 +13,7 @@ public interface Client {
 
     HttpResponse<String> put(String path, Map<String, String> headers, InputStream body);
 
+    HttpResponse<String> put(String path, String body, Map<String, String> headers);
+
     HttpResponse<String> delete(String path, Map<String, String> headers, String body);
 }

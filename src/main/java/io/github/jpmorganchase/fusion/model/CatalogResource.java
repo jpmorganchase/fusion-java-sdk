@@ -16,7 +16,6 @@ public abstract class CatalogResource {
 
     private final String identifier;
 
-    @Setter
     private Map<String, Object> varArgs;
 
     @Expose(serialize = false, deserialize = false)
@@ -26,6 +25,7 @@ public abstract class CatalogResource {
     private final String rootUrl;
 
     @Expose(serialize = false, deserialize = false)
+    @Getter
     private final String catalogIdentifier;
 
     public CatalogResource(
@@ -43,6 +43,10 @@ public abstract class CatalogResource {
 
     public String create() {
         return this.apiManager.callAPIToPost(getApiPath(), this);
+    }
+
+    public String update() {
+        return this.apiManager.callAPIToPut(getApiPath(), this);
     }
 
     /**

@@ -22,13 +22,13 @@ public class Dataset extends CatalogResource {
     String title;
     String frequency;
 
-    @Builder
+    @Builder(toBuilder = true)
     public Dataset(
-            String identifier,
-            Map<String, Object> varArgs,
-            APIManager apiManager,
-            String rootUrl,
-            String catalogIdentifier,
+            @Builder.ObtainVia(method = "getIdentifier") String identifier,
+            @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
+            @Builder.ObtainVia(method = "getApiManager") APIManager apiManager,
+            @Builder.ObtainVia(method = "getRootUrl") String rootUrl,
+            @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             String description,
             String linkedEntity,
             String title,

@@ -39,6 +39,11 @@ public class JdkClient implements Client {
     }
 
     @Override
+    public HttpResponse<String> put(String path, String body, Map<String, String> headers) {
+        return executeMethod(METHOD_PUT, path, headers, body);
+    }
+
+    @Override
     public HttpResponse<String> put(String path, Map<String, String> headers, InputStream body) {
         if (body == null) {
             throw new ClientException("No request body specified for PUT operation");

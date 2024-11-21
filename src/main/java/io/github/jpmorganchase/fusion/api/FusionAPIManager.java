@@ -87,6 +87,24 @@ public class FusionAPIManager implements APIManager {
         return response.getBody();
     }
 
+    /**
+     * Sends a PUT request to the specified API endpoint with the provided catalog resource.
+     *
+     * @param apiPath         the API endpoint path to which the PUT request will be sent
+     * @param catalogResource the resource object to be serialized and sent as the request body
+     * @return the response body as a {@code String} if the request is successful
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    @Override
+    public String callAPIToPut(String apiPath, CatalogResource catalogResource) {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+
+        HttpResponse<String> response = httpClient.put(apiPath, serializer.serialize(catalogResource), requestHeaders);
+        checkResponseStatus(response);
+        return response.getBody();
+    }
+
     @Override
     public void callAPIFileDownload(
             String apiPath, String fileName, String catalog, String dataset, Map<String, String> headers)

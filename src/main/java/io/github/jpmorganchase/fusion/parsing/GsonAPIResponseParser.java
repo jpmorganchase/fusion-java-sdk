@@ -2,8 +2,11 @@ package io.github.jpmorganchase.fusion.parsing;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import io.github.jpmorganchase.fusion.api.context.APIContext;
 import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.model.*;
+import io.github.jpmorganchase.fusion.serializing.mutation.MutationContext;
+import io.github.jpmorganchase.fusion.serializing.mutation.ResourceMutationFactory;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -22,16 +25,22 @@ public class GsonAPIResponseParser implements APIResponseParser {
             LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final Gson gson;
+    private final APIContext apiContext;
 
     public GsonAPIResponseParser() {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        // TODO: need to add a serializer as well once we get to update operations
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateDeserializer());
-        gson = gsonBuilder.create();
+        this(APIContext.builder().build());
     }
 
-    public GsonAPIResponseParser(Gson gson) {
+    public GsonAPIResponseParser(APIContext apiContext) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateDeserializer());
+        this.gson = gsonBuilder.create();
+        this.apiContext = apiContext;
+    }
+
+    public GsonAPIResponseParser(Gson gson, APIContext apiContext) {
         this.gson = gson;
+        this.apiContext = apiContext;
     }
 
     @Override
@@ -41,7 +50,12 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     @Override
     public Map<String, Dataset> parseDatasetResponse(String json) {
-        return parseResourcesWithVarArgsFromResponse(json, Dataset.class);
+        return parseResourcesWithVarArgsFromResponse(json, Dataset.class, (resource, mc) -> resource.toBuilder()
+                .varArgs(mc.getVarArgs())
+                .apiManager(mc.getApiContext().getApiManager())
+                .rootUrl(mc.getApiContext().getRootUrl())
+                .catalogIdentifier(mc.getApiContext().getDefaultCatalog())
+                .build());
     }
 
     @Override
@@ -76,7 +90,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
-            String json, Class<T> resourceClass) {
+            String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator) {
 
         Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json);
         JsonArray resources = getResources(json);
@@ -84,7 +98,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
         Set<String> excludes = varArgsExclusions(resourceClass);
         List<T> resourceList = new ArrayList<>();
         for (JsonElement element : resources) {
-            resourceList.add(parseResourceWithVarArgs(resourceClass, excludes, element, untypedResources));
+            resourceList.add(parseResourceWithVarArgs(resourceClass, excludes, element, untypedResources, mutator));
         }
 
         return collectMapOfUniqueResources(resourceList);
@@ -92,7 +106,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass) {
-        // TODO: handle varArgs
 
         JsonArray resources = getResources(json);
 
@@ -146,13 +159,17 @@ public class GsonAPIResponseParser implements APIResponseParser {
             Class<T> resourceClass,
             Set<String> excludes,
             JsonElement element,
-            Map<String, Map<String, Object>> untypedResources) {
+            Map<String, Map<String, Object>> untypedResources,
+            ResourceMutationFactory<T> mutator) {
         T obj = gson.fromJson(element, resourceClass);
 
         Map<String, Object> varArgs = getVarArgsToInclude(untypedResources.get(obj.getIdentifier()), excludes);
-
-        obj.setVarArgs(varArgs);
-        return obj;
+        return mutator.mutate(
+                obj,
+                MutationContext.builder()
+                        .varArgs(varArgs)
+                        .apiContext(apiContext)
+                        .build());
     }
 
     private Map<String, Object> getVarArgsToInclude(Map<String, Object> untypedResource, Set<String> exclusionList) {
