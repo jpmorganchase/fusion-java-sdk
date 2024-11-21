@@ -78,13 +78,13 @@ public class GsonAPIResponseParser implements APIResponseParser {
     public <T extends CatalogResource> Map<String, T> parseResourcesFromResponseWithVarArgs(
             String json, Class<T> resourceClass) {
 
+        Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json);
         JsonArray resources = getResources(json);
+
+        Set<String> excludes = varArgsExclusions(resourceClass);
         List<T> resourceList = new ArrayList<>();
-
-        List<String> excludes = varArgsExclusions(resourceClass);
-
         for (JsonElement element : resources) {
-            resourceList.add(parseResourceWithVarArgs(resourceClass, excludes, element));
+            resourceList.add(parseResourceWithVarArgs(resourceClass, excludes, element, untypedResources));
         }
 
         return collectMapOfUniqueResources(resourceList);
@@ -127,6 +127,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
         }
     }
 
+
     private JsonArray getResources(String json) {
         JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
         JsonArray array = obj.getAsJsonArray("resources");
@@ -143,29 +144,33 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     private <T extends CatalogResource> T parseResourceWithVarArgs(
-            Class<T> resourceClass, List<String> excludes, JsonElement element) {
-        JsonObject jsonObject = element.getAsJsonObject();
+            Class<T> resourceClass, Set<String> excludes, JsonElement element, Map<String, Map<String, Object>> untypedResources) {
         T obj = gson.fromJson(element, resourceClass);
 
-        Map<String, Object> varArgs = extractFieldsAsMap(jsonObject, excludes);
+        Map<String, Object> varArgs = getVarArgsToInclude(untypedResources.get(obj.getIdentifier()), excludes);
 
         obj.setVarArgs(varArgs);
         return obj;
     }
 
-    private static <T extends CatalogResource> List<String> varArgsExclusions(Class<T> resourceClass) {
-        // TODO :: Should this be returned by the Model Object ?
-        List<String> excludes = new ArrayList<>();
-        List<String> excludeFromType = Arrays.stream(resourceClass.getDeclaredFields())
+    private Map<String, Object> getVarArgsToInclude(Map<String, Object> untypedResource, Set<String> exclusionList) {
+        HashMap<String, Object> modified = new HashMap<>(untypedResource);
+        modified.keySet().removeIf(exclusionList::contains);
+        return modified;
+    }
+
+    private static <T extends CatalogResource> Set<String> varArgsExclusions(Class<T> resourceClass) {
+        // TODO :: Should this be returned by the Model Object ? It Should
+        Set<String> excludes = new HashSet<>();
+        Set<String> excludeFromType = Arrays.stream(resourceClass.getDeclaredFields())
                 .map(Field::getName)
-                .collect(Collectors.toList());
-        List<String> excludeFromCatalogResource = Arrays.stream(CatalogResource.class.getDeclaredFields())
+                .collect(Collectors.toSet());
+        Set<String> excludeFromCatalogResource = Arrays.stream(CatalogResource.class.getDeclaredFields())
                 .map(Field::getName)
-                .collect(Collectors.toList());
-        List<String> staticExcludes = Collections.singletonList("@id");
+                .collect(Collectors.toSet());
         excludes.addAll(excludeFromType);
         excludes.addAll(excludeFromCatalogResource);
-        excludes.addAll(staticExcludes);
+        excludes.add("@id");
         return excludes;
     }
 
@@ -179,12 +184,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
                             logger.warn("Duplicate key '{}' found, will be ignored", r2.getIdentifier());
                             return r1;
                         }));
-    }
-
-    private Map<String, Object> extractFieldsAsMap(JsonObject jsonObject, List<String> exclusionList) {
-        return jsonObject.entrySet().stream()
-                .filter(entry -> !exclusionList.contains(entry.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> (Object) entry.getValue()));
     }
 
     private static final class LocalDateDeserializer implements JsonDeserializer<LocalDate> {

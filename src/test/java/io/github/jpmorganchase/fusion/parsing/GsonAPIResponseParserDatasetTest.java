@@ -80,6 +80,7 @@ public class GsonAPIResponseParserDatasetTest {
         assertThat(testDatasetResponse, is(equalTo(testDataset)));
     }
 
+    @Test
     public void singleDatasetInResourcesParsesCorrectlyWithVarArgs() {
         Map<String, Dataset> datasetMap =
                 responseParser.parseResourcesFromResponseWithVarArgs(singleDatasetJson, Dataset.class);
