@@ -24,7 +24,7 @@ public class DatasetBuilderTest {
                 .linkedEntity("The entity")
                 .title("The title")
                 .frequency("The frequency")
-                .rootUrl("http://foobar/api/v1")
+                .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
                 .apiManager(apiManager)
                 .build();
@@ -35,7 +35,7 @@ public class DatasetBuilderTest {
         assertThat(d.getLinkedEntity(), is(equalTo("The entity")));
         assertThat(d.getTitle(), is(equalTo("The title")));
         assertThat(d.getFrequency(), is(equalTo("The frequency")));
-        assertThat(d.getRootUrl(), is(equalTo("http://foobar/api/v1")));
+        assertThat(d.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(d.getApiManager(), is(equalTo(apiManager)));
     }
@@ -47,5 +47,17 @@ public class DatasetBuilderTest {
         Dataset d = Dataset.builder().varArg("key1", "value1").build();
 
         assertThat(d.getVarArgs(), is(equalTo(varArgs)));
+    }
+
+    @Test
+    void constructionWithBuilderCorrectlyReturnsApiPath() {
+
+        Dataset d = Dataset.builder()
+                .identifier("The identifier")
+                .rootUrl("http://foobar/api/v1/")
+                .catalogIdentifier("foobar")
+                .build();
+
+        assertThat(d.getApiPath(), is(equalTo("http://foobar/api/v1/catalogs/foobar/datasets/The identifier")));
     }
 }
