@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.parsing;
 
 import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.model.*;
+import io.github.jpmorganchase.fusion.serializing.mutation.ResourceMutationFactory;
 import java.util.Map;
 
 public interface APIResponseParser {
@@ -20,7 +21,7 @@ public interface APIResponseParser {
     <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass);
 
     <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
-            String json, Class<T> resourceClass);
+            String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator);
 
     Map<String, Map<String, Object>> parseResourcesUntyped(String json);
 

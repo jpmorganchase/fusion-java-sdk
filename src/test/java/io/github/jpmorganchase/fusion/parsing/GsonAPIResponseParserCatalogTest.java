@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.api.context.APIContext;
 import io.github.jpmorganchase.fusion.model.Catalog;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 public class GsonAPIResponseParserCatalogTest {
 
@@ -42,7 +45,12 @@ public class GsonAPIResponseParserCatalogTest {
             .title("Test data catalog 3")
             .build();
 
-    private static final APIResponseParser responseParser = new GsonAPIResponseParser();
+    private static final APIContext apiContext = APIContext.builder()
+            .apiManager(Mockito.mock(APIManager.class))
+            .rootUrl("http://foobar/api/v1/")
+            .defaultCatalog("foobar")
+            .build();
+    private static final APIResponseParser responseParser = new GsonAPIResponseParser(apiContext);
 
     @Test
     public void singleCatalogInResourcesParsesCorrectly() {

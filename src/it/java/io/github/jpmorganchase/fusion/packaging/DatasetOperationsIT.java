@@ -145,6 +145,37 @@ public class DatasetOperationsIT {
     }
 
     @Test
+    public void testUpdateDatasetRetrievedFromListDatasets() {
+        // Given
+        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/multiple-dataset-response.json")));
+
+        wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/SD0001"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-SD0001-update-request.json")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-create-response.json")));
+
+        Map<String, Dataset> datasets = sdk.listDatasets("common", "SD0001", true);
+        Dataset originalDataset = datasets.get("SD0001");
+
+        // When
+        Dataset amendedDataset = originalDataset
+                .toBuilder()
+                .description("Updated Sample dataset description 1")
+                .build();
+
+        amendedDataset.update();
+
+        // Then Verify the response
+        //TODO :: Contract for response of dataset.create() needs to be decided
+    }
+
+    @Test
     public void testListDatasets() {
         // Given
         wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets"))

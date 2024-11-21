@@ -4,6 +4,7 @@ import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets
 
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.FusionAPIManager;
+import io.github.jpmorganchase.fusion.api.context.APIContext;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
@@ -52,11 +53,12 @@ public class Fusion {
     private String defaultPath;
     private String rootURL;
 
-    @Builder.Default
-    private APIResponseParser responseParser = new GsonAPIResponseParser();
+    private APIResponseParser responseParser;
 
     @Builder.Default
     private APIRequestSerializer requestSerializer = new GsonAPIRequestSerializer();
+
+    private APIContext apiContext;
 
     /**
      * Get the default download path - Please see default {@link FusionConfiguration}
@@ -808,6 +810,10 @@ public class Fusion {
         protected FusionConfiguration configuration =
                 FusionConfiguration.builder().build();
 
+        protected APIResponseParser responseParser;
+        protected APIRequestSerializer requestSerializer;
+        protected APIContext apiContext;
+
         public FusionBuilder configuration(FusionConfiguration configuration) {
             this.configuration = configuration;
             return this;
@@ -856,6 +862,10 @@ public class Fusion {
         private FusionBuilder defaultPath(String defaultPath) {
             return this;
         }
+
+        private FusionBuilder apiContext(APIContext apiContext) {
+            return this;
+        }
     }
 
     private static class CustomFusionBuilder extends FusionBuilder {
@@ -892,6 +902,16 @@ public class Fusion {
                         .apiManager(api)
                         .configuration(configuration)
                         .build();
+            }
+
+            apiContext = APIContext.builder()
+                    .apiManager(api)
+                    .rootUrl(rootURL)
+                    .defaultCatalog(defaultCatalog)
+                    .build();
+
+            if (Objects.isNull(responseParser)) {
+                responseParser = new GsonAPIResponseParser(apiContext);
             }
 
             return super.build();

@@ -1,0 +1,34 @@
+{
+  "category": [
+    "Category 1"
+  ],
+  "createdDate": "2022-02-05",
+  "coverageStartDate": "2022-02-05",
+  "coverageEndDate": "2023-03-08",
+  "description": "Updated Sample dataset description 1",
+  "frequency": "Daily",
+  "identifier": "SD0001",
+  "isThirdPartyData": false,
+  "isInternalOnlyDataset": false,
+  "language": "English",
+  "maintainer": "Maintainer 1",
+  "modifiedDate": "2023-03-08",
+  "publisher": "Publisher 1",
+  "region": [
+    "North America"
+  ],
+  "source": [
+    "Source System 1"
+  ],
+  "subCategory": [
+    "Subcategory 1"
+  ],
+  "title": "Sample Dataset 1 | North America",
+  "tag": [
+    "Tag1"
+  ],
+  "isRestricted": false,
+  "isRawData": false,
+  "hasSample": false,
+  "@id": "SD0001/"
+}
