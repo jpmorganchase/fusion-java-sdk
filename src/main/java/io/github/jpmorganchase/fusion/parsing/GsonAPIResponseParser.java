@@ -41,7 +41,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     @Override
     public Map<String, Dataset> parseDatasetResponse(String json) {
-        return parseResourcesFromResponse(json, Dataset.class);
+        return parseResourcesWithVarArgsFromResponse(json, Dataset.class);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
-    public <T extends CatalogResource> Map<String, T> parseResourcesFromResponseWithVarArgs(
+    public <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
             String json, Class<T> resourceClass) {
 
         Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json);

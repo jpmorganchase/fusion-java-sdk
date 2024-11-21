@@ -19,7 +19,7 @@ public interface APIResponseParser {
 
     <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass);
 
-    <T extends CatalogResource> Map<String, T> parseResourcesFromResponseWithVarArgs(
+    <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
             String json, Class<T> resourceClass);
 
     Map<String, Map<String, Object>> parseResourcesUntyped(String json);
