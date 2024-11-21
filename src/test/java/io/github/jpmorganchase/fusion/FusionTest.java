@@ -53,6 +53,44 @@ public class FusionTest {
     }
 
     @Test
+    public void testListDatasetsInteractionWithContainsForId() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, Dataset> stubResponse = setupDatasetTest("common");
+
+        Map<String, Dataset> actualResponse = f.listDatasets("common", "dataset1", true);
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testListDatasetsInteractionWithContainsForIdNoMatch() throws Exception {
+        Fusion f = stubFusion();
+
+        setupDatasetTest("common");
+        Map<String, Dataset> actualResponse = f.listDatasets("common", "dataset2", true);
+        assertThat(actualResponse, is(equalTo(new HashMap<>())));
+    }
+
+    @Test
+    public void testListDatasetsInteractionWithContains() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, Dataset> stubResponse = setupDatasetTest("common");
+
+        Map<String, Dataset> actualResponse = f.listDatasets("common", "datasetOne", false);
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testListDatasetsInteractionWithContainsNoMatch() throws Exception {
+        Fusion f = stubFusion();
+
+        setupDatasetTest("common");
+        Map<String, Dataset> actualResponse = f.listDatasets("common", "datasetTwo", false);
+        assertThat(actualResponse, is(equalTo(new HashMap<>())));
+    }
+
+    @Test
     public void testListDatasetsInteractionWithNonDefaultCatalog() throws Exception {
         Fusion f = stubFusion();
 
@@ -65,7 +103,10 @@ public class FusionTest {
     private Map<String, Dataset> setupDatasetTest(String catalog) throws Exception {
 
         Map<String, Dataset> stubResponse = new HashMap<>();
-        stubResponse.put("first", Dataset.builder().identifier("dataset1").build());
+        stubResponse.put("dataset1", Dataset.builder().identifier("dataset1")
+                .description("Description datasetOne")
+                .title("Title datasetOne")
+                .build());
 
         when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets", config.getRootURL(), catalog)))
                 .thenReturn("{\"key\":value}");

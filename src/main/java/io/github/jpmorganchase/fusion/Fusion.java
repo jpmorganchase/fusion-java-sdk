@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Builder;
 
+import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
+
 /**
  * Class representing the Fusion API, providing methods that correspond to available API endpoints
  */
@@ -199,7 +201,7 @@ public class Fusion {
     public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) {
         String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
-        return DatasetFilter.filterDatasets(responseParser.parseDatasetResponse(json), contains, idContains);
+        return filterDatasets(responseParser.parseDatasetResponse(json), contains, idContains);
     }
 
     /**
