@@ -1,5 +1,7 @@
 package io.github.jpmorganchase.fusion;
 
+import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
+
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.FusionAPIManager;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
@@ -8,7 +10,6 @@ import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
 import io.github.jpmorganchase.fusion.api.exception.FileUploadException;
 import io.github.jpmorganchase.fusion.builders.APIConfiguredBuilders;
 import io.github.jpmorganchase.fusion.builders.Builders;
-import io.github.jpmorganchase.fusion.filter.DatasetFilter;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.JdkClient;
 import io.github.jpmorganchase.fusion.model.*;
@@ -36,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.Builder;
-
-import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
 
 /**
  * Class representing the Fusion API, providing methods that correspond to available API endpoints

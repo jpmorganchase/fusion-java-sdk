@@ -103,10 +103,13 @@ public class FusionTest {
     private Map<String, Dataset> setupDatasetTest(String catalog) throws Exception {
 
         Map<String, Dataset> stubResponse = new HashMap<>();
-        stubResponse.put("dataset1", Dataset.builder().identifier("dataset1")
-                .description("Description datasetOne")
-                .title("Title datasetOne")
-                .build());
+        stubResponse.put(
+                "dataset1",
+                Dataset.builder()
+                        .identifier("dataset1")
+                        .description("Description datasetOne")
+                        .title("Title datasetOne")
+                        .build());
 
         when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets", config.getRootURL(), catalog)))
                 .thenReturn("{\"key\":value}");
