@@ -1,11 +1,15 @@
 package io.github.jpmorganchase.fusion;
 
+import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
+
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.FusionAPIManager;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
 import io.github.jpmorganchase.fusion.api.exception.FileUploadException;
+import io.github.jpmorganchase.fusion.builders.APIConfiguredBuilders;
+import io.github.jpmorganchase.fusion.builders.Builders;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.JdkClient;
 import io.github.jpmorganchase.fusion.model.*;
@@ -19,6 +23,8 @@ import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
+import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
+import io.github.jpmorganchase.fusion.serializing.GsonAPIRequestSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -41,12 +47,16 @@ public class Fusion {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private APIManager api;
+    private Builders builders;
     private String defaultCatalog;
     private String defaultPath;
     private String rootURL;
 
     @Builder.Default
     private APIResponseParser responseParser = new GsonAPIResponseParser();
+
+    @Builder.Default
+    private APIRequestSerializer requestSerializer = new GsonAPIRequestSerializer();
 
     /**
      * Get the default download path - Please see default {@link FusionConfiguration}
@@ -187,11 +197,10 @@ public class Fusion {
      * @throws ParsingException if the response from Fusion could not be parsed successfully
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    // TODO: Search parameters
     public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) {
         String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
-        return responseParser.parseDatasetResponse(json);
+        return filterDatasets(responseParser.parseDatasetResponse(json), contains, idContains);
     }
 
     /**
@@ -772,6 +781,16 @@ public class Fusion {
         this.upload(catalogName, dataset, seriesMember, distribution, data, dataDate, dataDate, dataDate, headers);
     }
 
+    /**
+     * Returns a builder for creating a {@link io.github.jpmorganchase.fusion.model.Dataset} object.
+     * The builder can be used to set properties and then create or update an instance of {@link io.github.jpmorganchase.fusion.model.Dataset}.
+     *
+     * @return {@link Builders} The object that provides access to specific model builders for different types of datasets.
+     */
+    public Builders builders() {
+        return this.builders;
+    }
+
     public static FusionBuilder builder() {
         return new CustomFusionBuilder();
     }
@@ -780,6 +799,7 @@ public class Fusion {
 
         protected Client client;
         protected APIManager api;
+        protected Builders builders;
         protected String rootURL;
         protected String defaultCatalog;
         protected String defaultPath;
@@ -863,6 +883,13 @@ public class Fusion {
                 api = FusionAPIManager.builder()
                         .httpClient(client)
                         .tokenProvider(fusionTokenProvider)
+                        .configuration(configuration)
+                        .build();
+            }
+
+            if (Objects.isNull(builders)) {
+                builders = APIConfiguredBuilders.builder()
+                        .apiManager(api)
                         .configuration(configuration)
                         .build();
             }

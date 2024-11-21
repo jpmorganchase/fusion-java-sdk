@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
+import io.github.jpmorganchase.fusion.api.APIManager;
 import java.time.LocalDate;
 import java.util.Map;
 import lombok.Builder;
@@ -23,23 +24,31 @@ public class DatasetSeries extends CatalogResource {
     @Builder
     public DatasetSeries(
             String identifier,
-            Map<String, String> varArgs,
+            Map<String, Object> varArgs,
+            APIManager apiManager,
+            String rootUrl,
+            String catalogIdentifier,
             LocalDate fromDate,
             LocalDate toDate,
             LocalDate createdDate,
             String linkedEntity) {
-        super(identifier, varArgs);
+        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.fromDate = fromDate;
         this.toDate = toDate;
         this.createdDate = createdDate;
         this.linkedEntity = linkedEntity;
     }
 
+    @Override
+    protected String getApiPath() {
+        throw new UnsupportedOperationException("Operation not yet supported for DatasetSeries");
+    }
+
     public static class DatasetSeriesBuilder {
         @SuppressWarnings("FieldCanBeLocal")
-        private Map<String, String> varArgs;
+        private Map<String, Object> varArgs;
 
-        public DatasetSeriesBuilder varArgs(Map<String, String> varArgs) {
+        public DatasetSeriesBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = copyMap(varArgs);
             return this;
         }

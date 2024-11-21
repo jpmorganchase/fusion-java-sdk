@@ -1,5 +1,6 @@
 package io.github.jpmorganchase.fusion.parsing;
 
+import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -18,13 +19,29 @@ public class GsonAPIResponseParserDatasetTest {
     private static final String singleDatasetJson = loadTestResource("single-dataset-response.json");
     private static final String multipleDatasetJson = loadTestResource("multiple-dataset-response.json");
 
-    // TODO: Need to map out all the fields
     private static final Dataset testDataset = Dataset.builder()
             .identifier("SD0001")
             .description("Sample dataset description 1")
             .linkedEntity("SD0001/")
             .frequency("Daily")
             .title("Sample Dataset 1 | North America")
+            .varArg("category", listOf("Category 1"))
+            .varArg("createdDate", "2022-02-05")
+            .varArg("coverageStartDate", "2022-02-05")
+            .varArg("coverageEndDate", "2023-03-08")
+            .varArg("isThirdPartyData", Boolean.FALSE)
+            .varArg("isInternalOnlyDataset", Boolean.FALSE)
+            .varArg("language", "English")
+            .varArg("maintainer", "Maintainer 1")
+            .varArg("modifiedDate", "2023-03-08")
+            .varArg("publisher", "Publisher 1")
+            .varArg("region", listOf("North America"))
+            .varArg("source", listOf("Source System 1"))
+            .varArg("subCategory", listOf("Subcategory 1"))
+            .varArg("tag", listOf("Tag1"))
+            .varArg("isRestricted", Boolean.FALSE)
+            .varArg("isRawData", Boolean.FALSE)
+            .varArg("hasSample", Boolean.FALSE)
             .build();
 
     private static final Dataset testDataset2 = Dataset.builder()
@@ -33,6 +50,23 @@ public class GsonAPIResponseParserDatasetTest {
             .linkedEntity("SD0002/")
             .frequency("Daily")
             .title("Sample Dataset 2 | North America")
+            .varArg("category", listOf("Category 2"))
+            .varArg("createdDate", "2022-02-06")
+            .varArg("coverageStartDate", "2022-02-06")
+            .varArg("coverageEndDate", "2023-03-09")
+            .varArg("isThirdPartyData", Boolean.FALSE)
+            .varArg("isInternalOnlyDataset", Boolean.FALSE)
+            .varArg("language", "English")
+            .varArg("maintainer", "Maintainer 2")
+            .varArg("modifiedDate", "2023-03-09")
+            .varArg("publisher", "Publisher 2")
+            .varArg("region", listOf("North America"))
+            .varArg("source", listOf("Source System 2"))
+            .varArg("subCategory", listOf("Subcategory 2"))
+            .varArg("tag", listOf("Tag2"))
+            .varArg("isRestricted", Boolean.FALSE)
+            .varArg("isRawData", Boolean.FALSE)
+            .varArg("hasSample", Boolean.FALSE)
             .build();
 
     private static final Dataset testDataset3 = Dataset.builder()
@@ -41,6 +75,23 @@ public class GsonAPIResponseParserDatasetTest {
             .linkedEntity("SD0003/")
             .frequency("Daily")
             .title("Sample Dataset 3 | North America")
+            .varArg("category", listOf("Category 3"))
+            .varArg("createdDate", "2022-02-07")
+            .varArg("coverageStartDate", "2022-02-07")
+            .varArg("coverageEndDate", "2023-03-10")
+            .varArg("isThirdPartyData", Boolean.FALSE)
+            .varArg("isInternalOnlyDataset", Boolean.FALSE)
+            .varArg("language", "English")
+            .varArg("maintainer", "Maintainer 3")
+            .varArg("modifiedDate", "2023-03-10")
+            .varArg("publisher", "Publisher 3")
+            .varArg("region", listOf("North America"))
+            .varArg("source", listOf("Source System 3"))
+            .varArg("subCategory", listOf("Subcategory 3"))
+            .varArg("tag", listOf("Tag3"))
+            .varArg("isRestricted", Boolean.FALSE)
+            .varArg("isRawData", Boolean.FALSE)
+            .varArg("hasSample", Boolean.FALSE)
             .build();
 
     private static final APIResponseParser responseParser = new GsonAPIResponseParser();

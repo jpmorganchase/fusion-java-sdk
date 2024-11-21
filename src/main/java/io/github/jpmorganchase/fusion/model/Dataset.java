@@ -1,11 +1,10 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
+import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import lombok.Value;
+import java.util.Objects;
+import lombok.*;
 
 /**
  * An object representing a dataset. Object properties hold dataset metadata attributes
@@ -26,23 +25,40 @@ public class Dataset extends CatalogResource {
     @Builder
     public Dataset(
             String identifier,
-            Map<String, String> varArgs,
+            Map<String, Object> varArgs,
+            APIManager apiManager,
+            String rootUrl,
+            String catalogIdentifier,
             String description,
             String linkedEntity,
             String title,
             String frequency) {
-        super(identifier, varArgs);
+        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
         this.title = title;
         this.frequency = frequency;
     }
 
+    @Override
+    protected String getApiPath() {
+        return String.format(
+                "%1scatalogs/%2s/datasets/%3s", this.getRootUrl(), this.getCatalogIdentifier(), this.getIdentifier());
+    }
+
     public static class DatasetBuilder {
         @SuppressWarnings("FieldCanBeLocal")
-        private Map<String, String> varArgs;
+        private Map<String, Object> varArgs;
 
-        public DatasetBuilder varArgs(Map<String, String> varArgs) {
+        public DatasetBuilder varArg(String key, Object value) {
+            if (Objects.isNull(varArgs)) {
+                this.varArgs = initializeMap();
+            }
+            this.varArgs.put(key, value);
+            return this;
+        }
+
+        public DatasetBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = copyMap(varArgs);
             return this;
         }

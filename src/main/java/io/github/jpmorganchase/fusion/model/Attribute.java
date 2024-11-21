@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
+import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -23,13 +24,16 @@ public class Attribute extends CatalogResource {
     @Builder
     public Attribute(
             String identifier,
-            Map<String, String> varArgs,
+            Map<String, Object> varArgs,
+            APIManager apiManager,
+            String rootUrl,
+            String catalogIdentifier,
             boolean key,
             String dataType,
             long index,
             String description,
             String title) {
-        super(identifier, varArgs);
+        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.key = key;
         this.dataType = dataType;
         this.index = index;
@@ -37,10 +41,15 @@ public class Attribute extends CatalogResource {
         this.title = title;
     }
 
-    public static class AttributeBuilder {
-        private Map<String, String> varArgs;
+    @Override
+    protected String getApiPath() {
+        throw new UnsupportedOperationException("Operation is not yet supported for attributes");
+    }
 
-        public AttributeBuilder varArgs(Map<String, String> varArgs) {
+    public static class AttributeBuilder {
+        private Map<String, Object> varArgs;
+
+        public AttributeBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = copyMap(varArgs);
             return this;
         }

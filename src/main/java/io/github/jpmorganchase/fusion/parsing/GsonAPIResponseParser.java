@@ -5,13 +5,12 @@ import com.google.gson.reflect.TypeToken;
 import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.model.*;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -42,7 +41,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     @Override
     public Map<String, Dataset> parseDatasetResponse(String json) {
-        return parseResourcesFromResponse(json, Dataset.class);
+        return parseResourcesWithVarArgsFromResponse(json, Dataset.class);
     }
 
     @Override
@@ -76,6 +75,22 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
+    public <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
+            String json, Class<T> resourceClass) {
+
+        Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json);
+        JsonArray resources = getResources(json);
+
+        Set<String> excludes = varArgsExclusions(resourceClass);
+        List<T> resourceList = new ArrayList<>();
+        for (JsonElement element : resources) {
+            resourceList.add(parseResourceWithVarArgs(resourceClass, excludes, element, untypedResources));
+        }
+
+        return collectMapOfUniqueResources(resourceList);
+    }
+
+    @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass) {
         // TODO: handle varArgs
 
@@ -83,15 +98,8 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
         Type listType = TypeToken.getParameterized(List.class, resourceClass).getType();
         List<T> resourceList = gson.fromJson(resources, listType);
-        return resourceList.stream()
-                .collect(Collectors.toMap(
-                        T::getIdentifier,
-                        Function.identity(),
-                        // resolve any duplicate keys, for now just skip the duplicates
-                        (r1, r2) -> {
-                            logger.warn("Duplicate key '{}' found, will be ignored", r2.getIdentifier());
-                            return r1;
-                        }));
+
+        return collectMapOfUniqueResources(resourceList);
     }
 
     @Override
@@ -132,6 +140,52 @@ public class GsonAPIResponseParser implements APIResponseParser {
         String message = "Failed to parse resources from JSON, none found";
         logger.error(message);
         return new ParsingException(message);
+    }
+
+    private <T extends CatalogResource> T parseResourceWithVarArgs(
+            Class<T> resourceClass,
+            Set<String> excludes,
+            JsonElement element,
+            Map<String, Map<String, Object>> untypedResources) {
+        T obj = gson.fromJson(element, resourceClass);
+
+        Map<String, Object> varArgs = getVarArgsToInclude(untypedResources.get(obj.getIdentifier()), excludes);
+
+        obj.setVarArgs(varArgs);
+        return obj;
+    }
+
+    private Map<String, Object> getVarArgsToInclude(Map<String, Object> untypedResource, Set<String> exclusionList) {
+        HashMap<String, Object> modified = new HashMap<>(untypedResource);
+        modified.keySet().removeIf(exclusionList::contains);
+        return modified;
+    }
+
+    private static <T extends CatalogResource> Set<String> varArgsExclusions(Class<T> resourceClass) {
+        // TODO :: Should this be returned by the Model Object ? It Should
+        Set<String> excludes = new HashSet<>();
+        Set<String> excludeFromType = Arrays.stream(resourceClass.getDeclaredFields())
+                .map(Field::getName)
+                .collect(Collectors.toSet());
+        Set<String> excludeFromCatalogResource = Arrays.stream(CatalogResource.class.getDeclaredFields())
+                .map(Field::getName)
+                .collect(Collectors.toSet());
+        excludes.addAll(excludeFromType);
+        excludes.addAll(excludeFromCatalogResource);
+        excludes.add("@id");
+        return excludes;
+    }
+
+    private static <T extends CatalogResource> Map<String, T> collectMapOfUniqueResources(List<T> resourceList) {
+        return resourceList.stream()
+                .collect(Collectors.toMap(
+                        T::getIdentifier,
+                        Function.identity(),
+                        // resolve any duplicate keys, for now just skip the duplicates
+                        (r1, r2) -> {
+                            logger.warn("Duplicate key '{}' found, will be ignored", r2.getIdentifier());
+                            return r1;
+                        }));
     }
 
     private static final class LocalDateDeserializer implements JsonDeserializer<LocalDate> {

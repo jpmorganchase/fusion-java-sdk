@@ -11,7 +11,10 @@ import io.github.jpmorganchase.fusion.FusionInitialisationException;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
+import io.github.jpmorganchase.fusion.model.CatalogResource;
+import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
+import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +35,9 @@ public class FusionApiManagerTest {
     @Mock
     private FusionTokenProvider fusionTokenProvider;
 
+    @Mock
+    private APIRequestSerializer serializer;
+
     private String apiPath;
 
     private final Map<String, String> requestHeaders = new HashMap<>();
@@ -41,6 +47,10 @@ public class FusionApiManagerTest {
     private String responseBody;
 
     private String actualResponse;
+
+    private CatalogResource catalogResource;
+
+    private String serializedCatalogResource;
 
     @Test
     void successfulGetCall() {
@@ -52,6 +62,33 @@ public class FusionApiManagerTest {
         givenCallToClientToGetIsSuccessful();
         WhenFusionApiManagerIsCalledToGet();
         thenTheResponseBodyShouldMatchExpected();
+    }
+
+    @Test
+    void successfulPostCall() {
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
+        givenResponseBody("sample response");
+        givenCatalogResource("dataset_one");
+        givenSerializedCatalogResource("dataset_one");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenCallToClientToPostIsSuccessful();
+        givenCallToSerializeCatalogResource();
+        WhenFusionApiManagerIsCalledToPost();
+        thenTheResponseBodyShouldMatchExpected();
+    }
+
+    private void givenSerializedCatalogResource(String identifier) {
+        serializedCatalogResource = String.format("{\"identifier\":\"%s\"}", identifier);
+    }
+
+    private void givenCallToSerializeCatalogResource() {
+        given(serializer.serialize(catalogResource)).willReturn(serializedCatalogResource);
+    }
+
+    private void givenCatalogResource(String identifier) {
+        catalogResource = Dataset.builder().identifier(identifier).build();
     }
 
     private void givenSessionBearerToken(String token) {
@@ -86,6 +123,10 @@ public class FusionApiManagerTest {
         actualResponse = fusionAPIManager.callAPI(apiPath);
     }
 
+    private void WhenFusionApiManagerIsCalledToPost() {
+        actualResponse = fusionAPIManager.callAPIToPost(apiPath, catalogResource);
+    }
+
     private void givenResponseBody(String responseBody) {
         this.responseBody = responseBody;
     }
@@ -96,6 +137,14 @@ public class FusionApiManagerTest {
                 .body(responseBody)
                 .build();
         when(client.get(apiPath, requestHeaders)).thenReturn(expectedHttpResponse);
+    }
+
+    private void givenCallToClientToPostIsSuccessful() {
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body(responseBody)
+                .build();
+        when(client.post(apiPath, requestHeaders, serializedCatalogResource)).thenReturn(expectedHttpResponse);
     }
 
     private void thenExceptionMessageShouldMatchExpected(String message) {
@@ -126,6 +175,7 @@ public class FusionApiManagerTest {
         fusionAPIManager = FusionAPIManager.builder()
                 .httpClient(client)
                 .tokenProvider(fusionTokenProvider)
+                .serializer(serializer)
                 .build();
     }
 }
