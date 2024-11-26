@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 
@@ -162,7 +163,34 @@ public class DataDictionaryAttributeOperationsIT {
     }
 
     @Test
-    public void testUpdateDataDictionaryAttributeRetrievedFromListFunction(){}
+    public void testUpdateDataDictionaryAttributeRetrievedFromListFunction(){
+        // Given
+        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/attributes"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("data-dictionary-attribute/multiple-dd-attribute-response.json")));
+
+        wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/attributes/AT0002"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("data-dictionary-attribute/attribute-AT0002-update-request.json")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)));
+
+        Map<String, DataDictionaryAttribute> attributes = sdk.listDataDictionaryAttributes("common");
+        DataDictionaryAttribute original = attributes.get("AT0002");
+
+        // When
+        DataDictionaryAttribute amended = original
+                .toBuilder()
+                .description("Updated Sample dd attribute description 2")
+                .build();
+
+        amended.update();
+
+        // Then Verify the response
+        //TODO :: Contract for response of dataset.update() needs to be decided
+    }
 
     @Test
     public void testDeleteDataDictionaryAttribute(){

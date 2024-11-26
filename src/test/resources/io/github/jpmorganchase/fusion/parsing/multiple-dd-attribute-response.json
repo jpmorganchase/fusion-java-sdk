@@ -1,0 +1,39 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/test/attributes"
+  },
+  "@id": "attributes/",
+  "description": "A list of available attributes",
+  "identifier": "attributes",
+  "resources": [
+    {
+      "description": "Sample attribute description 1",
+      "title": "Sample Attribute 1",
+      "identifier": "AT0001",
+      "applicationId": {
+        "id": "12345",
+        "idType": "SEAL"
+      }
+    },
+    {
+      "description": "Sample attribute description 2",
+      "title": "Sample Attribute 2",
+      "identifier": "AT0002",
+      "applicationId": {
+        "id": "12345",
+        "idType": "SEAL"
+      }
+    },
+    {
+      "description": "Sample attribute description 3",
+      "title": "Sample Attribute 3",
+      "identifier": "AT0003",
+      "applicationId": {
+        "id": "12345",
+        "idType": "SEAL"
+      }
+    }
+  ],
+  "title": "Attributes"
+}

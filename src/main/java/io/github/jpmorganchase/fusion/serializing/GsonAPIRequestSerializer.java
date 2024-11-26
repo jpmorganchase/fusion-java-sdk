@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.serializing;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.serializing.adapters.DataDictionaryAttributeSerializer;

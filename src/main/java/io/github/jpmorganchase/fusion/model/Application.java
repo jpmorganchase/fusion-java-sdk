@@ -1,5 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -13,6 +15,13 @@ public class Application {
 
     String id;
     String idType;
+
+    public Map<String, String> toMap() {
+        Map<String, String> attributeMap = new HashMap<>();
+        attributeMap.put("id", id);
+        attributeMap.put("idType", idType);
+        return attributeMap;
+    }
 
     public static class ApplicationBuilder {
         @SuppressWarnings("FieldCanBeLocal")
