@@ -1,22 +1,21 @@
 package io.github.jpmorganchase.fusion.api.request;
 
+import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
+
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter

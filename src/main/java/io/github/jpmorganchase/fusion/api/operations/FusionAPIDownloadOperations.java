@@ -11,13 +11,12 @@ import io.github.jpmorganchase.fusion.api.stream.DeferredMultiPartInputStream;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 @Builder
 @Getter

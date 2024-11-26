@@ -2,13 +2,12 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.api.APIManager;
+import java.time.LocalDate;
+import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
-
-import java.time.LocalDate;
-import java.util.Map;
 
 @Value
 @EqualsAndHashCode(callSuper = true)

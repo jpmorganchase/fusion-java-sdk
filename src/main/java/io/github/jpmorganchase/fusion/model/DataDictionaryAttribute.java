@@ -1,12 +1,11 @@
 package io.github.jpmorganchase.fusion.model;
 
 import io.github.jpmorganchase.fusion.api.APIManager;
+import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
-
-import java.util.Map;
 
 @Value
 @EqualsAndHashCode(callSuper = true)

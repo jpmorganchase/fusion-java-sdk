@@ -1,14 +1,13 @@
 package io.github.jpmorganchase.fusion.model;
 
+import static io.github.jpmorganchase.fusion.model.VarArgsHelper.copyMap;
+
 import com.google.gson.annotations.Expose;
 import io.github.jpmorganchase.fusion.api.APIManager;
+import java.util.Map;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-
-import java.util.Map;
-
-import static io.github.jpmorganchase.fusion.model.VarArgsHelper.copyMap;
 
 /**
  * superclass of all entities contained in a catalog

@@ -1,5 +1,7 @@
 package io.github.jpmorganchase.fusion.api.operations;
 
+import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
+
 import com.google.gson.GsonBuilder;
 import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.FusionException;
@@ -19,11 +21,6 @@ import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
-import lombok.Builder;
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,8 +28,10 @@ import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.*;
-
-import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
+import lombok.Builder;
+import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Builder
 @Getter

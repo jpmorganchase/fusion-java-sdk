@@ -1,7 +1,6 @@
 package io.github.jpmorganchase.fusion.api.tools;
 
 import io.github.jpmorganchase.fusion.api.response.ContentRange;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

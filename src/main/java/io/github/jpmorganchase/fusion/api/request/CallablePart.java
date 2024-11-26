@@ -1,11 +1,10 @@
 package io.github.jpmorganchase.fusion.api.request;
 
+import java.io.InputStream;
+import java.util.concurrent.Callable;
 import lombok.Builder;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.InputStream;
-import java.util.concurrent.Callable;
 
 @Slf4j
 @Builder

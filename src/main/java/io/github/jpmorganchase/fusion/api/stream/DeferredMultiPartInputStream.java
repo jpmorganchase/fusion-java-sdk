@@ -1,15 +1,14 @@
 package io.github.jpmorganchase.fusion.api.stream;
 
 import io.github.jpmorganchase.fusion.api.request.CallableParts;
-import lombok.Builder;
-import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import lombok.Builder;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ToString

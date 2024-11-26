@@ -1,7 +1,6 @@
 package io.github.jpmorganchase.fusion.api.operations;
 
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
-
 import java.io.InputStream;
 import java.util.Map;
 

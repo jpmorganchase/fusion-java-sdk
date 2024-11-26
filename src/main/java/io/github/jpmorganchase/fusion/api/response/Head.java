@@ -1,17 +1,16 @@
 package io.github.jpmorganchase.fusion.api.response;
 
+import static java.util.Objects.nonNull;
+
 import io.github.jpmorganchase.fusion.api.tools.ContentRangeParser;
 import io.github.jpmorganchase.fusion.api.tools.RegexBasedContentRangeParser;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static java.util.Objects.nonNull;
 
 @Getter
 @Builder

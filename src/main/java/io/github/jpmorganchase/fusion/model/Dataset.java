@@ -2,12 +2,11 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.api.APIManager;
+import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
-
-import java.util.Map;
 
 /**
  * An object representing a dataset. Object properties hold dataset metadata attributes
