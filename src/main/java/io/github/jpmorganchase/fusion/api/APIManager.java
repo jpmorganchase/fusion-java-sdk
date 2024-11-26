@@ -35,4 +35,12 @@ public interface APIManager extends APIDownloadOperations, APIUploadOperations {
      * @throws APICallException if the response status indicates an error or the request fails
      */
     String callAPIToPut(String apiPath, CatalogResource catalogResource);
+
+    /**
+     * Sends a DELETE request to the specified API endpoint with the provided catalog resource.
+     *
+     * @param apiPath         the API endpoint path to which the PUT request will be sent
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    String callAPIToDelete(String apiPath);
 }

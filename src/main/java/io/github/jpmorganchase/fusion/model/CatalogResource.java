@@ -49,6 +49,10 @@ public abstract class CatalogResource {
         return this.apiManager.callAPIToPut(getApiPath(), this);
     }
 
+    public String delete() {
+        return this.apiManager.callAPIToDelete(getApiPath());
+    }
+
     /**
      * Returns the API path used to perform operations on this catalog resource.
      * This path is utilized for creating, reading, updating, and deleting the resource.

@@ -105,6 +105,22 @@ public class FusionAPIManager implements APIManager {
         return response.getBody();
     }
 
+    /**
+     * Sends a DELETE request to the specified API endpoint with the provided catalog resource.
+     *
+     * @param apiPath         the API endpoint path to which the PUT request will be sent
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    @Override
+    public String callAPIToDelete(String apiPath) {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+
+        HttpResponse<String> response = httpClient.delete(apiPath, requestHeaders, null);
+        checkResponseStatus(response);
+        return response.getBody();
+    }
+
     @Override
     public void callAPIFileDownload(
             String apiPath, String fileName, String catalog, String dataset, Map<String, String> headers)
