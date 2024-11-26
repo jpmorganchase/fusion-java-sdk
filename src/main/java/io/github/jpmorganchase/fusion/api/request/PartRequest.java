@@ -1,11 +1,12 @@
 package io.github.jpmorganchase.fusion.api.request;
 
 import io.github.jpmorganchase.fusion.api.response.Head;
-import java.util.Objects;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+
+import java.util.Objects;
 
 /**
  * Used by the {@link PartFetcher} to request a part. The partNo is mandatory.

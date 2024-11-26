@@ -2,9 +2,13 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.Expose;
 import io.github.jpmorganchase.fusion.api.APIManager;
-import java.util.HashMap;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
 import java.util.Map;
-import lombok.*;
+
+import static io.github.jpmorganchase.fusion.model.VarArgsHelper.copyMap;
 
 /**
  * superclass of all entities contained in a catalog
@@ -63,17 +67,5 @@ public abstract class CatalogResource {
 
     public Map<String, Object> getVarArgs() {
         return copyMap(varArgs);
-    }
-
-    static Map<String, Object> copyMap(Map<String, Object> source) {
-        Map<String, Object> target = null;
-        if (source != null) {
-            target = new HashMap<>(source);
-        }
-        return target;
-    }
-
-    static Map<String, Object> initializeMap() {
-        return new HashMap<>();
     }
 }

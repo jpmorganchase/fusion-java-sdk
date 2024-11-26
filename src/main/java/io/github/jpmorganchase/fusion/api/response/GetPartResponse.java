@@ -1,10 +1,11 @@
 package io.github.jpmorganchase.fusion.api.response;
 
-import java.io.InputStream;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+
+import java.io.InputStream;
 
 @Getter
 @Builder

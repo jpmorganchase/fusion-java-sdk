@@ -1,9 +1,10 @@
 package io.github.jpmorganchase.fusion.http;
 
-import java.util.List;
-import java.util.Map;
 import lombok.Builder;
 import lombok.Value;
+
+import java.util.List;
+import java.util.Map;
 
 @Value
 @Builder

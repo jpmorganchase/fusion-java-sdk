@@ -1,17 +1,18 @@
 package io.github.jpmorganchase.fusion.api.context;
 
-import static io.github.jpmorganchase.fusion.api.context.MultipartTransferContext.MultipartTransferStatus.INITIATED;
-import static io.github.jpmorganchase.fusion.api.context.MultipartTransferContext.MultipartTransferStatus.TRANSFERRED;
-
 import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.api.response.UploadedParts;
 import io.github.jpmorganchase.fusion.model.Operation;
+import lombok.*;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import lombok.*;
+
+import static io.github.jpmorganchase.fusion.api.context.MultipartTransferContext.MultipartTransferStatus.INITIATED;
+import static io.github.jpmorganchase.fusion.api.context.MultipartTransferContext.MultipartTransferStatus.TRANSFERRED;
 
 @Getter
 @ToString

@@ -2,12 +2,13 @@ package io.github.jpmorganchase.fusion.oauth.model;
 
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.retriever.OAuthServerResponse;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Value;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Value
 @AllArgsConstructor(staticName = "of", access = AccessLevel.PRIVATE)

@@ -7,35 +7,29 @@ import static org.hamcrest.Matchers.is;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class AttributeBuilderTest {
+public class DataDictionaryAttributeBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
         APIManager apiManager = Mockito.mock(APIManager.class);
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
-        Attribute a = Attribute.builder()
+
+        DataDictionaryAttribute a = DataDictionaryAttribute.builder()
                 .identifier("The identifier")
-                .varArgs(varArgs)
-                .key(true)
-                .dataType("The type")
-                .index(100)
                 .description("The description")
                 .title("The title")
                 .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
                 .apiManager(apiManager)
+                .varArgs(varArgs)
                 .build();
 
         assertThat(a.getIdentifier(), is(equalTo("The identifier")));
         assertThat(a.getVarArgs(), is(equalTo(varArgs)));
-        assertThat(a.isKey(), is(true));
-        assertThat(a.getDataType(), is(equalTo("The type")));
-        assertThat(a.getIndex(), is(100L));
         assertThat(a.getDescription(), is(equalTo("The description")));
         assertThat(a.getTitle(), is(equalTo("The title")));
         assertThat(a.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
@@ -47,7 +41,8 @@ public class AttributeBuilderTest {
     void constructionWithBuilderCorrectlyPopulatesAllFieldsWhenSingleVarArgAdded() {
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
-        Attribute a = Attribute.builder().varArg("key1", "value1").build();
+        DataDictionaryAttribute a =
+                DataDictionaryAttribute.builder().varArg("key1", "value1").build();
 
         assertThat(a.getVarArgs(), is(equalTo(varArgs)));
     }
@@ -55,12 +50,12 @@ public class AttributeBuilderTest {
     @Test
     void constructionWithBuilderCorrectlyReturnsApiPath() {
 
-        Attribute a = Attribute.builder()
+        DataDictionaryAttribute a = DataDictionaryAttribute.builder()
                 .identifier("The identifier")
                 .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
                 .build();
 
-        Assertions.assertThrows(UnsupportedOperationException.class, a::getApiPath);
+        assertThat(a.getApiPath(), is(equalTo("http://foobar/api/v1/catalogs/foobar/attributes/The identifier")));
     }
 }

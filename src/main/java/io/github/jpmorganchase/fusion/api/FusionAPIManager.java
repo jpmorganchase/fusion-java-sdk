@@ -1,7 +1,5 @@
 package io.github.jpmorganchase.fusion.api;
 
-import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
-
 import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.FusionInitialisationException;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
@@ -18,11 +16,14 @@ import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
 import io.github.jpmorganchase.fusion.serializing.GsonAPIRequestSerializer;
+import lombok.Builder;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import lombok.Builder;
+
+import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
 
 /**
  * Class that manages calls to the API. Intended to be called from multithreaded code.

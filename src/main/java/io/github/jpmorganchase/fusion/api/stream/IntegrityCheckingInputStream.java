@@ -1,11 +1,12 @@
 package io.github.jpmorganchase.fusion.api.stream;
 
 import io.github.jpmorganchase.fusion.digest.PartChecker;
+import lombok.Builder;
+import lombok.ToString;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
-import lombok.Builder;
-import lombok.ToString;
 
 @Builder
 @ToString

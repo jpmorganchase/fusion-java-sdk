@@ -2,11 +2,12 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.api.APIManager;
-import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
+
+import java.util.Map;
 
 /**
  * An object representing a data product. Object properties hold metadata attributes and descriptions.
@@ -52,7 +53,7 @@ public class DataProduct extends CatalogResource {
         private Map<String, Object> varArgs;
 
         public DataProductBuilder varArgs(Map<String, Object> varArgs) {
-            this.varArgs = copyMap(varArgs);
+            this.varArgs = VarArgsHelper.copyMap(varArgs);
             return this;
         }
     }
