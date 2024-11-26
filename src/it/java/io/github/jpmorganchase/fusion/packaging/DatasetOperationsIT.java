@@ -24,6 +24,7 @@ import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
@@ -166,7 +167,7 @@ public class DatasetOperationsIT {
         dataset.update();
 
         // Then Verify the response
-        //TODO :: Contract for response of dataset.create() needs to be decided
+        //TODO :: Contract for response of dataset.update() needs to be decided
     }
 
     @Test
@@ -197,7 +198,48 @@ public class DatasetOperationsIT {
         amendedDataset.update();
 
         // Then Verify the response
-        //TODO :: Contract for response of dataset.create() needs to be decided
+        //TODO :: Contract for response of dataset.update() needs to be decided
+    }
+
+    @Test
+    public void testDeleteDataset() {
+        // Given
+        wireMockRule.stubFor(WireMock.delete(WireMock.urlEqualTo("/catalogs/common/datasets/SD0001"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-delete-response.json")));
+
+        Dataset dataset = sdk.builders().dataset()
+                .identifier("SD0001")
+                .build();
+
+        // When
+        dataset.delete();
+
+        // Then Verify the response
+        //TODO :: Contract for response of dataset.delete() needs to be decided
+    }
+
+    @Test
+    public void testDeleteDatasetWithCatalogOverride() {
+        // Given
+        wireMockRule.stubFor(WireMock.delete(WireMock.urlEqualTo("/catalogs/foobar/datasets/SD0001"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-delete-response.json")));
+
+        Dataset dataset = sdk.builders().dataset()
+                .identifier("SD0001")
+                .catalogIdentifier("foobar")
+                .build();
+
+        // When
+        dataset.delete();
+
+        // Then Verify the response
+        //TODO :: Contract for response of dataset.delete() needs to be decided
     }
 
     @Test
@@ -213,10 +255,9 @@ public class DatasetOperationsIT {
         Map<String, Dataset> datasets = sdk.listDatasets();
 
         // Then Verify the response
-        MatcherAssert.assertThat(datasets.containsKey("SD0001"), is(equalTo(true)));
-        MatcherAssert.assertThat(datasets.containsKey("SD0002"), is(equalTo(true)));
-        MatcherAssert.assertThat(datasets.containsKey("SD0003"), is(equalTo(true)));
-
+        assertThat(datasets.containsKey("SD0001"), is(equalTo(true)));
+        assertThat(datasets.containsKey("SD0002"), is(equalTo(true)));
+        assertThat(datasets.containsKey("SD0003"), is(equalTo(true)));
     }
 
     @Test
@@ -232,9 +273,9 @@ public class DatasetOperationsIT {
         Map<String, Dataset> datasets = sdk.listDatasets("common", "SD0001", true);
 
         // Then Verify the response
-        MatcherAssert.assertThat(datasets.containsKey("SD0001"), is(equalTo(true)));
-        MatcherAssert.assertThat(datasets.containsKey("SD0002"), is(equalTo(false)));
-        MatcherAssert.assertThat(datasets.containsKey("SD0003"), is(equalTo(false)));
+        assertThat(datasets.containsKey("SD0001"), is(equalTo(true)));
+        assertThat(datasets.containsKey("SD0002"), is(equalTo(false)));
+        assertThat(datasets.containsKey("SD0003"), is(equalTo(false)));
 
     }
 

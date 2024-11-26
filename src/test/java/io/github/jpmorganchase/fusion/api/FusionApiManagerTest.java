@@ -94,6 +94,19 @@ public class FusionApiManagerTest {
         thenTheResponseBodyShouldMatchExpected();
     }
 
+    @Test
+    void successfulDeleteCall() {
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
+        givenResponseBody("sample response");
+        givenCatalogResource("dataset_one");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenCallToClientToDeleteIsSuccessful();
+        WhenFusionApiManagerIsCalledToDelete();
+        thenTheResponseBodyShouldMatchExpected();
+    }
+
     private void givenSerializedCatalogResource(String identifier) {
         serializedCatalogResource = String.format("{\"identifier\":\"%s\"}", identifier);
     }
@@ -146,6 +159,10 @@ public class FusionApiManagerTest {
         actualResponse = fusionAPIManager.callAPIToPut(apiPath, catalogResource);
     }
 
+    private void WhenFusionApiManagerIsCalledToDelete() {
+        actualResponse = fusionAPIManager.callAPIToDelete(apiPath);
+    }
+
     private void givenResponseBody(String responseBody) {
         this.responseBody = responseBody;
     }
@@ -172,6 +189,14 @@ public class FusionApiManagerTest {
                 .body(responseBody)
                 .build();
         when(client.put(apiPath, serializedCatalogResource, requestHeaders)).thenReturn(expectedHttpResponse);
+    }
+
+    private void givenCallToClientToDeleteIsSuccessful() {
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body(responseBody)
+                .build();
+        when(client.delete(apiPath, requestHeaders, null)).thenReturn(expectedHttpResponse);
     }
 
     private void thenExceptionMessageShouldMatchExpected(String message) {
