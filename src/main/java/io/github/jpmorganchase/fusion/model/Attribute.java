@@ -21,13 +21,13 @@ public class Attribute extends CatalogResource {
     String description;
     String title;
 
-    @Builder
+    @Builder(toBuilder = true)
     public Attribute(
-            String identifier,
-            Map<String, Object> varArgs,
-            APIManager apiManager,
-            String rootUrl,
-            String catalogIdentifier,
+            @Builder.ObtainVia(method = "getIdentifier") String identifier,
+            @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
+            @Builder.ObtainVia(method = "getApiManager") APIManager apiManager,
+            @Builder.ObtainVia(method = "getRootUrl") String rootUrl,
+            @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             boolean key,
             String dataType,
             long index,
@@ -43,14 +43,20 @@ public class Attribute extends CatalogResource {
 
     @Override
     protected String getApiPath() {
-        throw new UnsupportedOperationException("Operation is not yet supported for attributes");
+        throw new UnsupportedOperationException("Operation not yet supported");
     }
 
     public static class AttributeBuilder {
+        @SuppressWarnings("FieldCanBeLocal")
         private Map<String, Object> varArgs;
 
-        public AttributeBuilder varArgs(Map<String, Object> varArgs) {
-            this.varArgs = copyMap(varArgs);
+        public Attribute.AttributeBuilder varArg(String key, Object value) {
+            this.varArgs = VarArgsHelper.varArg(key, value, this.varArgs);
+            return this;
+        }
+
+        public Attribute.AttributeBuilder varArgs(Map<String, Object> varArgs) {
+            this.varArgs = VarArgsHelper.copyMap(varArgs);
             return this;
         }
     }

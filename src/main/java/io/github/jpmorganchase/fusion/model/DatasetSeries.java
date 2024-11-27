@@ -49,7 +49,7 @@ public class DatasetSeries extends CatalogResource {
         private Map<String, Object> varArgs;
 
         public DatasetSeriesBuilder varArgs(Map<String, Object> varArgs) {
-            this.varArgs = copyMap(varArgs);
+            this.varArgs = VarArgsHelper.copyMap(varArgs);
             return this;
         }
     }

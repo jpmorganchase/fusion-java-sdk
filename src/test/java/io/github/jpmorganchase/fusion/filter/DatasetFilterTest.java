@@ -3,7 +3,6 @@ package io.github.jpmorganchase.fusion.filter;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.jpmorganchase.fusion.model.Dataset;
 import java.util.HashMap;
