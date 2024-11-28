@@ -14,7 +14,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 @ExtendWith(WireMockExtension.class)
 public class AttributeOperationsIT extends BaseOperationsIT {
 
-
     @Test
     public void testCreateAttribute() {
 

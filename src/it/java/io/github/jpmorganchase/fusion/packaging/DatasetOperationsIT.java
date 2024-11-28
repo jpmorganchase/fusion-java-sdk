@@ -1,16 +1,9 @@
 package io.github.jpmorganchase.fusion.packaging;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import io.github.jpmorganchase.fusion.Fusion;
-import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.test.TestUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,28 +16,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-@ExtendWith(WireMockExtension.class)
-public class DatasetOperationsIT {
+public class DatasetOperationsIT extends BaseOperationsIT {
 
     private static final Logger logger =
             LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    @RegisterExtension
-    public static WireMockExtension wireMockRule = WireMockExtension.newInstance().options(WireMockConfiguration.wireMockConfig().dynamicPort()).build();
-
-    private Fusion sdk;
-
-    @BeforeEach
-    public void setUp() {
-        int port = wireMockRule.getRuntimeInfo().getHttpPort();
-        logger.debug("Wiremock is configured to port {}", port);
-
-        sdk = Fusion.builder()
-                .bearerToken("my-token")
-                .configuration(FusionConfiguration.builder()
-                        .rootURL("http://localhost:" + port + "/")
-                .build()).build();
-    }
 
     @Test
     public void testCreateDataset() {
@@ -56,7 +31,7 @@ public class DatasetOperationsIT {
                         .withStatus(200)
                         .withBodyFile("dataset/dataset-create-response.json")));
 
-        Dataset dataset = sdk.builders().dataset()
+        Dataset dataset = getSdk().builders().dataset()
                 .identifier("SD0001")
                 .description("Sample dataset description 1")
                 .linkedEntity("SD0001/")
@@ -81,7 +56,7 @@ public class DatasetOperationsIT {
                         .withStatus(200)
                         .withBodyFile("dataset/dataset-create-response.json")));
 
-        Dataset dataset = sdk.builders().dataset()
+        Dataset dataset = getSdk().builders().dataset()
                 .identifier("SD0002")
                 .description("Sample dataset description 2")
                 .linkedEntity("SD0002/")
@@ -124,7 +99,7 @@ public class DatasetOperationsIT {
                         .withStatus(200)
                         .withBodyFile("dataset/dataset-create-response.json")));
 
-        Dataset dataset = sdk.builders().dataset()
+        Dataset dataset = getSdk().builders().dataset()
                 .identifier("SD0001")
                 .description("Sample dataset description 1")
                 .linkedEntity("SD0001/")
@@ -150,7 +125,7 @@ public class DatasetOperationsIT {
                         .withStatus(200)
                         .withBodyFile("dataset/dataset-update-response.json")));
 
-        Dataset dataset = sdk.builders().dataset()
+        Dataset dataset = getSdk().builders().dataset()
                 .identifier("SD0004")
                 .description("New Sample dataset description 4")
                 .linkedEntity("SD0004/")
@@ -181,7 +156,7 @@ public class DatasetOperationsIT {
                         .withStatus(200)
                         .withBodyFile("dataset/dataset-create-response.json")));
 
-        Map<String, Dataset> datasets = sdk.listDatasets("common", "SD0001", true);
+        Map<String, Dataset> datasets = getSdk().listDatasets("common", "SD0001", true);
         Dataset originalDataset = datasets.get("SD0001");
 
         // When
@@ -205,7 +180,7 @@ public class DatasetOperationsIT {
                         .withStatus(200)
                         .withBodyFile("dataset/dataset-delete-response.json")));
 
-        Dataset dataset = sdk.builders().dataset()
+        Dataset dataset = getSdk().builders().dataset()
                 .identifier("SD0001")
                 .build();
 
@@ -225,7 +200,7 @@ public class DatasetOperationsIT {
                         .withStatus(200)
                         .withBodyFile("dataset/dataset-delete-response.json")));
 
-        Dataset dataset = sdk.builders().dataset()
+        Dataset dataset = getSdk().builders().dataset()
                 .identifier("SD0001")
                 .catalogIdentifier("foobar")
                 .build();
@@ -247,7 +222,7 @@ public class DatasetOperationsIT {
                         .withBodyFile("dataset/multiple-dataset-response.json")));
 
         // When
-        Map<String, Dataset> datasets = sdk.listDatasets();
+        Map<String, Dataset> datasets = getSdk().listDatasets();
 
         // Then Verify the response
         assertThat(datasets.containsKey("SD0001"), is(equalTo(true)));
@@ -265,7 +240,7 @@ public class DatasetOperationsIT {
                         .withBodyFile("dataset/multiple-dataset-response.json")));
 
         // When
-        Map<String, Dataset> datasets = sdk.listDatasets("common", "SD0001", true);
+        Map<String, Dataset> datasets = getSdk().listDatasets("common", "SD0001", true);
 
         // Then Verify the response
         assertThat(datasets.containsKey("SD0001"), is(equalTo(true)));
