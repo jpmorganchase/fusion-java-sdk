@@ -22,31 +22,58 @@ public class GsonAPIResponseParserAttributeTest {
     private static final String multipleAttributeJson = loadTestResource("multiple-attribute-response.json");
     private static final String duplicateAttributeJson = loadTestResource("duplicate-attribute-response.json");
 
-    private static final Attribute testAttribute = Attribute.builder()
+    private final Attribute testAttribute = Attribute.builder()
             .identifier("name")
             .key(true)
             .dataType("String")
             .description("The name")
             .title("Name")
             .index(0)
+            .varArg("isDatasetKey", true)
+            .varArg("term", "bizterm1")
+            .varArg("id", 1.0)
+            .varArg("source", "Source System 1")
+            .varArg("sourceFieldId", "src_name")
+            .apiManager(apiContext.getApiManager())
+            .rootUrl(apiContext.getRootUrl())
+            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .dataset("SD0001")
             .build();
 
-    private static final Attribute testAttribute2 = Attribute.builder()
+    private final Attribute testAttribute2 = Attribute.builder()
             .identifier("currency")
             .key(false)
             .dataType("String")
             .description("The currency")
             .title("Currency")
             .index(1)
+            .varArg("isDatasetKey", false)
+            .varArg("term", "bizterm1")
+            .varArg("id", 2.0)
+            .varArg("source", "Source System 1")
+            .varArg("sourceFieldId", "")
+            .apiManager(apiContext.getApiManager())
+            .rootUrl(apiContext.getRootUrl())
+            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .dataset("SD0001")
             .build();
 
-    private static final Attribute testAttribute3 = Attribute.builder()
+    private final Attribute testAttribute3 = Attribute.builder()
             .identifier("term")
             .key(false)
             .dataType("String")
             .description("The term")
             .title("Term")
             .index(2)
+            .varArg("isDatasetKey", false)
+            .varArg("term", "bizterm1")
+            .varArg("id", 3.0)
+            .varArg("source", "Source System 1")
+            .varArg("sourceFieldId", "")
+            .apiManager(apiContext.getApiManager())
+            .rootUrl(apiContext.getRootUrl())
+            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .dataset("SD0001")
             .build();
 
     private static final APIContext apiContext = APIContext.builder()
@@ -58,7 +85,7 @@ public class GsonAPIResponseParserAttributeTest {
 
     @Test
     public void singleAttributeInResourcesParsesCorrectly() {
-        Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(singleAttributeJson);
+        Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(singleAttributeJson, "SD0001");
         assertThat(attributeMap.size(), is(1));
 
         Attribute testAttributeResponse = attributeMap.get("name");
@@ -67,7 +94,7 @@ public class GsonAPIResponseParserAttributeTest {
 
     @Test
     public void multipleCatalogsInResourcesParseCorrectly() {
-        Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(multipleAttributeJson);
+        Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(multipleAttributeJson, "SD0001");
         assertThat(attributeMap.size(), is(3));
 
         Attribute testAttributeResponse = attributeMap.get("name");
@@ -82,7 +109,7 @@ public class GsonAPIResponseParserAttributeTest {
 
     @Test
     public void duplicateAttributesAreIgnored() {
-        Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(duplicateAttributeJson);
+        Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(duplicateAttributeJson, "SD0001");
         assertThat(attributeMap.size(), is(3));
 
         Attribute testAttributeResponse = attributeMap.get("name");

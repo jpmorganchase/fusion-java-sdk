@@ -70,8 +70,14 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
-    public Map<String, Attribute> parseAttributeResponse(String json) {
-        return parseResourcesFromResponse(json, Attribute.class);
+    public Map<String, Attribute> parseAttributeResponse(String json, String dataset) {
+        return parseResourcesWithVarArgsFromResponse(json, Attribute.class, (resource, mc) -> resource.toBuilder()
+                .dataset(dataset)
+                .varArgs(mc.getVarArgs())
+                .apiManager(mc.getApiContext().getApiManager())
+                .rootUrl(mc.getApiContext().getRootUrl())
+                .catalogIdentifier(mc.getApiContext().getDefaultCatalog())
+                .build());
     }
 
     @Override

@@ -70,7 +70,7 @@ public class DataDictionaryAttributeOperationsIT {
     }
 
     @Test
-    public void testCreateDataDictionaryAttributeWithVarArgs() {
+    public void testCreateDataDictionaryAttributeWithoutVarArgs() {
         // Given
         wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/attributes/AT0002"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("data-dictionary-attribute/attribute-AT0002-create-request.json")))

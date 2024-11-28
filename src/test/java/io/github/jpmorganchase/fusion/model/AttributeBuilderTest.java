@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.is;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -26,6 +25,7 @@ public class AttributeBuilderTest {
                 .index(100)
                 .description("The description")
                 .title("The title")
+                .dataset("foo")
                 .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
                 .apiManager(apiManager)
@@ -38,6 +38,7 @@ public class AttributeBuilderTest {
         assertThat(a.getIndex(), is(100L));
         assertThat(a.getDescription(), is(equalTo("The description")));
         assertThat(a.getTitle(), is(equalTo("The title")));
+        assertThat(a.getDataset(), is(equalTo("foo")));
         assertThat(a.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(a.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(a.getApiManager(), is(equalTo(apiManager)));
@@ -57,10 +58,13 @@ public class AttributeBuilderTest {
 
         Attribute a = Attribute.builder()
                 .identifier("The identifier")
-                .rootUrl("http://foobar/api/v1/")
-                .catalogIdentifier("foobar")
+                .rootUrl("http://foo/api/v1/")
+                .catalogIdentifier("bar")
+                .dataset("foobar")
                 .build();
 
-        Assertions.assertThrows(UnsupportedOperationException.class, a::getApiPath);
+        assertThat(
+                a.getApiPath(),
+                is(equalTo("http://foo/api/v1/catalogs/bar/datasets/foobar/attributes/The identifier")));
     }
 }

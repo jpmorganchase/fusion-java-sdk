@@ -176,7 +176,7 @@ public class FusionTest {
         when(apiManager.callAPI(String.format(
                         "%1scatalogs/%2s/datasets/%3s/attributes", config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
-        when(responseParser.parseAttributeResponse("{\"key\":value}")).thenReturn(stubResponse);
+        when(responseParser.parseAttributeResponse("{\"key\":value}", "foobar")).thenReturn(stubResponse);
 
         Map<String, Attribute> actualResponse = f.listAttributes("sample_dataset");
         assertThat(actualResponse, is(equalTo(stubResponse)));
