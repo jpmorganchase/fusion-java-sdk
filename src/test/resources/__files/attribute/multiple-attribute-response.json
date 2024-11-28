@@ -1,0 +1,48 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/test/datasets/SAMPLE_DATASET/"
+  },
+  "@id": "attributes/",
+  "description": "A list of available attributes",
+  "identifier": "attributes",
+  "resources": [
+    {
+      "id": 1,
+      "source": "Source System 1",
+      "term": "bizterm1",
+      "dataType": "String",
+      "description": "The name",
+      "identifier": "name",
+      "index": 0,
+      "isDatasetKey": true,
+      "sourceFieldId": "src_name",
+      "title": "Name"
+    },
+    {
+      "id": 2,
+      "source": "Source System 1",
+      "term": "bizterm1",
+      "dataType": "String",
+      "description": "The currency",
+      "identifier": "currency",
+      "index": 1,
+      "isDatasetKey": false,
+      "sourceFieldId": "",
+      "title": "Currency"
+    },
+    {
+      "id": 3,
+      "source": "Source System 1",
+      "term": "bizterm1",
+      "dataType": "String",
+      "description": "The term",
+      "identifier": "term",
+      "index": 2,
+      "isDatasetKey": false,
+      "sourceFieldId": "",
+      "title": "Term"
+    }
+  ],
+  "title": "Attributes"
+}

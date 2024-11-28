@@ -369,7 +369,7 @@ public class Fusion {
     public Map<String, Attribute> listAttributes(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes", this.rootURL, catalogName, dataset);
         String json = this.api.callAPI(url);
-        return responseParser.parseAttributeResponse(json);
+        return responseParser.parseAttributeResponse(json, dataset);
     }
 
     /**

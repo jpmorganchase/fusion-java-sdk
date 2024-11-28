@@ -1,48 +1,16 @@
 package io.github.jpmorganchase.fusion.packaging;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import io.github.jpmorganchase.fusion.Fusion;
-import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
 import io.github.jpmorganchase.fusion.test.TestUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 
-@ExtendWith(WireMockExtension.class)
-public class DataDictionaryAttributeOperationsIT {
-
-    private static final Logger logger =
-            LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    @RegisterExtension
-    public static WireMockExtension wireMockRule = WireMockExtension.newInstance().options(WireMockConfiguration.wireMockConfig().dynamicPort()).build();
-
-    private Fusion sdk;
-
-    @BeforeEach
-    public void setUp() {
-        int port = wireMockRule.getRuntimeInfo().getHttpPort();
-        logger.debug("Wiremock is configured to port {}", port);
-
-        sdk = Fusion.builder()
-                .bearerToken("my-token")
-                .configuration(FusionConfiguration.builder()
-                        .rootURL("http://localhost:" + port + "/")
-                        .build()).build();
-    }
-
+public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
 
     @Test
     public void testCreateDataDictionaryAttribute() {
@@ -54,7 +22,7 @@ public class DataDictionaryAttributeOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        DataDictionaryAttribute dda = sdk.builders().dataDictionaryAttribute()
+        DataDictionaryAttribute dda = getSdk().builders().dataDictionaryAttribute()
                 .identifier("AT0001")
                 .title("Sample Attribute 1")
                 .description("Sample dd attribute description 1")
@@ -70,7 +38,7 @@ public class DataDictionaryAttributeOperationsIT {
     }
 
     @Test
-    public void testCreateDataDictionaryAttributeWithVarArgs() {
+    public void testCreateDataDictionaryAttributeWithoutVarArgs() {
         // Given
         wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/attributes/AT0002"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("data-dictionary-attribute/attribute-AT0002-create-request.json")))
@@ -78,7 +46,7 @@ public class DataDictionaryAttributeOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        DataDictionaryAttribute dda = sdk.builders().dataDictionaryAttribute()
+        DataDictionaryAttribute dda = getSdk().builders().dataDictionaryAttribute()
                 .identifier("AT0002")
                 .title("Sample Attribute 2")
                 .description("Sample dd attribute description 2")
@@ -100,7 +68,7 @@ public class DataDictionaryAttributeOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        DataDictionaryAttribute dda = sdk.builders().dataDictionaryAttribute()
+        DataDictionaryAttribute dda = getSdk().builders().dataDictionaryAttribute()
                 .identifier("AT0001")
                 .title("Sample Attribute 1")
                 .description("Sample dd attribute description 1")
@@ -124,7 +92,7 @@ public class DataDictionaryAttributeOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        DataDictionaryAttribute dda = sdk.builders().dataDictionaryAttribute()
+        DataDictionaryAttribute dda = getSdk().builders().dataDictionaryAttribute()
                 .identifier("AT0001")
                 .title("Sample Attribute 1")
                 .description("Sample dd attribute description 1")
@@ -147,7 +115,7 @@ public class DataDictionaryAttributeOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        DataDictionaryAttribute dda = sdk.builders().dataDictionaryAttribute()
+        DataDictionaryAttribute dda = getSdk().builders().dataDictionaryAttribute()
                 .identifier("AT0001")
                 .title("Sample Attribute 1")
                 .description("Sample dd attribute description 1")
@@ -177,7 +145,7 @@ public class DataDictionaryAttributeOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        Map<String, DataDictionaryAttribute> attributes = sdk.listDataDictionaryAttributes("common");
+        Map<String, DataDictionaryAttribute> attributes = getSdk().listDataDictionaryAttributes("common");
         DataDictionaryAttribute original = attributes.get("AT0002");
 
         // When
@@ -200,7 +168,7 @@ public class DataDictionaryAttributeOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        DataDictionaryAttribute dda = sdk.builders().dataDictionaryAttribute()
+        DataDictionaryAttribute dda = getSdk().builders().dataDictionaryAttribute()
                 .identifier("AT0001")
                 .build();
 
@@ -219,7 +187,7 @@ public class DataDictionaryAttributeOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        DataDictionaryAttribute dda = sdk.builders().dataDictionaryAttribute()
+        DataDictionaryAttribute dda = getSdk().builders().dataDictionaryAttribute()
                 .identifier("AT0001")
                 .catalogIdentifier("foobar")
                 .build();

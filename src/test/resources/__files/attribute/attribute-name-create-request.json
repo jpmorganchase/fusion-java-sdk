@@ -1,0 +1,11 @@
+{
+  "isDatasetKey": true,
+  "dataType": "String",
+  "index": 0,
+  "description": "The name",
+  "title": "Name",
+  "identifier": "name",
+  "term": "bizterm1",
+  "source": "Source System 1",
+  "sourceFieldId": "src_name"
+}
