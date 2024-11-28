@@ -23,6 +23,8 @@ public class Dataset extends CatalogResource {
 
     String title;
     String frequency;
+    String type;
+    Report report;
 
     @Builder(toBuilder = true)
     public Dataset(
@@ -34,12 +36,16 @@ public class Dataset extends CatalogResource {
             String description,
             String linkedEntity,
             String title,
-            String frequency) {
+            String frequency,
+            String type,
+            Report report) {
         super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
         this.title = title;
         this.frequency = frequency;
+        this.type = type;
+        this.report = report;
     }
 
     @Override
@@ -59,6 +65,11 @@ public class Dataset extends CatalogResource {
 
         public DatasetBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = VarArgsHelper.copyMap(varArgs);
+            return this;
+        }
+
+        public DatasetBuilder report(Object value) {
+            this.varArgs = VarArgsHelper.varArg("report", value, this.varArgs);
             return this;
         }
     }
