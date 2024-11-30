@@ -15,6 +15,7 @@ public class DatasetBuilderTest {
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
         APIManager apiManager = Mockito.mock(APIManager.class);
+        Report report = Report.builder().tier("The tier").build();
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         Dataset d = Dataset.builder()
@@ -25,6 +26,7 @@ public class DatasetBuilderTest {
                 .title("The title")
                 .frequency("The frequency")
                 .type("The type")
+                .report(report)
                 .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
                 .apiManager(apiManager)
@@ -37,6 +39,7 @@ public class DatasetBuilderTest {
         assertThat(d.getTitle(), is(equalTo("The title")));
         assertThat(d.getFrequency(), is(equalTo("The frequency")));
         assertThat(d.getType(), is(equalTo("The type")));
+        assertThat(d.getReport(), is(equalTo(report)));
         assertThat(d.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(d.getApiManager(), is(equalTo(apiManager)));

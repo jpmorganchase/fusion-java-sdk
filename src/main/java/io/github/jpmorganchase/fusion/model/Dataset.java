@@ -67,10 +67,5 @@ public class Dataset extends CatalogResource {
             this.varArgs = VarArgsHelper.copyMap(varArgs);
             return this;
         }
-
-        public DatasetBuilder report(Object value) {
-            this.varArgs = VarArgsHelper.varArg("report", value, this.varArgs);
-            return this;
-        }
     }
 }

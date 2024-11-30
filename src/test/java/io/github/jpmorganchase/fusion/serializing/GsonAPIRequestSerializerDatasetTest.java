@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import io.github.jpmorganchase.fusion.model.Dataset;
+import io.github.jpmorganchase.fusion.model.Report;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -41,6 +42,8 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("isRestricted", Boolean.FALSE)
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
+                .type("Report")
+                .report(Report.builder().tier("Tier 1").build())
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
