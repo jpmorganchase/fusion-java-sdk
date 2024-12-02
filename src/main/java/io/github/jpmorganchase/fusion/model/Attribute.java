@@ -1,5 +1,6 @@
 package io.github.jpmorganchase.fusion.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
@@ -21,6 +22,9 @@ public class Attribute extends CatalogResource {
     String description;
     String title;
 
+    @Expose(serialize = false, deserialize = false)
+    String dataset;
+
     @Builder(toBuilder = true)
     public Attribute(
             @Builder.ObtainVia(method = "getIdentifier") String identifier,
@@ -32,18 +36,22 @@ public class Attribute extends CatalogResource {
             String dataType,
             long index,
             String description,
-            String title) {
+            String title,
+            String dataset) {
         super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.key = key;
         this.dataType = dataType;
         this.index = index;
         this.description = description;
         this.title = title;
+        this.dataset = dataset;
     }
 
     @Override
     protected String getApiPath() {
-        throw new UnsupportedOperationException("Operation not yet supported");
+        return String.format(
+                "%1scatalogs/%2s/datasets/%3s/attributes/%4s",
+                this.getRootUrl(), this.getCatalogIdentifier(), this.getDataset(), this.getIdentifier());
     }
 
     public static class AttributeBuilder {

@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Report;
 import java.net.URL;
@@ -13,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class GsonAPIRequestSerializerDatasetTest {
 
@@ -44,6 +46,9 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("hasSample", Boolean.FALSE)
                 .type("Report")
                 .report(Report.builder().tier("Tier 1").build())
+                .apiManager(Mockito.mock(APIManager.class))
+                .rootUrl("http://foo/bar")
+                .catalogIdentifier("foobar")
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
