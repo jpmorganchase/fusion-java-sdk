@@ -218,6 +218,37 @@ public class DatasetOperationsIT extends BaseOperationsIT {
     }
 
     @Test
+    public void testUpdateDatasetOfTypeReportRetrievedFromListDatasets() {
+        // Given
+        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/multiple-dataset-response.json")));
+
+        wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/SR0001"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-report-SR0001-update-request.json")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-create-response.json")));
+
+        Map<String, Dataset> datasets = getSdk().listDatasets("common", "SR0001", true);
+        Dataset originalDataset = datasets.get("SR0001");
+
+        // When
+        Dataset amendedDataset = originalDataset
+                .toBuilder()
+                .description("Updated Sample report description 1")
+                .build();
+
+        amendedDataset.update();
+
+        // Then Verify the response
+        //TODO :: Contract for response of dataset.update() needs to be decided
+    }
+
+    @Test
     public void testDeleteDataset() {
         // Given
         wireMockRule.stubFor(WireMock.delete(WireMock.urlEqualTo("/catalogs/common/datasets/SD0001"))
@@ -274,6 +305,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
         assertThat(datasets.containsKey("SD0001"), is(equalTo(true)));
         assertThat(datasets.containsKey("SD0002"), is(equalTo(true)));
         assertThat(datasets.containsKey("SD0003"), is(equalTo(true)));
+        assertThat(datasets.containsKey("SR0001"), is(equalTo(true)));
     }
 
     @Test
@@ -292,6 +324,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
         assertThat(datasets.containsKey("SD0001"), is(equalTo(true)));
         assertThat(datasets.containsKey("SD0002"), is(equalTo(false)));
         assertThat(datasets.containsKey("SD0003"), is(equalTo(false)));
+        assertThat(datasets.containsKey("SR0001"), is(equalTo(false)));
 
     }
 
