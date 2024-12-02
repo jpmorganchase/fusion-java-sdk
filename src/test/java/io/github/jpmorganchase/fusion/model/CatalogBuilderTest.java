@@ -26,6 +26,7 @@ public class CatalogBuilderTest {
                 .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
                 .apiManager(apiManager)
+                .isInternal(true)
                 .build();
 
         assertThat(c.getIdentifier(), is(equalTo("The identifier")));
@@ -33,8 +34,10 @@ public class CatalogBuilderTest {
         assertThat(c.getDescription(), is(equalTo("The description")));
         assertThat(c.getLinkedEntity(), is(equalTo("The entity")));
         assertThat(c.getTitle(), is(equalTo("The title")));
+        assertThat(c.getVarArgs(), is(equalTo(varArgs)));
         assertThat(c.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(c.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(c.getApiManager(), is(equalTo(apiManager)));
+        assertThat(c.isInternal(), is(equalTo(true)));
     }
 }

@@ -35,6 +35,36 @@ public class DataDictionaryAttribute extends CatalogResource {
                 "%1scatalogs/%2s/attributes/%3s", this.getRootUrl(), this.getCatalogIdentifier(), this.getIdentifier());
     }
 
+    public String setLinage(DataDictionaryAttribute derived) {
+        return buildAttributeLineage(derived.getIdentifier(), derived.getCatalogIdentifier())
+                .create();
+    }
+
+    public String updateLineage(DataDictionaryAttribute derived) {
+        return buildAttributeLineage(derived.getIdentifier(), derived.getCatalogIdentifier())
+                .update();
+    }
+
+    public String deleteLineage() {
+        return buildAttributeLineage().delete();
+    }
+
+    private DataDictionaryAttributeLineage buildAttributeLineage() {
+        return buildAttributeLineage(null, null);
+    }
+
+    private DataDictionaryAttributeLineage buildAttributeLineage(
+            String derivedIdentifier, String derivedCatalogIdentifier) {
+        return DataDictionaryAttributeLineage.builder()
+                .identifier(derivedIdentifier)
+                .catalogIdentifier(derivedCatalogIdentifier)
+                .baseIdentifier(this.getIdentifier())
+                .baseCatalogIdentifier(this.getCatalogIdentifier())
+                .apiManager(this.getApiManager())
+                .rootUrl(this.getRootUrl())
+                .build();
+    }
+
     public static class DataDictionaryAttributeBuilder {
         @SuppressWarnings("FieldCanBeLocal")
         private Map<String, Object> varArgs;

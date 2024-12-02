@@ -23,6 +23,8 @@ public class Catalog extends CatalogResource {
 
     String title;
 
+    boolean isInternal;
+
     @Builder
     public Catalog(
             String identifier,
@@ -32,11 +34,13 @@ public class Catalog extends CatalogResource {
             APIManager apiManager,
             String description,
             String linkedEntity,
-            String title) {
+            String title,
+            boolean isInternal) {
         super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
         this.title = title;
+        this.isInternal = isInternal;
     }
 
     @Override
