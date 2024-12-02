@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.packaging;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.github.jpmorganchase.fusion.model.Dataset;
+import io.github.jpmorganchase.fusion.model.Report;
 import io.github.jpmorganchase.fusion.test.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -110,6 +111,51 @@ public class DatasetOperationsIT extends BaseOperationsIT {
 
         // When
         dataset.create();
+
+        // Then Verify the response
+        //TODO :: Contract for response of dataset.create() needs to be decided
+    }
+
+    @Test
+    public void testCreateDatasetOfTypeReport() {
+        // Given
+        wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SR0001"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-report-SR0001-create-request.json")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-create-response.json")));
+
+        Dataset dataset = getSdk().builders().dataset()
+                .identifier("SR0001")
+                .description("Sample report description 1")
+                .linkedEntity("SR0001/")
+                .title("Sample Report 1 | North America")
+                .frequency("Daily")
+                .varArg("category", listOf("Category 1"))
+                .varArg("createdDate", "2022-02-06")
+                .varArg("coverageStartDate", "2022-02-06")
+                .varArg("coverageEndDate", "2023-03-09")
+                .varArg("isThirdPartyData", Boolean.FALSE)
+                .varArg("isInternalOnlyDataset", Boolean.FALSE)
+                .varArg("language", "English")
+                .varArg("maintainer", "Maintainer 1")
+                .varArg("modifiedDate", "2023-03-09")
+                .varArg("publisher", "Publisher 1")
+                .varArg("region", listOf("North America"))
+                .varArg("source", listOf("Source System 1"))
+                .varArg("subCategory", listOf("Subcategory 1"))
+                .varArg("tag", listOf("Tag1"))
+                .varArg("isRestricted", Boolean.FALSE)
+                .varArg("isRawData", Boolean.FALSE)
+                .varArg("hasSample", Boolean.FALSE)
+                .type("Report")
+                .report(Report.builder().tier("Tier 1").build())
+                .build();
+
+        // When
+        dataset.create();
+
 
         // Then Verify the response
         //TODO :: Contract for response of dataset.create() needs to be decided
