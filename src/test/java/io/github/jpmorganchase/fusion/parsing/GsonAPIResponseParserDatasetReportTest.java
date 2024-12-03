@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.context.APIContext;
+import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Report;
 import java.net.URL;
@@ -50,6 +51,9 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
             .type("Report")
+            .varArg(
+                    "applicationId",
+                    Application.builder().sealId("12345").build().toMap())
             .report(Report.builder().tier("Tier 1").build())
             .build();
 
@@ -80,6 +84,9 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
             .type("Report")
+            .varArg(
+                    "applicationId",
+                    Application.builder().sealId("12345").build().toMap())
             .report(Report.builder().tier("Tier 2").build())
             .build();
 
@@ -110,6 +117,9 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
             .type("Report")
+            .varArg(
+                    "applicationId",
+                    Application.builder().sealId("12345").build().toMap())
             .report(Report.builder().tier("Tier 3").build())
             .build();
 

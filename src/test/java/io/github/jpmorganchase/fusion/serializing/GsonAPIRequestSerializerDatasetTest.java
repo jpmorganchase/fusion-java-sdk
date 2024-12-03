@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Report;
 import java.net.URL;
@@ -45,6 +46,7 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
                 .type("Report")
+                .varArg("applicationId", Application.builder().sealId("12345"))
                 .report(Report.builder().tier("Tier 1").build())
                 .apiManager(Mockito.mock(APIManager.class))
                 .rootUrl("http://foo/bar")

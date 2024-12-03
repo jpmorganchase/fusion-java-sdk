@@ -41,6 +41,10 @@
       "hasSample": false,
       "@id": "SR0001/",
       "type": "Report",
+      "applicationId": {
+        "id": "12345",
+        "idType": "SEAL"
+      },
       "report": {
         "tier": "Tier 1"
       }
@@ -79,6 +83,10 @@
       "hasSample": false,
       "@id": "SR0002/",
       "type": "Report",
+      "applicationId": {
+        "id": "12345",
+        "idType": "SEAL"
+      },
       "report": {
         "tier": "Tier 2"
       }
@@ -117,6 +125,10 @@
       "hasSample": false,
       "@id": "SR0003/",
       "type": "Report",
+      "applicationId": {
+        "id": "12345",
+        "idType": "SEAL"
+      },
       "report": {
         "tier": "Tier 3"
       }

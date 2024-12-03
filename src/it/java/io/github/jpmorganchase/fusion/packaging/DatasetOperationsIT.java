@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.packaging;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Report;
 import io.github.jpmorganchase.fusion.test.TestUtils;
@@ -150,6 +151,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
                 .type("Report")
+                .varArg("applicationId", Application.builder().sealId("12345"))
                 .report(Report.builder().tier("Tier 1").build())
                 .build();
 
