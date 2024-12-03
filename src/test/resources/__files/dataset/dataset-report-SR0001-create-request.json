@@ -32,6 +32,10 @@
   "hasSample": false,
   "isRestricted": false,
   "type": "Report",
+  "applicationId": {
+    "id": "12345",
+    "idType": "SEAL"
+  },
   "report": {
     "tier": "Tier 1"
   }

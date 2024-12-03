@@ -25,7 +25,6 @@ public class DatasetBuilderTest {
                 .linkedEntity("The entity")
                 .title("The title")
                 .frequency("The frequency")
-                .type("The type")
                 .report(report)
                 .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
@@ -38,7 +37,7 @@ public class DatasetBuilderTest {
         assertThat(d.getLinkedEntity(), is(equalTo("The entity")));
         assertThat(d.getTitle(), is(equalTo("The title")));
         assertThat(d.getFrequency(), is(equalTo("The frequency")));
-        assertThat(d.getType(), is(equalTo("The type")));
+        assertThat(d.getType(), is(equalTo("Report")));
         assertThat(d.getReport(), is(equalTo(report)));
         assertThat(d.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
