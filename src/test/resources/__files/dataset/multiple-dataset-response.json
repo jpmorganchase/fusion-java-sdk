@@ -143,6 +143,10 @@
       "hasSample": false,
       "@id": "SR0001/",
       "type": "Report",
+      "applicationId": {
+        "id": "12345",
+        "idType": "SEAL"
+      },
       "report": {
         "tier": "Tier 1"
       }
