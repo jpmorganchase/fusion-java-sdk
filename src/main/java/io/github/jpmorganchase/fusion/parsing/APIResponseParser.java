@@ -13,7 +13,10 @@ public interface APIResponseParser {
     Map<String, Attribute> parseAttributeResponse(String json, String dataset);
 
     Map<String, DataDictionaryAttribute> parseDataDictionaryAttributeResponse(String json);
-    DataDictionaryAttributeLineage parseDataDictionaryAttributeLineageResponse(String json, String baseCatalogIdentifier, String baseIdentifier);
+
+    DataDictionaryAttributeLineage parseDataDictionaryAttributeLineageResponse(
+            String json, String baseCatalogIdentifier, String baseIdentifier);
+
     Map<String, DataProduct> parseDataProductResponse(String json);
 
     Map<String, DatasetSeries> parseDatasetSeriesResponse(String json);

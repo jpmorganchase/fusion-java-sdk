@@ -235,8 +235,10 @@ public class Fusion {
      * @throws ParsingException if the response from Fusion could not be parsed successfully
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public DataDictionaryAttributeLineage dataDictionaryAttributeLineage(String catalogName, String attributeIdentifier) {
-        String url = String.format("%1scatalogs/%2s/attributes/%3s/lineage", this.rootURL, catalogName, attributeIdentifier);
+    public DataDictionaryAttributeLineage dataDictionaryAttributeLineage(
+            String catalogName, String attributeIdentifier) {
+        String url =
+                String.format("%1scatalogs/%2s/attributes/%3s/lineage", this.rootURL, catalogName, attributeIdentifier);
         String json = this.api.callAPI(url);
         return responseParser.parseDataDictionaryAttributeLineageResponse(json, catalogName, attributeIdentifier);
     }

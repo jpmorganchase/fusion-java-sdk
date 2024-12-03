@@ -1,25 +1,21 @@
 package io.github.jpmorganchase.fusion.parsing;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.context.APIContext;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Catalog;
-import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttributeLineage;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 public class GsonAPIResponseParserDataDictionaryAttributeLineageTest {
 
@@ -47,7 +43,6 @@ public class GsonAPIResponseParserDataDictionaryAttributeLineageTest {
             .baseIdentifier("BA0001")
             .build();
 
-
     private static final APIContext apiContext = APIContext.builder()
             .apiManager(Mockito.mock(APIManager.class))
             .rootUrl("http://foobar/api/v1/")
@@ -58,13 +53,12 @@ public class GsonAPIResponseParserDataDictionaryAttributeLineageTest {
 
     @Test
     public void singleDataDictionaryAttributeResourceIsParsedCorrectly() {
-        DataDictionaryAttributeLineage l =
-                responseParser.parseDataDictionaryAttributeLineageResponse(singleDataDictionaryAttributeLineageJson, "base", "BA0001");
+        DataDictionaryAttributeLineage l = responseParser.parseDataDictionaryAttributeLineageResponse(
+                singleDataDictionaryAttributeLineageJson, "base", "BA0001");
         assertThat(l, is(notNullValue()));
 
         assertThat(l, is(equalTo(lineage)));
     }
-
 
     private static String loadTestResource(String resourceName) {
         URL url = GsonAPIResponseParser.class.getResource(resourceName);

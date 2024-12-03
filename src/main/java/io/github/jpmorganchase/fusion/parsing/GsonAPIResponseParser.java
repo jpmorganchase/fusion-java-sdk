@@ -70,7 +70,8 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
-    public DataDictionaryAttributeLineage parseDataDictionaryAttributeLineageResponse(String json, String baseCatalogIdentifier, String baseIdentifier) {
+    public DataDictionaryAttributeLineage parseDataDictionaryAttributeLineageResponse(
+            String json, String baseCatalogIdentifier, String baseIdentifier) {
         return parseResourceFromResponse(
                 json, DataDictionaryAttributeLineage.class, (resource, mc) -> resource.toBuilder()
                         .varArgs(mc.getVarArgs())
@@ -81,7 +82,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
                         .baseIdentifier(baseIdentifier)
                         .build());
     }
-
 
     @Override
     public Map<String, Attribute> parseAttributeResponse(String json, String dataset) {
@@ -199,10 +199,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     private <T extends CatalogResource> T parseResourceWithVarArgs(
-            Set<String> excludes,
-            T obj,
-            Map<String, Object> untypedResource,
-            ResourceMutationFactory<T> mutator) {
+            Set<String> excludes, T obj, Map<String, Object> untypedResource, ResourceMutationFactory<T> mutator) {
 
         Map<String, Object> varArgs = getVarArgsToInclude(untypedResource, excludes);
         return mutator.mutate(
