@@ -45,7 +45,6 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("isRestricted", Boolean.FALSE)
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
-                .type("Report")
                 .varArg("applicationId", Application.builder().sealId("12345"))
                 .report(Report.builder().tier("Tier 1").build())
                 .apiManager(Mockito.mock(APIManager.class))

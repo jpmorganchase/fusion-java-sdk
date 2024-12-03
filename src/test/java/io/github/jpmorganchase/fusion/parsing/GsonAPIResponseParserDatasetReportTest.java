@@ -50,7 +50,6 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("isRestricted", Boolean.FALSE)
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
-            .type("Report")
             .varArg(
                     "applicationId",
                     Application.builder().sealId("12345").build().toMap())
@@ -83,7 +82,6 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("isRestricted", Boolean.FALSE)
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
-            .type("Report")
             .varArg(
                     "applicationId",
                     Application.builder().sealId("12345").build().toMap())
@@ -116,7 +114,6 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("isRestricted", Boolean.FALSE)
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
-            .type("Report")
             .varArg(
                     "applicationId",
                     Application.builder().sealId("12345").build().toMap())
