@@ -31,6 +31,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .description("The name")
                 .index(0)
                 .key(true)
+                .isCriticalDataElement(true)
                 .varArg("source", "Source System 1")
                 .varArg("term", "bizterm1")
                 .varArg("dataType", "String")
@@ -92,6 +93,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .varArg("dataType", "String")
                 .varArg("sourceFieldId", "src_name")
                 .catalogIdentifier("foobar")
+                .isCriticalDataElement(true)
                 .build();
 
         //When
@@ -124,6 +126,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .varArg("dataType", "String")
                 .varArg("sourceFieldId", "src_name")
                 .varArg("id", 1)
+                .isCriticalDataElement(true)
                 .build();
 
         //When
@@ -156,6 +159,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .varArg("sourceFieldId", "src_name")
                 .varArg("id", 1)
                 .catalogIdentifier("foobar")
+                .isCriticalDataElement(true)
                 .build();
 
         //When
@@ -237,6 +241,4 @@ public class AttributeOperationsIT extends BaseOperationsIT {
         //Then
 
     }
-
-
 }

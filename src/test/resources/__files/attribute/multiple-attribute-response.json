@@ -17,7 +17,8 @@
       "index": 0,
       "isDatasetKey": true,
       "sourceFieldId": "src_name",
-      "title": "Name"
+      "title": "Name",
+      "isCriticalDataElement": true
     },
     {
       "id": 2,

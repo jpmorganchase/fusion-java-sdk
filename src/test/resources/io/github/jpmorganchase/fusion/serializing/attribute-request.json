@@ -1,1 +1,1 @@
-{"isDatasetKey":true,"dataType":"String","index":0,"description":"The name","title":"Name","identifier":"name","term":"bizterm1","id":1.0,"source":"Source System 1","sourceFieldId":"src_name"}
+{"isDatasetKey":true,"dataType":"String","index":0,"description":"The name","title":"Name","identifier":"name","isCriticalDataElement":false,"term":"bizterm1","id":1.0,"source":"Source System 1","sourceFieldId":"src_name"}
