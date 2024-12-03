@@ -20,6 +20,7 @@ public class AttributeSerializer implements JsonSerializer<Attribute> {
         jsonObject.add("description", context.serialize(src.getDescription()));
         jsonObject.add("title", context.serialize(src.getTitle()));
         jsonObject.add("identifier", context.serialize(src.getIdentifier()));
+        jsonObject.add("isCriticalDataElement", context.serialize(src.isCriticalDataElement()));
 
         Map<String, Object> varArgs = src.getVarArgs();
         if (varArgs != null) {
