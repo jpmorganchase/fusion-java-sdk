@@ -227,6 +227,21 @@ public class Fusion {
     }
 
     /**
+     * Get the metadata for a data dictionary attribute lineage, using the specified catalog
+     *
+     * @param catalogName identifier of the catalog to be queried
+     * @param attributeIdentifier identifier of the base attribute
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public DataDictionaryAttributeLineage dataDictionaryAttributeLineage(String catalogName, String attributeIdentifier) {
+        String url = String.format("%1scatalogs/%2s/attributes/%3s/lineage", this.rootURL, catalogName, attributeIdentifier);
+        String json = this.api.callAPI(url);
+        return responseParser.parseDataDictionaryAttributeLineageResponse(json, catalogName, attributeIdentifier);
+    }
+
+    /**
      * Get a filtered list of the datasets in the specified catalog
      * <p>
      * Note that as of current version this search capability is not yet implemented

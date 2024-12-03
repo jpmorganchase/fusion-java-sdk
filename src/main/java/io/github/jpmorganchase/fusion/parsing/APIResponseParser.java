@@ -13,12 +13,15 @@ public interface APIResponseParser {
     Map<String, Attribute> parseAttributeResponse(String json, String dataset);
 
     Map<String, DataDictionaryAttribute> parseDataDictionaryAttributeResponse(String json);
-
+    DataDictionaryAttributeLineage parseDataDictionaryAttributeLineageResponse(String json, String baseCatalogIdentifier, String baseIdentifier);
     Map<String, DataProduct> parseDataProductResponse(String json);
 
     Map<String, DatasetSeries> parseDatasetSeriesResponse(String json);
 
     Map<String, Distribution> parseDistributionResponse(String json);
+
+    <T extends CatalogResource> T parseResourceFromResponse(
+            String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator);
 
     <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass);
 

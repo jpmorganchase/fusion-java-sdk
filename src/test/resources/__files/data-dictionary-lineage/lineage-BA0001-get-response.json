@@ -1,0 +1,20 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/base/attributes/BA001/lineage"
+  },
+  "@id": "lineage/",
+  "description": "Derived Attribute Description",
+  "identifier": "DR0001",
+  "title": "Derived Attribute Title",
+  "applicationId": {
+    "id": "12345",
+    "idType": "SEAL"
+  },
+ "catalog": {
+   "@id": "derived/",
+   "description": "Derived Catalog Description",
+   "identifier": "derived",
+   "title": "Derived Catalog Title"
+ }
+}

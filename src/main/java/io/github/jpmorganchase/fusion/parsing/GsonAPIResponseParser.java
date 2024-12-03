@@ -70,6 +70,20 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
+    public DataDictionaryAttributeLineage parseDataDictionaryAttributeLineageResponse(String json, String baseCatalogIdentifier, String baseIdentifier) {
+        return parseResourceFromResponse(
+                json, DataDictionaryAttributeLineage.class, (resource, mc) -> resource.toBuilder()
+                        .varArgs(mc.getVarArgs())
+                        .apiManager(mc.getApiContext().getApiManager())
+                        .rootUrl(mc.getApiContext().getRootUrl())
+                        .catalogIdentifier(resource.getCatalog().getIdentifier())
+                        .baseCatalogIdentifier(baseCatalogIdentifier)
+                        .baseIdentifier(baseIdentifier)
+                        .build());
+    }
+
+
+    @Override
     public Map<String, Attribute> parseAttributeResponse(String json, String dataset) {
         return parseResourcesWithVarArgsFromResponse(json, Attribute.class, (resource, mc) -> resource.toBuilder()
                 .dataset(dataset)
@@ -106,6 +120,17 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
+    public <T extends CatalogResource> T parseResourceFromResponse(
+            String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator) {
+
+        Map<String, Object> responseMap = getMapFromJsonResponse(json);
+        T obj = gson.fromJson(json, resourceClass);
+
+        Set<String> excludes = varArgsExclusions(resourceClass);
+        return parseResourceWithVarArgs(excludes, obj, responseMap, mutator);
+    }
+
+    @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
             String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator) {
 
@@ -115,7 +140,9 @@ public class GsonAPIResponseParser implements APIResponseParser {
         Set<String> excludes = varArgsExclusions(resourceClass);
         List<T> resourceList = new ArrayList<>();
         for (JsonElement element : resources) {
-            resourceList.add(parseResourceWithVarArgs(resourceClass, excludes, element, untypedResources, mutator));
+            T obj = gson.fromJson(element, resourceClass);
+            Map<String, Object> untypedResource = untypedResources.get(obj.getIdentifier());
+            resourceList.add(parseResourceWithVarArgs(excludes, obj, untypedResource, mutator));
         }
 
         return collectMapOfUniqueResources(resourceList);
@@ -134,8 +161,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     @Override
     public Map<String, Map<String, Object>> parseResourcesUntyped(String json) {
-        Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, Object> responseMap = gson.fromJson(json, mapType);
+        Map<String, Object> responseMap = getMapFromJsonResponse(json);
 
         Object resources = responseMap.get("resources");
         if (resources instanceof List) {
@@ -173,14 +199,12 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     private <T extends CatalogResource> T parseResourceWithVarArgs(
-            Class<T> resourceClass,
             Set<String> excludes,
-            JsonElement element,
-            Map<String, Map<String, Object>> untypedResources,
+            T obj,
+            Map<String, Object> untypedResource,
             ResourceMutationFactory<T> mutator) {
-        T obj = gson.fromJson(element, resourceClass);
 
-        Map<String, Object> varArgs = getVarArgsToInclude(untypedResources.get(obj.getIdentifier()), excludes);
+        Map<String, Object> varArgs = getVarArgsToInclude(untypedResource, excludes);
         return mutator.mutate(
                 obj,
                 MutationContext.builder()
@@ -196,7 +220,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     private static <T extends CatalogResource> Set<String> varArgsExclusions(Class<T> resourceClass) {
-        // TODO :: Should this be returned by the Model Object ? It Should
+        // TODO :: Should this be returned by the Model Object ? My Thinking is yes.
         Set<String> excludes = new HashSet<>();
         Set<String> excludeFromType = Arrays.stream(resourceClass.getDeclaredFields())
                 .map(Field::getName)
@@ -207,7 +231,14 @@ public class GsonAPIResponseParser implements APIResponseParser {
         excludes.addAll(excludeFromType);
         excludes.addAll(excludeFromCatalogResource);
         excludes.add("@id");
+        excludes.add("@context");
+        excludes.add("@base");
         return excludes;
+    }
+
+    private Map<String, Object> getMapFromJsonResponse(String json) {
+        Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+        return gson.fromJson(json, mapType);
     }
 
     private static <T extends CatalogResource> Map<String, T> collectMapOfUniqueResources(List<T> resourceList) {
