@@ -58,10 +58,6 @@ public class DataDictionaryAttributeLineage extends CatalogResource {
                 this.getRootUrl(), this.getBaseCatalogIdentifier(), this.getBaseIdentifier());
     }
 
-    public DataDictionaryAttributeLineage get() {
-        throw new UnsupportedOperationException("To be implemented");
-    }
-
     public static class AttributeLineageBuilder {
         @SuppressWarnings("FieldCanBeLocal")
         private Map<String, Object> varArgs;
