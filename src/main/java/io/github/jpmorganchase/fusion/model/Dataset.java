@@ -3,6 +3,7 @@ package io.github.jpmorganchase.fusion.model;
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
+import java.util.Optional;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -25,6 +26,7 @@ public class Dataset extends CatalogResource {
     String frequency;
     String type;
     Report report;
+    Application applicationId;
 
     @Builder(toBuilder = true)
     public Dataset(
@@ -38,7 +40,8 @@ public class Dataset extends CatalogResource {
             String title,
             String frequency,
             String type,
-            Report report) {
+            Report report,
+            Application applicationId) {
         super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
@@ -46,6 +49,7 @@ public class Dataset extends CatalogResource {
         this.frequency = frequency;
         this.type = type;
         this.report = report;
+        this.applicationId = applicationId;
     }
 
     @Override
@@ -69,8 +73,10 @@ public class Dataset extends CatalogResource {
         }
 
         public DatasetBuilder report(Report report) {
-            this.type = "Report";
-            this.report = report;
+            Optional.ofNullable(report).ifPresent(val -> {
+                this.type = "Report";
+                this.report = val;
+            });
             return this;
         }
     }

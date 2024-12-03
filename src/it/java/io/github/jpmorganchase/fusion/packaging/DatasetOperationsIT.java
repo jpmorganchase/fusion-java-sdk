@@ -150,7 +150,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .varArg("isRestricted", Boolean.FALSE)
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
-                .varArg("applicationId", Application.builder().sealId("12345"))
+                .applicationId(Application.builder().sealId("12345").build())
                 .report(Report.builder().tier("Tier 1").build())
                 .build();
 
