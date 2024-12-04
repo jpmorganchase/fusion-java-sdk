@@ -8,5 +8,6 @@
   "term": "bizterm1",
   "source": "Source System 1",
   "id": 1,
-  "sourceFieldId": "src_name"
+  "sourceFieldId": "src_name",
+  "isCriticalDataElement": true
 }

@@ -29,6 +29,7 @@ public class AttributeBuilderTest {
                 .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
                 .apiManager(apiManager)
+                .isCriticalDataElement(true)
                 .build();
 
         assertThat(a.getIdentifier(), is(equalTo("The identifier")));
@@ -42,6 +43,7 @@ public class AttributeBuilderTest {
         assertThat(a.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(a.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(a.getApiManager(), is(equalTo(apiManager)));
+        assertThat(a.isCriticalDataElement(), is(equalTo(true)));
     }
 
     @Test

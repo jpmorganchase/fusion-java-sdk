@@ -1,1 +1,1 @@
-{"isDatasetKey":true,"dataType":"String","index":0,"description":"The name","title":"Name","identifier":"name"}
+{"isDatasetKey":true,"dataType":"String","index":0,"description":"The name","title":"Name","identifier":"name","isCriticalDataElement":false}

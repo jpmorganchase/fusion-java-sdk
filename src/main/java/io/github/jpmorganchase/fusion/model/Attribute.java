@@ -25,6 +25,8 @@ public class Attribute extends CatalogResource {
     @Expose(serialize = false, deserialize = false)
     String dataset;
 
+    boolean isCriticalDataElement;
+
     @Builder(toBuilder = true)
     public Attribute(
             @Builder.ObtainVia(method = "getIdentifier") String identifier,
@@ -37,7 +39,8 @@ public class Attribute extends CatalogResource {
             long index,
             String description,
             String title,
-            String dataset) {
+            String dataset,
+            boolean isCriticalDataElement) {
         super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.key = key;
         this.dataType = dataType;
@@ -45,6 +48,7 @@ public class Attribute extends CatalogResource {
         this.description = description;
         this.title = title;
         this.dataset = dataset;
+        this.isCriticalDataElement = isCriticalDataElement;
     }
 
     @Override
