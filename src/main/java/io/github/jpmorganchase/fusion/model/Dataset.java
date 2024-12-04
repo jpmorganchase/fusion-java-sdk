@@ -27,6 +27,9 @@ public class Dataset extends CatalogResource {
     String type;
     Report report;
     Application applicationId;
+    Application producerApplicationId;
+    Application[] consumerApplicationId;
+    Flow flowDetails;
 
     @Builder(toBuilder = true)
     public Dataset(
@@ -41,7 +44,10 @@ public class Dataset extends CatalogResource {
             String frequency,
             String type,
             Report report,
-            Application applicationId) {
+            Application applicationId,
+            Application producerApplicationId,
+            Application[] consumerApplicationId,
+            Flow flowDetails) {
         super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
@@ -50,6 +56,9 @@ public class Dataset extends CatalogResource {
         this.type = type;
         this.report = report;
         this.applicationId = applicationId;
+        this.producerApplicationId = producerApplicationId;
+        this.consumerApplicationId = consumerApplicationId;
+        this.flowDetails = flowDetails;
     }
 
     @Override
@@ -76,6 +85,26 @@ public class Dataset extends CatalogResource {
             Optional.ofNullable(report).ifPresent(val -> {
                 this.type = "Report";
                 this.report = val;
+            });
+            return this;
+        }
+
+        public DatasetBuilder inputFlow(Application producerApplicationId, Application[] consumerApplicationId) {
+            Optional.ofNullable(producerApplicationId).ifPresent(val -> {
+                this.type = "Flow";
+                this.flowDetails = Flow.builder().flowDirection("Input").build();
+                this.producerApplicationId = producerApplicationId;
+                this.consumerApplicationId = consumerApplicationId;
+            });
+            return this;
+        }
+
+        public DatasetBuilder outputFlow(Application producerApplicationId, Application[] consumerApplicationId) {
+            Optional.ofNullable(producerApplicationId).ifPresent(val -> {
+                this.type = "Flow";
+                this.flowDetails = Flow.builder().flowDirection("Output").build();
+                this.producerApplicationId = producerApplicationId;
+                this.consumerApplicationId = consumerApplicationId;
             });
             return this;
         }

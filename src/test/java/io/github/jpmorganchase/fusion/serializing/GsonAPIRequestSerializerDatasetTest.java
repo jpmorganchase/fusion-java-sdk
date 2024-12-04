@@ -83,6 +83,96 @@ class GsonAPIRequestSerializerDatasetTest {
         assertThat(actual, is(equalTo(expected)));
     }
 
+    @Test
+    public void testDatasetOfTypeFlowInput() {
+        // Given
+        Dataset dataset = Dataset.builder()
+                .identifier("SIF0001")
+                .description("Sample input flow dataset description 1")
+                .linkedEntity("SIF0001/")
+                .title("Sample Input Flow Dataset 1 | North America")
+                .frequency("Daily")
+                .varArg("category", listOf("Category 1"))
+                .varArg("createdDate", "2022-02-05")
+                .varArg("coverageStartDate", "2022-02-05")
+                .varArg("coverageEndDate", "2023-03-08")
+                .varArg("isThirdPartyData", Boolean.FALSE)
+                .varArg("isInternalOnlyDataset", Boolean.FALSE)
+                .varArg("language", "English")
+                .varArg("maintainer", "Maintainer 1")
+                .varArg("modifiedDate", "2023-03-08")
+                .varArg("publisher", "Publisher 1")
+                .varArg("region", listOf("North America"))
+                .varArg("source", listOf("Source System 1"))
+                .varArg("subCategory", listOf("Subcategory 1"))
+                .varArg("tag", listOf("Tag1"))
+                .varArg("isRestricted", Boolean.FALSE)
+                .varArg("isRawData", Boolean.FALSE)
+                .varArg("hasSample", Boolean.FALSE)
+                .applicationId(Application.builder().sealId("12345").build())
+                .inputFlow(Application.builder().sealId("123456").build(), new Application[] {
+                    Application.builder().sealId("456789").build()
+                })
+                .apiManager(Mockito.mock(APIManager.class))
+                .rootUrl("http://foo/bar")
+                .catalogIdentifier("foobar")
+                .build();
+
+        GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
+
+        // When
+        String actual = serializer.serialize(dataset);
+
+        // Then
+        String expected = loadTestResource("dataset-flow-input-request.json");
+        assertThat(actual, is(equalTo(expected)));
+    }
+
+    @Test
+    public void testDatasetOfTypeFlowOutput() {
+        // Given
+        Dataset dataset = Dataset.builder()
+                .identifier("SOF0001")
+                .description("Sample output flow dataset description 1")
+                .linkedEntity("SOF0001/")
+                .title("Sample Output Flow Dataset 1 | North America")
+                .frequency("Daily")
+                .varArg("category", listOf("Category 1"))
+                .varArg("createdDate", "2022-02-05")
+                .varArg("coverageStartDate", "2022-02-05")
+                .varArg("coverageEndDate", "2023-03-08")
+                .varArg("isThirdPartyData", Boolean.FALSE)
+                .varArg("isInternalOnlyDataset", Boolean.FALSE)
+                .varArg("language", "English")
+                .varArg("maintainer", "Maintainer 1")
+                .varArg("modifiedDate", "2023-03-08")
+                .varArg("publisher", "Publisher 1")
+                .varArg("region", listOf("North America"))
+                .varArg("source", listOf("Source System 1"))
+                .varArg("subCategory", listOf("Subcategory 1"))
+                .varArg("tag", listOf("Tag1"))
+                .varArg("isRestricted", Boolean.FALSE)
+                .varArg("isRawData", Boolean.FALSE)
+                .varArg("hasSample", Boolean.FALSE)
+                .applicationId(Application.builder().sealId("12345").build())
+                .outputFlow(Application.builder().sealId("123456").build(), new Application[] {
+                    Application.builder().sealId("456789").build()
+                })
+                .apiManager(Mockito.mock(APIManager.class))
+                .rootUrl("http://foo/bar")
+                .catalogIdentifier("foobar")
+                .build();
+
+        GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
+
+        // When
+        String actual = serializer.serialize(dataset);
+
+        // Then
+        String expected = loadTestResource("dataset-flow-output-request.json");
+        assertThat(actual, is(equalTo(expected)));
+    }
+
     private static String loadTestResource(String resourceName) {
         URL url = GsonAPIRequestSerializer.class.getResource(resourceName);
         try {

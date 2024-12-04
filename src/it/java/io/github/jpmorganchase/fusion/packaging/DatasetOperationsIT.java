@@ -163,6 +163,102 @@ public class DatasetOperationsIT extends BaseOperationsIT {
     }
 
     @Test
+    public void testCreateDatasetOfTypeFlowInput() {
+        // Given
+        wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SIF0001"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-flow-SIF0001-create-request.json")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-create-response.json")));
+
+        Dataset dataset = getSdk().builders().dataset()
+                .identifier("SIF0001")
+                .description("Sample input flow description 1")
+                .linkedEntity("SIF0001/")
+                .title("Sample Input Flow 1 | North America")
+                .frequency("Daily")
+                .varArg("category", listOf("Category 1"))
+                .varArg("createdDate", "2022-02-06")
+                .varArg("coverageStartDate", "2022-02-06")
+                .varArg("coverageEndDate", "2023-03-09")
+                .varArg("isThirdPartyData", Boolean.FALSE)
+                .varArg("isInternalOnlyDataset", Boolean.FALSE)
+                .varArg("language", "English")
+                .varArg("maintainer", "Maintainer 1")
+                .varArg("modifiedDate", "2023-03-09")
+                .varArg("publisher", "Publisher 1")
+                .varArg("region", listOf("North America"))
+                .varArg("source", listOf("Source System 1"))
+                .varArg("subCategory", listOf("Subcategory 1"))
+                .varArg("tag", listOf("Tag1"))
+                .varArg("isRestricted", Boolean.FALSE)
+                .varArg("isRawData", Boolean.FALSE)
+                .varArg("hasSample", Boolean.FALSE)
+                .applicationId(Application.builder().sealId("12345").build())
+                .inputFlow(
+                        Application.builder().sealId("123456").build(),
+                        new Application[] {Application.builder().sealId("456789").build()}
+                )
+                .build();
+
+        // When
+        dataset.create();
+
+
+        // Then Verify the response
+        //TODO :: Contract for response of dataset.create() needs to be decided
+    }
+
+    @Test
+    public void testCreateDatasetOfTypeFlowOutput() {
+        // Given
+        wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SOF0001"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-flow-SOF0001-create-request.json")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-create-response.json")));
+
+        Dataset dataset = getSdk().builders().dataset()
+                .identifier("SOF0001")
+                .description("Sample output flow description 1")
+                .linkedEntity("SOF0001/")
+                .title("Sample Output Flow 1 | North America")
+                .frequency("Daily")
+                .varArg("category", listOf("Category 1"))
+                .varArg("createdDate", "2022-02-06")
+                .varArg("coverageStartDate", "2022-02-06")
+                .varArg("coverageEndDate", "2023-03-09")
+                .varArg("isThirdPartyData", Boolean.FALSE)
+                .varArg("isInternalOnlyDataset", Boolean.FALSE)
+                .varArg("language", "English")
+                .varArg("maintainer", "Maintainer 1")
+                .varArg("modifiedDate", "2023-03-09")
+                .varArg("publisher", "Publisher 1")
+                .varArg("region", listOf("North America"))
+                .varArg("source", listOf("Source System 1"))
+                .varArg("subCategory", listOf("Subcategory 1"))
+                .varArg("tag", listOf("Tag1"))
+                .varArg("isRestricted", Boolean.FALSE)
+                .varArg("isRawData", Boolean.FALSE)
+                .varArg("hasSample", Boolean.FALSE)
+                .applicationId(Application.builder().sealId("12345").build())
+                .outputFlow(
+                        Application.builder().sealId("123456").build(),
+                        new Application[] {Application.builder().sealId("456789").build()}
+                )
+                .build();
+
+        // When
+        dataset.create();
+
+
+        // Then Verify the response
+        //TODO :: Contract for response of dataset.create() needs to be decided
+    }
+
+    @Test
     public void testUpdateDataset() {
         // Given
         wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/SD0004"))
@@ -241,6 +337,37 @@ public class DatasetOperationsIT extends BaseOperationsIT {
         Dataset amendedDataset = originalDataset
                 .toBuilder()
                 .description("Updated Sample report description 1")
+                .build();
+
+        amendedDataset.update();
+
+        // Then Verify the response
+        //TODO :: Contract for response of dataset.update() needs to be decided
+    }
+
+    @Test
+    public void testUpdateDatasetOfTypeFlowRetrievedFromListDatasets() {
+        // Given
+        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/multiple-dataset-response.json")));
+
+        wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/SIF0001"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-flow-SIF0001-update-request.json")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-create-response.json")));
+
+        Map<String, Dataset> datasets = getSdk().listDatasets("common", "SIF0001", true);
+        Dataset originalDataset = datasets.get("SIF0001");
+
+        // When
+        Dataset amendedDataset = originalDataset
+                .toBuilder()
+                .description("Updated Sample input flow description 1")
                 .build();
 
         amendedDataset.update();
