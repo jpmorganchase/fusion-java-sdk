@@ -47,8 +47,10 @@ public class DatasetBuilderTest {
     @Test
     void constructionWithBuilderCorrectlyPopulatesForTypeFlowInput() {
         APIManager apiManager = Mockito.mock(APIManager.class);
-        Application producerApplicationId = Application.builder().sealId("123456").build();
-        Application[] consumerApplicationId = new Application[] {Application.builder().sealId("456789").build()};
+        Application producerApplicationId =
+                Application.builder().sealId("123456").build();
+        Application[] consumerApplicationId =
+                new Application[] {Application.builder().sealId("456789").build()};
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         Dataset d = Dataset.builder()
@@ -82,8 +84,10 @@ public class DatasetBuilderTest {
     @Test
     void constructionWithBuilderCorrectlyPopulatesForTypeFlowOutput() {
         APIManager apiManager = Mockito.mock(APIManager.class);
-        Application producerApplicationId = Application.builder().sealId("123456").build();
-        Application[] consumerApplicationId = new Application[] {Application.builder().sealId("456789").build()};
+        Application producerApplicationId =
+                Application.builder().sealId("123456").build();
+        Application[] consumerApplicationId =
+                new Application[] {Application.builder().sealId("456789").build()};
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         Dataset d = Dataset.builder()
