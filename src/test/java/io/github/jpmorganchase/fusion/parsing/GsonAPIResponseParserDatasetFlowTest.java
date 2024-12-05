@@ -9,6 +9,7 @@ import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.context.APIContext;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
+import io.github.jpmorganchase.fusion.model.Flow;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -53,9 +54,14 @@ public class GsonAPIResponseParserDatasetFlowTest {
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
             .applicationId(Application.builder().sealId("12345").build())
-            .inputFlow(
-                    Application.builder().sealId("123456").build(),
-                    new Application[] {Application.builder().sealId("456789").build()})
+            .flow(Flow.builder()
+                    .flowDirection("Input")
+                    .producerApplicationId(
+                            Application.builder().sealId("123456").build())
+                    .consumerApplicationId(new Application[] {
+                        Application.builder().sealId("456789").build()
+                    })
+                    .build())
             .build();
 
     private final Dataset testDatasetOutputFlow1 = Dataset.builder()
@@ -85,9 +91,14 @@ public class GsonAPIResponseParserDatasetFlowTest {
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
             .applicationId(Application.builder().sealId("12345").build())
-            .outputFlow(
-                    Application.builder().sealId("123456").build(),
-                    new Application[] {Application.builder().sealId("456789").build()})
+            .flow(Flow.builder()
+                    .flowDirection("Output")
+                    .producerApplicationId(
+                            Application.builder().sealId("123456").build())
+                    .consumerApplicationId(new Application[] {
+                        Application.builder().sealId("456789").build()
+                    })
+                    .build())
             .build();
 
     private final Dataset testDatasetInputFlow2 = Dataset.builder()
@@ -117,9 +128,14 @@ public class GsonAPIResponseParserDatasetFlowTest {
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
             .applicationId(Application.builder().sealId("12345").build())
-            .inputFlow(
-                    Application.builder().sealId("123456").build(),
-                    new Application[] {Application.builder().sealId("456789").build()})
+            .flow(Flow.builder()
+                    .flowDirection("Input")
+                    .producerApplicationId(
+                            Application.builder().sealId("123456").build())
+                    .consumerApplicationId(new Application[] {
+                        Application.builder().sealId("456789").build()
+                    })
+                    .build())
             .build();
 
     private static final APIContext apiContext = APIContext.builder()

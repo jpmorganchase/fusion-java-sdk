@@ -11,4 +11,12 @@ import lombok.Value;
 @ToString()
 public class Flow {
     String flowDirection;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Application producerApplicationId;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Application[] consumerApplicationId;
 }

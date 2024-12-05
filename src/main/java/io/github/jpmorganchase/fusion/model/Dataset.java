@@ -89,23 +89,12 @@ public class Dataset extends CatalogResource {
             return this;
         }
 
-        public DatasetBuilder inputFlow(Application producerApplicationId, Application[] consumerApplicationId) {
-            Optional.ofNullable(producerApplicationId).ifPresent(val -> {
-                this.type = "Flow";
-                this.flowDetails = Flow.builder().flowDirection("Input").build();
-                this.producerApplicationId = producerApplicationId;
-                this.consumerApplicationId = consumerApplicationId;
-            });
-            return this;
-        }
+        public DatasetBuilder flow(Flow flow) {
+            this.type = "Flow";
 
-        public DatasetBuilder outputFlow(Application producerApplicationId, Application[] consumerApplicationId) {
-            Optional.ofNullable(producerApplicationId).ifPresent(val -> {
-                this.type = "Flow";
-                this.flowDetails = Flow.builder().flowDirection("Output").build();
-                this.producerApplicationId = producerApplicationId;
-                this.consumerApplicationId = consumerApplicationId;
-            });
+            this.producerApplicationId = flow.getProducerApplicationId();
+            this.consumerApplicationId = flow.getConsumerApplicationId();
+            this.flowDetails = flow;
             return this;
         }
     }

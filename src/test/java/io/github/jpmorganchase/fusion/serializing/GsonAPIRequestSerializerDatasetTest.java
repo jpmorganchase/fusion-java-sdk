@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
+import io.github.jpmorganchase.fusion.model.Flow;
 import io.github.jpmorganchase.fusion.model.Report;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -110,9 +111,14 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
                 .applicationId(Application.builder().sealId("12345").build())
-                .inputFlow(Application.builder().sealId("123456").build(), new Application[] {
-                    Application.builder().sealId("456789").build()
-                })
+                .flow(Flow.builder()
+                        .flowDirection("Input")
+                        .producerApplicationId(
+                                Application.builder().sealId("123456").build())
+                        .consumerApplicationId(new Application[] {
+                            Application.builder().sealId("456789").build()
+                        })
+                        .build())
                 .apiManager(Mockito.mock(APIManager.class))
                 .rootUrl("http://foo/bar")
                 .catalogIdentifier("foobar")
@@ -155,9 +161,14 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
                 .applicationId(Application.builder().sealId("12345").build())
-                .outputFlow(Application.builder().sealId("123456").build(), new Application[] {
-                    Application.builder().sealId("456789").build()
-                })
+                .flow(Flow.builder()
+                        .flowDirection("Output")
+                        .producerApplicationId(
+                                Application.builder().sealId("123456").build())
+                        .consumerApplicationId(new Application[] {
+                            Application.builder().sealId("456789").build()
+                        })
+                        .build())
                 .apiManager(Mockito.mock(APIManager.class))
                 .rootUrl("http://foo/bar")
                 .catalogIdentifier("foobar")

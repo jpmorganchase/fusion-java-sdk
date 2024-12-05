@@ -3,6 +3,7 @@ package io.github.jpmorganchase.fusion.packaging;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
+import io.github.jpmorganchase.fusion.model.Flow;
 import io.github.jpmorganchase.fusion.model.Report;
 import io.github.jpmorganchase.fusion.test.TestUtils;
 import org.junit.jupiter.api.Test;
@@ -196,9 +197,12 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
                 .applicationId(Application.builder().sealId("12345").build())
-                .inputFlow(
-                        Application.builder().sealId("123456").build(),
-                        new Application[] {Application.builder().sealId("456789").build()}
+                .flow(
+                        Flow.builder()
+                                .flowDirection("Input")
+                                .producerApplicationId(Application.builder().sealId("123456").build())
+                                .consumerApplicationId(new Application[]{Application.builder().sealId("456789").build()})
+                                .build()
                 )
                 .build();
 
@@ -244,9 +248,12 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
                 .applicationId(Application.builder().sealId("12345").build())
-                .outputFlow(
-                        Application.builder().sealId("123456").build(),
-                        new Application[] {Application.builder().sealId("456789").build()}
+                .flow(
+                        Flow.builder()
+                                .flowDirection("Output")
+                                .producerApplicationId(Application.builder().sealId("123456").build())
+                                .consumerApplicationId(new Application[]{Application.builder().sealId("456789").build()})
+                                .build()
                 )
                 .build();
 
