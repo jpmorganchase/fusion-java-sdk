@@ -46,7 +46,7 @@ public class FusionTest {
     public void testListDatasetsInteraction() throws Exception {
         Fusion f = stubFusion();
 
-        Map<String, Dataset> stubResponse = setupDatasetTest("common");
+        Map<String, Dataset> stubResponse = setupDatasetTest(f, "common");
 
         Map<String, Dataset> actualResponse = f.listDatasets();
         assertThat(actualResponse, is(equalTo(stubResponse)));
@@ -56,7 +56,7 @@ public class FusionTest {
     public void testListDatasetsInteractionWithContainsForId() throws Exception {
         Fusion f = stubFusion();
 
-        Map<String, Dataset> stubResponse = setupDatasetTest("common");
+        Map<String, Dataset> stubResponse = setupDatasetTest(f, "common");
 
         Map<String, Dataset> actualResponse = f.listDatasets("common", "dataset1", true);
         assertThat(actualResponse, is(equalTo(stubResponse)));
@@ -66,7 +66,7 @@ public class FusionTest {
     public void testListDatasetsInteractionWithContainsForIdNoMatch() throws Exception {
         Fusion f = stubFusion();
 
-        setupDatasetTest("common");
+        setupDatasetTest(f, "common");
         Map<String, Dataset> actualResponse = f.listDatasets("common", "dataset2", true);
         assertThat(actualResponse, is(equalTo(new HashMap<>())));
     }
@@ -75,7 +75,7 @@ public class FusionTest {
     public void testListDatasetsInteractionWithContains() throws Exception {
         Fusion f = stubFusion();
 
-        Map<String, Dataset> stubResponse = setupDatasetTest("common");
+        Map<String, Dataset> stubResponse = setupDatasetTest(f, "common");
 
         Map<String, Dataset> actualResponse = f.listDatasets("common", "datasetOne", false);
         assertThat(actualResponse, is(equalTo(stubResponse)));
@@ -85,7 +85,7 @@ public class FusionTest {
     public void testListDatasetsInteractionWithContainsNoMatch() throws Exception {
         Fusion f = stubFusion();
 
-        setupDatasetTest("common");
+        setupDatasetTest(f, "common");
         Map<String, Dataset> actualResponse = f.listDatasets("common", "datasetTwo", false);
         assertThat(actualResponse, is(equalTo(new HashMap<>())));
     }
@@ -94,13 +94,13 @@ public class FusionTest {
     public void testListDatasetsInteractionWithNonDefaultCatalog() throws Exception {
         Fusion f = stubFusion();
 
-        Map<String, Dataset> stubResponse = setupDatasetTest("other-catalog");
+        Map<String, Dataset> stubResponse = setupDatasetTest(f, "other-catalog");
 
         Map<String, Dataset> actualResponse = f.listDatasets("other-catalog");
         assertThat(actualResponse, is(equalTo(stubResponse)));
     }
 
-    private Map<String, Dataset> setupDatasetTest(String catalog) throws Exception {
+    private Map<String, Dataset> setupDatasetTest(Fusion f, String catalog) throws Exception {
 
         Map<String, Dataset> stubResponse = new HashMap<>();
         stubResponse.put(
@@ -113,7 +113,7 @@ public class FusionTest {
 
         when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets", config.getRootURL(), catalog)))
                 .thenReturn("{\"key\":value}");
-        when(responseParser.parseDatasetResponse("{\"key\":value}")).thenReturn(stubResponse);
+        when(responseParser.parseDatasetResponse(f, "{\"key\":value}")).thenReturn(stubResponse);
 
         return stubResponse;
     }
@@ -176,7 +176,7 @@ public class FusionTest {
         when(apiManager.callAPI(String.format(
                         "%1scatalogs/%2s/datasets/%3s/attributes", config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
-        when(responseParser.parseAttributeResponse("{\"key\":value}", "sample_dataset"))
+        when(responseParser.parseAttributeResponse(f, "{\"key\":value}", "sample_dataset"))
                 .thenReturn(stubResponse);
 
         Map<String, Attribute> actualResponse = f.listAttributes("sample_dataset");

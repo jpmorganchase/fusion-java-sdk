@@ -3,8 +3,12 @@ package io.github.jpmorganchase.fusion.model;
 import static io.github.jpmorganchase.fusion.model.VarArgsHelper.copyMap;
 
 import com.google.gson.annotations.Expose;
+import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
+import java.util.Objects;
+
+import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -19,41 +23,42 @@ public abstract class CatalogResource {
 
     private final String identifier;
 
-    private Map<String, Object> varArgs;
+    private final Map<String, Object> varArgs;
 
     @Expose(serialize = false, deserialize = false)
-    private final APIManager apiManager;
+    private final Fusion fusion;
 
-    @Expose(serialize = false, deserialize = false)
-    private final String rootUrl;
-
-    @Expose(serialize = false, deserialize = false)
-    @Getter
     private final String catalogIdentifier;
+
 
     public CatalogResource(
             String identifier,
             Map<String, Object> varArgs,
-            APIManager apiManager,
-            String rootUrl,
+            Fusion fusion,
             String catalogIdentifier) {
         this.varArgs = copyMap(varArgs);
         this.identifier = identifier;
-        this.apiManager = apiManager;
-        this.rootUrl = rootUrl;
+        this.fusion = fusion;
         this.catalogIdentifier = catalogIdentifier;
     }
 
+    protected String getCatalogIdentifier(){
+        if (Objects.isNull(catalogIdentifier)){
+            return fusion.getDefaultCatalog();
+        }
+        return catalogIdentifier;
+    }
+
     public String create() {
-        return this.apiManager.callAPIToPost(getApiPath(), this);
+        return this.fusion.create(getApiPath(), this);
     }
 
     public String update() {
-        return this.apiManager.callAPIToPut(getApiPath(), this);
+        return this.fusion.update(getApiPath(), this);
     }
 
     public String delete() {
-        return this.apiManager.callAPIToDelete(getApiPath());
+        return this.fusion.delete(getApiPath());
     }
 
     /**

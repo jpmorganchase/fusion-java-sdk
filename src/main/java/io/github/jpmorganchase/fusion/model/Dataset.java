@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
+import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
 import java.util.Optional;
@@ -32,8 +33,7 @@ public class Dataset extends CatalogResource {
     public Dataset(
             @Builder.ObtainVia(method = "getIdentifier") String identifier,
             @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
-            @Builder.ObtainVia(method = "getApiManager") APIManager apiManager,
-            @Builder.ObtainVia(method = "getRootUrl") String rootUrl,
+            @Builder.ObtainVia(method = "getFusion") Fusion fusion,
             @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             String description,
             String linkedEntity,
@@ -42,7 +42,7 @@ public class Dataset extends CatalogResource {
             String type,
             Report report,
             Application applicationId) {
-        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
+        super(identifier, varArgs, fusion, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
         this.title = title;
@@ -55,7 +55,7 @@ public class Dataset extends CatalogResource {
     @Override
     protected String getApiPath() {
         return String.format(
-                "%1scatalogs/%2s/datasets/%3s", this.getRootUrl(), this.getCatalogIdentifier(), this.getIdentifier());
+                "%1scatalogs/%2s/datasets/%3s", getFusion().getRootURL(), this.getCatalogIdentifier(), this.getIdentifier());
     }
 
     public static class DatasetBuilder {

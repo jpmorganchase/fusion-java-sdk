@@ -105,6 +105,18 @@ public class Fusion {
         }
     }
 
+    public String create(String apiPath, CatalogResource resource){
+        return this.api.callAPIToPost(apiPath, resource);
+    }
+
+    public String update(String apiPath, CatalogResource resource){
+        return this.api.callAPIToPut(apiPath, resource);
+    }
+
+    public String delete(String apiPath){
+        return this.api.callAPIToDelete(apiPath);
+    }
+
     /**
      * Call the API and returns a data table structure containing the results of the API call in tabular form
      *
@@ -198,7 +210,7 @@ public class Fusion {
     public Map<String, DataDictionaryAttribute> listDataDictionaryAttributes(String catalogName) {
         String url = String.format("%1scatalogs/%2s/attributes", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
-        return responseParser.parseDataDictionaryAttributeResponse(json);
+        return responseParser.parseDataDictionaryAttributeResponse(this, json);
     }
 
     /**
@@ -241,7 +253,7 @@ public class Fusion {
     public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) {
         String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
-        return filterDatasets(responseParser.parseDatasetResponse(json), contains, idContains);
+        return filterDatasets(responseParser.parseDatasetResponse(this, json), contains, idContains);
     }
 
     /**
@@ -369,7 +381,7 @@ public class Fusion {
     public Map<String, Attribute> listAttributes(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes", this.rootURL, catalogName, dataset);
         String json = this.api.callAPI(url);
-        return responseParser.parseAttributeResponse(json, dataset);
+        return responseParser.parseAttributeResponse(this, json, dataset);
     }
 
     /**
@@ -936,13 +948,6 @@ public class Fusion {
                         .build();
             }
 
-            if (Objects.isNull(builders)) {
-                builders = APIConfiguredBuilders.builder()
-                        .apiManager(api)
-                        .configuration(configuration)
-                        .build();
-            }
-
             apiContext = APIContext.builder()
                     .apiManager(api)
                     .rootUrl(rootURL)
@@ -951,6 +956,13 @@ public class Fusion {
 
             if (Objects.isNull(responseParser)) {
                 responseParser = new GsonAPIResponseParser(apiContext);
+            }
+
+            if (Objects.isNull(builders)) {
+                builders = APIConfiguredBuilders.builder()
+                        .apiContext(apiContext)
+                        .apiResponseParser(responseParser)
+                        .build();
             }
 
             return super.build();

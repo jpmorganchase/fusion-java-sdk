@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.api.context.APIContext;
 import io.github.jpmorganchase.fusion.model.Attribute;
 import io.github.jpmorganchase.fusion.model.CatalogResource;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
@@ -17,16 +18,14 @@ import org.mockito.Mockito;
 @SuppressWarnings("SameParameterValue")
 class APIConfiguredBuildersTest {
     private APIConfiguredBuilders apiConfiguredBuilders;
-    private FusionConfiguration configuration;
+    private APIContext apiContext;
 
     @BeforeEach
     public void setUp() {
 
-        APIManager mockApiManager = Mockito.mock(APIManager.class);
-        configuration = Mockito.mock(FusionConfiguration.class);
+        apiContext = Mockito.mock(APIContext.class);
         apiConfiguredBuilders = APIConfiguredBuilders.builder()
-                .apiManager(mockApiManager)
-                .configuration(configuration)
+                .apiContext(apiContext)
                 .build();
     }
 
@@ -95,10 +94,10 @@ class APIConfiguredBuildersTest {
     }
 
     private void givenConfigurationReturnsDefaultCatalog(String catalog) {
-        Mockito.when(configuration.getDefaultCatalog()).thenReturn(catalog);
+        Mockito.when(apiContext.getDefaultCatalog()).thenReturn(catalog);
     }
 
     private void givenConfigurationReturnsRootUrl(String rootUrl) {
-        Mockito.when(configuration.getRootURL()).thenReturn(rootUrl);
+        Mockito.when(apiContext.getRootUrl()).thenReturn(rootUrl);
     }
 }
