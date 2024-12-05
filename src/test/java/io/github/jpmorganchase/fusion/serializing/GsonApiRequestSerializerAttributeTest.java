@@ -1,6 +1,6 @@
 package io.github.jpmorganchase.fusion.serializing;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Attribute;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -29,8 +29,7 @@ public class GsonApiRequestSerializerAttributeTest {
                 .varArg("id", 1.0)
                 .varArg("source", "Source System 1")
                 .varArg("sourceFieldId", "src_name")
-                .apiManager(Mockito.mock(APIManager.class))
-                .rootUrl("http://foo/bar")
+                .fusion(Mockito.mock(Fusion.class))
                 .catalogIdentifier("foobar")
                 .dataset("set me")
                 .build();
@@ -54,8 +53,7 @@ public class GsonApiRequestSerializerAttributeTest {
                 .description("The name")
                 .title("Name")
                 .index(0)
-                .apiManager(Mockito.mock(APIManager.class))
-                .rootUrl("http://foo/bar")
+                .fusion(Mockito.mock(Fusion.class))
                 .catalogIdentifier("foobar")
                 .dataset("set me")
                 .build();

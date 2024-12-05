@@ -1,12 +1,10 @@
 package io.github.jpmorganchase.fusion.builders;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
-import io.github.jpmorganchase.fusion.FusionConfiguration;
-import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.context.APIContext;
+import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Attribute;
 import io.github.jpmorganchase.fusion.model.CatalogResource;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
@@ -18,86 +16,52 @@ import org.mockito.Mockito;
 @SuppressWarnings("SameParameterValue")
 class APIConfiguredBuildersTest {
     private APIConfiguredBuilders apiConfiguredBuilders;
-    private APIContext apiContext;
 
     @BeforeEach
     public void setUp() {
 
-        apiContext = Mockito.mock(APIContext.class);
-        apiConfiguredBuilders = APIConfiguredBuilders.builder()
-                .apiContext(apiContext)
-                .build();
+        Fusion fusion = Mockito.mock(Fusion.class);
+        apiConfiguredBuilders = new APIConfiguredBuilders(fusion);
     }
 
     @Test
     public void testDatasetBuilderReturned() {
         // Given
-        givenConfigurationReturnsRootUrl("http://foo.com/api/v1");
-        givenConfigurationReturnsDefaultCatalog("bar");
+        Dataset.DatasetBuilder datasetBuilder = apiConfiguredBuilders.dataset();
 
         // When
-        Dataset.DatasetBuilder datasetBuilder = apiConfiguredBuilders.dataset();
-        assertNotNull(datasetBuilder);
+        Dataset d = datasetBuilder.build();
 
         // Then
-        Dataset d = datasetBuilder.build();
-        thenApiManagerShouldBeNonNull(d);
-        thenRootUrlShouldBeEqualTo(d, "http://foo.com/api/v1");
-        thenCatalogIdentifierShouldBeEqualTo(d, "bar");
+        thenFusionShouldBeNonNull(d);
     }
 
     @Test
     public void testDataDictionaryAttributeBuilderReturned() {
         // Given
-        givenConfigurationReturnsRootUrl("http://foo.com/api/v1");
-        givenConfigurationReturnsDefaultCatalog("bar");
-
-        // When
         DataDictionaryAttribute.DataDictionaryAttributeBuilder attributeBuilder =
                 apiConfiguredBuilders.dataDictionaryAttribute();
-        assertNotNull(attributeBuilder);
+
+        // When
+        DataDictionaryAttribute a = attributeBuilder.build();
 
         // Then
-        DataDictionaryAttribute a = attributeBuilder.build();
-        thenApiManagerShouldBeNonNull(a);
-        thenRootUrlShouldBeEqualTo(a, "http://foo.com/api/v1");
-        thenCatalogIdentifierShouldBeEqualTo(a, "bar");
+        thenFusionShouldBeNonNull(a);
     }
 
     @Test
     public void testAttributeBuilderReturned() {
         // Given
-        givenConfigurationReturnsRootUrl("http://foo.com/api/v1");
-        givenConfigurationReturnsDefaultCatalog("bar");
+        Attribute.AttributeBuilder attributeBuilder = apiConfiguredBuilders.attribute();
 
         // When
-        Attribute.AttributeBuilder attributeBuilder = apiConfiguredBuilders.attribute();
-        assertNotNull(attributeBuilder);
+        Attribute a = attributeBuilder.build();
 
         // Then
-        Attribute a = attributeBuilder.build();
-        thenApiManagerShouldBeNonNull(a);
-        thenRootUrlShouldBeEqualTo(a, "http://foo.com/api/v1");
-        thenCatalogIdentifierShouldBeEqualTo(a, "bar");
+        thenFusionShouldBeNonNull(a);
     }
 
-    private static void thenApiManagerShouldBeNonNull(CatalogResource cr) {
-        assertThat(cr.getApiManager(), is(notNullValue()));
-    }
-
-    private static void thenCatalogIdentifierShouldBeEqualTo(CatalogResource cr, String catalogIdentifier) {
-        assertThat(cr.getCatalogIdentifier(), is(equalTo(catalogIdentifier)));
-    }
-
-    private static void thenRootUrlShouldBeEqualTo(CatalogResource cr, String rootUrl) {
-        assertThat(cr.getRootUrl(), is(equalTo(rootUrl)));
-    }
-
-    private void givenConfigurationReturnsDefaultCatalog(String catalog) {
-        Mockito.when(apiContext.getDefaultCatalog()).thenReturn(catalog);
-    }
-
-    private void givenConfigurationReturnsRootUrl(String rootUrl) {
-        Mockito.when(apiContext.getRootUrl()).thenReturn(rootUrl);
+    private static void thenFusionShouldBeNonNull(CatalogResource cr) {
+        assertThat(cr.getFusion(), is(notNullValue()));
     }
 }

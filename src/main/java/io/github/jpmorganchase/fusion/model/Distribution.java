@@ -1,7 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
-import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.Fusion;
 import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -27,17 +27,16 @@ public class Distribution extends CatalogResource {
 
     @Builder
     public Distribution(
-            String identifier,
-            Map<String, Object> varArgs,
-            APIManager apiManager,
-            String rootUrl,
-            String catalogIdentifier,
+            @Builder.ObtainVia(method = "getIdentifier") String identifier,
+            @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
+            @Builder.ObtainVia(method = "getFusion") Fusion fusion,
+            @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             String description,
             String linkedEntity,
             String title,
             String fileExtension,
             String mediaType) {
-        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
+        super(identifier, varArgs, fusion, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
         this.title = title;

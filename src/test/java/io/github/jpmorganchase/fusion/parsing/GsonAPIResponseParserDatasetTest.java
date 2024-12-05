@@ -6,8 +6,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import io.github.jpmorganchase.fusion.Fusion;
-import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.context.APIContext;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +45,7 @@ public class GsonAPIResponseParserDatasetTest {
             .varArg("isRestricted", Boolean.FALSE)
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
+            .catalogIdentifier("foobar")
             .build();
 
     private final Dataset testDataset2 = Dataset.builder()
@@ -73,6 +72,7 @@ public class GsonAPIResponseParserDatasetTest {
             .varArg("isRestricted", Boolean.FALSE)
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
+            .catalogIdentifier("foobar")
             .build();
 
     private final Dataset testDataset3 = Dataset.builder()
@@ -99,15 +99,19 @@ public class GsonAPIResponseParserDatasetTest {
             .varArg("isRestricted", Boolean.FALSE)
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
+            .catalogIdentifier("foobar")
             .build();
 
     private static final Fusion fusion = Mockito.mock(Fusion.class);
 
-    private static final APIResponseParser responseParser = new GsonAPIResponseParser();
+    private static final APIResponseParser responseParser = GsonAPIResponseParser.builder()
+            .gson(DefaultGsonConfig.gson())
+            .fusion(fusion)
+            .build();
 
     @Test
     public void singleDatasetInResourcesParsesCorrectly() {
-        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(fusion, singleDatasetJson);
+        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(singleDatasetJson, "foobar");
         assertThat(datasetMap.size(), is(1));
 
         Dataset testDatasetResponse = datasetMap.get("SD0001");
@@ -116,7 +120,7 @@ public class GsonAPIResponseParserDatasetTest {
 
     @Test
     public void multipleCatalogsInResourcesParseCorrectly() {
-        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(fusion, multipleDatasetJson);
+        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(multipleDatasetJson, "foobar");
         assertThat(datasetMap.size(), is(3));
 
         Dataset testDatasetResponse = datasetMap.get("SD0001");

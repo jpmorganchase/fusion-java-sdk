@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Report;
@@ -47,8 +47,7 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("hasSample", Boolean.FALSE)
                 .applicationId(Application.builder().sealId("12345").build())
                 .report(Report.builder().tier("Tier 1").build())
-                .apiManager(Mockito.mock(APIManager.class))
-                .rootUrl("http://foo/bar")
+                .fusion(Mockito.mock(Fusion.class))
                 .catalogIdentifier("foobar")
                 .build();
 

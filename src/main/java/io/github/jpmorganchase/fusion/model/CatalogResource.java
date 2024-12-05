@@ -4,11 +4,7 @@ import static io.github.jpmorganchase.fusion.model.VarArgsHelper.copyMap;
 
 import com.google.gson.annotations.Expose;
 import io.github.jpmorganchase.fusion.Fusion;
-import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
-import java.util.Objects;
-
-import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -30,20 +26,15 @@ public abstract class CatalogResource {
 
     private final String catalogIdentifier;
 
-
-    public CatalogResource(
-            String identifier,
-            Map<String, Object> varArgs,
-            Fusion fusion,
-            String catalogIdentifier) {
+    public CatalogResource(String identifier, Map<String, Object> varArgs, Fusion fusion, String catalogIdentifier) {
         this.varArgs = copyMap(varArgs);
         this.identifier = identifier;
         this.fusion = fusion;
         this.catalogIdentifier = catalogIdentifier;
     }
 
-    protected String getCatalogIdentifier(){
-        if (Objects.isNull(catalogIdentifier)){
+    protected String getCatalogIdentifier() {
+        if (catalogIdentifier == null && fusion != null) {
             return fusion.getDefaultCatalog();
         }
         return catalogIdentifier;

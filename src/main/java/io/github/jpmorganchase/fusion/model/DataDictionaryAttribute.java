@@ -1,6 +1,6 @@
 package io.github.jpmorganchase.fusion.model;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.Fusion;
 import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -19,12 +19,11 @@ public class DataDictionaryAttribute extends CatalogResource {
     public DataDictionaryAttribute(
             @Builder.ObtainVia(method = "getIdentifier") String identifier,
             @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
-            @Builder.ObtainVia(method = "getApiManager") APIManager apiManager,
-            @Builder.ObtainVia(method = "getRootUrl") String rootUrl,
+            @Builder.ObtainVia(method = "getFusion") Fusion fusion,
             @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             String description,
             String title) {
-        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
+        super(identifier, varArgs, fusion, catalogIdentifier);
         this.description = description;
         this.title = title;
     }
@@ -32,7 +31,8 @@ public class DataDictionaryAttribute extends CatalogResource {
     @Override
     protected String getApiPath() {
         return String.format(
-                "%1scatalogs/%2s/attributes/%3s", this.getRootUrl(), this.getCatalogIdentifier(), this.getIdentifier());
+                "%1scatalogs/%2s/attributes/%3s",
+                getFusion().getRootURL(), this.getCatalogIdentifier(), this.getIdentifier());
     }
 
     public static class DataDictionaryAttributeBuilder {

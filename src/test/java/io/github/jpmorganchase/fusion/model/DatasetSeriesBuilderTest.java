@@ -4,7 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.Fusion;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +15,7 @@ public class DatasetSeriesBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
-        APIManager apiManager = Mockito.mock(APIManager.class);
+        Fusion fusion = Mockito.mock(Fusion.class);
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         DatasetSeries d = DatasetSeries.builder()
@@ -25,9 +25,8 @@ public class DatasetSeriesBuilderTest {
                 .toDate(LocalDate.of(2023, 1, 3))
                 .createdDate(LocalDate.of(2023, 1, 4))
                 .linkedEntity("The entity")
-                .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
-                .apiManager(apiManager)
+                .fusion(fusion)
                 .build();
 
         assertThat(d.getIdentifier(), is(equalTo("The identifier")));
@@ -36,8 +35,7 @@ public class DatasetSeriesBuilderTest {
         assertThat(d.getToDate(), is(equalTo(LocalDate.of(2023, 1, 3))));
         assertThat(d.getCreatedDate(), is(equalTo(LocalDate.of(2023, 1, 4))));
         assertThat(d.getLinkedEntity(), is(equalTo("The entity")));
-        assertThat(d.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
-        assertThat(d.getApiManager(), is(equalTo(apiManager)));
+        assertThat(d.getFusion(), is(equalTo(fusion)));
     }
 }

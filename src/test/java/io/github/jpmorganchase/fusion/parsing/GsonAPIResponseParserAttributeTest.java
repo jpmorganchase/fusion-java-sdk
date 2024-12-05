@@ -4,8 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.context.APIContext;
+import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Attribute;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -34,9 +33,8 @@ public class GsonAPIResponseParserAttributeTest {
             .varArg("id", 1.0)
             .varArg("source", "Source System 1")
             .varArg("sourceFieldId", "src_name")
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
+            .catalogIdentifier("foobar")
             .dataset("SD0001")
             .build();
 
@@ -52,9 +50,8 @@ public class GsonAPIResponseParserAttributeTest {
             .varArg("id", 2.0)
             .varArg("source", "Source System 1")
             .varArg("sourceFieldId", "")
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
+            .catalogIdentifier("foobar")
             .dataset("SD0001")
             .build();
 
@@ -70,22 +67,21 @@ public class GsonAPIResponseParserAttributeTest {
             .varArg("id", 3.0)
             .varArg("source", "Source System 1")
             .varArg("sourceFieldId", "")
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
+            .catalogIdentifier("foobar")
             .dataset("SD0001")
             .build();
 
-    private static final APIContext apiContext = APIContext.builder()
-            .apiManager(Mockito.mock(APIManager.class))
-            .rootUrl("http://foobar/api/v1/")
-            .defaultCatalog("foobar")
+    private static final Fusion fusion = Mockito.mock(Fusion.class);
+    private static final APIResponseParser responseParser = GsonAPIResponseParser.builder()
+            .gson(DefaultGsonConfig.gson())
+            .fusion(fusion)
             .build();
-    private static final APIResponseParser responseParser = new GsonAPIResponseParser(apiContext);
 
     @Test
     public void singleAttributeInResourcesParsesCorrectly() {
-        Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(singleAttributeJson, "SD0001");
+        Map<String, Attribute> attributeMap =
+                responseParser.parseAttributeResponse(singleAttributeJson, "foobar", "SD0001");
         assertThat(attributeMap.size(), is(1));
 
         Attribute testAttributeResponse = attributeMap.get("name");
@@ -94,7 +90,8 @@ public class GsonAPIResponseParserAttributeTest {
 
     @Test
     public void multipleCatalogsInResourcesParseCorrectly() {
-        Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(multipleAttributeJson, "SD0001");
+        Map<String, Attribute> attributeMap =
+                responseParser.parseAttributeResponse(multipleAttributeJson, "foobar", "SD0001");
         assertThat(attributeMap.size(), is(3));
 
         Attribute testAttributeResponse = attributeMap.get("name");
@@ -109,7 +106,8 @@ public class GsonAPIResponseParserAttributeTest {
 
     @Test
     public void duplicateAttributesAreIgnored() {
-        Map<String, Attribute> attributeMap = responseParser.parseAttributeResponse(duplicateAttributeJson, "SD0001");
+        Map<String, Attribute> attributeMap =
+                responseParser.parseAttributeResponse(duplicateAttributeJson, "foobar", "SD0001");
         assertThat(attributeMap.size(), is(3));
 
         Attribute testAttributeResponse = attributeMap.get("name");

@@ -2,7 +2,6 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.Fusion;
-import io.github.jpmorganchase.fusion.api.APIManager;
 import java.util.Map;
 import java.util.Optional;
 import lombok.Builder;
@@ -55,7 +54,8 @@ public class Dataset extends CatalogResource {
     @Override
     protected String getApiPath() {
         return String.format(
-                "%1scatalogs/%2s/datasets/%3s", getFusion().getRootURL(), this.getCatalogIdentifier(), this.getIdentifier());
+                "%1scatalogs/%2s/datasets/%3s",
+                getFusion().getRootURL(), this.getCatalogIdentifier(), this.getIdentifier());
     }
 
     public static class DatasetBuilder {

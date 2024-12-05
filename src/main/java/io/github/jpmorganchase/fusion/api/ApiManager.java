@@ -5,7 +5,7 @@ import io.github.jpmorganchase.fusion.api.operations.APIDownloadOperations;
 import io.github.jpmorganchase.fusion.api.operations.APIUploadOperations;
 import io.github.jpmorganchase.fusion.model.CatalogResource;
 
-public interface APIManager extends APIDownloadOperations, APIUploadOperations {
+public interface ApiManager extends APIDownloadOperations, APIUploadOperations {
 
     /**
      * Sends a GET request to the specified API endpoint.
