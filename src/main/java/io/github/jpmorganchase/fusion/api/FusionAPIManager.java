@@ -28,7 +28,7 @@ import lombok.Builder;
  * Class that manages calls to the API. Intended to be called from multithreaded code.
  */
 @Builder
-public class FusionAPIManager implements ApiManager {
+public class FusionAPIManager implements APIManager {
 
     private final Client httpClient;
     private final FusionTokenProvider tokenProvider;

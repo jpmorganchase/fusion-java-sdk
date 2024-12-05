@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("SameParameterValue")
 @ExtendWith(MockitoExtension.class)
-public class FusionApiManagerTest {
+public class FusionAPIManagerTest {
 
     private FusionAPIManager fusionAPIManager;
 

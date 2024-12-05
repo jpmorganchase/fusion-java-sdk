@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import io.github.jpmorganchase.fusion.api.ApiManager;
+import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
@@ -32,7 +32,7 @@ public class FusionTest {
     private static final String TMP_PATH = System.getProperty("java.io.tmpdir");
 
     @Mock
-    private ApiManager apiManager;
+    private APIManager apiManager;
 
     @Mock
     private APIResponseParser responseParser;

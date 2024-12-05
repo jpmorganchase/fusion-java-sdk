@@ -2,7 +2,7 @@ package io.github.jpmorganchase.fusion;
 
 import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
 
-import io.github.jpmorganchase.fusion.api.ApiManager;
+import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.FusionAPIManager;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
@@ -44,7 +44,7 @@ public class Fusion {
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    private final ApiManager api;
+    private final APIManager api;
     private String defaultCatalog;
     private final String defaultPath;
     private final String rootURL;
@@ -53,7 +53,7 @@ public class Fusion {
 
     @Builder
     public Fusion(
-            ApiManager api,
+            APIManager api,
             String defaultCatalog,
             String defaultPath,
             String rootURL,
@@ -915,7 +915,7 @@ public class Fusion {
     public static class FusionBuilder {
 
         protected Client client;
-        protected ApiManager api;
+        protected APIManager api;
         protected Builders builders;
         protected String rootURL;
         protected String defaultCatalog;
