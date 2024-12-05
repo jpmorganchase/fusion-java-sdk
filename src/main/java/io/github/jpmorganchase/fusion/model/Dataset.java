@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.api.APIManager;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.Builder;
@@ -27,6 +28,9 @@ public class Dataset extends CatalogResource {
     String type;
     Report report;
     Application applicationId;
+    Application producerApplicationId;
+    List<Application> consumerApplicationId;
+    Flow flowDetails;
 
     @Builder(toBuilder = true)
     public Dataset(
@@ -41,7 +45,10 @@ public class Dataset extends CatalogResource {
             String frequency,
             String type,
             Report report,
-            Application applicationId) {
+            Application applicationId,
+            Application producerApplicationId,
+            List<Application> consumerApplicationId,
+            Flow flowDetails) {
         super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
@@ -50,6 +57,9 @@ public class Dataset extends CatalogResource {
         this.type = type;
         this.report = report;
         this.applicationId = applicationId;
+        this.producerApplicationId = producerApplicationId;
+        this.consumerApplicationId = consumerApplicationId;
+        this.flowDetails = flowDetails;
     }
 
     @Override
@@ -77,6 +87,15 @@ public class Dataset extends CatalogResource {
                 this.type = "Report";
                 this.report = val;
             });
+            return this;
+        }
+
+        public DatasetBuilder flow(Flow flow) {
+            this.type = "Flow";
+
+            this.producerApplicationId = flow.getProducerApplicationId();
+            this.consumerApplicationId = flow.getConsumerApplicationId();
+            this.flowDetails = flow;
             return this;
         }
     }
