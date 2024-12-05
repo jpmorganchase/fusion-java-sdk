@@ -1,9 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
-
 import io.github.jpmorganchase.fusion.Fusion;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

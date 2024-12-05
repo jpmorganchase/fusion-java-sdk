@@ -117,8 +117,7 @@ class GsonAPIRequestSerializerDatasetTest {
                         .consumerApplicationId(
                                 Application.builder().sealId("456789").build())
                         .build())
-                .apiManager(Mockito.mock(APIManager.class))
-                .rootUrl("http://foo/bar")
+                .fusion(Mockito.mock(Fusion.class))
                 .catalogIdentifier("foobar")
                 .build();
 
@@ -166,8 +165,6 @@ class GsonAPIRequestSerializerDatasetTest {
                         .consumerApplicationId(
                                 Application.builder().sealId("456789").build())
                         .build())
-                .apiManager(Mockito.mock(APIManager.class))
-                .rootUrl("http://foo/bar")
                 .catalogIdentifier("foobar")
                 .build();
 

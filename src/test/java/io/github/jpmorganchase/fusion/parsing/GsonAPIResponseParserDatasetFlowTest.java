@@ -5,8 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.context.APIContext;
+import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Flow;
@@ -32,9 +31,7 @@ public class GsonAPIResponseParserDatasetFlowTest {
             .description("Sample input flow description 1")
             .linkedEntity("SIF0001/")
             .frequency("Daily")
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
             .title("Sample Input Flow 1 | North America")
             .varArg("category", listOf("Category 1"))
             .varArg("createdDate", "2022-02-05")
@@ -53,6 +50,7 @@ public class GsonAPIResponseParserDatasetFlowTest {
             .varArg("isRestricted", Boolean.FALSE)
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
+            .catalogIdentifier("foobar")
             .applicationId(Application.builder().sealId("12345").build())
             .flow(Flow.builder()
                     .flowDirection("Input")
@@ -68,9 +66,7 @@ public class GsonAPIResponseParserDatasetFlowTest {
             .description("Sample output flow description 1")
             .linkedEntity("SOF0001/")
             .frequency("Daily")
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
             .title("Sample Output Flow 1 | North America")
             .varArg("category", listOf("Category 1"))
             .varArg("createdDate", "2022-02-05")
@@ -89,6 +85,7 @@ public class GsonAPIResponseParserDatasetFlowTest {
             .varArg("isRestricted", Boolean.FALSE)
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
+            .catalogIdentifier("foobar")
             .applicationId(Application.builder().sealId("12345").build())
             .flow(Flow.builder()
                     .flowDirection("Output")
@@ -105,9 +102,7 @@ public class GsonAPIResponseParserDatasetFlowTest {
             .linkedEntity("SIF0002/")
             .frequency("Daily")
             .title("Sample Input Flow 2 | North America")
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
             .varArg("category", listOf("Category 2"))
             .varArg("createdDate", "2022-02-06")
             .varArg("coverageStartDate", "2022-02-06")
@@ -125,6 +120,7 @@ public class GsonAPIResponseParserDatasetFlowTest {
             .varArg("isRestricted", Boolean.FALSE)
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
+            .catalogIdentifier("foobar")
             .applicationId(Application.builder().sealId("12345").build())
             .flow(Flow.builder()
                     .flowDirection("Input")
@@ -135,17 +131,16 @@ public class GsonAPIResponseParserDatasetFlowTest {
                     .build())
             .build();
 
-    private static final APIContext apiContext = APIContext.builder()
-            .apiManager(Mockito.mock(APIManager.class))
-            .rootUrl("http://foobar/api/v1/")
-            .defaultCatalog("foobar")
-            .build();
+    private static final Fusion fusion = Mockito.mock(Fusion.class);
 
-    private static final APIResponseParser responseParser = new GsonAPIResponseParser(apiContext);
+    private static final APIResponseParser responseParser = GsonAPIResponseParser.builder()
+            .gson(DefaultGsonConfig.gson())
+            .fusion(fusion)
+            .build();
 
     @Test
     public void singleDatasetInputFlowInResourcesParsesCorrectly() {
-        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(singleDatasetInputFlowJson);
+        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(singleDatasetInputFlowJson, "foobar");
         assertThat(datasetMap.size(), is(1));
 
         Dataset testDatasetResponse = datasetMap.get("SIF0001");
@@ -154,7 +149,7 @@ public class GsonAPIResponseParserDatasetFlowTest {
 
     @Test
     public void singleDatasetOutputFlowInResourcesParsesCorrectly() {
-        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(singleDatasetOutputFlowJson);
+        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(singleDatasetOutputFlowJson, "foobar");
         assertThat(datasetMap.size(), is(1));
 
         Dataset testDatasetResponse = datasetMap.get("SOF0001");
@@ -163,7 +158,7 @@ public class GsonAPIResponseParserDatasetFlowTest {
 
     @Test
     public void multipleCatalogsInResourcesParseCorrectly() {
-        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(multipleDatasetJson);
+        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(multipleDatasetJson, "foobar");
         assertThat(datasetMap.size(), is(3));
 
         Dataset testDatasetResponse = datasetMap.get("SIF0001");

@@ -43,7 +43,7 @@ public class DatasetBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesForTypeFlowInput() {
-        APIManager apiManager = Mockito.mock(APIManager.class);
+        Fusion fusion = Mockito.mock(Fusion.class);
         Application producerApplicationId =
                 Application.builder().sealId("123456").build();
         Application consumerApplicationId =
@@ -62,9 +62,8 @@ public class DatasetBuilderTest {
                         .producerApplicationId(producerApplicationId)
                         .consumerApplicationId(consumerApplicationId)
                         .build())
-                .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
-                .apiManager(apiManager)
+                .fusion(fusion)
                 .build();
 
         assertThat(d.getIdentifier(), is(equalTo("The identifier")));
@@ -77,14 +76,13 @@ public class DatasetBuilderTest {
         assertThat(d.getFlowDetails().getFlowDirection(), is(equalTo("Input")));
         assertThat(d.getProducerApplicationId(), is(equalTo(producerApplicationId)));
         assertThat(d.getConsumerApplicationId().get(0), is(equalTo(consumerApplicationId)));
-        assertThat(d.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
-        assertThat(d.getApiManager(), is(equalTo(apiManager)));
+        assertThat(d.getFusion(), is(equalTo(fusion)));
     }
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesForTypeFlowOutput() {
-        APIManager apiManager = Mockito.mock(APIManager.class);
+        Fusion fusion = Mockito.mock(Fusion.class);
         Application producerApplicationId =
                 Application.builder().sealId("123456").build();
         Application consumerApplicationId =
@@ -103,9 +101,8 @@ public class DatasetBuilderTest {
                         .producerApplicationId(producerApplicationId)
                         .consumerApplicationId(consumerApplicationId)
                         .build())
-                .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
-                .apiManager(apiManager)
+                .fusion(fusion)
                 .build();
 
         assertThat(d.getIdentifier(), is(equalTo("The identifier")));
@@ -118,9 +115,8 @@ public class DatasetBuilderTest {
         assertThat(d.getFlowDetails().getFlowDirection(), is(equalTo("Output")));
         assertThat(d.getProducerApplicationId(), is(equalTo(producerApplicationId)));
         assertThat(d.getConsumerApplicationId().get(0), is(equalTo(consumerApplicationId)));
-        assertThat(d.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
-        assertThat(d.getApiManager(), is(equalTo(apiManager)));
+        assertThat(d.getFusion(), is(equalTo(fusion)));
     }
 
     @Test
