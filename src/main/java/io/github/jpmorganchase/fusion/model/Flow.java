@@ -1,9 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import lombok.Value;
+import java.util.List;
+import lombok.*;
 
 @Builder
 @Value
@@ -18,5 +16,6 @@ public class Flow {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    Application[] consumerApplicationId;
+    @Singular("consumerApplicationId")
+    List<Application> consumerApplicationId;
 }

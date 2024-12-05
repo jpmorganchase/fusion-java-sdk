@@ -201,7 +201,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                         Flow.builder()
                                 .flowDirection("Input")
                                 .producerApplicationId(Application.builder().sealId("123456").build())
-                                .consumerApplicationId(new Application[]{Application.builder().sealId("456789").build()})
+                                .consumerApplicationId(Application.builder().sealId("456789").build())
                                 .build()
                 )
                 .build();
@@ -252,7 +252,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                         Flow.builder()
                                 .flowDirection("Output")
                                 .producerApplicationId(Application.builder().sealId("123456").build())
-                                .consumerApplicationId(new Application[]{Application.builder().sealId("456789").build()})
+                                .consumerApplicationId(Application.builder().sealId("456789").build())
+                                .consumerApplicationId(Application.builder().sealId("901234").build())
                                 .build()
                 )
                 .build();

@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.api.APIManager;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.Builder;
@@ -28,7 +29,7 @@ public class Dataset extends CatalogResource {
     Report report;
     Application applicationId;
     Application producerApplicationId;
-    Application[] consumerApplicationId;
+    List<Application> consumerApplicationId;
     Flow flowDetails;
 
     @Builder(toBuilder = true)
@@ -46,7 +47,7 @@ public class Dataset extends CatalogResource {
             Report report,
             Application applicationId,
             Application producerApplicationId,
-            Application[] consumerApplicationId,
+            List<Application> consumerApplicationId,
             Flow flowDetails) {
         super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
         this.description = description;

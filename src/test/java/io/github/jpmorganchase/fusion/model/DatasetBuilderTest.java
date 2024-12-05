@@ -49,8 +49,8 @@ public class DatasetBuilderTest {
         APIManager apiManager = Mockito.mock(APIManager.class);
         Application producerApplicationId =
                 Application.builder().sealId("123456").build();
-        Application[] consumerApplicationId =
-                new Application[] {Application.builder().sealId("456789").build()};
+        Application consumerApplicationId =
+                Application.builder().sealId("456789").build();
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         Dataset d = Dataset.builder()
@@ -79,7 +79,7 @@ public class DatasetBuilderTest {
         assertThat(d.getType(), is(equalTo("Flow")));
         assertThat(d.getFlowDetails().getFlowDirection(), is(equalTo("Input")));
         assertThat(d.getProducerApplicationId(), is(equalTo(producerApplicationId)));
-        assertThat(d.getConsumerApplicationId(), is(equalTo(consumerApplicationId)));
+        assertThat(d.getConsumerApplicationId().get(0), is(equalTo(consumerApplicationId)));
         assertThat(d.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(d.getApiManager(), is(equalTo(apiManager)));
@@ -90,8 +90,8 @@ public class DatasetBuilderTest {
         APIManager apiManager = Mockito.mock(APIManager.class);
         Application producerApplicationId =
                 Application.builder().sealId("123456").build();
-        Application[] consumerApplicationId =
-                new Application[] {Application.builder().sealId("456789").build()};
+        Application consumerApplicationId =
+                Application.builder().sealId("456789").build();
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         Dataset d = Dataset.builder()
@@ -120,7 +120,7 @@ public class DatasetBuilderTest {
         assertThat(d.getType(), is(equalTo("Flow")));
         assertThat(d.getFlowDetails().getFlowDirection(), is(equalTo("Output")));
         assertThat(d.getProducerApplicationId(), is(equalTo(producerApplicationId)));
-        assertThat(d.getConsumerApplicationId(), is(equalTo(consumerApplicationId)));
+        assertThat(d.getConsumerApplicationId().get(0), is(equalTo(consumerApplicationId)));
         assertThat(d.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(d.getApiManager(), is(equalTo(apiManager)));

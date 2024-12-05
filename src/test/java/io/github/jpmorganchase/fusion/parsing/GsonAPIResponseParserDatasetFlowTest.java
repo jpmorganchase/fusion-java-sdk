@@ -58,9 +58,8 @@ public class GsonAPIResponseParserDatasetFlowTest {
                     .flowDirection("Input")
                     .producerApplicationId(
                             Application.builder().sealId("123456").build())
-                    .consumerApplicationId(new Application[] {
-                        Application.builder().sealId("456789").build()
-                    })
+                    .consumerApplicationId(
+                            Application.builder().sealId("456789").build())
                     .build())
             .build();
 
@@ -95,9 +94,8 @@ public class GsonAPIResponseParserDatasetFlowTest {
                     .flowDirection("Output")
                     .producerApplicationId(
                             Application.builder().sealId("123456").build())
-                    .consumerApplicationId(new Application[] {
-                        Application.builder().sealId("456789").build()
-                    })
+                    .consumerApplicationId(
+                            Application.builder().sealId("456789").build())
                     .build())
             .build();
 
@@ -132,9 +130,8 @@ public class GsonAPIResponseParserDatasetFlowTest {
                     .flowDirection("Input")
                     .producerApplicationId(
                             Application.builder().sealId("123456").build())
-                    .consumerApplicationId(new Application[] {
-                        Application.builder().sealId("456789").build()
-                    })
+                    .consumerApplicationId(
+                            Application.builder().sealId("456789").build())
                     .build())
             .build();
 
