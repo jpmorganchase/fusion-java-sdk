@@ -3,8 +3,6 @@ package io.github.jpmorganchase.fusion.parsing;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.context.APIContext;
 import io.github.jpmorganchase.fusion.model.DatasetSeries;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +12,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 public class GsonAPIResponseParserDatasetSeriesTest {
 
@@ -48,12 +45,8 @@ public class GsonAPIResponseParserDatasetSeriesTest {
             .toDate(LocalDate.of(2022, 3, 20))
             .build();
 
-    private static final APIContext apiContext = APIContext.builder()
-            .apiManager(Mockito.mock(APIManager.class))
-            .rootUrl("http://foobar/api/v1/")
-            .defaultCatalog("foobar")
-            .build();
-    private static final APIResponseParser responseParser = new GsonAPIResponseParser(apiContext);
+    private static final APIResponseParser responseParser =
+            GsonAPIResponseParser.builder().gson(DefaultGsonConfig.gson()).build();
 
     @Test
     public void multipleSeriesMembersInResourcesParseCorrectly() {

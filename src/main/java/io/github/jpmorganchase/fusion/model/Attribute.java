@@ -2,7 +2,7 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.Fusion;
 import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -31,8 +31,7 @@ public class Attribute extends CatalogResource {
     public Attribute(
             @Builder.ObtainVia(method = "getIdentifier") String identifier,
             @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
-            @Builder.ObtainVia(method = "getApiManager") APIManager apiManager,
-            @Builder.ObtainVia(method = "getRootUrl") String rootUrl,
+            @Builder.ObtainVia(method = "getFusion") Fusion fusion,
             @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             boolean key,
             String dataType,
@@ -41,7 +40,7 @@ public class Attribute extends CatalogResource {
             String title,
             String dataset,
             boolean isCriticalDataElement) {
-        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
+        super(identifier, varArgs, fusion, catalogIdentifier);
         this.key = key;
         this.dataType = dataType;
         this.index = index;
@@ -55,7 +54,7 @@ public class Attribute extends CatalogResource {
     protected String getApiPath() {
         return String.format(
                 "%1scatalogs/%2s/datasets/%3s/attributes/%4s",
-                this.getRootUrl(), this.getCatalogIdentifier(), this.getDataset(), this.getIdentifier());
+                getFusion().getRootURL(), getCatalogIdentifier(), this.getDataset(), this.getIdentifier());
     }
 
     public static class AttributeBuilder {

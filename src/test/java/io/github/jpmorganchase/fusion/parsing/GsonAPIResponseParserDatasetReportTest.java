@@ -5,8 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.context.APIContext;
+import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Report;
@@ -29,9 +28,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .description("Sample report description 1")
             .linkedEntity("SR0001/")
             .frequency("Daily")
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
             .title("Sample Report 1 | North America")
             .varArg("category", listOf("Category 1"))
             .varArg("createdDate", "2022-02-05")
@@ -52,6 +49,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("hasSample", Boolean.FALSE)
             .applicationId(Application.builder().sealId("12345").build())
             .report(Report.builder().tier("Tier 1").build())
+            .catalogIdentifier("foobar")
             .build();
 
     private final Dataset testDataset2 = Dataset.builder()
@@ -60,9 +58,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .linkedEntity("SR0002/")
             .frequency("Daily")
             .title("Sample Report 2 | North America")
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
             .varArg("category", listOf("Category 2"))
             .varArg("createdDate", "2022-02-06")
             .varArg("coverageStartDate", "2022-02-06")
@@ -82,6 +78,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("hasSample", Boolean.FALSE)
             .applicationId(Application.builder().sealId("12345").build())
             .report(Report.builder().tier("Tier 2").build())
+            .catalogIdentifier("foobar")
             .build();
 
     private final Dataset testDataset3 = Dataset.builder()
@@ -90,9 +87,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .linkedEntity("SR0003/")
             .frequency("Daily")
             .title("Sample Report 3 | North America")
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
             .varArg("category", listOf("Category 3"))
             .varArg("createdDate", "2022-02-07")
             .varArg("coverageStartDate", "2022-02-07")
@@ -112,19 +107,19 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("hasSample", Boolean.FALSE)
             .applicationId(Application.builder().sealId("12345").build())
             .report(Report.builder().tier("Tier 3").build())
+            .catalogIdentifier("foobar")
             .build();
 
-    private static final APIContext apiContext = APIContext.builder()
-            .apiManager(Mockito.mock(APIManager.class))
-            .rootUrl("http://foobar/api/v1/")
-            .defaultCatalog("foobar")
-            .build();
+    private static final Fusion fusion = Mockito.mock(Fusion.class);
 
-    private static final APIResponseParser responseParser = new GsonAPIResponseParser(apiContext);
+    private static final APIResponseParser responseParser = GsonAPIResponseParser.builder()
+            .gson(DefaultGsonConfig.gson())
+            .fusion(fusion)
+            .build();
 
     @Test
     public void singleDatasetInResourcesParsesCorrectly() {
-        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(singleDatasetJson);
+        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(singleDatasetJson, "foobar");
         assertThat(datasetMap.size(), is(1));
 
         Dataset testDatasetResponse = datasetMap.get("SR0001");
@@ -133,7 +128,7 @@ public class GsonAPIResponseParserDatasetReportTest {
 
     @Test
     public void multipleCatalogsInResourcesParseCorrectly() {
-        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(multipleDatasetJson);
+        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(multipleDatasetJson, "foobar");
         assertThat(datasetMap.size(), is(3));
 
         Dataset testDatasetResponse = datasetMap.get("SR0001");

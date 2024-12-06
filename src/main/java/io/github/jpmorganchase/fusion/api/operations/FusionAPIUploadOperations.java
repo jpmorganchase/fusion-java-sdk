@@ -20,6 +20,7 @@ import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
+import io.github.jpmorganchase.fusion.parsing.DefaultGsonConfig;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -55,8 +56,7 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
 
     private final DigestProducer digestProducer;
 
-    @Builder.Default
-    private final APIResponseParser responseParser = new GsonAPIResponseParser();
+    private final APIResponseParser responseParser;
 
     /**
      * Max size in MB of data allowed for a single part upload.
@@ -411,6 +411,12 @@ public class FusionAPIUploadOperations implements APIUploadOperations {
             if (Objects.isNull(digestProducer)) {
                 this.digestProducer = AlgoSpecificDigestProducer.builder()
                         .digestAlgorithm(configuration.getDigestAlgorithm())
+                        .build();
+            }
+
+            if (Objects.isNull(responseParser)) {
+                responseParser = GsonAPIResponseParser.builder()
+                        .gson(DefaultGsonConfig.gson())
                         .build();
             }
 

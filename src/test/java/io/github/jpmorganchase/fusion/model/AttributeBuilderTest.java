@@ -4,7 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.Fusion;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ public class AttributeBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
-        APIManager apiManager = Mockito.mock(APIManager.class);
+        Fusion fusion = Mockito.mock(Fusion.class);
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         Attribute a = Attribute.builder()
@@ -26,9 +26,8 @@ public class AttributeBuilderTest {
                 .description("The description")
                 .title("The title")
                 .dataset("foo")
-                .rootUrl("http://foobar/api/v1/")
                 .catalogIdentifier("foobar")
-                .apiManager(apiManager)
+                .fusion(fusion)
                 .isCriticalDataElement(true)
                 .build();
 
@@ -40,9 +39,8 @@ public class AttributeBuilderTest {
         assertThat(a.getDescription(), is(equalTo("The description")));
         assertThat(a.getTitle(), is(equalTo("The title")));
         assertThat(a.getDataset(), is(equalTo("foo")));
-        assertThat(a.getRootUrl(), is(equalTo("http://foobar/api/v1/")));
         assertThat(a.getCatalogIdentifier(), is(equalTo("foobar")));
-        assertThat(a.getApiManager(), is(equalTo(apiManager)));
+        assertThat(a.getFusion(), is(equalTo(fusion)));
         assertThat(a.isCriticalDataElement(), is(equalTo(true)));
     }
 
@@ -57,14 +55,19 @@ public class AttributeBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyReturnsApiPath() {
+        // Given
+        Fusion fusion = Mockito.mock(Fusion.class);
+        Mockito.when(fusion.getRootURL()).thenReturn("http://foo/api/v1/");
 
+        // When
         Attribute a = Attribute.builder()
                 .identifier("The identifier")
-                .rootUrl("http://foo/api/v1/")
+                .fusion(fusion)
                 .catalogIdentifier("bar")
                 .dataset("foobar")
                 .build();
 
+        // Then
         assertThat(
                 a.getApiPath(),
                 is(equalTo("http://foo/api/v1/catalogs/bar/datasets/foobar/attributes/The identifier")));

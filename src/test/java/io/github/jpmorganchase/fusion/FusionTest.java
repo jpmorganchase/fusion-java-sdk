@@ -113,7 +113,7 @@ public class FusionTest {
 
         when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets", config.getRootURL(), catalog)))
                 .thenReturn("{\"key\":value}");
-        when(responseParser.parseDatasetResponse("{\"key\":value}")).thenReturn(stubResponse);
+        when(responseParser.parseDatasetResponse("{\"key\":value}", catalog)).thenReturn(stubResponse);
 
         return stubResponse;
     }
@@ -176,7 +176,7 @@ public class FusionTest {
         when(apiManager.callAPI(String.format(
                         "%1scatalogs/%2s/datasets/%3s/attributes", config.getRootURL(), "common", "sample_dataset")))
                 .thenReturn("{\"key\":value}");
-        when(responseParser.parseAttributeResponse("{\"key\":value}", "sample_dataset"))
+        when(responseParser.parseAttributeResponse("{\"key\":value}", "common", "sample_dataset"))
                 .thenReturn(stubResponse);
 
         Map<String, Attribute> actualResponse = f.listAttributes("sample_dataset");

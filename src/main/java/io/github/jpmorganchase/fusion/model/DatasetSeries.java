@@ -1,7 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
-import io.github.jpmorganchase.fusion.api.APIManager;
+import io.github.jpmorganchase.fusion.Fusion;
 import java.time.LocalDate;
 import java.util.Map;
 import lombok.Builder;
@@ -23,16 +23,15 @@ public class DatasetSeries extends CatalogResource {
 
     @Builder
     public DatasetSeries(
-            String identifier,
-            Map<String, Object> varArgs,
-            APIManager apiManager,
-            String rootUrl,
-            String catalogIdentifier,
+            @Builder.ObtainVia(method = "getIdentifier") String identifier,
+            @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
+            @Builder.ObtainVia(method = "getFusion") Fusion fusion,
+            @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             LocalDate fromDate,
             LocalDate toDate,
             LocalDate createdDate,
             String linkedEntity) {
-        super(identifier, varArgs, apiManager, rootUrl, catalogIdentifier);
+        super(identifier, varArgs, fusion, catalogIdentifier);
         this.fromDate = fromDate;
         this.toDate = toDate;
         this.createdDate = createdDate;

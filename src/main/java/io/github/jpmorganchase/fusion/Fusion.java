@@ -4,7 +4,6 @@ import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets
 
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.FusionAPIManager;
-import io.github.jpmorganchase.fusion.api.context.APIContext;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.exception.ApiInputValidationException;
 import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
@@ -22,10 +21,9 @@ import io.github.jpmorganchase.fusion.oauth.exception.OAuthException;
 import io.github.jpmorganchase.fusion.oauth.provider.DefaultFusionTokenProvider;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
+import io.github.jpmorganchase.fusion.parsing.DefaultGsonConfig;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
-import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
-import io.github.jpmorganchase.fusion.serializing.GsonAPIRequestSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -42,23 +40,69 @@ import lombok.Builder;
 /**
  * Class representing the Fusion API, providing methods that correspond to available API endpoints
  */
-@Builder
 public class Fusion {
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    private APIManager api;
-    private Builders builders;
+    private final APIManager api;
     private String defaultCatalog;
-    private String defaultPath;
-    private String rootURL;
+    private final String defaultPath;
+    private final String rootURL;
+    private final APIResponseParser responseParser;
+    private final Builders builders;
 
-    private APIResponseParser responseParser;
+    @Builder
+    public Fusion(
+            APIManager api,
+            String defaultCatalog,
+            String defaultPath,
+            String rootURL,
+            APIResponseParser responseParser,
+            Builders builders) {
+        this.api = api;
+        this.defaultCatalog = defaultCatalog;
+        this.defaultPath = defaultPath;
+        this.rootURL = rootURL;
+        this.responseParser = initApiResponseParser(responseParser);
+        this.builders = initApiResourceBuilders(builders);
+    }
 
-    @Builder.Default
-    private APIRequestSerializer requestSerializer = new GsonAPIRequestSerializer();
+    /**
+     * Initializes the API resource builders if they have not already been set.
+     * <p>
+     * If the provided {@code builders} parameter is {@code null}, a new instance of
+     * {@link APIConfiguredBuilders} is created and initialized with the current object.
+     * Otherwise, the provided {@code builders} instance is returned unchanged.
+     * </p>
+     *
+     * @param builders the {@link Builders} instance to initialize, or {@code null}
+     *                 to create a new default instance.
+     * @return an initialized {@link Builders} instance.
+     */
+    private Builders initApiResourceBuilders(Builders builders) {
+        return Objects.isNull(builders) ? new APIConfiguredBuilders(this) : builders;
+    }
 
-    private APIContext apiContext;
+    /**
+     * Initializes the API response parser if it has not already been set.
+     * <p>
+     * If the provided {@code responseParser} is {@code null}, a default instance of
+     * {@link GsonAPIResponseParser} is created using the {@link DefaultGsonConfig}.
+     * Otherwise, the provided {@code responseParser} is returned unchanged.
+     * </p>
+     *
+     * @param responseParser the {@link APIResponseParser} instance to initialize, or {@code null}
+     *                       to use the default parser.
+     * @return an initialized {@link APIResponseParser} instance.
+     */
+    private APIResponseParser initApiResponseParser(APIResponseParser responseParser) {
+        return Objects.isNull(responseParser)
+                ? GsonAPIResponseParser.builder()
+                        .gson(DefaultGsonConfig.gson())
+                        .fusion(this)
+                        .build()
+                : responseParser;
+    }
 
     /**
      * Get the default download path - Please see default {@link FusionConfiguration}
@@ -103,6 +147,38 @@ public class Fusion {
         } else {
             throw new FusionException("Bearer token update not supported");
         }
+    }
+
+    /**
+     * Creates a new catalog resource by sending a POST request to the specified API path.
+     *
+     * @param apiPath the API endpoint path where the resource should be created.
+     * @param resource the {@link CatalogResource} to be created.
+     * @return the response from the API as a {@link String}.
+     */
+    public String create(String apiPath, CatalogResource resource) {
+        return this.api.callAPIToPost(apiPath, resource);
+    }
+
+    /**
+     * Updates an existing catalog resource by sending a PUT request to the specified API path.
+     *
+     * @param apiPath the API endpoint path where the resource exists.
+     * @param resource the {@link CatalogResource} containing the updated data.
+     * @return the response from the API as a {@link String}.
+     */
+    public String update(String apiPath, CatalogResource resource) {
+        return this.api.callAPIToPut(apiPath, resource);
+    }
+
+    /**
+     * Deletes a catalog resource by sending a DELETE request to the specified API path.
+     *
+     * @param apiPath the API endpoint path where the resource to be deleted exists.
+     * @return the response from the API as a {@link String}.
+     */
+    public String delete(String apiPath) {
+        return this.api.callAPIToDelete(apiPath);
     }
 
     /**
@@ -198,7 +274,7 @@ public class Fusion {
     public Map<String, DataDictionaryAttribute> listDataDictionaryAttributes(String catalogName) {
         String url = String.format("%1scatalogs/%2s/attributes", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
-        return responseParser.parseDataDictionaryAttributeResponse(json);
+        return responseParser.parseDataDictionaryAttributeResponse(json, catalogName);
     }
 
     /**
@@ -241,7 +317,7 @@ public class Fusion {
     public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) {
         String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
-        return filterDatasets(responseParser.parseDatasetResponse(json), contains, idContains);
+        return filterDatasets(responseParser.parseDatasetResponse(json, catalogName), contains, idContains);
     }
 
     /**
@@ -369,7 +445,7 @@ public class Fusion {
     public Map<String, Attribute> listAttributes(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes", this.rootURL, catalogName, dataset);
         String json = this.api.callAPI(url);
-        return responseParser.parseAttributeResponse(json, dataset);
+        return responseParser.parseAttributeResponse(json, catalogName, dataset);
     }
 
     /**
@@ -850,8 +926,6 @@ public class Fusion {
                 FusionConfiguration.builder().build();
 
         protected APIResponseParser responseParser;
-        protected APIRequestSerializer requestSerializer;
-        protected APIContext apiContext;
 
         public FusionBuilder configuration(FusionConfiguration configuration) {
             this.configuration = configuration;
@@ -901,10 +975,6 @@ public class Fusion {
         private FusionBuilder defaultPath(String defaultPath) {
             return this;
         }
-
-        private FusionBuilder apiContext(APIContext apiContext) {
-            return this;
-        }
     }
 
     private static class CustomFusionBuilder extends FusionBuilder {
@@ -934,23 +1004,6 @@ public class Fusion {
                         .tokenProvider(fusionTokenProvider)
                         .configuration(configuration)
                         .build();
-            }
-
-            if (Objects.isNull(builders)) {
-                builders = APIConfiguredBuilders.builder()
-                        .apiManager(api)
-                        .configuration(configuration)
-                        .build();
-            }
-
-            apiContext = APIContext.builder()
-                    .apiManager(api)
-                    .rootUrl(rootURL)
-                    .defaultCatalog(defaultCatalog)
-                    .build();
-
-            if (Objects.isNull(responseParser)) {
-                responseParser = new GsonAPIResponseParser(apiContext);
             }
 
             return super.build();

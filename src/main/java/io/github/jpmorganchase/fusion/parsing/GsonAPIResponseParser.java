@@ -2,7 +2,7 @@ package io.github.jpmorganchase.fusion.parsing;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import io.github.jpmorganchase.fusion.api.context.APIContext;
+import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.api.response.UploadedPart;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.serializing.mutation.MutationContext;
@@ -10,73 +10,92 @@ import io.github.jpmorganchase.fusion.serializing.mutation.ResourceMutationFacto
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Builder
 public class GsonAPIResponseParser implements APIResponseParser {
 
     private static final Logger logger =
             LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final Gson gson;
-    private final APIContext apiContext;
-
-    public GsonAPIResponseParser() {
-        this(APIContext.builder().build());
-    }
-
-    public GsonAPIResponseParser(APIContext apiContext) {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateDeserializer());
-        this.gson = gsonBuilder.create();
-        this.apiContext = apiContext;
-    }
-
-    public GsonAPIResponseParser(Gson gson, APIContext apiContext) {
-        this.gson = gson;
-        this.apiContext = apiContext;
-    }
+    private final Fusion fusion;
 
     @Override
     public Map<String, Catalog> parseCatalogResponse(String json) {
         return parseResourcesFromResponse(json, Catalog.class);
     }
 
+    /**
+     * Parses a JSON response to extract a map of datasets.
+     * <p>
+     * This method deserializes the given JSON string into a map of {@link Dataset} objects.
+     * Each dataset is enriched with additional context, such as variable arguments and the
+     * {@code fusion} configuration, using the builder pattern.
+     * </p>
+     *
+     * @param json the JSON response containing dataset information to be parsed.
+     * @return a map where the keys represent dataset identifiers (or relevant keys from the JSON structure),
+     *         and the values are {@link Dataset} objects enriched with context.
+     */
     @Override
-    public Map<String, Dataset> parseDatasetResponse(String json) {
+    public Map<String, Dataset> parseDatasetResponse(String json, String catalog) {
         return parseResourcesWithVarArgsFromResponse(json, Dataset.class, (resource, mc) -> resource.toBuilder()
                 .varArgs(mc.getVarArgs())
-                .apiManager(mc.getApiContext().getApiManager())
-                .rootUrl(mc.getApiContext().getRootUrl())
-                .catalogIdentifier(mc.getApiContext().getDefaultCatalog())
+                .fusion(fusion)
+                .catalogIdentifier(catalog)
                 .build());
     }
 
+    /**
+     * Parses a JSON response to extract a map of data dictionary attributes.
+     * <p>
+     * This method deserializes the given JSON string into a map of {@link DataDictionaryAttribute} objects.
+     * Each attribute is enriched with additional context, including variable arguments and the {@code fusion} configuration,
+     * using the builder pattern.
+     * </p>
+     *
+     * @param json the JSON response containing data dictionary attribute information to be parsed.
+     * @param catalog the catalog identifier to associate with each parsed attribute.
+     * @return a map where the keys represent attribute identifiers (or relevant keys from the JSON structure),
+     *         and the values are {@link DataDictionaryAttribute} objects enriched with context.
+     */
     @Override
-    public Map<String, DataDictionaryAttribute> parseDataDictionaryAttributeResponse(String json) {
+    public Map<String, DataDictionaryAttribute> parseDataDictionaryAttributeResponse(String json, String catalog) {
         return parseResourcesWithVarArgsFromResponse(
                 json, DataDictionaryAttribute.class, (resource, mc) -> resource.toBuilder()
                         .varArgs(mc.getVarArgs())
-                        .apiManager(mc.getApiContext().getApiManager())
-                        .rootUrl(mc.getApiContext().getRootUrl())
-                        .catalogIdentifier(mc.getApiContext().getDefaultCatalog())
+                        .fusion(fusion)
+                        .catalogIdentifier(catalog)
                         .build());
     }
 
+    /**
+     * Parses a JSON response to extract a map of attributes associated with a specific catalog and dataset.
+     * <p>
+     * This method deserializes the given JSON string into a map of attribute objects, using the provided
+     * {@code catalog} and {@code dataset} to enrich the parsed attributes with additional context.
+     * Each attribute is further customized via a builder pattern.
+     * </p>
+     *
+     * @param json    the JSON response containing attribute data to be parsed.
+     * @param catalog the catalog identifier to associate with each parsed attribute.
+     * @param dataset the dataset identifier to associate with each parsed attribute.
+     * @return a map where the keys are attribute identifiers (or relevant keys from the JSON structure),
+     *         and the values are {@link Attribute} objects enriched with the provided context.
+     */
     @Override
-    public Map<String, Attribute> parseAttributeResponse(String json, String dataset) {
+    public Map<String, Attribute> parseAttributeResponse(String json, String catalog, String dataset) {
         return parseResourcesWithVarArgsFromResponse(json, Attribute.class, (resource, mc) -> resource.toBuilder()
                 .dataset(dataset)
                 .varArgs(mc.getVarArgs())
-                .apiManager(mc.getApiContext().getApiManager())
-                .rootUrl(mc.getApiContext().getRootUrl())
-                .catalogIdentifier(mc.getApiContext().getDefaultCatalog())
+                .fusion(fusion)
+                .catalogIdentifier(catalog)
                 .build());
     }
 
@@ -106,6 +125,17 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
+    public <T extends CatalogResource> T parseResourceFromResponse(
+            String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator) {
+
+        Map<String, Object> responseMap = getMapFromJsonResponse(json);
+        T obj = gson.fromJson(json, resourceClass);
+
+        Set<String> excludes = varArgsExclusions(resourceClass);
+        return parseResourceWithVarArgs(excludes, obj, responseMap, mutator);
+    }
+
+    @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
             String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator) {
 
@@ -115,7 +145,9 @@ public class GsonAPIResponseParser implements APIResponseParser {
         Set<String> excludes = varArgsExclusions(resourceClass);
         List<T> resourceList = new ArrayList<>();
         for (JsonElement element : resources) {
-            resourceList.add(parseResourceWithVarArgs(resourceClass, excludes, element, untypedResources, mutator));
+            T obj = gson.fromJson(element, resourceClass);
+            Map<String, Object> untypedResource = untypedResources.get(obj.getIdentifier());
+            resourceList.add(parseResourceWithVarArgs(excludes, obj, untypedResource, mutator));
         }
 
         return collectMapOfUniqueResources(resourceList);
@@ -134,8 +166,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     @Override
     public Map<String, Map<String, Object>> parseResourcesUntyped(String json) {
-        Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
-        Map<String, Object> responseMap = gson.fromJson(json, mapType);
+        Map<String, Object> responseMap = getMapFromJsonResponse(json);
 
         Object resources = responseMap.get("resources");
         if (resources instanceof List) {
@@ -173,20 +204,10 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     private <T extends CatalogResource> T parseResourceWithVarArgs(
-            Class<T> resourceClass,
-            Set<String> excludes,
-            JsonElement element,
-            Map<String, Map<String, Object>> untypedResources,
-            ResourceMutationFactory<T> mutator) {
-        T obj = gson.fromJson(element, resourceClass);
+            Set<String> excludes, T obj, Map<String, Object> untypedResource, ResourceMutationFactory<T> mutator) {
 
-        Map<String, Object> varArgs = getVarArgsToInclude(untypedResources.get(obj.getIdentifier()), excludes);
-        return mutator.mutate(
-                obj,
-                MutationContext.builder()
-                        .varArgs(varArgs)
-                        .apiContext(apiContext)
-                        .build());
+        Map<String, Object> varArgs = getVarArgsToInclude(untypedResource, excludes);
+        return mutator.mutate(obj, MutationContext.builder().varArgs(varArgs).build());
     }
 
     private Map<String, Object> getVarArgsToInclude(Map<String, Object> untypedResource, Set<String> exclusionList) {
@@ -196,7 +217,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     private static <T extends CatalogResource> Set<String> varArgsExclusions(Class<T> resourceClass) {
-        // TODO :: Should this be returned by the Model Object ? It Should
+        // TODO :: Should this be returned by the Model Object ? My Thinking is yes.
         Set<String> excludes = new HashSet<>();
         Set<String> excludeFromType = Arrays.stream(resourceClass.getDeclaredFields())
                 .map(Field::getName)
@@ -207,7 +228,14 @@ public class GsonAPIResponseParser implements APIResponseParser {
         excludes.addAll(excludeFromType);
         excludes.addAll(excludeFromCatalogResource);
         excludes.add("@id");
+        excludes.add("@context");
+        excludes.add("@base");
         return excludes;
+    }
+
+    private Map<String, Object> getMapFromJsonResponse(String json) {
+        Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+        return gson.fromJson(json, mapType);
     }
 
     private static <T extends CatalogResource> Map<String, T> collectMapOfUniqueResources(List<T> resourceList) {
@@ -222,21 +250,18 @@ public class GsonAPIResponseParser implements APIResponseParser {
                         }));
     }
 
-    private static final class LocalDateDeserializer implements JsonDeserializer<LocalDate> {
+    public static class CustomGsonAPIResponseParserBuilder extends GsonAPIResponseParser.GsonAPIResponseParserBuilder {
 
-        private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        private Gson gson;
 
         @Override
-        public LocalDate deserialize(
-                JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext)
-                throws JsonParseException {
-            try {
-                return LocalDate.parse(jsonElement.getAsString(), dateTimeFormatter);
-            } catch (DateTimeParseException e) {
-                String message = "Failed to deserialize date field with value " + jsonElement.getAsString();
-                logger.warn(message);
-                return null;
+        public GsonAPIResponseParser build() {
+
+            if (Objects.isNull(gson)) {
+                this.gson = new DefaultGsonConfig().getGson();
             }
+
+            return super.build();
         }
     }
 }

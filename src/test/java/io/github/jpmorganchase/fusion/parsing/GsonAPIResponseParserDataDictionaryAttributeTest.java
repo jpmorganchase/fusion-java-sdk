@@ -4,8 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
-import io.github.jpmorganchase.fusion.api.context.APIContext;
+import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
 import java.net.URL;
@@ -28,53 +27,45 @@ public class GsonAPIResponseParserDataDictionaryAttributeTest {
             .identifier("AT0001")
             .description("Sample attribute description 1")
             .title("Sample Attribute 1")
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .catalogIdentifier("common")
             .varArg(
                     "applicationId",
                     Application.builder().sealId("12345").build().toMap())
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
             .build();
 
     private final DataDictionaryAttribute attribute2 = DataDictionaryAttribute.builder()
             .identifier("AT0002")
             .description("Sample attribute description 2")
             .title("Sample Attribute 2")
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .catalogIdentifier("common")
             .varArg(
                     "applicationId",
                     Application.builder().sealId("12345").build().toMap())
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
             .build();
 
     private final DataDictionaryAttribute attribute3 = DataDictionaryAttribute.builder()
             .identifier("AT0003")
             .description("Sample attribute description 3")
             .title("Sample Attribute 3")
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .catalogIdentifier("common")
             .varArg(
                     "applicationId",
                     Application.builder().sealId("12345").build().toMap())
-            .apiManager(apiContext.getApiManager())
-            .rootUrl(apiContext.getRootUrl())
-            .catalogIdentifier(apiContext.getDefaultCatalog())
+            .fusion(fusion)
             .build();
 
-    private static final APIContext apiContext = APIContext.builder()
-            .apiManager(Mockito.mock(APIManager.class))
-            .rootUrl("http://foobar/api/v1/")
-            .defaultCatalog("foobar")
+    private static final Fusion fusion = Mockito.mock(Fusion.class);
+    private static final APIResponseParser responseParser = GsonAPIResponseParser.builder()
+            .gson(DefaultGsonConfig.gson())
+            .fusion(fusion)
             .build();
-
-    private static final APIResponseParser responseParser = new GsonAPIResponseParser(apiContext);
 
     @Test
     public void singleDatasetInResourcesParsesCorrectly() {
         Map<String, DataDictionaryAttribute> datasetMap =
-                responseParser.parseDataDictionaryAttributeResponse(singleDataDictionaryAttributeJson);
+                responseParser.parseDataDictionaryAttributeResponse(singleDataDictionaryAttributeJson, "common");
         assertThat(datasetMap.size(), is(1));
 
         DataDictionaryAttribute dda = datasetMap.get("AT0001");
@@ -84,7 +75,7 @@ public class GsonAPIResponseParserDataDictionaryAttributeTest {
     @Test
     public void multipleCatalogsInResourcesParseCorrectly() {
         Map<String, DataDictionaryAttribute> datasetMap =
-                responseParser.parseDataDictionaryAttributeResponse(multipleDataDictionaryAttributeJson);
+                responseParser.parseDataDictionaryAttributeResponse(multipleDataDictionaryAttributeJson, "common");
         assertThat(datasetMap.size(), is(3));
 
         DataDictionaryAttribute dda = datasetMap.get("AT0001");
