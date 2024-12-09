@@ -274,7 +274,7 @@ public class Fusion {
     public Map<String, DataDictionaryAttribute> listDataDictionaryAttributes(String catalogName) {
         String url = String.format("%1scatalogs/%2s/attributes", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
-        return responseParser.parseDataDictionaryAttributeResponse(json, catalogName);
+        return responseParser.parseDataDictionaryAttributesResponse(json, catalogName);
     }
 
     /**

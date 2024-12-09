@@ -66,7 +66,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
      *         and the values are {@link DataDictionaryAttribute} objects enriched with context.
      */
     @Override
-    public Map<String, DataDictionaryAttribute> parseDataDictionaryAttributeResponse(String json, String catalog) {
+    public Map<String, DataDictionaryAttribute> parseDataDictionaryAttributesResponse(String json, String catalog) {
         return parseResourcesWithVarArgsFromResponse(
                 json, DataDictionaryAttribute.class, (resource, mc) -> resource.toBuilder()
                         .varArgs(mc.getVarArgs())
