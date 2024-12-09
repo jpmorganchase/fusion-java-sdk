@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import io.github.jpmorganchase.fusion.Fusion;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -63,6 +64,36 @@ public class DataDictionaryAttributeBuilderTest {
                 .build();
 
         // Then
-        assertThat(a.getApiPath(), is(equalTo("http://foo/api/v1/catalogs/bar/attributes/The identifier")));
+        Assertions.assertThrows(UnsupportedOperationException.class, a::getApiPath);
+    }
+
+    @Test
+    void testCreateIsUnsupportedOperation() {
+        // Given
+        DataDictionaryAttribute a =
+                DataDictionaryAttribute.builder().identifier("The identifier").build();
+
+        // When & Then
+        Assertions.assertThrows(UnsupportedOperationException.class, a::create);
+    }
+
+    @Test
+    void testUpdateIsUnsupportedOperation() {
+        // Given
+        DataDictionaryAttribute a =
+                DataDictionaryAttribute.builder().identifier("The identifier").build();
+
+        // When & Then
+        Assertions.assertThrows(UnsupportedOperationException.class, a::update);
+    }
+
+    @Test
+    void testDeleteIsUnsupportedOperation() {
+        // Given
+        DataDictionaryAttribute a =
+                DataDictionaryAttribute.builder().identifier("The identifier").build();
+
+        // When & Then
+        Assertions.assertThrows(UnsupportedOperationException.class, a::delete);
     }
 }

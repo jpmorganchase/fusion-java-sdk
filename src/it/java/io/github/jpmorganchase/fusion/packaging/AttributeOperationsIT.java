@@ -4,6 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import io.github.jpmorganchase.fusion.model.Attribute;
 import io.github.jpmorganchase.fusion.test.TestUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -38,10 +39,8 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .varArg("sourceFieldId", "src_name")
                 .build();
 
-        //When
-        a.create();
-
-        //Then
+        // When & Then
+        Assertions.assertDoesNotThrow(a::create);
 
     }
 
@@ -64,10 +63,8 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .key(true)
                 .build();
 
-        //When
-        a.create();
-
-        //Then
+        // When & Then
+        Assertions.assertDoesNotThrow(a::create);
 
     }
 
@@ -96,12 +93,8 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .isCriticalDataElement(true)
                 .build();
 
-        //When
-        a.create();
-
-        //Then
-        //TODO :: Need to assert something here; return to be formulated
-
+        // When & Then
+        Assertions.assertDoesNotThrow(a::create);
     }
 
     @Test
@@ -129,11 +122,8 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .isCriticalDataElement(true)
                 .build();
 
-        //When
-        a.update();
-
-        //Then
-
+        // When & Then
+        Assertions.assertDoesNotThrow(a::update);
     }
 
     @Test
@@ -162,10 +152,8 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .isCriticalDataElement(true)
                 .build();
 
-        //When
-        a.update();
-
-        //Then
+        // When & Then
+        Assertions.assertDoesNotThrow(a::update);
 
     }
 
@@ -192,11 +180,8 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .description("The name updated")
                 .build();
 
-        //When
-        a.update();
-
-        //Then
-
+        // When & Then
+        Assertions.assertDoesNotThrow(a::update);
     }
 
     @Test
@@ -213,11 +198,8 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .identifier("name")
                 .build();
 
-        //When
-        a.delete();
-
-        //Then
-
+        // When & Then
+        Assertions.assertDoesNotThrow(a::delete);
     }
 
     @Test
@@ -235,10 +217,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                 .identifier("name")
                 .build();
 
-        //When
-        a.delete();
-
-        //Then
-
+        // When & Then
+        Assertions.assertDoesNotThrow(a::delete);
     }
 }

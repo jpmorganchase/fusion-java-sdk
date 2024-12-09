@@ -39,9 +39,7 @@ public class DataDictionaryAttribute extends CatalogResource {
 
     @Override
     protected String getApiPath() {
-        return String.format(
-                "%1scatalogs/%2s/attributes/%3s",
-                getFusion().getRootURL(), this.getCatalogIdentifier(), this.getIdentifier());
+        throw new UnsupportedOperationException("Operation not yet supported for DataDictionaryAttribute");
     }
 
     public static class DataDictionaryAttributeBuilder {

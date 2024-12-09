@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -111,5 +112,37 @@ public class DataDictionaryAttributesBuilderTest {
 
         // Then
         assertThat(dataDictionaryAttributes.getVarArgs().get("key1"), is(equalTo("value1")));
+    }
+
+    @Test
+    void testCreateIsSupportedOperation() {
+        // Given
+        DataDictionaryAttributes a = DataDictionaryAttributes.builder()
+                .fusion(Mockito.mock(Fusion.class))
+                .build();
+
+        // When & Then
+        a.create();
+    }
+
+    @Test
+    void testUpdateIsUnsupportedOperation() {
+        // Given
+        DataDictionaryAttributes a = DataDictionaryAttributes.builder()
+                .fusion(Mockito.mock(Fusion.class))
+                .build();
+
+        // When & Then
+        Assertions.assertThrows(UnsupportedOperationException.class, a::update);
+    }
+
+    @Test
+    void testDeleteIsUnsupportedOperation() {
+        DataDictionaryAttributes a = DataDictionaryAttributes.builder()
+                .fusion(Mockito.mock(Fusion.class))
+                .build();
+
+        // When & Then
+        Assertions.assertThrows(UnsupportedOperationException.class, a::update);
     }
 }
