@@ -12,6 +12,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 
 public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
 
+
     @Test
     public void testCreateDataDictionaryAttribute() {
 
