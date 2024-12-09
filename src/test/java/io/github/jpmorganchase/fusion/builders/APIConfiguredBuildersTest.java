@@ -5,10 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 import io.github.jpmorganchase.fusion.Fusion;
-import io.github.jpmorganchase.fusion.model.Attribute;
-import io.github.jpmorganchase.fusion.model.CatalogResource;
-import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
-import io.github.jpmorganchase.fusion.model.Dataset;
+import io.github.jpmorganchase.fusion.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -44,6 +41,19 @@ class APIConfiguredBuildersTest {
 
         // When
         DataDictionaryAttribute a = attributeBuilder.build();
+
+        // Then
+        thenFusionShouldBeNonNull(a);
+    }
+
+    @Test
+    public void testDataDictionaryAttributesBuilderReturned() {
+        // Given
+        DataDictionaryAttributes.DataDictionaryAttributesBuilder attributeBuilder =
+                apiConfiguredBuilders.dataDictionaryAttributes();
+
+        // When
+        DataDictionaryAttributes a = attributeBuilder.build();
 
         // Then
         thenFusionShouldBeNonNull(a);
