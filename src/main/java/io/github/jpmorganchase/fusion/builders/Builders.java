@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.builders;
 
 import io.github.jpmorganchase.fusion.model.Attribute;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
+import io.github.jpmorganchase.fusion.model.DataDictionaryAttributes;
 import io.github.jpmorganchase.fusion.model.Dataset;
 
 public interface Builders {
@@ -21,6 +22,17 @@ public interface Builders {
      * @return {@link DataDictionaryAttribute.DataDictionaryAttributeBuilder} the attribute builder
      */
     DataDictionaryAttribute.DataDictionaryAttributeBuilder dataDictionaryAttribute();
+
+    /**
+     * Returns a builder for creating a {@link DataDictionaryAttributes} object.
+     * <p>
+     * The builder allows you to set properties and construct an instance of {@link DataDictionaryAttributes}.
+     * This is useful for managing collections or groups of related attributes.
+     * </p>
+     *
+     * @return a {@link DataDictionaryAttributes.DataDictionaryAttributesBuilder} instance for building a {@link DataDictionaryAttributes}.
+     */
+    DataDictionaryAttributes.DataDictionaryAttributesBuilder dataDictionaryAttributes();
 
     /**
      * Returns a builder for creating a {@link io.github.jpmorganchase.fusion.model.Attribute} object.

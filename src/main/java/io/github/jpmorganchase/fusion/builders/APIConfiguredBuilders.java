@@ -3,6 +3,7 @@ package io.github.jpmorganchase.fusion.builders;
 import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Attribute;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
+import io.github.jpmorganchase.fusion.model.DataDictionaryAttributes;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import lombok.AllArgsConstructor;
 
@@ -19,6 +20,11 @@ public class APIConfiguredBuilders implements Builders {
     @Override
     public DataDictionaryAttribute.DataDictionaryAttributeBuilder dataDictionaryAttribute() {
         return DataDictionaryAttribute.builder().fusion(fusion);
+    }
+
+    @Override
+    public DataDictionaryAttributes.DataDictionaryAttributesBuilder dataDictionaryAttributes() {
+        return DataDictionaryAttributes.builder().fusion(fusion);
     }
 
     @Override

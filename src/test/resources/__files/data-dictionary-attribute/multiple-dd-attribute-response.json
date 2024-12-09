@@ -5,15 +5,15 @@
   },
   "@id": "attributes/",
   "description": "A list of available attributes",
-  "identifier": "attributes",
+  "identifier": "Attributes",
   "resources": [
     {
       "description": "Sample attribute description 1",
       "title": "Sample Attribute 1",
       "identifier": "AT0001",
       "applicationId": {
-        "id": "12345",
-        "idType": "SEAL"
+        "idType": "SEAL",
+        "id": "12345"
       }
     },
     {
@@ -21,8 +21,8 @@
       "title": "Sample Attribute 2",
       "identifier": "AT0002",
       "applicationId": {
-        "id": "12345",
-        "idType": "SEAL"
+        "idType": "SEAL",
+        "id": "12345"
       }
     },
     {
@@ -30,8 +30,8 @@
       "title": "Sample Attribute 3",
       "identifier": "AT0003",
       "applicationId": {
-        "id": "12345",
-        "idType": "SEAL"
+        "idType": "SEAL",
+        "id": "12345"
       }
     }
   ],

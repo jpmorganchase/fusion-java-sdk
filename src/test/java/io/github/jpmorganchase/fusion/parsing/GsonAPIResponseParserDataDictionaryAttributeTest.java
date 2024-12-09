@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -28,9 +29,8 @@ public class GsonAPIResponseParserDataDictionaryAttributeTest {
             .description("Sample attribute description 1")
             .title("Sample Attribute 1")
             .catalogIdentifier("common")
-            .varArg(
-                    "applicationId",
-                    Application.builder().sealId("12345").build().toMap())
+            .applicationId(Application.builder().sealId("12345").build())
+            .varArgs(new HashMap<>())
             .fusion(fusion)
             .build();
 
@@ -39,9 +39,8 @@ public class GsonAPIResponseParserDataDictionaryAttributeTest {
             .description("Sample attribute description 2")
             .title("Sample Attribute 2")
             .catalogIdentifier("common")
-            .varArg(
-                    "applicationId",
-                    Application.builder().sealId("12345").build().toMap())
+            .applicationId(Application.builder().sealId("12345").build())
+            .varArgs(new HashMap<>())
             .fusion(fusion)
             .build();
 
@@ -50,9 +49,8 @@ public class GsonAPIResponseParserDataDictionaryAttributeTest {
             .description("Sample attribute description 3")
             .title("Sample Attribute 3")
             .catalogIdentifier("common")
-            .varArg(
-                    "applicationId",
-                    Application.builder().sealId("12345").build().toMap())
+            .applicationId(Application.builder().sealId("12345").build())
+            .varArgs(new HashMap<>())
             .fusion(fusion)
             .build();
 
@@ -65,7 +63,7 @@ public class GsonAPIResponseParserDataDictionaryAttributeTest {
     @Test
     public void singleDatasetInResourcesParsesCorrectly() {
         Map<String, DataDictionaryAttribute> datasetMap =
-                responseParser.parseDataDictionaryAttributeResponse(singleDataDictionaryAttributeJson, "common");
+                responseParser.parseDataDictionaryAttributesResponse(singleDataDictionaryAttributeJson, "common");
         assertThat(datasetMap.size(), is(1));
 
         DataDictionaryAttribute dda = datasetMap.get("AT0001");
@@ -75,7 +73,7 @@ public class GsonAPIResponseParserDataDictionaryAttributeTest {
     @Test
     public void multipleCatalogsInResourcesParseCorrectly() {
         Map<String, DataDictionaryAttribute> datasetMap =
-                responseParser.parseDataDictionaryAttributeResponse(multipleDataDictionaryAttributeJson, "common");
+                responseParser.parseDataDictionaryAttributesResponse(multipleDataDictionaryAttributeJson, "common");
         assertThat(datasetMap.size(), is(3));
 
         DataDictionaryAttribute dda = datasetMap.get("AT0001");
