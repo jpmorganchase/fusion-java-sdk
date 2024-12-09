@@ -35,7 +35,7 @@ public class GsonAPIResponseParserAttributeTest {
             .varArg("sourceFieldId", "src_name")
             .fusion(fusion)
             .catalogIdentifier("foobar")
-            .dataset("SD0001")
+            .datasetIdentifier("SD0001")
             .build();
 
     private final Attribute testAttribute2 = Attribute.builder()
@@ -52,7 +52,7 @@ public class GsonAPIResponseParserAttributeTest {
             .varArg("sourceFieldId", "")
             .fusion(fusion)
             .catalogIdentifier("foobar")
-            .dataset("SD0001")
+            .datasetIdentifier("SD0001")
             .build();
 
     private final Attribute testAttribute3 = Attribute.builder()
@@ -69,7 +69,7 @@ public class GsonAPIResponseParserAttributeTest {
             .varArg("sourceFieldId", "")
             .fusion(fusion)
             .catalogIdentifier("foobar")
-            .dataset("SD0001")
+            .datasetIdentifier("SD0001")
             .build();
 
     private static final Fusion fusion = Mockito.mock(Fusion.class);
