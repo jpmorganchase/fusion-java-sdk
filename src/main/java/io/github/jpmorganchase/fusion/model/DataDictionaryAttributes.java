@@ -32,6 +32,16 @@ public class DataDictionaryAttributes extends CatalogResource {
         return String.format("%1scatalogs/%2s/attributes", getFusion().getRootURL(), this.getCatalogIdentifier());
     }
 
+    @Override
+    public String update() {
+        throw new UnsupportedOperationException("Operation not yet supported for DataDictionaryAttribute");
+    }
+
+    @Override
+    public String delete() {
+        throw new UnsupportedOperationException("Operation not yet supported for DataDictionaryAttribute");
+    }
+
     public static class DataDictionaryAttributesBuilder {
         @SuppressWarnings("FieldCanBeLocal")
         private Map<String, Object> varArgs;

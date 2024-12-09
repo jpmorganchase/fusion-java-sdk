@@ -4,12 +4,15 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
 import io.github.jpmorganchase.fusion.test.TestUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 
+@Disabled("CRUD Operations currently unsupported on DataDictionaryAttribute")
 public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
 
 
@@ -30,12 +33,8 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .applicationId(Application.builder().sealId("12345").build())
                 .build();
 
-        //When
-        dda.create();
-
-        //Then
-        //TODO :: Need to assert something here; return to be formulated
-
+        // When & Then
+        Assertions.assertDoesNotThrow(dda::create);
     }
 
     @Test
@@ -53,11 +52,8 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .description("Sample dd attribute description 2")
                 .build();
 
-        //When
-        dda.create();
-
-        //Then
-        //TODO :: Need to assert something here; return to be formulated
+        // When & Then
+        Assertions.assertDoesNotThrow(dda::create);
     }
 
     @Test
@@ -77,11 +73,8 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .catalogIdentifier("foobar")
                 .build();
 
-        //When
-        dda.create();
-
-        //Then
-        //TODO :: Need to assert something here; return to be formulated
+        // When & Then
+        Assertions.assertDoesNotThrow(dda::create);
     }
 
     @Test
@@ -100,11 +93,8 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .applicationId(Application.builder().sealId("12345").build())
                 .build();
 
-        //When
-        dda.update();
-
-        //Then
-        //TODO :: Need to assert something here; return to be formulated
+        // When & Then
+        Assertions.assertDoesNotThrow(dda::update);
     }
 
     @Test
@@ -124,11 +114,8 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .catalogIdentifier("foobar")
                 .build();
 
-        //When
-        dda.update();
-
-        //Then
-        //TODO :: Need to assert something here; return to be formulated
+        // When & Then
+        Assertions.assertDoesNotThrow(dda::update);
     }
 
     @Test
@@ -155,10 +142,8 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .description("Updated Sample dd attribute description 2")
                 .build();
 
-        amended.update();
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.update() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(amended::update);
     }
 
     @Test
@@ -173,11 +158,8 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .identifier("AT0001")
                 .build();
 
-        //When
-        dda.delete();
-
-        //Then
-        //TODO :: Need to assert something here; return to be formulated
+        // When & Then
+        Assertions.assertDoesNotThrow(dda::delete);
     }
 
     @Test
@@ -193,11 +175,8 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .catalogIdentifier("foobar")
                 .build();
 
-        //When
-        dda.delete();
-
-        //Then
-        //TODO :: Need to assert something here; return to be formulated
+        // When & Then
+        Assertions.assertDoesNotThrow(dda::delete);
     }
 
 

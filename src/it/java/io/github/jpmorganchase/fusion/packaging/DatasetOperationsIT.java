@@ -6,11 +6,9 @@ import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Flow;
 import io.github.jpmorganchase.fusion.model.Report;
 import io.github.jpmorganchase.fusion.test.TestUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
@@ -20,9 +18,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 public class DatasetOperationsIT extends BaseOperationsIT {
-
-    private static final Logger logger =
-            LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Test
     public void testCreateDataset() {
@@ -42,11 +37,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .frequency("Daily")
                 .build();
 
-        // When
-        dataset.create();
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.create() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(dataset::create);
     }
 
     @Test
@@ -84,12 +76,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .varArg("hasSample", Boolean.FALSE)
                 .build();
 
-        // When
-        dataset.create();
-
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.create() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(dataset::create);
     }
 
     @Test
@@ -111,11 +99,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .catalogIdentifier("foobar")
                 .build();
 
-        // When
-        dataset.create();
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.create() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(dataset::create);
     }
 
     @Test
@@ -155,12 +140,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .report(Report.builder().tier("Tier 1").build())
                 .build();
 
-        // When
-        dataset.create();
-
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.create() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(dataset::create);
     }
 
     @Test
@@ -206,12 +187,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 )
                 .build();
 
-        // When
-        dataset.create();
-
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.create() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(dataset::create);
     }
 
     @Test
@@ -258,12 +235,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 )
                 .build();
 
-        // When
-        dataset.create();
-
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.create() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(dataset::create);
     }
 
     @Test
@@ -284,11 +257,9 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .frequency("Daily")
                 .build();
 
-        // When
-        dataset.update();
 
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.update() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(dataset::update);
     }
 
     @Test
@@ -316,10 +287,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .description("Updated Sample dataset description 1")
                 .build();
 
-        amendedDataset.update();
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.update() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(amendedDataset::update);
     }
 
     @Test
@@ -347,10 +316,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .description("Updated Sample report description 1")
                 .build();
 
-        amendedDataset.update();
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.update() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(amendedDataset::update);
     }
 
     @Test
@@ -378,10 +345,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .description("Updated Sample input flow description 1")
                 .build();
 
-        amendedDataset.update();
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.update() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(amendedDataset::update);
     }
 
     @Test
@@ -397,11 +362,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .identifier("SD0001")
                 .build();
 
-        // When
-        dataset.delete();
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.delete() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(dataset::delete);
     }
 
     @Test
@@ -418,11 +380,8 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .catalogIdentifier("foobar")
                 .build();
 
-        // When
-        dataset.delete();
-
-        // Then Verify the response
-        //TODO :: Contract for response of dataset.delete() needs to be decided
+        // When & Then
+        Assertions.assertDoesNotThrow(dataset::delete);
     }
 
     @Test

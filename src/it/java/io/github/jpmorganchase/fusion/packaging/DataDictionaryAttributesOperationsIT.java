@@ -5,6 +5,7 @@ import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
 import io.github.jpmorganchase.fusion.model.DataDictionaryAttributes;
 import io.github.jpmorganchase.fusion.test.TestUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -47,11 +48,8 @@ public class DataDictionaryAttributesOperationsIT extends BaseOperationsIT {
                 .dataDictionaryAttribute(dda2)
                 .build();
 
-        //When
-        ddas.create();
-
-        //Then
-
+        // When & Then
+        Assertions.assertDoesNotThrow(ddas::create);
     }
 
 
