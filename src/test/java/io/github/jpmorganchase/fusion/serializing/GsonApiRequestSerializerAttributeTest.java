@@ -31,7 +31,7 @@ public class GsonApiRequestSerializerAttributeTest {
                 .varArg("sourceFieldId", "src_name")
                 .fusion(Mockito.mock(Fusion.class))
                 .catalogIdentifier("foobar")
-                .dataset("set me")
+                .datasetIdentifier("set me")
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
@@ -55,7 +55,7 @@ public class GsonApiRequestSerializerAttributeTest {
                 .index(0)
                 .fusion(Mockito.mock(Fusion.class))
                 .catalogIdentifier("foobar")
-                .dataset("set me")
+                .datasetIdentifier("set me")
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();

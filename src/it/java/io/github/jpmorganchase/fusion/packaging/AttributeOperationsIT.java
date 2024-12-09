@@ -26,7 +26,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                         .withStatus(200)));
 
         Attribute a = getSdk().builders().attribute()
-                .dataset("SD0001")
+                .datasetIdentifier("SD0001")
                 .identifier("name")
                 .title("Name")
                 .description("The name")
@@ -55,7 +55,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                         .withStatus(200)));
 
         Attribute a = getSdk().builders().attribute()
-                .dataset("SD0001")
+                .datasetIdentifier("SD0001")
                 .identifier("alternate")
                 .title("Alternate")
                 .description("The alternate")
@@ -79,7 +79,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                         .withStatus(200)));
 
         Attribute a = getSdk().builders().attribute()
-                .dataset("SD0001")
+                .datasetIdentifier("SD0001")
                 .identifier("name")
                 .title("Name")
                 .description("The name")
@@ -108,7 +108,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                         .withStatus(200)));
 
         Attribute a = getSdk().builders().attribute()
-                .dataset("SD0001")
+                .datasetIdentifier("SD0001")
                 .identifier("name")
                 .title("Name")
                 .description("The name updated")
@@ -137,7 +137,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                         .withStatus(200)));
 
         Attribute a = getSdk().builders().attribute()
-                .dataset("SD0001")
+                .datasetIdentifier("SD0001")
                 .identifier("name")
                 .title("Name")
                 .description("The name updated")
@@ -194,7 +194,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
                         .withStatus(200)));
 
         Attribute a = getSdk().builders().attribute()
-                .dataset("SD0001")
+                .datasetIdentifier("SD0001")
                 .identifier("name")
                 .build();
 
@@ -213,7 +213,7 @@ public class AttributeOperationsIT extends BaseOperationsIT {
 
         Attribute a = getSdk().builders().attribute()
                 .catalogIdentifier("foobar")
-                .dataset("SD0001")
+                .datasetIdentifier("SD0001")
                 .identifier("name")
                 .build();
 

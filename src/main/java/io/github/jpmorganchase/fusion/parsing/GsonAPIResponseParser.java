@@ -92,7 +92,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
     @Override
     public Map<String, Attribute> parseAttributeResponse(String json, String catalog, String dataset) {
         return parseResourcesWithVarArgsFromResponse(json, Attribute.class, (resource, mc) -> resource.toBuilder()
-                .dataset(dataset)
+                .datasetIdentifier(dataset)
                 .varArgs(mc.getVarArgs())
                 .fusion(fusion)
                 .catalogIdentifier(catalog)

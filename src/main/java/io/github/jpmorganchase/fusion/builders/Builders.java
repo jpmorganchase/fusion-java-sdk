@@ -1,9 +1,6 @@
 package io.github.jpmorganchase.fusion.builders;
 
-import io.github.jpmorganchase.fusion.model.Attribute;
-import io.github.jpmorganchase.fusion.model.DataDictionaryAttribute;
-import io.github.jpmorganchase.fusion.model.DataDictionaryAttributes;
-import io.github.jpmorganchase.fusion.model.Dataset;
+import io.github.jpmorganchase.fusion.model.*;
 
 public interface Builders {
 
@@ -41,4 +38,14 @@ public interface Builders {
      * @return {@link io.github.jpmorganchase.fusion.model.Attribute.AttributeBuilder} the attribute builder
      */
     Attribute.AttributeBuilder attribute();
+
+    /**
+     * Returns a builder for creating an {@link io.github.jpmorganchase.fusion.model.Attributes} object.
+     * The builder enables the configuration of multiple {@code Attribute} objects and other properties
+     * associated with the {@code Attributes} resource. It supports chaining calls for setting
+     * properties and building an {@code Attributes} instance.
+     *
+     * @return {@link io.github.jpmorganchase.fusion.model.Attributes.AttributesBuilder} an instance of the attributes builder
+     */
+    Attributes.AttributesBuilder attributes();
 }

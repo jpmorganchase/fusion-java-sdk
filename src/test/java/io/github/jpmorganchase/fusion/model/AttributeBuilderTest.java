@@ -25,7 +25,7 @@ public class AttributeBuilderTest {
                 .index(100)
                 .description("The description")
                 .title("The title")
-                .dataset("foo")
+                .datasetIdentifier("foo")
                 .catalogIdentifier("foobar")
                 .fusion(fusion)
                 .isCriticalDataElement(true)
@@ -38,7 +38,7 @@ public class AttributeBuilderTest {
         assertThat(a.getIndex(), is(100L));
         assertThat(a.getDescription(), is(equalTo("The description")));
         assertThat(a.getTitle(), is(equalTo("The title")));
-        assertThat(a.getDataset(), is(equalTo("foo")));
+        assertThat(a.getDatasetIdentifier(), is(equalTo("foo")));
         assertThat(a.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(a.getFusion(), is(equalTo(fusion)));
         assertThat(a.isCriticalDataElement(), is(equalTo(true)));
@@ -64,7 +64,7 @@ public class AttributeBuilderTest {
                 .identifier("The identifier")
                 .fusion(fusion)
                 .catalogIdentifier("bar")
-                .dataset("foobar")
+                .datasetIdentifier("foobar")
                 .build();
 
         // Then

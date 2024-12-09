@@ -23,7 +23,7 @@ public class Attribute extends CatalogResource {
     String title;
 
     @Expose(serialize = false, deserialize = false)
-    String dataset;
+    String datasetIdentifier;
 
     boolean isCriticalDataElement;
 
@@ -38,7 +38,7 @@ public class Attribute extends CatalogResource {
             long index,
             String description,
             String title,
-            String dataset,
+            String datasetIdentifier,
             boolean isCriticalDataElement) {
         super(identifier, varArgs, fusion, catalogIdentifier);
         this.key = key;
@@ -46,7 +46,7 @@ public class Attribute extends CatalogResource {
         this.index = index;
         this.description = description;
         this.title = title;
-        this.dataset = dataset;
+        this.datasetIdentifier = datasetIdentifier;
         this.isCriticalDataElement = isCriticalDataElement;
     }
 
@@ -54,7 +54,7 @@ public class Attribute extends CatalogResource {
     protected String getApiPath() {
         return String.format(
                 "%1scatalogs/%2s/datasets/%3s/attributes/%4s",
-                getFusion().getRootURL(), getCatalogIdentifier(), this.getDataset(), this.getIdentifier());
+                getFusion().getRootURL(), getCatalogIdentifier(), this.getDatasetIdentifier(), this.getIdentifier());
     }
 
     public static class AttributeBuilder {
