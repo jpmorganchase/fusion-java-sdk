@@ -22,6 +22,8 @@ public class GsonApiRequestSerializerDataDictionaryAttributesTest {
                 .description("Sample dd attribute description 1")
                 .title("Sample Attribute 1")
                 .varArg("applicationId", Application.builder().sealId("12345"))
+                .dataType("String")
+                .publisher("Bloomberg")
                 .build();
 
         DataDictionaryAttribute dda2 = DataDictionaryAttribute.builder()
@@ -29,6 +31,8 @@ public class GsonApiRequestSerializerDataDictionaryAttributesTest {
                 .description("Sample dd attribute description 2")
                 .title("Sample Attribute 2")
                 .varArg("applicationId", Application.builder().sealId("12345"))
+                .dataType("String")
+                .publisher("Bloomberg")
                 .build();
 
         DataDictionaryAttributes ddAttributes = DataDictionaryAttributes.builder()

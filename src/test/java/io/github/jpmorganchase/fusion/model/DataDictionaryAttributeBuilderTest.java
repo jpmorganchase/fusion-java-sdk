@@ -24,6 +24,8 @@ public class DataDictionaryAttributeBuilderTest {
                 .title("The title")
                 .catalogIdentifier("foobar")
                 .fusion(fusion)
+                .dataType("String")
+                .publisher("Bloomberg")
                 .varArgs(varArgs)
                 .build();
 
@@ -33,6 +35,8 @@ public class DataDictionaryAttributeBuilderTest {
         assertThat(a.getTitle(), is(equalTo("The title")));
         assertThat(a.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(a.getFusion(), is(equalTo(fusion)));
+        assertThat(a.getDataType(), is(equalTo("String")));
+        assertThat(a.getPublisher(), is(equalTo("Bloomberg")));
     }
 
     @Test

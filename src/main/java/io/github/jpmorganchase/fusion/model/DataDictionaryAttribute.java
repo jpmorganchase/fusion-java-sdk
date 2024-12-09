@@ -15,6 +15,8 @@ public class DataDictionaryAttribute extends CatalogResource {
     String description;
     String title;
     Application applicationId;
+    String dataType;
+    String publisher;
 
     @Builder(toBuilder = true)
     public DataDictionaryAttribute(
@@ -24,11 +26,15 @@ public class DataDictionaryAttribute extends CatalogResource {
             @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             String description,
             String title,
-            Application applicationId) {
+            Application applicationId,
+            String dataType,
+            String publisher) {
         super(identifier, varArgs, fusion, catalogIdentifier);
         this.description = description;
         this.title = title;
         this.applicationId = applicationId;
+        this.dataType = dataType;
+        this.publisher = publisher;
     }
 
     @Override
