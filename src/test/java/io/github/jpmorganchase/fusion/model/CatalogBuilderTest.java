@@ -24,6 +24,7 @@ public class CatalogBuilderTest {
                 .linkedEntity("The entity")
                 .title("The title")
                 .catalogIdentifier("foobar")
+                .isInternal(Boolean.FALSE)
                 .fusion(fusion)
                 .build();
 
@@ -33,6 +34,7 @@ public class CatalogBuilderTest {
         assertThat(c.getLinkedEntity(), is(equalTo("The entity")));
         assertThat(c.getTitle(), is(equalTo("The title")));
         assertThat(c.getCatalogIdentifier(), is(equalTo("foobar")));
+        assertThat(c.getIsInternal(), is(equalTo(Boolean.FALSE)));
         assertThat(c.getFusion(), is(equalTo(fusion)));
     }
 }
