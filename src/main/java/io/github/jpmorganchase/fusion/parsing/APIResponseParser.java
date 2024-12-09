@@ -12,7 +12,7 @@ public interface APIResponseParser {
 
     Map<String, Attribute> parseAttributeResponse(String json, String catalog, String dataset);
 
-    Map<String, DataDictionaryAttribute> parseDataDictionaryAttributeResponse(String json, String catalog);
+    Map<String, DataDictionaryAttribute> parseDataDictionaryAttributesResponse(String json, String catalog);
 
     Map<String, DataProduct> parseDataProductResponse(String json);
 

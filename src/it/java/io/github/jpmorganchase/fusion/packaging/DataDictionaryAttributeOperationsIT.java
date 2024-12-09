@@ -27,7 +27,7 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .identifier("AT0001")
                 .title("Sample Attribute 1")
                 .description("Sample dd attribute description 1")
-                .varArg("applicationId", Application.builder().sealId("12345"))
+                .applicationId(Application.builder().sealId("12345").build())
                 .build();
 
         //When
@@ -73,7 +73,7 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .identifier("AT0001")
                 .title("Sample Attribute 1")
                 .description("Sample dd attribute description 1")
-                .varArg("applicationId", Application.builder().sealId("12345"))
+                .applicationId(Application.builder().sealId("12345").build())
                 .catalogIdentifier("foobar")
                 .build();
 
@@ -97,7 +97,7 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .identifier("AT0001")
                 .title("Sample Attribute 1")
                 .description("Sample dd attribute description 1")
-                .varArg("applicationId", Application.builder().sealId("12345"))
+                .applicationId(Application.builder().sealId("12345").build())
                 .build();
 
         //When
@@ -120,7 +120,7 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
                 .identifier("AT0001")
                 .title("Sample Attribute 1")
                 .description("Sample dd attribute description 1")
-                .varArg("applicationId", Application.builder().sealId("12345"))
+                .applicationId(Application.builder().sealId("12345").build())
                 .catalogIdentifier("foobar")
                 .build();
 

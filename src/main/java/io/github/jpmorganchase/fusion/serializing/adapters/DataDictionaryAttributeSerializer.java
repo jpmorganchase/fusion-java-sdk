@@ -17,6 +17,7 @@ public class DataDictionaryAttributeSerializer implements JsonSerializer<DataDic
         jsonObject.add("description", context.serialize(src.getDescription()));
         jsonObject.add("title", context.serialize(src.getTitle()));
         jsonObject.add("identifier", context.serialize(src.getIdentifier()));
+        jsonObject.add("applicationId", context.serialize(src.getApplicationId()));
 
         Map<String, Object> varArgs = src.getVarArgs();
         if (varArgs != null) {
