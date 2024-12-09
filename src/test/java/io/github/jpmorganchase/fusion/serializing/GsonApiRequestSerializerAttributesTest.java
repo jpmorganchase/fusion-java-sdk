@@ -1,6 +1,5 @@
 package io.github.jpmorganchase.fusion.serializing;
 
-import com.sun.tools.javac.util.List;
 import io.github.jpmorganchase.fusion.model.Attribute;
 import io.github.jpmorganchase.fusion.model.Attributes;
 import java.net.URL;
@@ -34,7 +33,8 @@ public class GsonApiRequestSerializerAttributesTest {
         Attributes attributes = Attributes.builder()
                 .identifier("Attributes")
                 .catalogIdentifier("common")
-                .attributes(List.of(attribute1, attribute2))
+                .attribute(attribute1)
+                .attribute(attribute2)
                 .datasetIdentifier("dataset001")
                 .build();
 
