@@ -26,6 +26,7 @@ public class GsonAPIResponseParserCatalogTest {
             .description("A catalog used for test cases")
             .linkedEntity("test/")
             .title("Test data catalog")
+            .isInternal(Boolean.FALSE)
             .build();
 
     private static final Catalog testCatalog2 = Catalog.builder()
@@ -33,6 +34,7 @@ public class GsonAPIResponseParserCatalogTest {
             .description("A second catalog used for test cases")
             .linkedEntity("test2/")
             .title("Test data catalog 2")
+            .isInternal(Boolean.FALSE)
             .build();
 
     private static final Catalog testCatalog3 = Catalog.builder()
@@ -40,6 +42,7 @@ public class GsonAPIResponseParserCatalogTest {
             .description("A third catalog used for test cases")
             .linkedEntity("test3/")
             .title("Test data catalog 3")
+            .isInternal(Boolean.FALSE)
             .build();
 
     private static final APIResponseParser responseParser =
