@@ -26,6 +26,7 @@ public class DatasetSerializer implements JsonSerializer<Dataset> {
         jsonObject.add("producerApplicationId", context.serialize(src.getProducerApplicationId()));
         jsonObject.add("consumerApplicationId", context.serialize(src.getConsumerApplicationId()));
         jsonObject.add("flowDetails", context.serialize(src.getFlowDetails()));
+        jsonObject.add("publisher", context.serialize(src.getPublisher()));
 
         Map<String, Object> varArgs = src.getVarArgs();
         if (varArgs != null) {
