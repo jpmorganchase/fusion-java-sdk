@@ -34,20 +34,20 @@
   "type": "Flow",
   "applicationId": {
     "id": "12345",
-    "idType": "SEAL"
+    "type": "Application (SEAL)"
   },
   "producerApplicationId": {
     "id": "123456",
-    "idType": "SEAL"
+    "type": "Application (SEAL)"
   },
   "consumerApplicationId": [
     {
       "id": "456789",
-      "idType": "SEAL"
+      "type": "Application (SEAL)"
     },
     {
       "id": "901234",
-      "idType": "SEAL"
+      "type": "Application (SEAL)"
     }
   ],
   "flowDetails": {

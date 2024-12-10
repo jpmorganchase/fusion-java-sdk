@@ -43,7 +43,7 @@
       "type": "Report",
       "applicationId": {
         "id": "12345",
-        "idType": "SEAL"
+        "type": "Application (SEAL)"
       },
       "report": {
         "tier": "Tier 1"
