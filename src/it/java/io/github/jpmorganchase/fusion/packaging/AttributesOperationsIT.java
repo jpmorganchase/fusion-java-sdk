@@ -16,6 +16,7 @@ public class AttributesOperationsIT extends BaseOperationsIT {
         // Given
         wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/dataset1/attributes"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("attribute/attributes-bulk-update-request.json")))
+                        .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
@@ -53,6 +54,7 @@ public class AttributesOperationsIT extends BaseOperationsIT {
         // Given
         wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/dataset1/attributes"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("attribute/attributes-bulk-update-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));

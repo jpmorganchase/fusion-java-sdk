@@ -81,6 +81,7 @@ public class FusionAPIManager implements APIManager {
     public String callAPIToPost(String apiPath, CatalogResource catalogResource) throws APICallException {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+        requestHeaders.put("Content-Type", "application/json");
 
         HttpResponse<String> response = httpClient.post(apiPath, requestHeaders, serializer.serialize(catalogResource));
         checkResponseStatus(response);
@@ -99,6 +100,7 @@ public class FusionAPIManager implements APIManager {
     public String callAPIToPut(String apiPath, CatalogResource catalogResource) {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+        requestHeaders.put("Content-Type", "application/json");
 
         HttpResponse<String> response = httpClient.put(apiPath, serializer.serialize(catalogResource), requestHeaders);
         checkResponseStatus(response);
