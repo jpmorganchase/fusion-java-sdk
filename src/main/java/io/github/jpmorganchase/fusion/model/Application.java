@@ -14,34 +14,34 @@ import lombok.Value;
 public class Application {
 
     String id;
-    String idType;
+    String type;
 
     public Map<String, String> toMap() {
         Map<String, String> attributeMap = new HashMap<>();
         attributeMap.put("id", id);
-        attributeMap.put("idType", idType);
+        attributeMap.put("type", type);
         return attributeMap;
     }
 
     public static class ApplicationBuilder {
         @SuppressWarnings("FieldCanBeLocal")
-        private String idType;
+        private String type;
 
         public Application.ApplicationBuilder sealId(String id) {
             this.id = id;
-            this.idType = "SEAL";
+            this.type = "Application (SEAL)";
             return this;
         }
 
-        public Application.ApplicationBuilder utId(String id) {
+        public Application.ApplicationBuilder userToolId(String id) {
             this.id = id;
-            this.idType = "UT";
+            this.type = "User Tool";
             return this;
         }
 
-        public Application.ApplicationBuilder isId(String id) {
+        public Application.ApplicationBuilder intelligentSolutionsId(String id) {
             this.id = id;
-            this.idType = "is";
+            this.type = "Intelligent Solutions";
             return this;
         }
     }

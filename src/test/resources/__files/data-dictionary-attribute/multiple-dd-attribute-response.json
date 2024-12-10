@@ -12,7 +12,7 @@
       "title": "Sample Attribute 1",
       "identifier": "AT0001",
       "applicationId": {
-        "idType": "SEAL",
+        "type": "Application (SEAL)",
         "id": "12345"
       }
     },
@@ -21,7 +21,7 @@
       "title": "Sample Attribute 2",
       "identifier": "AT0002",
       "applicationId": {
-        "idType": "SEAL",
+        "type": "Application (SEAL)",
         "id": "12345"
       }
     },
@@ -30,7 +30,7 @@
       "title": "Sample Attribute 3",
       "identifier": "AT0003",
       "applicationId": {
-        "idType": "SEAL",
+        "type": "Application (SEAL)",
         "id": "12345"
       }
     }

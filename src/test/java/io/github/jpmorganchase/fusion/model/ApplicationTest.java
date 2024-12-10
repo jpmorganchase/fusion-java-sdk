@@ -15,25 +15,26 @@ class ApplicationTest {
 
         assertThat(application, is(notNullValue()));
         assertThat(application.getId(), is(equalTo("12345")));
-        assertThat(application.getIdType(), is(equalTo("SEAL")));
+        assertThat(application.getType(), is(equalTo("Application (SEAL)")));
     }
 
     @Test
     void testUtIdTypeBuildsCorrectApplication() {
-        Application application = Application.builder().utId("67890").build();
+        Application application = Application.builder().userToolId("67890").build();
 
         assertThat(application, is(notNullValue()));
         assertThat(application.getId(), is(equalTo("67890")));
-        assertThat(application.getIdType(), is(equalTo("UT")));
+        assertThat(application.getType(), is(equalTo("User Tool")));
     }
 
     @Test
     void testIsIdTypeBuildsCorrectApplication() {
-        Application application = Application.builder().isId("54321").build();
+        Application application =
+                Application.builder().intelligentSolutionsId("54321").build();
 
         assertThat(application, is(notNullValue()));
         assertThat(application.getId(), is(equalTo("54321")));
-        assertThat(application.getIdType(), is(equalTo("is")));
+        assertThat(application.getType(), is(equalTo("Intelligent Solutions")));
     }
 
     @Test
@@ -42,24 +43,24 @@ class ApplicationTest {
 
         assertThat(application, is(notNullValue()));
         assertThat(application.getId(), is(equalTo("99999")));
-        assertThat(application.getIdType(), is(nullValue()));
+        assertThat(application.getType(), is(nullValue()));
     }
 
     @Test
     void testWhenBothIdAndIdTypeSpecified() {
         Application application =
-                Application.builder().id("12345").idType("SEAL").build();
+                Application.builder().id("12345").type("foobar").build();
 
         assertThat(application, is(notNullValue()));
         assertThat(application.getId(), is(equalTo("12345")));
-        assertThat(application.getIdType(), is(equalTo("SEAL")));
+        assertThat(application.getType(), is(equalTo("foobar")));
     }
 
     @Test
     void testToMapWithValidIdAndIdType() {
         // Arrange
         Application application =
-                Application.builder().id("12345").idType("SEAL").build();
+                Application.builder().id("12345").type("Application (SEAL)").build();
 
         // Act
         Map<String, String> result = application.toMap();
@@ -68,13 +69,13 @@ class ApplicationTest {
         assertThat(result, is(notNullValue()));
         assertThat(result.size(), is(2));
         assertThat(result, hasEntry("id", "12345"));
-        assertThat(result, hasEntry("idType", "SEAL"));
+        assertThat(result, hasEntry("type", "Application (SEAL)"));
     }
 
     @Test
     void testToMapWithNullIdAndIdType() {
         // Arrange
-        Application application = Application.builder().id(null).idType(null).build();
+        Application application = Application.builder().id(null).type(null).build();
 
         // Act
         Map<String, String> result = application.toMap();
@@ -83,13 +84,13 @@ class ApplicationTest {
         assertThat(result, is(notNullValue()));
         assertThat(result.size(), is(2));
         assertThat(result, hasEntry("id", null));
-        assertThat(result, hasEntry("idType", null));
+        assertThat(result, hasEntry("type", null));
     }
 
     @Test
     void testToMapWithEmptyIdAndIdType() {
         // Arrange
-        Application application = Application.builder().id("").idType("").build();
+        Application application = Application.builder().id("").type("").build();
 
         // Act
         Map<String, String> result = application.toMap();
@@ -98,6 +99,6 @@ class ApplicationTest {
         assertThat(result, is(notNullValue()));
         assertThat(result.size(), is(2));
         assertThat(result, hasEntry("id", ""));
-        assertThat(result, hasEntry("idType", ""));
+        assertThat(result, hasEntry("type", ""));
     }
 }

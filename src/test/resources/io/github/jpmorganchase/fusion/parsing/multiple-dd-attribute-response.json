@@ -13,7 +13,7 @@
       "identifier": "AT0001",
       "applicationId": {
         "id": "12345",
-        "idType": "SEAL"
+        "type": "Application (SEAL)"
       }
     },
     {
@@ -22,7 +22,7 @@
       "identifier": "AT0002",
       "applicationId": {
         "id": "12345",
-        "idType": "SEAL"
+        "type": "Application (SEAL)"
       }
     },
     {
@@ -31,7 +31,7 @@
       "identifier": "AT0003",
       "applicationId": {
         "id": "12345",
-        "idType": "SEAL"
+        "type": "Application (SEAL)"
       }
     }
   ],

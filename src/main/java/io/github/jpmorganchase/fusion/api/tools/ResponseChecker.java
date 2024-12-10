@@ -2,7 +2,9 @@ package io.github.jpmorganchase.fusion.api.tools;
 
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ResponseChecker {
 
     /**
@@ -12,6 +14,7 @@ public class ResponseChecker {
      */
     public static <T> void checkResponseStatus(HttpResponse<T> response) throws APICallException {
         if (response.isError()) {
+            log.error("Error response received from API Call [{}]", response);
             throw new APICallException(response.getStatusCode(), extractErrorDetailFromBody(response));
         }
     }

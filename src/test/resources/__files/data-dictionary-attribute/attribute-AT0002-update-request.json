@@ -1,1 +1,1 @@
-{"description":"Updated Sample dd attribute description 2","title":"Sample Attribute 2","identifier":"AT0002", "applicationId":{"id":"12345","idType":"SEAL"}}
+{"description":"Updated Sample dd attribute description 2","title":"Sample Attribute 2","identifier":"AT0002", "applicationId":{"id":"12345","type":"Application (SEAL)"}}
