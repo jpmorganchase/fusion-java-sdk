@@ -1,23 +1,22 @@
 package io.github.jpmorganchase.fusion.serializing;
 
+import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Flow;
 import io.github.jpmorganchase.fusion.model.Report;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class GsonAPIRequestSerializerDatasetTest {
 
