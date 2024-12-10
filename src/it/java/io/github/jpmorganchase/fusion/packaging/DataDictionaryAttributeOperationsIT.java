@@ -22,6 +22,7 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
         // Given
         wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/attributes/AT0001"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("data-dictionary-attribute/attribute-AT0001-create-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
@@ -42,6 +43,7 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
         // Given
         wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/attributes/AT0002"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("data-dictionary-attribute/attribute-AT0002-create-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
@@ -61,6 +63,7 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
         // Given
         wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/foobar/attributes/AT0001"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("data-dictionary-attribute/attribute-AT0001-create-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
@@ -82,6 +85,7 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
         // Given
         wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/attributes/AT0001"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("data-dictionary-attribute/attribute-AT0001-create-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
@@ -102,6 +106,7 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
         // Given
         wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/foobar/attributes/AT0001"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("data-dictionary-attribute/attribute-AT0001-create-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
@@ -129,6 +134,7 @@ public class DataDictionaryAttributeOperationsIT extends BaseOperationsIT {
 
         wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/attributes/AT0002"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("data-dictionary-attribute/attribute-AT0002-update-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));

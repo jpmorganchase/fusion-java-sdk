@@ -73,6 +73,7 @@ public class FusionAPIManagerTest {
         givenCatalogResource("dataset_one");
         givenSerializedCatalogResource("dataset_one");
         givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Content-Type", "application/json");
         givenCallToClientToPostIsSuccessful();
         givenCallToSerializeCatalogResource();
         WhenFusionApiManagerIsCalledToPost();
@@ -88,6 +89,7 @@ public class FusionAPIManagerTest {
         givenCatalogResource("dataset_one");
         givenSerializedCatalogResource("dataset_one");
         givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Content-Type", "application/json");
         givenCallToClientToPutIsSuccessful();
         givenCallToSerializeCatalogResource();
         WhenFusionApiManagerIsCalledToPut();

@@ -25,6 +25,7 @@ public class DataDictionaryAttributesOperationsIT extends BaseOperationsIT {
         // Given
         wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/attributes"))
                 .withRequestBody(equalToJson(TestUtils.loadJsonForIt("data-dictionary-attribute/attributes-bulk-create-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
