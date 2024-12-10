@@ -63,6 +63,7 @@ public class JdkClient implements Client {
     private HttpResponse<String> executeMethod(String method, String path, Map<String, String> headers, String body) {
         InputStream bodyAsStream =
                 body != null ? new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)) : null;
+        logger.debug("Request body: {}", body);
         return executeMethod(method, path, headers, bodyAsStream, true, this::getResponseBody);
     }
 

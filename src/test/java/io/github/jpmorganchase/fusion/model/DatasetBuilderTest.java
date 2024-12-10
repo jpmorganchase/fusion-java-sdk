@@ -150,4 +150,27 @@ public class DatasetBuilderTest {
         // Then
         assertThat(d.getApiPath(), is(equalTo("http://foobar/api/v1/catalogs/foobar/datasets/The identifier")));
     }
+
+    @Test
+    void constructionWithBuilderCorrectlyPopulatesForNullReportTier() {
+        Fusion fusion = Mockito.mock(Fusion.class);
+        Report report = Report.builder().tier(null).build(); // Tier is null
+        Map<String, Object> varArgs = new HashMap<>();
+        varArgs.put("key1", "value1");
+        Dataset d = Dataset.builder()
+                .identifier("The identifier")
+                .varArgs(varArgs)
+                .description("The description")
+                .linkedEntity("The entity")
+                .title("The title")
+                .frequency("The frequency")
+                .report(report)
+                .fusion(fusion)
+                .catalogIdentifier("foobar")
+                .publisher("J.P. Morgan")
+                .build();
+
+        assertThat(d.getType(), is(equalTo(null)));
+        assertThat(d.getReport(), is(equalTo(null)));
+    }
 }
