@@ -23,6 +23,8 @@ public class Catalog extends CatalogResource {
 
     String title;
 
+    Boolean isInternal;
+
     @Builder
     public Catalog(
             @Builder.ObtainVia(method = "getIdentifier") String identifier,
@@ -31,11 +33,13 @@ public class Catalog extends CatalogResource {
             @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             String description,
             String linkedEntity,
-            String title) {
+            String title,
+            Boolean isInternal) {
         super(identifier, varArgs, fusion, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
         this.title = title;
+        this.isInternal = isInternal;
     }
 
     @Override
