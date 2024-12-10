@@ -8,13 +8,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
-import io.github.jpmorganchase.fusion.model.Flow;
 import io.github.jpmorganchase.fusion.model.Report;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -85,41 +85,16 @@ class GsonAPIRequestSerializerDatasetTest {
     }
 
     @Test
-    public void testDatasetOfTypeFlowInput() {
+    public void testDatasetWithNullValues() {
         // Given
         Dataset dataset = Dataset.builder()
-                .identifier("SIF0001")
-                .description("Sample input flow dataset description 1")
-                .linkedEntity("SIF0001/")
-                .title("Sample Input Flow Dataset 1 | North America")
-                .frequency("Daily")
-                .publisher("Publisher 1")
-                .varArg("category", listOf("Category 1"))
-                .varArg("createdDate", "2022-02-05")
-                .varArg("coverageStartDate", "2022-02-05")
-                .varArg("coverageEndDate", "2023-03-08")
-                .varArg("isThirdPartyData", Boolean.FALSE)
-                .varArg("isInternalOnlyDataset", Boolean.FALSE)
-                .varArg("language", "English")
-                .varArg("maintainer", "Maintainer 1")
-                .varArg("modifiedDate", "2023-03-08")
-                .varArg("region", listOf("North America"))
-                .varArg("source", listOf("Source System 1"))
-                .varArg("subCategory", listOf("Subcategory 1"))
-                .varArg("tag", listOf("Tag1"))
-                .varArg("isRestricted", Boolean.FALSE)
-                .varArg("isRawData", Boolean.FALSE)
-                .varArg("hasSample", Boolean.FALSE)
-                .applicationId(Application.builder().sealId("12345").build())
-                .flow(Flow.builder()
-                        .flowDirection("Input")
-                        .producerApplicationId(
-                                Application.builder().sealId("123456").build())
-                        .consumerApplicationId(
-                                Application.builder().sealId("456789").build())
-                        .build())
-                .fusion(Mockito.mock(Fusion.class))
-                .catalogIdentifier("foobar")
+                .identifier("SD0002")
+                .description(null)
+                .linkedEntity(null)
+                .title("Sample Dataset with Nulls")
+                .frequency("Monthly")
+                .applicationId(null)
+                .report(null)
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
@@ -128,45 +103,20 @@ class GsonAPIRequestSerializerDatasetTest {
         String actual = serializer.serialize(dataset);
 
         // Then
-        String expected = loadTestResource("dataset-flow-input-request.json");
+        String expected = loadTestResource("dataset-with-nulls-request.json");
         assertThat(actual, is(equalTo(expected)));
     }
 
     @Test
-    public void testDatasetOfTypeFlowOutput() {
+    public void testDatasetWithEmptyConsumerApplicationIds() {
         // Given
         Dataset dataset = Dataset.builder()
-                .identifier("SOF0001")
-                .description("Sample output flow dataset description 1")
-                .linkedEntity("SOF0001/")
-                .title("Sample Output Flow Dataset 1 | North America")
-                .frequency("Daily")
-                .publisher("Publisher 1")
-                .varArg("category", listOf("Category 1"))
-                .varArg("createdDate", "2022-02-05")
-                .varArg("coverageStartDate", "2022-02-05")
-                .varArg("coverageEndDate", "2023-03-08")
-                .varArg("isThirdPartyData", Boolean.FALSE)
-                .varArg("isInternalOnlyDataset", Boolean.FALSE)
-                .varArg("language", "English")
-                .varArg("maintainer", "Maintainer 1")
-                .varArg("modifiedDate", "2023-03-08")
-                .varArg("region", listOf("North America"))
-                .varArg("source", listOf("Source System 1"))
-                .varArg("subCategory", listOf("Subcategory 1"))
-                .varArg("tag", listOf("Tag1"))
-                .varArg("isRestricted", Boolean.FALSE)
-                .varArg("isRawData", Boolean.FALSE)
-                .varArg("hasSample", Boolean.FALSE)
-                .applicationId(Application.builder().sealId("12345").build())
-                .flow(Flow.builder()
-                        .flowDirection("Output")
-                        .producerApplicationId(
-                                Application.builder().sealId("123456").build())
-                        .consumerApplicationId(
-                                Application.builder().sealId("456789").build())
-                        .build())
-                .catalogIdentifier("foobar")
+                .identifier("SD0003")
+                .description("Sample dataset with empty consumer IDs")
+                .linkedEntity("SD0003/")
+                .title("Sample Dataset 3 | North America")
+                .frequency("Weekly")
+                .consumerApplicationId(new ArrayList<>())
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
@@ -175,7 +125,28 @@ class GsonAPIRequestSerializerDatasetTest {
         String actual = serializer.serialize(dataset);
 
         // Then
-        String expected = loadTestResource("dataset-flow-output-request.json");
+        String expected = loadTestResource("dataset-empty-consumer-ids.json");
+        assertThat(actual, is(equalTo(expected)));
+    }
+
+    @Test
+    public void testDatasetWithSpecialCharacters() {
+        // Given
+        Dataset dataset = Dataset.builder()
+                .identifier("SD0004")
+                .description("Special characters: \"quotes\", \n newlines, and \u2022 bullets")
+                .linkedEntity("SD0004/")
+                .title("Dataset with Special Characters")
+                .frequency("Yearly")
+                .build();
+
+        GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
+
+        // When
+        String actual = serializer.serialize(dataset);
+
+        // Then
+        String expected = loadTestResource("dataset-special-characters.json");
         assertThat(actual, is(equalTo(expected)));
     }
 

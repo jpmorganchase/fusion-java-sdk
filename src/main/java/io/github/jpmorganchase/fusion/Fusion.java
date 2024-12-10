@@ -345,7 +345,7 @@ public class Fusion {
 
     /**
      * Get the available resources for a dataset, in the specified catalog
-     * Currently this will always return a datasetseries.
+     * Currently this will always return a dataset.
      *
      * @param catalogName identifier of the catalog to be queried
      * @param dataset     a String representing the dataset identifier to query.

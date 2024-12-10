@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.Fusion;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -86,10 +86,11 @@ public class Dataset extends CatalogResource {
         }
 
         public DatasetBuilder report(Report report) {
-            Optional.ofNullable(report).ifPresent(val -> {
+
+            if (Objects.nonNull(report) && Objects.nonNull(report.getTier())) {
                 this.type = "Report";
-                this.report = val;
-            });
+                this.report = report;
+            }
             return this;
         }
 
