@@ -2,13 +2,14 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * An object representing a dataset. Object properties hold dataset metadata attributes
@@ -31,6 +32,7 @@ public class Dataset extends CatalogResource {
     Application producerApplicationId;
     List<Application> consumerApplicationId;
     Flow flowDetails;
+    String publisher;
 
     @Builder(toBuilder = true)
     public Dataset(
@@ -47,7 +49,8 @@ public class Dataset extends CatalogResource {
             Application applicationId,
             Application producerApplicationId,
             List<Application> consumerApplicationId,
-            Flow flowDetails) {
+            Flow flowDetails,
+            String publisher) {
         super(identifier, varArgs, fusion, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
@@ -59,6 +62,7 @@ public class Dataset extends CatalogResource {
         this.producerApplicationId = producerApplicationId;
         this.consumerApplicationId = consumerApplicationId;
         this.flowDetails = flowDetails;
+        this.publisher = publisher;
     }
 
     @Override

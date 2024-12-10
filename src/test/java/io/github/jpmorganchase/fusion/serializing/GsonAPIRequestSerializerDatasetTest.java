@@ -1,22 +1,23 @@
 package io.github.jpmorganchase.fusion.serializing;
 
-import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-
 import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Flow;
 import io.github.jpmorganchase.fusion.model.Report;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 class GsonAPIRequestSerializerDatasetTest {
 
@@ -29,6 +30,7 @@ class GsonAPIRequestSerializerDatasetTest {
                 .linkedEntity("SD0001/")
                 .title("Sample Dataset 1 | North America")
                 .frequency("Daily")
+                .publisher("Publisher 1")
                 .varArg("category", listOf("Category 1"))
                 .varArg("createdDate", "2022-02-05")
                 .varArg("coverageStartDate", "2022-02-05")
@@ -38,7 +40,6 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("language", "English")
                 .varArg("maintainer", "Maintainer 1")
                 .varArg("modifiedDate", "2023-03-08")
-                .varArg("publisher", "Publisher 1")
                 .varArg("region", listOf("North America"))
                 .varArg("source", listOf("Source System 1"))
                 .varArg("subCategory", listOf("Subcategory 1"))
@@ -71,6 +72,7 @@ class GsonAPIRequestSerializerDatasetTest {
                 .linkedEntity("SD0001/")
                 .title("Sample Dataset 1 | North America")
                 .frequency("Daily")
+                .publisher("Publisher 1")
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
@@ -92,6 +94,7 @@ class GsonAPIRequestSerializerDatasetTest {
                 .linkedEntity("SIF0001/")
                 .title("Sample Input Flow Dataset 1 | North America")
                 .frequency("Daily")
+                .publisher("Publisher 1")
                 .varArg("category", listOf("Category 1"))
                 .varArg("createdDate", "2022-02-05")
                 .varArg("coverageStartDate", "2022-02-05")
@@ -101,7 +104,6 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("language", "English")
                 .varArg("maintainer", "Maintainer 1")
                 .varArg("modifiedDate", "2023-03-08")
-                .varArg("publisher", "Publisher 1")
                 .varArg("region", listOf("North America"))
                 .varArg("source", listOf("Source System 1"))
                 .varArg("subCategory", listOf("Subcategory 1"))
@@ -140,6 +142,7 @@ class GsonAPIRequestSerializerDatasetTest {
                 .linkedEntity("SOF0001/")
                 .title("Sample Output Flow Dataset 1 | North America")
                 .frequency("Daily")
+                .publisher("Publisher 1")
                 .varArg("category", listOf("Category 1"))
                 .varArg("createdDate", "2022-02-05")
                 .varArg("coverageStartDate", "2022-02-05")
@@ -149,7 +152,6 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("language", "English")
                 .varArg("maintainer", "Maintainer 1")
                 .varArg("modifiedDate", "2023-03-08")
-                .varArg("publisher", "Publisher 1")
                 .varArg("region", listOf("North America"))
                 .varArg("source", listOf("Source System 1"))
                 .varArg("subCategory", listOf("Subcategory 1"))

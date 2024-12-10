@@ -36,6 +36,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .linkedEntity("SD0001/")
                 .title("Sample Dataset 1 | North America")
                 .frequency("Daily")
+                .publisher("Publisher 1")
                 .build();
 
         // When & Then
@@ -59,6 +60,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .linkedEntity("SD0002/")
                 .title("Sample Dataset 2 | North America")
                 .frequency("Daily")
+                .publisher("Publisher 2")
                 .varArg("category", listOf("Category 2"))
                 .varArg("createdDate", "2022-02-06")
                 .varArg("coverageStartDate", "2022-02-06")
@@ -68,7 +70,6 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .varArg("language", "English")
                 .varArg("maintainer", "Maintainer 2")
                 .varArg("modifiedDate", "2023-03-09")
-                .varArg("publisher", "Publisher 2")
                 .varArg("region", listOf("North America"))
                 .varArg("source", listOf("Source System 2"))
                 .varArg("subCategory", listOf("Subcategory 2"))
@@ -100,6 +101,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .title("Sample Dataset 1 | North America")
                 .frequency("Daily")
                 .catalogIdentifier("foobar")
+                .publisher("Publisher 1")
                 .build();
 
         // When & Then
@@ -123,6 +125,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .linkedEntity("SR0001/")
                 .title("Sample Report 1 | North America")
                 .frequency("Daily")
+                .publisher("Publisher 1")
                 .varArg("category", listOf("Category 1"))
                 .varArg("createdDate", "2022-02-06")
                 .varArg("coverageStartDate", "2022-02-06")
@@ -132,7 +135,6 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .varArg("language", "English")
                 .varArg("maintainer", "Maintainer 1")
                 .varArg("modifiedDate", "2023-03-09")
-                .varArg("publisher", "Publisher 1")
                 .varArg("region", listOf("North America"))
                 .varArg("source", listOf("Source System 1"))
                 .varArg("subCategory", listOf("Subcategory 1"))
@@ -165,6 +167,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .linkedEntity("SIF0001/")
                 .title("Sample Input Flow 1 | North America")
                 .frequency("Daily")
+                .publisher("Publisher 1")
                 .varArg("category", listOf("Category 1"))
                 .varArg("createdDate", "2022-02-06")
                 .varArg("coverageStartDate", "2022-02-06")
@@ -174,7 +177,6 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .varArg("language", "English")
                 .varArg("maintainer", "Maintainer 1")
                 .varArg("modifiedDate", "2023-03-09")
-                .varArg("publisher", "Publisher 1")
                 .varArg("region", listOf("North America"))
                 .varArg("source", listOf("Source System 1"))
                 .varArg("subCategory", listOf("Subcategory 1"))
@@ -213,6 +215,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .linkedEntity("SOF0001/")
                 .title("Sample Output Flow 1 | North America")
                 .frequency("Daily")
+                .publisher("Publisher 1")
                 .varArg("category", listOf("Category 1"))
                 .varArg("createdDate", "2022-02-06")
                 .varArg("coverageStartDate", "2022-02-06")
@@ -222,7 +225,6 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .varArg("language", "English")
                 .varArg("maintainer", "Maintainer 1")
                 .varArg("modifiedDate", "2023-03-09")
-                .varArg("publisher", "Publisher 1")
                 .varArg("region", listOf("North America"))
                 .varArg("source", listOf("Source System 1"))
                 .varArg("subCategory", listOf("Subcategory 1"))
@@ -262,6 +264,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .linkedEntity("SD0004/")
                 .title("Sample Dataset 4 | North America")
                 .frequency("Daily")
+                .publisher("Publisher 4")
                 .build();
 
 

@@ -1,22 +1,23 @@
 package io.github.jpmorganchase.fusion.parsing;
 
-import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-
 import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.model.Report;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
+import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 public class GsonAPIResponseParserDatasetReportTest {
 
@@ -29,6 +30,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .linkedEntity("SR0001/")
             .frequency("Daily")
             .fusion(fusion)
+            .publisher("Publisher 1")
             .title("Sample Report 1 | North America")
             .varArg("category", listOf("Category 1"))
             .varArg("createdDate", "2022-02-05")
@@ -39,7 +41,6 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("language", "English")
             .varArg("maintainer", "Maintainer 1")
             .varArg("modifiedDate", "2023-03-08")
-            .varArg("publisher", "Publisher 1")
             .varArg("region", listOf("North America"))
             .varArg("source", listOf("Source System 1"))
             .varArg("subCategory", listOf("Subcategory 1"))
@@ -58,6 +59,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .linkedEntity("SR0002/")
             .frequency("Daily")
             .title("Sample Report 2 | North America")
+            .publisher("Publisher 2")
             .fusion(fusion)
             .varArg("category", listOf("Category 2"))
             .varArg("createdDate", "2022-02-06")
@@ -68,7 +70,6 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("language", "English")
             .varArg("maintainer", "Maintainer 2")
             .varArg("modifiedDate", "2023-03-09")
-            .varArg("publisher", "Publisher 2")
             .varArg("region", listOf("North America"))
             .varArg("source", listOf("Source System 2"))
             .varArg("subCategory", listOf("Subcategory 2"))
@@ -87,6 +88,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .linkedEntity("SR0003/")
             .frequency("Daily")
             .title("Sample Report 3 | North America")
+            .publisher("Publisher 3")
             .fusion(fusion)
             .varArg("category", listOf("Category 3"))
             .varArg("createdDate", "2022-02-07")
@@ -97,7 +99,6 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("language", "English")
             .varArg("maintainer", "Maintainer 3")
             .varArg("modifiedDate", "2023-03-10")
-            .varArg("publisher", "Publisher 3")
             .varArg("region", listOf("North America"))
             .varArg("source", listOf("Source System 3"))
             .varArg("subCategory", listOf("Subcategory 3"))

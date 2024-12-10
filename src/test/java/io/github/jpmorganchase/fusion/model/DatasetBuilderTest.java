@@ -1,13 +1,14 @@
 package io.github.jpmorganchase.fusion.model;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public class DatasetBuilderTest {
 
@@ -27,6 +28,7 @@ public class DatasetBuilderTest {
                 .report(report)
                 .fusion(fusion)
                 .catalogIdentifier("foobar")
+                .publisher("J.P. Morgan")
                 .build();
 
         assertThat(d.getIdentifier(), is(equalTo("The identifier")));
@@ -38,6 +40,7 @@ public class DatasetBuilderTest {
         assertThat(d.getType(), is(equalTo("Report")));
         assertThat(d.getReport(), is(equalTo(report)));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
+        assertThat(d.getPublisher(), is(equalTo("J.P. Morgan")));
         assertThat(d.getFusion(), notNullValue());
     }
 
@@ -62,6 +65,7 @@ public class DatasetBuilderTest {
                         .producerApplicationId(producerApplicationId)
                         .consumerApplicationId(consumerApplicationId)
                         .build())
+                .publisher("J.P. Morgan")
                 .catalogIdentifier("foobar")
                 .fusion(fusion)
                 .build();
@@ -77,6 +81,7 @@ public class DatasetBuilderTest {
         assertThat(d.getProducerApplicationId(), is(equalTo(producerApplicationId)));
         assertThat(d.getConsumerApplicationId().get(0), is(equalTo(consumerApplicationId)));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
+        assertThat(d.getPublisher(), is(equalTo("J.P. Morgan")));
         assertThat(d.getFusion(), is(equalTo(fusion)));
     }
 
@@ -101,6 +106,7 @@ public class DatasetBuilderTest {
                         .producerApplicationId(producerApplicationId)
                         .consumerApplicationId(consumerApplicationId)
                         .build())
+                .publisher("J.P. Morgan")
                 .catalogIdentifier("foobar")
                 .fusion(fusion)
                 .build();
@@ -116,6 +122,7 @@ public class DatasetBuilderTest {
         assertThat(d.getProducerApplicationId(), is(equalTo(producerApplicationId)));
         assertThat(d.getConsumerApplicationId().get(0), is(equalTo(consumerApplicationId)));
         assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
+        assertThat(d.getPublisher(), is(equalTo("J.P. Morgan")));
         assertThat(d.getFusion(), is(equalTo(fusion)));
     }
 
