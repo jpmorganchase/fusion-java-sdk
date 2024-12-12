@@ -4,16 +4,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import io.github.jpmorganchase.fusion.Fusion;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 public class DatasetSeriesBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
-        Map<String, String> varArgs = new HashMap<>();
+        Fusion fusion = Mockito.mock(Fusion.class);
+        Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         DatasetSeries d = DatasetSeries.builder()
                 .identifier("The identifier")
@@ -22,6 +25,8 @@ public class DatasetSeriesBuilderTest {
                 .toDate(LocalDate.of(2023, 1, 3))
                 .createdDate(LocalDate.of(2023, 1, 4))
                 .linkedEntity("The entity")
+                .catalogIdentifier("foobar")
+                .fusion(fusion)
                 .build();
 
         assertThat(d.getIdentifier(), is(equalTo("The identifier")));
@@ -30,5 +35,7 @@ public class DatasetSeriesBuilderTest {
         assertThat(d.getToDate(), is(equalTo(LocalDate.of(2023, 1, 3))));
         assertThat(d.getCreatedDate(), is(equalTo(LocalDate.of(2023, 1, 4))));
         assertThat(d.getLinkedEntity(), is(equalTo("The entity")));
+        assertThat(d.getCatalogIdentifier(), is(equalTo("foobar")));
+        assertThat(d.getFusion(), is(equalTo(fusion)));
     }
 }

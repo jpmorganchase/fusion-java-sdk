@@ -11,7 +11,10 @@ import io.github.jpmorganchase.fusion.FusionInitialisationException;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
+import io.github.jpmorganchase.fusion.model.CatalogResource;
+import io.github.jpmorganchase.fusion.model.Dataset;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
+import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
 import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("SameParameterValue")
 @ExtendWith(MockitoExtension.class)
-public class FusionApiManagerTest {
+public class FusionAPIManagerTest {
 
     private FusionAPIManager fusionAPIManager;
 
@@ -31,6 +34,9 @@ public class FusionApiManagerTest {
 
     @Mock
     private FusionTokenProvider fusionTokenProvider;
+
+    @Mock
+    private APIRequestSerializer serializer;
 
     private String apiPath;
 
@@ -42,6 +48,10 @@ public class FusionApiManagerTest {
 
     private String actualResponse;
 
+    private CatalogResource catalogResource;
+
+    private String serializedCatalogResource;
+
     @Test
     void successfulGetCall() {
         givenFusionApiManager();
@@ -52,6 +62,63 @@ public class FusionApiManagerTest {
         givenCallToClientToGetIsSuccessful();
         WhenFusionApiManagerIsCalledToGet();
         thenTheResponseBodyShouldMatchExpected();
+    }
+
+    @Test
+    void successfulPostCall() {
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
+        givenResponseBody("sample response");
+        givenCatalogResource("dataset_one");
+        givenSerializedCatalogResource("dataset_one");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Content-Type", "application/json");
+        givenCallToClientToPostIsSuccessful();
+        givenCallToSerializeCatalogResource();
+        WhenFusionApiManagerIsCalledToPost();
+        thenTheResponseBodyShouldMatchExpected();
+    }
+
+    @Test
+    void successfulPutCall() {
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
+        givenResponseBody("sample response");
+        givenCatalogResource("dataset_one");
+        givenSerializedCatalogResource("dataset_one");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenRequestHeader("Content-Type", "application/json");
+        givenCallToClientToPutIsSuccessful();
+        givenCallToSerializeCatalogResource();
+        WhenFusionApiManagerIsCalledToPut();
+        thenTheResponseBodyShouldMatchExpected();
+    }
+
+    @Test
+    void successfulDeleteCall() {
+        givenFusionApiManager();
+        givenApiPath("http://localhost:8080/test");
+        givenSessionBearerToken("my-token");
+        givenResponseBody("sample response");
+        givenCatalogResource("dataset_one");
+        givenRequestHeader("Authorization", "Bearer my-token");
+        givenCallToClientToDeleteIsSuccessful();
+        WhenFusionApiManagerIsCalledToDelete();
+        thenTheResponseBodyShouldMatchExpected();
+    }
+
+    private void givenSerializedCatalogResource(String identifier) {
+        serializedCatalogResource = String.format("{\"identifier\":\"%s\"}", identifier);
+    }
+
+    private void givenCallToSerializeCatalogResource() {
+        given(serializer.serialize(catalogResource)).willReturn(serializedCatalogResource);
+    }
+
+    private void givenCatalogResource(String identifier) {
+        catalogResource = Dataset.builder().identifier(identifier).build();
     }
 
     private void givenSessionBearerToken(String token) {
@@ -86,6 +153,18 @@ public class FusionApiManagerTest {
         actualResponse = fusionAPIManager.callAPI(apiPath);
     }
 
+    private void WhenFusionApiManagerIsCalledToPost() {
+        actualResponse = fusionAPIManager.callAPIToPost(apiPath, catalogResource);
+    }
+
+    private void WhenFusionApiManagerIsCalledToPut() {
+        actualResponse = fusionAPIManager.callAPIToPut(apiPath, catalogResource);
+    }
+
+    private void WhenFusionApiManagerIsCalledToDelete() {
+        actualResponse = fusionAPIManager.callAPIToDelete(apiPath);
+    }
+
     private void givenResponseBody(String responseBody) {
         this.responseBody = responseBody;
     }
@@ -96,6 +175,30 @@ public class FusionApiManagerTest {
                 .body(responseBody)
                 .build();
         when(client.get(apiPath, requestHeaders)).thenReturn(expectedHttpResponse);
+    }
+
+    private void givenCallToClientToPostIsSuccessful() {
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body(responseBody)
+                .build();
+        when(client.post(apiPath, requestHeaders, serializedCatalogResource)).thenReturn(expectedHttpResponse);
+    }
+
+    private void givenCallToClientToPutIsSuccessful() {
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body(responseBody)
+                .build();
+        when(client.put(apiPath, serializedCatalogResource, requestHeaders)).thenReturn(expectedHttpResponse);
+    }
+
+    private void givenCallToClientToDeleteIsSuccessful() {
+        HttpResponse<String> expectedHttpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body(responseBody)
+                .build();
+        when(client.delete(apiPath, requestHeaders, null)).thenReturn(expectedHttpResponse);
     }
 
     private void thenExceptionMessageShouldMatchExpected(String message) {
@@ -126,6 +229,7 @@ public class FusionApiManagerTest {
         fusionAPIManager = FusionAPIManager.builder()
                 .httpClient(client)
                 .tokenProvider(fusionTokenProvider)
+                .serializer(serializer)
                 .build();
     }
 }

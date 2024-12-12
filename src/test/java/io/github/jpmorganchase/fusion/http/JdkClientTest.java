@@ -460,6 +460,125 @@ public class JdkClientTest {
     }
 
     @Test
+    void successfulPutWithStringBodyCall() throws Exception {
+
+        stubFor(put(BASE_PATH).willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY)));
+
+        HttpResponse<String> response = httpClient.put(API_URL, "sample post body", Collections.emptyMap());
+
+        verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
+        assertThat(response.getStatusCode(), is(equalTo(200)));
+        assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
+    }
+
+    @Test
+    void successfulPutCallFromStringBody() throws Exception {
+
+        stubFor(put(BASE_PATH).willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY)));
+
+        HttpResponse<String> response = httpClient.put(API_URL, "sample post body", Collections.emptyMap());
+
+        verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
+        assertThat(response.getStatusCode(), is(equalTo(200)));
+        assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
+    }
+
+    @Test
+    void successfulPutCallWithStringBodyAndWithOneHeader() throws Exception {
+
+        stubFor(put(BASE_PATH).willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY)));
+
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("header1", "value1");
+
+        HttpResponse<String> response = httpClient.put(API_URL, "sample post body", requestHeaders);
+
+        verify(putRequestedFor(urlEqualTo(BASE_PATH))
+                .withRequestBody(WireMock.equalTo("sample post body"))
+                .withHeader("header1", WireMock.equalTo("value1")));
+        assertThat(response.getStatusCode(), is(equalTo(200)));
+        assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
+    }
+
+    @Test
+    void successfulPutCallWithStringBodyAndWithManyHeaders() throws Exception {
+
+        stubFor(put(BASE_PATH).willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY)));
+
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("header1", "value1");
+        requestHeaders.put("header2", "value2");
+        requestHeaders.put("header3", "value3");
+        HttpResponse<String> response = httpClient.put(API_URL, "sample post body", requestHeaders);
+
+        verify(putRequestedFor(urlEqualTo(BASE_PATH))
+                .withRequestBody(WireMock.equalTo("sample post body"))
+                .withHeader("header1", WireMock.equalTo("value1"))
+                .withHeader("header2", WireMock.equalTo("value2"))
+                .withHeader("header3", WireMock.equalTo("value3")));
+        assertThat(response.getStatusCode(), is(equalTo(200)));
+        assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
+    }
+
+    @Test
+    void putCallWithStringBodyAndWith404Response() throws Exception {
+        stubFor(put(BASE_PATH).willReturn(aResponse().withStatus(HttpURLConnection.HTTP_NOT_FOUND)));
+
+        HttpResponse<String> response = httpClient.put(API_URL, "sample post body", Collections.emptyMap());
+
+        verify(putRequestedFor(urlEqualTo(BASE_PATH)));
+        assertThat(response.getStatusCode(), is(equalTo(404)));
+        assertThat(response.getBody(), is(emptyString()));
+        assertThat(response.isError(), is(true));
+    }
+
+    @Test
+    void putCallWithStringBodyAndWith500Response() throws Exception {
+        stubFor(put(BASE_PATH).willReturn(aResponse().withStatus(HttpURLConnection.HTTP_INTERNAL_ERROR)));
+
+        HttpResponse<String> response = httpClient.put(API_URL, "sample post body", Collections.emptyMap());
+
+        verify(putRequestedFor(urlEqualTo(BASE_PATH)));
+        assertThat(response.getStatusCode(), is(equalTo(500)));
+        assertThat(response.getBody(), is(emptyString()));
+        assertThat(response.isError(), is(true));
+    }
+
+    @Test
+    void correctHandlingOfResponseHeaderOnPutRequestWithStringBOdy() throws Exception {
+
+        stubFor(put(BASE_PATH)
+                .willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY).withHeader("test-header-1", "header-1-value")));
+
+        HttpResponse<String> response = httpClient.put(API_URL, "sample post body", Collections.emptyMap());
+
+        verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
+        assertThat(response.getStatusCode(), is(equalTo(200)));
+        assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.getHeaders().get("test-header-1").get(0), is(equalTo("header-1-value")));
+        assertThat(response.isError(), is(false));
+    }
+
+    @Test
+    void putRequestWithStringBodyAndWithRespectsConfiguredProxySettings() throws Exception {
+
+        wiremockProxy.stubFor(put(BASE_PATH).willReturn(aResponse().proxiedFrom(BASE_URL)));
+        stubFor(put(BASE_PATH).willReturn(aResponse().withBody(SAMPLE_RESPONSE_BODY)));
+
+        HttpResponse<String> response = httpClientWithProxy.put(API_URL, "sample post body", Collections.emptyMap());
+
+        wiremockProxy.verify(putRequestedFor(urlEqualTo(BASE_PATH)));
+        verify(putRequestedFor(urlEqualTo(BASE_PATH)).withRequestBody(WireMock.equalTo("sample post body")));
+        assertThat(response.getStatusCode(), is(equalTo(200)));
+        assertThat(response.getBody(), is(equalTo(SAMPLE_RESPONSE_BODY)));
+        assertThat(response.isError(), is(false));
+    }
+
+    @Test
     void noRequestBodyForPostRequestDoesNotResultInException() {
         assertDoesNotThrow(
                 () -> httpClient.post(API_URL, Collections.emptyMap(), null),

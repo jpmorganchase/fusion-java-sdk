@@ -1,0 +1,11 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/test/"
+  },
+  "@id": "datasets/",
+  "description": "A list of available datasets (for access or download in one or more formats)",
+  "identifier": "datasets",
+  "resources": [],
+  "title": "Datasets"
+}

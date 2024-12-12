@@ -1,6 +1,8 @@
 package io.github.jpmorganchase.fusion.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import io.github.jpmorganchase.fusion.Fusion;
 import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -20,28 +22,52 @@ public class Attribute extends CatalogResource {
     String description;
     String title;
 
-    @Builder
+    @Expose(serialize = false, deserialize = false)
+    String datasetIdentifier;
+
+    boolean isCriticalDataElement;
+
+    @Builder(toBuilder = true)
     public Attribute(
-            String identifier,
-            Map<String, String> varArgs,
+            @Builder.ObtainVia(method = "getIdentifier") String identifier,
+            @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
+            @Builder.ObtainVia(method = "getFusion") Fusion fusion,
+            @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             boolean key,
             String dataType,
             long index,
             String description,
-            String title) {
-        super(identifier, varArgs);
+            String title,
+            String datasetIdentifier,
+            boolean isCriticalDataElement) {
+        super(identifier, varArgs, fusion, catalogIdentifier);
         this.key = key;
         this.dataType = dataType;
         this.index = index;
         this.description = description;
         this.title = title;
+        this.datasetIdentifier = datasetIdentifier;
+        this.isCriticalDataElement = isCriticalDataElement;
+    }
+
+    @Override
+    protected String getApiPath() {
+        return String.format(
+                "%1scatalogs/%2s/datasets/%3s/attributes/%4s",
+                getFusion().getRootURL(), getCatalogIdentifier(), this.getDatasetIdentifier(), this.getIdentifier());
     }
 
     public static class AttributeBuilder {
-        private Map<String, String> varArgs;
+        @SuppressWarnings("FieldCanBeLocal")
+        private Map<String, Object> varArgs;
 
-        public AttributeBuilder varArgs(Map<String, String> varArgs) {
-            this.varArgs = copyMap(varArgs);
+        public Attribute.AttributeBuilder varArg(String key, Object value) {
+            this.varArgs = VarArgsHelper.varArg(key, value, this.varArgs);
+            return this;
+        }
+
+        public Attribute.AttributeBuilder varArgs(Map<String, Object> varArgs) {
+            this.varArgs = VarArgsHelper.copyMap(varArgs);
             return this;
         }
     }

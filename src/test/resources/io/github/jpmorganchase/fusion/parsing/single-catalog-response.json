@@ -11,7 +11,8 @@
       "@id": "test/",
       "description": "A catalog used for test cases",
       "identifier": "test",
-      "title": "Test data catalog"
+      "title": "Test data catalog",
+      "isInternal": false
     }
   ],
   "title": "Catalogs"

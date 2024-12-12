@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.gson.GsonBuilder;
 import io.github.jpmorganchase.fusion.FusionConfiguration;
-import io.github.jpmorganchase.fusion.api.FusionApiManagerTest;
+import io.github.jpmorganchase.fusion.api.FusionAPIManagerTest;
 import io.github.jpmorganchase.fusion.api.context.MultipartTransferContext;
 import io.github.jpmorganchase.fusion.api.context.UploadedPartContext;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
@@ -1056,7 +1056,7 @@ class FusionAPIUploadOperationsTest {
     }
 
     private static String getPathFromResource(String resourceName) {
-        URL url = FusionApiManagerTest.class.getResource(resourceName);
+        URL url = FusionAPIManagerTest.class.getResource(resourceName);
         try {
             Path path = Paths.get(url.toURI());
             return path.toString();

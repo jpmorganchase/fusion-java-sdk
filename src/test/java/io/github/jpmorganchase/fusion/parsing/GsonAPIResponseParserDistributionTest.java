@@ -36,7 +36,8 @@ public class GsonAPIResponseParserDistributionTest {
             .title("Parquet")
             .build();
 
-    private static final APIResponseParser responseParser = new GsonAPIResponseParser();
+    private static final APIResponseParser responseParser =
+            GsonAPIResponseParser.builder().gson(DefaultGsonConfig.gson()).build();
 
     @Test
     public void singleDistributionInResourcesParsesCorrectly() {

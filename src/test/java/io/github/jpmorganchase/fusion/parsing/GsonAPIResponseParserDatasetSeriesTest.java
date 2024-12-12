@@ -45,7 +45,8 @@ public class GsonAPIResponseParserDatasetSeriesTest {
             .toDate(LocalDate.of(2022, 3, 20))
             .build();
 
-    private static final APIResponseParser responseParser = new GsonAPIResponseParser();
+    private static final APIResponseParser responseParser =
+            GsonAPIResponseParser.builder().gson(DefaultGsonConfig.gson()).build();
 
     @Test
     public void multipleSeriesMembersInResourcesParseCorrectly() {

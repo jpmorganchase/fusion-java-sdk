@@ -13,8 +13,11 @@ import io.github.jpmorganchase.fusion.api.operations.FusionAPIUploadOperations;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.http.JdkClient;
+import io.github.jpmorganchase.fusion.model.CatalogResource;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
+import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
+import io.github.jpmorganchase.fusion.serializing.GsonAPIRequestSerializer;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,14 +35,24 @@ public class FusionAPIManager implements APIManager {
     private final APIDownloadOperations downloader;
     private APIUploadOperations uploader;
 
+    @Builder.Default
+    private APIRequestSerializer serializer = new GsonAPIRequestSerializer();
+
     public void updateBearerToken(String token) {
         tokenProvider.updateCredentials(new BearerTokenCredentials(token));
     }
 
     /**
-     * Call the API with the path provided and return the JSON response.
+     * Sends a GET request to the specified API endpoint.
      *
-     * @param apiPath appended to the base URL
+     * <p>This method constructs the necessary authorization headers using a bearer token from
+     * the {@code tokenProvider} and sends a GET request to the specified {@code apiPath} using
+     * the {@code httpClient}. It then checks the HTTP response status for errors and returns the
+     * response body if the request is successful.
+     *
+     * @param apiPath the API endpoint path to which the GET request will be sent
+     * @return the response body as a {@code String} if the request is successful
+     * @throws APICallException if the response status indicates an error or the request fails
      */
     @Override
     public String callAPI(String apiPath) throws APICallException {
@@ -47,6 +60,65 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
 
         HttpResponse<String> response = httpClient.get(apiPath, requestHeaders);
+        checkResponseStatus(response);
+        return response.getBody();
+    }
+
+    /**
+     * Sends a POST request to the specified API endpoint with the provided catalog resource.
+     *
+     * <p>This method constructs the necessary authorization headers using a bearer token from
+     * the {@code tokenProvider}, serializes the given {@code catalogResource} into JSON,
+     * and sends a POST request to the specified {@code apiPath} using the {@code httpClient}.
+     * It then checks the HTTP response status for errors and returns the response body if successful.
+     *
+     * @param apiPath         the API endpoint path to which the POST request will be sent
+     * @param catalogResource the resource object to be serialized and sent as the request body
+     * @return the response body as a {@code String} if the request is successful
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    @Override
+    public String callAPIToPost(String apiPath, CatalogResource catalogResource) throws APICallException {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+        requestHeaders.put("Content-Type", "application/json");
+
+        HttpResponse<String> response = httpClient.post(apiPath, requestHeaders, serializer.serialize(catalogResource));
+        checkResponseStatus(response);
+        return response.getBody();
+    }
+
+    /**
+     * Sends a PUT request to the specified API endpoint with the provided catalog resource.
+     *
+     * @param apiPath         the API endpoint path to which the PUT request will be sent
+     * @param catalogResource the resource object to be serialized and sent as the request body
+     * @return the response body as a {@code String} if the request is successful
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    @Override
+    public String callAPIToPut(String apiPath, CatalogResource catalogResource) {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+        requestHeaders.put("Content-Type", "application/json");
+
+        HttpResponse<String> response = httpClient.put(apiPath, serializer.serialize(catalogResource), requestHeaders);
+        checkResponseStatus(response);
+        return response.getBody();
+    }
+
+    /**
+     * Sends a DELETE request to the specified API endpoint with the provided catalog resource.
+     *
+     * @param apiPath         the API endpoint path to which the PUT request will be sent
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    @Override
+    public String callAPIToDelete(String apiPath) {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+
+        HttpResponse<String> response = httpClient.delete(apiPath, requestHeaders, null);
         checkResponseStatus(response);
         return response.getBody();
     }

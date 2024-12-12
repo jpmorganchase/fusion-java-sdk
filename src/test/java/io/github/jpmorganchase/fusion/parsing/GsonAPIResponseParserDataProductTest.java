@@ -43,7 +43,8 @@ public class GsonAPIResponseParserDataProductTest {
             .title("Sample Data Product 3 Title")
             .build();
 
-    private static final APIResponseParser responseParser = new GsonAPIResponseParser();
+    private static final APIResponseParser responseParser =
+            GsonAPIResponseParser.builder().gson(DefaultGsonConfig.gson()).build();
 
     @Test
     public void singleProductInResourcesParsesCorrectly() {

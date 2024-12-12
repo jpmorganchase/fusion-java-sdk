@@ -1,0 +1,36 @@
+{
+  "@context": {
+    "@vocab": "https://www.w3.org/ns/dcat3.jsonld",
+    "@base": "https://fusion-api.jpmorgan.com/fusion/v1/catalogs/test/"
+  },
+  "@id": "common/",
+  "description": "A catalog of common data",
+  "identifier": "common",
+  "isInternal": false,
+  "resources": [
+    {
+      "@id": "datasets/",
+      "description": "A list of available datasets (for access or download in one or more formats)",
+      "identifier": "datasets",
+      "title": "Datasets"
+    },
+    {
+      "@id": "products/",
+      "description": "A list of available products",
+      "identifier": "products",
+      "title": "Products"
+    },
+    {
+      "@id": "attributes/",
+      "description": "A list of available attributes available in this catalog",
+      "identifier": "attributes",
+      "title": "Attributes"
+    },
+    {
+      "@id": "concepts/",
+      "description": "A list of available data concepts registered in this catalog",
+      "identifier": "concepts",
+      "title": "Concepts"
+    }
+  ]
+}

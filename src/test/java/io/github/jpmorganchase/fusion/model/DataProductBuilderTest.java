@@ -4,15 +4,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import io.github.jpmorganchase.fusion.Fusion;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 public class DataProductBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
-        Map<String, String> varArgs = new HashMap<>();
+        Fusion fusion = Mockito.mock(Fusion.class);
+        Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
         DataProduct p = DataProduct.builder()
                 .identifier("The identifier")
@@ -21,6 +24,8 @@ public class DataProductBuilderTest {
                 .linkedEntity("The entity")
                 .title("The title")
                 .status("The status")
+                .catalogIdentifier("foobar")
+                .fusion(fusion)
                 .build();
 
         assertThat(p.getIdentifier(), is(equalTo("The identifier")));
@@ -29,5 +34,7 @@ public class DataProductBuilderTest {
         assertThat(p.getLinkedEntity(), is(equalTo("The entity")));
         assertThat(p.getTitle(), is(equalTo("The title")));
         assertThat(p.getStatus(), is(equalTo("The status")));
+        assertThat(p.getCatalogIdentifier(), is(equalTo("foobar")));
+        assertThat(p.getFusion(), is(equalTo(fusion)));
     }
 }

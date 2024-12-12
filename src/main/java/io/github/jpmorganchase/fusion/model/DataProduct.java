@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
+import io.github.jpmorganchase.fusion.Fusion;
 import java.util.Map;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -25,25 +26,32 @@ public class DataProduct extends CatalogResource {
 
     @Builder
     public DataProduct(
-            String identifier,
-            Map<String, String> varArgs,
+            @Builder.ObtainVia(method = "getIdentifier") String identifier,
+            @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
+            @Builder.ObtainVia(method = "getFusion") Fusion fusion,
+            @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
             String description,
             String linkedEntity,
             String title,
             String status) {
-        super(identifier, varArgs);
+        super(identifier, varArgs, fusion, catalogIdentifier);
         this.description = description;
         this.linkedEntity = linkedEntity;
         this.title = title;
         this.status = status;
     }
 
+    @Override
+    protected String getApiPath() {
+        throw new UnsupportedOperationException("Operation not yet supported for DataProduct");
+    }
+
     public static class DataProductBuilder {
         @SuppressWarnings("FieldCanBeLocal")
-        private Map<String, String> varArgs;
+        private Map<String, Object> varArgs;
 
-        public DataProductBuilder varArgs(Map<String, String> varArgs) {
-            this.varArgs = copyMap(varArgs);
+        public DataProductBuilder varArgs(Map<String, Object> varArgs) {
+            this.varArgs = VarArgsHelper.copyMap(varArgs);
             return this;
         }
     }
