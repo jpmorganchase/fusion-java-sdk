@@ -48,4 +48,14 @@ public interface Builders {
      * @return {@link io.github.jpmorganchase.fusion.model.Attributes.AttributesBuilder} an instance of the attributes builder
      */
     Attributes.AttributesBuilder attributes();
+
+    /**
+     * Returns a builder for creating an {@link io.github.jpmorganchase.fusion.model.AttributeLineages} object.
+     * The builder facilitates the configuration of multiple {@code AttributeLineage} objects and other properties
+     * associated with the {@code AttributeLineages} resource. It supports chaining calls for setting
+     * properties and building an {@code AttributeLineages} instance.
+     *
+     * @return {@link io.github.jpmorganchase.fusion.model.AttributeLineages.AttributeLineagesBuilder} an instance of the attribute lineages builder
+     */
+    AttributeLineages.AttributeLineagesBuilder attributeLineages();
 }
