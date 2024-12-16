@@ -20,7 +20,7 @@ The Fusion SDK is published to Maven Central and can be retrieved from there usi
   <dependency>
     <groupId>io.github.jpmorganchase.fusion</groupId>
     <artifactId>fusion-sdk</artifactId>
-    <version>0.0.14</version>
+    <version>0.0.15-SNAPSHOT</version>
   </dependency>
 ```
 
