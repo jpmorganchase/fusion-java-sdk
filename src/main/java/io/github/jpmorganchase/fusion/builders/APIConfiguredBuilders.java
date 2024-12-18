@@ -33,4 +33,9 @@ public class APIConfiguredBuilders implements Builders {
     public Attributes.AttributesBuilder attributes() {
         return Attributes.builder().fusion(fusion);
     }
+
+    @Override
+    public AttributeLineages.AttributeLineagesBuilder attributeLineages() {
+        return AttributeLineages.builder().fusion(fusion);
+    }
 }
