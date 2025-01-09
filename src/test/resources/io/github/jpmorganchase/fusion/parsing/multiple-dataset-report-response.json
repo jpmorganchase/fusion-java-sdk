@@ -45,9 +45,7 @@
         "id": "12345",
         "type": "Application (SEAL)"
       },
-      "report": {
-        "tier": "Tier 1"
-      }
+      "tier": "Tier 1"
     },
     {
       "category": [
@@ -87,9 +85,7 @@
         "id": "12345",
         "type": "Application (SEAL)"
       },
-      "report": {
-        "tier": "Tier 2"
-      }
+      "tier": "Tier 2"
     },
     {
       "category": [
@@ -129,9 +125,7 @@
         "id": "12345",
         "type": "Application (SEAL)"
       },
-      "report": {
-        "tier": "Tier 3"
-      }
+      "tier": "Tier 3"
     }
   ],
   "title": "Datasets"

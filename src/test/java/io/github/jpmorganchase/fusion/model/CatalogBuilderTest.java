@@ -5,8 +5,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -36,5 +36,19 @@ public class CatalogBuilderTest {
         assertThat(c.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(c.getIsInternal(), is(equalTo(Boolean.FALSE)));
         assertThat(c.getFusion(), is(equalTo(fusion)));
+    }
+
+    @Test
+    public void testRegisteredAttributesReturnedCorrectly() {
+        // Given
+        Set<String> expected = VarArgsHelper.getFieldNames(new HashSet<>(), CatalogResource.class);
+        VarArgsHelper.getFieldNames(expected, Catalog.class);
+        expected.addAll(Arrays.asList("@id", "@context", "@base"));
+
+        // When
+        Set<String> actual = Catalog.builder().build().getRegisteredAttributes();
+
+        // Then
+        assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
     }
 }

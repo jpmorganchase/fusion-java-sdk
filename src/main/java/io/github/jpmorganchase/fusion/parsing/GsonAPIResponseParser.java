@@ -8,7 +8,6 @@ import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.serializing.mutation.MutationContext;
 import io.github.jpmorganchase.fusion.serializing.mutation.ResourceMutationFactory;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
@@ -46,6 +45,27 @@ public class GsonAPIResponseParser implements APIResponseParser {
     @Override
     public Map<String, Dataset> parseDatasetResponse(String json, String catalog) {
         return parseResourcesWithVarArgsFromResponse(json, Dataset.class, (resource, mc) -> resource.toBuilder()
+                .varArgs(mc.getVarArgs())
+                .fusion(fusion)
+                .catalogIdentifier(catalog)
+                .build());
+    }
+
+    /**
+     * Parses a JSON response to extract a map of reports.
+     * <p>
+     * This method deserializes the given JSON string into a map of {@link ReportObj} objects.
+     * Each report is enriched with additional context, such as variable arguments and the
+     * {@code fusion} configuration, using the builder pattern.
+     * </p>
+     *
+     * @param json the JSON response containing dataset information to be parsed.
+     * @return a map where the keys represent dataset identifiers (or relevant keys from the JSON structure),
+     *         and the values are {@link ReportObj} objects enriched with context.
+     */
+    @Override
+    public Map<String, ReportObj> parseReportResponse(String json, String catalog) {
+        return parseResourcesWithVarArgsFromResponse(json, ReportObj.class, (resource, mc) -> resource.toBuilder()
                 .varArgs(mc.getVarArgs())
                 .fusion(fusion)
                 .catalogIdentifier(catalog)
@@ -131,8 +151,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
         Map<String, Object> responseMap = getMapFromJsonResponse(json);
         T obj = gson.fromJson(json, resourceClass);
 
-        Set<String> excludes = varArgsExclusions(resourceClass);
-        return parseResourceWithVarArgs(excludes, obj, responseMap, mutator);
+        return parseResourceWithVarArgs(obj.getRegisteredAttributes(), obj, responseMap, mutator);
     }
 
     @Override
@@ -142,12 +161,11 @@ public class GsonAPIResponseParser implements APIResponseParser {
         Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json);
         JsonArray resources = getResources(json);
 
-        Set<String> excludes = varArgsExclusions(resourceClass);
         List<T> resourceList = new ArrayList<>();
         for (JsonElement element : resources) {
             T obj = gson.fromJson(element, resourceClass);
             Map<String, Object> untypedResource = untypedResources.get(obj.getIdentifier());
-            resourceList.add(parseResourceWithVarArgs(excludes, obj, untypedResource, mutator));
+            resourceList.add(parseResourceWithVarArgs(obj.getRegisteredAttributes(), obj, untypedResource, mutator));
         }
 
         return collectMapOfUniqueResources(resourceList);
@@ -214,23 +232,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
         HashMap<String, Object> modified = new HashMap<>(untypedResource);
         modified.keySet().removeIf(exclusionList::contains);
         return modified;
-    }
-
-    private static <T extends CatalogResource> Set<String> varArgsExclusions(Class<T> resourceClass) {
-        // TODO :: Should this be returned by the Model Object ? My Thinking is yes.
-        Set<String> excludes = new HashSet<>();
-        Set<String> excludeFromType = Arrays.stream(resourceClass.getDeclaredFields())
-                .map(Field::getName)
-                .collect(Collectors.toSet());
-        Set<String> excludeFromCatalogResource = Arrays.stream(CatalogResource.class.getDeclaredFields())
-                .map(Field::getName)
-                .collect(Collectors.toSet());
-        excludes.addAll(excludeFromType);
-        excludes.addAll(excludeFromCatalogResource);
-        excludes.add("@id");
-        excludes.add("@context");
-        excludes.add("@base");
-        return excludes;
     }
 
     private Map<String, Object> getMapFromJsonResponse(String json) {

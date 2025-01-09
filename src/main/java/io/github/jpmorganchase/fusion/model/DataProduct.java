@@ -3,6 +3,7 @@ package io.github.jpmorganchase.fusion.model;
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.Fusion;
 import java.util.Map;
+import java.util.Set;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -44,6 +45,12 @@ public class DataProduct extends CatalogResource {
     @Override
     protected String getApiPath() {
         throw new UnsupportedOperationException("Operation not yet supported for DataProduct");
+    }
+
+    @Override
+    public Set<String> getRegisteredAttributes() {
+        Set<String> exclusions = super.getRegisteredAttributes();
+        return VarArgsHelper.getFieldNames(exclusions, DataProduct.class);
     }
 
     public static class DataProductBuilder {

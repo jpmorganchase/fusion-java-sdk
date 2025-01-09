@@ -1,9 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -46,6 +44,12 @@ public class Attributes extends CatalogResource {
     public String delete() {
         throw new UnsupportedOperationException(
                 "Operation not yet supported for " + this.getClass().getName());
+    }
+
+    @Override
+    public Set<String> getRegisteredAttributes() {
+        Set<String> exclusions = super.getRegisteredAttributes();
+        return VarArgsHelper.getFieldNames(exclusions, Attributes.class);
     }
 
     public static class AttributesBuilder {

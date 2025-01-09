@@ -22,11 +22,6 @@ public class DatasetSerializer implements JsonSerializer<Dataset> {
         jsonObject.add("frequency", context.serialize(src.getFrequency()));
         jsonObject.add("identifier", context.serialize(src.getIdentifier()));
         jsonObject.add("type", context.serialize(src.getType()));
-
-        if (isReportPopulated(src)) {
-            jsonObject.add("report", context.serialize(src.getReport()));
-        }
-
         jsonObject.add("applicationId", context.serialize(src.getApplicationId()));
 
         if (isProducerApplicationIdPopulated(src)) {
@@ -63,10 +58,5 @@ public class DatasetSerializer implements JsonSerializer<Dataset> {
         return Objects.nonNull(src.getProducerApplicationId())
                 && Objects.nonNull(src.getProducerApplicationId().getId())
                 && Objects.nonNull(src.getProducerApplicationId().getType());
-    }
-
-    private boolean isReportPopulated(Dataset src) {
-        return Objects.nonNull(src.getReport())
-                && Objects.nonNull(src.getReport().getTier());
     }
 }

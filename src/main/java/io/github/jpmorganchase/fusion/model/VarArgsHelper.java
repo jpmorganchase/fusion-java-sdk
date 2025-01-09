@@ -1,8 +1,8 @@
 package io.github.jpmorganchase.fusion.model;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class VarArgsHelper {
 
@@ -24,5 +24,13 @@ public class VarArgsHelper {
 
     public static Map<String, Object> initializeMap() {
         return new HashMap<>();
+    }
+
+    public static Set<String> getFieldNames(Set<String> exclusions, Class<?> resourceClass) {
+        exclusions.addAll(Arrays.stream(resourceClass.getDeclaredFields())
+                .map(Field::getName)
+                .filter(n -> !"this$0".equals(n))
+                .collect(Collectors.toSet()));
+        return exclusions;
     }
 }

@@ -1,9 +1,10 @@
 package io.github.jpmorganchase.fusion.model;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import org.junit.jupiter.api.Test;
 
 class VarArgsHelperTest {
@@ -76,5 +77,67 @@ class VarArgsHelperTest {
 
         assertNotNull(map);
         assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void testGetFieldNamesWithoutExclusions() {
+        Set<String> exclusions = new HashSet<>();
+        Set<String> result = VarArgsHelper.getFieldNames(exclusions, TestClass.class);
+
+        Set<String> expected = new HashSet<>(Arrays.asList("field1", "field2"));
+        assertThat("The method should return all declared fields.", result, is(expected));
+    }
+
+    @Test
+    public void testGetFieldNamesWithExclusions() {
+        Set<String> exclusions = new HashSet<>(new HashSet<>(Arrays.asList("field2")));
+        Set<String> result = VarArgsHelper.getFieldNames(exclusions, TestClass.class);
+
+        assertThat(
+                "The result should include all declared fields and preserve existing exclusions.",
+                result,
+                containsInAnyOrder("field1", "field2"));
+    }
+
+    @Test
+    public void testGetFieldNamesWithInheritance() {
+        Set<String> exclusions = new HashSet<>();
+        Set<String> result = VarArgsHelper.getFieldNames(exclusions, SubClass.class);
+
+        assertThat(
+                "The method should only include fields declared in the given class.",
+                result,
+                containsInAnyOrder("field3"));
+    }
+
+    @Test
+    public void testGetFieldNamesWithEmptyClass() {
+        class EmptyClass {}
+
+        Set<String> result = VarArgsHelper.getFieldNames(new HashSet<>(), EmptyClass.class);
+
+        assertThat("The method should return an empty set for a class with no declared fields.", result, is(empty()));
+    }
+
+    @Test
+    public void testGetFieldNamesWithNullClass() {
+        Set<String> exclusions = new HashSet<>();
+
+        NullPointerException exception =
+                assertThrows(NullPointerException.class, () -> VarArgsHelper.getFieldNames(exclusions, null));
+
+        assertThat(
+                "The exception message should mention that resourceClass is null.",
+                exception.getMessage(),
+                containsString("resourceClass"));
+    }
+
+    static class TestClass {
+        private String field1;
+        private int field2;
+    }
+
+    static class SubClass extends TestClass {
+        private double field3;
     }
 }

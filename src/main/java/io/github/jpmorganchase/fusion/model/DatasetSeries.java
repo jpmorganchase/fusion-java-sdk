@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.Fusion;
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Set;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -36,6 +37,12 @@ public class DatasetSeries extends CatalogResource {
         this.toDate = toDate;
         this.createdDate = createdDate;
         this.linkedEntity = linkedEntity;
+    }
+
+    @Override
+    public Set<String> getRegisteredAttributes() {
+        Set<String> exclusions = super.getRegisteredAttributes();
+        return VarArgsHelper.getFieldNames(exclusions, DatasetSeries.class);
     }
 
     @Override

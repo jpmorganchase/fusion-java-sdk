@@ -9,7 +9,6 @@ import lombok.Value;
 @Value
 @EqualsAndHashCode()
 @ToString()
-public class Report {
-
+public class ReportDetail {
     String tier;
 }

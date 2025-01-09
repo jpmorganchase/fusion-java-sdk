@@ -15,6 +15,11 @@ public class APIConfiguredBuilders implements Builders {
     }
 
     @Override
+    public ReportObj.ReportObjBuilder report() {
+        return ReportObj.builder().fusion(fusion);
+    }
+
+    @Override
     public DataDictionaryAttribute.DataDictionaryAttributeBuilder dataDictionaryAttribute() {
         return DataDictionaryAttribute.builder().fusion(fusion);
     }

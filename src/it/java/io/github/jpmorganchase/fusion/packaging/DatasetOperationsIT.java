@@ -1,10 +1,7 @@
 package io.github.jpmorganchase.fusion.packaging;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import io.github.jpmorganchase.fusion.model.Application;
-import io.github.jpmorganchase.fusion.model.Dataset;
-import io.github.jpmorganchase.fusion.model.Flow;
-import io.github.jpmorganchase.fusion.model.Report;
+import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.test.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -119,7 +116,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                         .withStatus(200)
                         .withBodyFile("dataset/dataset-create-response.json")));
 
-        Dataset dataset = getSdk().builders().dataset()
+        ReportObj report = getSdk().builders().report()
                 .identifier("SR0001")
                 .description("Sample report description 1")
                 .linkedEntity("SR0001/")
@@ -143,11 +140,11 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
                 .applicationId(Application.builder().sealId("12345").build())
-                .report(Report.builder().tier("Tier 1").build())
+                .tier("Tier 1")
                 .build();
 
         // When & Then
-        Assertions.assertDoesNotThrow(dataset::create);
+        Assertions.assertDoesNotThrow(report::create);
     }
 
     @Test

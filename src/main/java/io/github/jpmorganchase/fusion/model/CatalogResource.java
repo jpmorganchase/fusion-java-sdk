@@ -4,7 +4,10 @@ import static io.github.jpmorganchase.fusion.model.VarArgsHelper.copyMap;
 
 import com.google.gson.annotations.Expose;
 import io.github.jpmorganchase.fusion.Fusion;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -62,5 +65,18 @@ public abstract class CatalogResource {
 
     public Map<String, Object> getVarArgs() {
         return copyMap(varArgs);
+    }
+
+    /**
+     * Returns the registered attributes pertaining to this catalog resource.
+     * A 'registered' attribute is essentially member variables belonging to the class.
+     * </p>
+     * It is expected that child classes will override, calling super to initialise and register attributes
+     * @return set of attributes registered against this CatalogResource
+     */
+    public Set<String> getRegisteredAttributes() {
+        Set<String> registered = VarArgsHelper.getFieldNames(new HashSet<>(), CatalogResource.class);
+        registered.addAll(Arrays.asList("@id", "@context", "@base"));
+        return registered;
     }
 }
