@@ -71,6 +71,7 @@ class GsonAPIRequestSerializerReportTest {
                 .title("Sample Dataset 1 | North America")
                 .frequency("Daily")
                 .publisher("Publisher 1")
+                .tier("Tier 1")
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
