@@ -113,6 +113,23 @@ class VarArgsHelperTest {
         assertThat("The method should return an empty set for a class with no declared fields.", result, is(empty()));
     }
 
+    @Test
+    public void testGetFieldNamesExcludesSyntheticFields() {
+        class SyntheticFieldClass {
+            class InnerClass {}
+        }
+        Set<String> result = VarArgsHelper.getFieldNames(SyntheticFieldClass.InnerClass.class);
+        assertThat("Synthetic field 'this$0' should not be included.", result.contains("this$0"), is(false));
+    }
+
+    @Test
+    public void testGetFieldNamesExactMatch() {
+        Set<String> result = VarArgsHelper.getFieldNames(TestClass.class);
+
+        Set<String> expected = new LinkedHashSet<>(Arrays.asList("field1", "field2"));
+        assertThat("Field names should match exactly.", expected, is(equalTo(result)));
+    }
+
     static class TestClass {
         private String field1;
         private int field2;
