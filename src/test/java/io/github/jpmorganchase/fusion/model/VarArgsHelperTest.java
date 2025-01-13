@@ -124,7 +124,12 @@ class VarArgsHelperTest {
 
     @Test
     public void testGetFieldNamesExactMatch() {
-        Set<String> result = VarArgsHelper.getFieldNames(TestClass.class);
+        class ExactMatchTestClass {
+            private String field1;
+            private int field2;
+        }
+
+        Set<String> result = VarArgsHelper.getFieldNames(ExactMatchTestClass.class);
 
         Set<String> expected = new LinkedHashSet<>(Arrays.asList("field1", "field2"));
         assertThat("Field names should match exactly.", expected, is(equalTo(result)));
