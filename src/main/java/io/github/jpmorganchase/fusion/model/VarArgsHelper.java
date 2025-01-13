@@ -27,10 +27,12 @@ public class VarArgsHelper {
     }
 
     public static Set<String> getFieldNames(Set<String> exclusions, Class<?> resourceClass) {
-        exclusions.addAll(Arrays.stream(resourceClass.getDeclaredFields())
-                .map(Field::getName)
-                .filter(n -> !"this$0".equals(n))
-                .collect(Collectors.toSet()));
+        if (null != resourceClass) {
+            exclusions.addAll(Arrays.stream(resourceClass.getDeclaredFields())
+                    .map(Field::getName)
+                    .filter(n -> !"this$0".equals(n))
+                    .collect(Collectors.toSet()));
+        }
         return exclusions;
     }
 }

@@ -121,15 +121,9 @@ class VarArgsHelperTest {
 
     @Test
     public void testGetFieldNamesWithNullClass() {
-        Set<String> exclusions = new HashSet<>();
+        Set<String> result = VarArgsHelper.getFieldNames(new HashSet<>(), null);
 
-        NullPointerException exception =
-                assertThrows(NullPointerException.class, () -> VarArgsHelper.getFieldNames(exclusions, null));
-
-        assertThat(
-                "The exception message should mention that resourceClass is null.",
-                exception.getMessage(),
-                containsString("resourceClass"));
+        assertThat("The method should return an empty set for a class with no declared fields.", result, is(empty()));
     }
 
     static class TestClass {
