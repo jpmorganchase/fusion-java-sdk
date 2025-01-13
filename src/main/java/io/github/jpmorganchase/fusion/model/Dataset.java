@@ -66,7 +66,8 @@ public class Dataset extends CatalogResource {
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();
-        return VarArgsHelper.getFieldNames(exclusions, Dataset.class);
+        exclusions.addAll(VarArgsHelper.getFieldNames(Dataset.class));
+        return exclusions;
     }
 
     public static class DatasetBuilder {

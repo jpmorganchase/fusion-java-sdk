@@ -80,29 +80,16 @@ class VarArgsHelperTest {
     }
 
     @Test
-    public void testGetFieldNamesWithoutExclusions() {
-        Set<String> exclusions = new HashSet<>();
-        Set<String> result = VarArgsHelper.getFieldNames(exclusions, TestClass.class);
+    public void testGetFieldNames() {
+        Set<String> result = VarArgsHelper.getFieldNames(TestClass.class);
 
         Set<String> expected = new HashSet<>(Arrays.asList("field1", "field2"));
         assertThat("The method should return all declared fields.", result, is(expected));
     }
 
     @Test
-    public void testGetFieldNamesWithExclusions() {
-        Set<String> exclusions = new HashSet<>(new HashSet<>(Arrays.asList("field2")));
-        Set<String> result = VarArgsHelper.getFieldNames(exclusions, TestClass.class);
-
-        assertThat(
-                "The result should include all declared fields and preserve existing exclusions.",
-                result,
-                containsInAnyOrder("field1", "field2"));
-    }
-
-    @Test
     public void testGetFieldNamesWithInheritance() {
-        Set<String> exclusions = new HashSet<>();
-        Set<String> result = VarArgsHelper.getFieldNames(exclusions, SubClass.class);
+        Set<String> result = VarArgsHelper.getFieldNames(SubClass.class);
 
         assertThat(
                 "The method should only include fields declared in the given class.",
@@ -114,14 +101,14 @@ class VarArgsHelperTest {
     public void testGetFieldNamesWithEmptyClass() {
         class EmptyClass {}
 
-        Set<String> result = VarArgsHelper.getFieldNames(new HashSet<>(), EmptyClass.class);
+        Set<String> result = VarArgsHelper.getFieldNames(EmptyClass.class);
 
         assertThat("The method should return an empty set for a class with no declared fields.", result, is(empty()));
     }
 
     @Test
     public void testGetFieldNamesWithNullClass() {
-        Set<String> result = VarArgsHelper.getFieldNames(new HashSet<>(), null);
+        Set<String> result = VarArgsHelper.getFieldNames(null);
 
         assertThat("The method should return an empty set for a class with no declared fields.", result, is(empty()));
     }

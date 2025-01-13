@@ -43,8 +43,8 @@ public class DistributionBuilderTest {
     @Test
     public void testRegisteredAttributesReturnedCorrectly() {
         // Given
-        Set<String> expected = VarArgsHelper.getFieldNames(new HashSet<>(), CatalogResource.class);
-        VarArgsHelper.getFieldNames(expected, Distribution.class);
+        Set<String> expected = VarArgsHelper.getFieldNames(CatalogResource.class);
+        expected.addAll(VarArgsHelper.getFieldNames(Distribution.class));
         expected.addAll(Arrays.asList("@id", "@context", "@base"));
 
         // When

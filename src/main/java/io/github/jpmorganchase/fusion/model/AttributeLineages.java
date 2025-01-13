@@ -34,7 +34,8 @@ public class AttributeLineages extends CatalogResource {
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();
-        return VarArgsHelper.getFieldNames(exclusions, AttributeLineages.class);
+        exclusions.addAll(VarArgsHelper.getFieldNames(AttributeLineages.class));
+        return exclusions;
     }
 
     public static class AttributeLineagesBuilder {

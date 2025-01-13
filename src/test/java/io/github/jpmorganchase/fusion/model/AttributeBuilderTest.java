@@ -76,8 +76,8 @@ public class AttributeBuilderTest {
     @Test
     public void testRegisteredAttributesReturnedCorrectly() {
         // Given
-        Set<String> expected = VarArgsHelper.getFieldNames(new HashSet<>(), CatalogResource.class);
-        VarArgsHelper.getFieldNames(expected, Attribute.class);
+        Set<String> expected = VarArgsHelper.getFieldNames(CatalogResource.class);
+        expected.addAll(VarArgsHelper.getFieldNames(Attribute.class));
         expected.addAll(Arrays.asList("@id", "@context", "@base"));
 
         // When

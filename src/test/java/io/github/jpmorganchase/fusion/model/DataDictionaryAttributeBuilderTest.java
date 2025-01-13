@@ -100,8 +100,8 @@ public class DataDictionaryAttributeBuilderTest {
     @Test
     public void testRegisteredAttributesReturnedCorrectly() {
         // Given
-        Set<String> expected = VarArgsHelper.getFieldNames(new HashSet<>(), CatalogResource.class);
-        VarArgsHelper.getFieldNames(expected, DataDictionaryAttribute.class);
+        Set<String> expected = VarArgsHelper.getFieldNames(CatalogResource.class);
+        expected.addAll(VarArgsHelper.getFieldNames(DataDictionaryAttribute.class));
         expected.addAll(Arrays.asList("@id", "@context", "@base"));
 
         // When

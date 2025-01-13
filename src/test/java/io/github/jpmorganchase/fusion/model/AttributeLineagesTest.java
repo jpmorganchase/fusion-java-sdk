@@ -154,8 +154,8 @@ class AttributeLineagesTest {
     @Test
     public void testRegisteredAttributesReturnedCorrectly() {
         // Given
-        Set<String> expected = VarArgsHelper.getFieldNames(new HashSet<>(), CatalogResource.class);
-        VarArgsHelper.getFieldNames(expected, AttributeLineages.class);
+        Set<String> expected = VarArgsHelper.getFieldNames(CatalogResource.class);
+        expected.addAll(VarArgsHelper.getFieldNames(AttributeLineages.class));
         expected.addAll(Arrays.asList("@id", "@context", "@base"));
 
         // When

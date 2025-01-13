@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.is;
 import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
-import io.github.jpmorganchase.fusion.model.ReportObj;
+import io.github.jpmorganchase.fusion.model.Report;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -23,7 +23,7 @@ public class GsonAPIResponseParserDatasetReportTest {
     private static final String singleReportJson = loadTestResource("single-dataset-report-response.json");
     private static final String multipleReportJson = loadTestResource("multiple-dataset-report-response.json");
 
-    private final ReportObj testReport = ReportObj.builder()
+    private final Report testReport = Report.builder()
             .identifier("SR0001")
             .description("Sample report description 1")
             .linkedEntity("SR0001/")
@@ -52,7 +52,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .catalogIdentifier("foobar")
             .build();
 
-    private final ReportObj testReport2 = ReportObj.builder()
+    private final Report testReport2 = Report.builder()
             .identifier("SR0002")
             .description("Sample report description 2")
             .linkedEntity("SR0002/")
@@ -81,7 +81,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .catalogIdentifier("foobar")
             .build();
 
-    private final ReportObj testReport3 = ReportObj.builder()
+    private final Report testReport3 = Report.builder()
             .identifier("SR0003")
             .description("Sample report description 3")
             .linkedEntity("SR0003/")
@@ -119,16 +119,16 @@ public class GsonAPIResponseParserDatasetReportTest {
 
     @Test
     public void singleDatasetInResourcesParsesCorrectly() {
-        Map<String, ReportObj> reportObjMap = responseParser.parseReportResponse(singleReportJson, "foobar");
+        Map<String, Report> reportObjMap = responseParser.parseReportResponse(singleReportJson, "foobar");
         assertThat(reportObjMap.size(), is(1));
 
-        ReportObj actualReport = reportObjMap.get("SR0001");
+        Report actualReport = reportObjMap.get("SR0001");
         assertThat(actualReport, is(equalTo(testReport)));
     }
 
     @Test
     public void multipleCatalogsInResourcesParseCorrectly() {
-        Map<String, ReportObj> reportObjMap = responseParser.parseReportResponse(multipleReportJson, "foobar");
+        Map<String, Report> reportObjMap = responseParser.parseReportResponse(multipleReportJson, "foobar");
         assertThat(reportObjMap.size(), is(3));
 
         Dataset actualReport = reportObjMap.get("SR0001");

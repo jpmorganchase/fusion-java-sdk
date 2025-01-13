@@ -4,15 +4,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import io.github.jpmorganchase.fusion.model.ReportObj;
+import io.github.jpmorganchase.fusion.model.Report;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Objects;
 
-public class ReportSerializer implements JsonSerializer<ReportObj> {
+public class ReportSerializer implements JsonSerializer<Report> {
 
     @Override
-    public JsonElement serialize(ReportObj src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(Report src, Type typeOfSrc, JsonSerializationContext context) {
 
         JsonObject jsonObject = new JsonObject();
 
@@ -38,7 +38,7 @@ public class ReportSerializer implements JsonSerializer<ReportObj> {
         return jsonObject;
     }
 
-    private boolean isReportPopulated(ReportObj src) {
+    private boolean isReportPopulated(Report src) {
         return Objects.nonNull(src.getReport())
                 && Objects.nonNull(src.getReport().getTier());
     }

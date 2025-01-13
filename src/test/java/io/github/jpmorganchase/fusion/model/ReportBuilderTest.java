@@ -17,7 +17,7 @@ public class ReportBuilderTest {
         ReportDetail reportDetail = ReportDetail.builder().tier("The tier").build();
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
-        ReportObj r = ReportObj.builder()
+        Report r = Report.builder()
                 .identifier("The identifier")
                 .varArgs(varArgs)
                 .description("The description")
@@ -47,7 +47,7 @@ public class ReportBuilderTest {
     void constructionWithBuilderCorrectlyPopulatesAllFieldsWhenSingleVarArgAdded() {
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
-        ReportObj r = ReportObj.builder().varArg("key1", "value1").build();
+        Report r = Report.builder().varArg("key1", "value1").build();
 
         assertThat(r.getVarArgs(), is(equalTo(varArgs)));
     }
@@ -59,7 +59,7 @@ public class ReportBuilderTest {
         Mockito.when(fusion.getRootURL()).thenReturn("http://foobar/api/v1/");
 
         // When
-        ReportObj r = ReportObj.builder()
+        Report r = Report.builder()
                 .identifier("The identifier")
                 .fusion(fusion)
                 .catalogIdentifier("foobar")
@@ -74,7 +74,7 @@ public class ReportBuilderTest {
         Fusion fusion = Mockito.mock(Fusion.class);
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
-        ReportObj d = ReportObj.builder()
+        Report d = Report.builder()
                 .identifier("The identifier")
                 .varArgs(varArgs)
                 .description("The description")
@@ -98,7 +98,7 @@ public class ReportBuilderTest {
         ReportDetail reportDetail = ReportDetail.builder().tier("The tier").build();
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
-        ReportObj r = ReportObj.builder()
+        Report r = Report.builder()
                 .identifier("The identifier")
                 .varArgs(varArgs)
                 .description("The description")
@@ -124,7 +124,7 @@ public class ReportBuilderTest {
         assertThat(r.getPublisher(), is(equalTo("J.P. Morgan")));
         assertThat(r.getFusion(), notNullValue());
 
-        ReportObj mr = r.toBuilder().tier("Updated Tier").build();
+        Report mr = r.toBuilder().tier("Updated Tier").build();
 
         assertThat(mr.getIdentifier(), is(equalTo("The identifier")));
         assertThat(mr.getVarArgs(), is(equalTo(varArgs)));
@@ -145,13 +145,13 @@ public class ReportBuilderTest {
     @Test
     public void testRegisteredAttributesReturnedCorrectly() {
         // Given
-        Set<String> expected = VarArgsHelper.getFieldNames(new HashSet<>(), CatalogResource.class);
-        VarArgsHelper.getFieldNames(expected, Dataset.class);
-        VarArgsHelper.getFieldNames(expected, ReportObj.class);
+        Set<String> expected = VarArgsHelper.getFieldNames(CatalogResource.class);
+        expected.addAll(VarArgsHelper.getFieldNames(Dataset.class));
+        expected.addAll(VarArgsHelper.getFieldNames(Report.class));
         expected.addAll(Arrays.asList("@id", "@context", "@base"));
 
         // When
-        Set<String> actual = ReportObj.builder().build().getRegisteredAttributes();
+        Set<String> actual = Report.builder().build().getRegisteredAttributes();
 
         // Then
         assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));

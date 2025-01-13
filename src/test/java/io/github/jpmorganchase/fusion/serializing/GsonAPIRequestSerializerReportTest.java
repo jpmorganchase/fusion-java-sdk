@@ -7,7 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
-import io.github.jpmorganchase.fusion.model.ReportObj;
+import io.github.jpmorganchase.fusion.model.Report;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -22,7 +22,7 @@ class GsonAPIRequestSerializerReportTest {
     @Test
     public void testReportSerializesCorrectly() {
         // Given
-        ReportObj report = ReportObj.builder()
+        Report report = Report.builder()
                 .identifier("SD0001")
                 .description("Sample report description 1")
                 .linkedEntity("SD0001/")
@@ -64,7 +64,7 @@ class GsonAPIRequestSerializerReportTest {
     @Test
     public void testReportWithoutVarArgsSerializesCorrectly() {
         // Given
-        ReportObj report = ReportObj.builder()
+        Report report = Report.builder()
                 .identifier("SD0001")
                 .description("Sample dataset description 1")
                 .linkedEntity("SD0001/")
@@ -87,7 +87,7 @@ class GsonAPIRequestSerializerReportTest {
     @Test
     public void testReportWithNullValues() {
         // Given
-        ReportObj report = ReportObj.builder()
+        Report report = Report.builder()
                 .identifier("SD0002")
                 .description(null)
                 .linkedEntity(null)
@@ -110,7 +110,7 @@ class GsonAPIRequestSerializerReportTest {
     @Test
     public void testReportWithEmptyConsumerApplicationIds() {
         // Given
-        ReportObj report = ReportObj.builder()
+        Report report = Report.builder()
                 .identifier("SD0003")
                 .description("Sample dataset with empty consumer IDs")
                 .linkedEntity("SD0003/")
@@ -133,7 +133,7 @@ class GsonAPIRequestSerializerReportTest {
     @Test
     public void testReportWithSpecialCharacters() {
         // Given
-        ReportObj dataset = ReportObj.builder()
+        Report dataset = Report.builder()
                 .identifier("SD0004")
                 .description("Special characters: \"quotes\", \n newlines, and \u2022 bullets")
                 .linkedEntity("SD0004/")

@@ -13,12 +13,12 @@ public interface Builders {
     Dataset.DatasetBuilder dataset();
 
     /**
-     * Returns a builder for creating a {@link io.github.jpmorganchase.fusion.model.ReportObj} object.
+     * Returns a builder for creating a {@link Report} object.
      * The builder can be used to set properties and then create / update an instance of ReportObj.
      *
-     * @return {@link io.github.jpmorganchase.fusion.model.ReportObj.ReportObjBuilder} the report builder
+     * @return {@link Report.ReportBuilder} the report builder
      */
-    ReportObj.ReportObjBuilder report();
+    Report.ReportBuilder report();
 
     /**
      * Returns a builder for creating a {@link DataDictionaryAttribute} object.

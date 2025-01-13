@@ -2,9 +2,7 @@ package io.github.jpmorganchase.fusion.packaging;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.github.jpmorganchase.fusion.model.Application;
-import io.github.jpmorganchase.fusion.model.Dataset;
-import io.github.jpmorganchase.fusion.model.Flow;
-import io.github.jpmorganchase.fusion.model.ReportObj;
+import io.github.jpmorganchase.fusion.model.Report;
 import io.github.jpmorganchase.fusion.test.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,7 +27,7 @@ public class ReportOperationsIT extends BaseOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        ReportObj report = reportSrOne();
+        Report report = reportSrOne();
 
         // When & Then
         Assertions.assertDoesNotThrow(report::create);
@@ -45,7 +43,7 @@ public class ReportOperationsIT extends BaseOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        ReportObj report = reportSrOne().toBuilder().catalogIdentifier("foobar").build();
+        Report report = reportSrOne().toBuilder().catalogIdentifier("foobar").build();
 
         // When & Then
         Assertions.assertDoesNotThrow(report::create);
@@ -62,7 +60,7 @@ public class ReportOperationsIT extends BaseOperationsIT {
                         .withStatus(200)));
 
 
-        ReportObj report = reportSrOne().toBuilder().description("Updated Sample report description 1").build();
+        Report report = reportSrOne().toBuilder().description("Updated Sample report description 1").build();
 
 
         // When & Then
@@ -85,11 +83,11 @@ public class ReportOperationsIT extends BaseOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        Map<String, ReportObj> reports = getSdk().listReports("common", "SR0001", true);
-        ReportObj originalReport = reports.get("SR0001");
+        Map<String, Report> reports = getSdk().listReports("common", "SR0001", true);
+        Report originalReport = reports.get("SR0001");
 
         // When
-        ReportObj amendedReport = originalReport
+        Report amendedReport = originalReport
                 .toBuilder()
                 .description("Updated Sample report description 1")
                 .build();
@@ -108,7 +106,7 @@ public class ReportOperationsIT extends BaseOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        ReportObj report = getSdk().builders().report()
+        Report report = getSdk().builders().report()
                 .identifier("SR0001")
                 .build();
 
@@ -124,7 +122,7 @@ public class ReportOperationsIT extends BaseOperationsIT {
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)));
 
-        ReportObj report = getSdk().builders().report()
+        Report report = getSdk().builders().report()
                 .identifier("SR0001")
                 .catalogIdentifier("foobar")
                 .build();
@@ -143,7 +141,7 @@ public class ReportOperationsIT extends BaseOperationsIT {
                         .withBodyFile("report/multiple-reports-response.json")));
 
         // When
-        Map<String, ReportObj> reports = getSdk().listReports();
+        Map<String, Report> reports = getSdk().listReports();
 
         // Then Verify the response
         assertThat(reports.size(), is(equalTo(2)));
@@ -161,14 +159,14 @@ public class ReportOperationsIT extends BaseOperationsIT {
                         .withBodyFile("report/multiple-reports-response.json")));
 
         // When
-        Map<String, ReportObj> reports = getSdk().listReports("common", "SR0001", true);
+        Map<String, Report> reports = getSdk().listReports("common", "SR0001", true);
 
         // Then Verify the response
         assertThat(reports.size(), is(equalTo(1)));
         assertThat(reports.containsKey("SR0001"), is(equalTo(true)));
     }
 
-    private ReportObj reportSrOne() {
+    private Report reportSrOne() {
         return getSdk().builders().report()
                 .identifier("SR0001")
                 .description("Sample report description 1")

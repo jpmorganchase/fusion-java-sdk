@@ -15,8 +15,8 @@ public class APIConfiguredBuilders implements Builders {
     }
 
     @Override
-    public ReportObj.ReportObjBuilder report() {
-        return ReportObj.builder().fusion(fusion).type(DatasetType.REPORT.getLabel());
+    public Report.ReportBuilder report() {
+        return Report.builder().fusion(fusion).type(DatasetType.REPORT.getLabel());
     }
 
     @Override

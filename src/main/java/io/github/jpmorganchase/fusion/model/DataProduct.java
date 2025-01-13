@@ -50,7 +50,8 @@ public class DataProduct extends CatalogResource {
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();
-        return VarArgsHelper.getFieldNames(exclusions, DataProduct.class);
+        exclusions.addAll(VarArgsHelper.getFieldNames(DataProduct.class));
+        return exclusions;
     }
 
     public static class DataProductBuilder {

@@ -26,14 +26,11 @@ public class VarArgsHelper {
         return new HashMap<>();
     }
 
-    public static Set<String> getFieldNames(Set<String> exclusions, Class<?> resourceClass) {
-        Set<String> mutated = new HashSet<>(exclusions);
-        if (null != resourceClass) {
-            mutated.addAll(Arrays.stream(resourceClass.getDeclaredFields())
-                    .map(Field::getName)
-                    .filter(n -> !"this$0".equals(n))
-                    .collect(Collectors.toSet()));
-        }
-        return mutated;
+    public static Set<String> getFieldNames(Class<?> resourceClass) {
+        if (null == resourceClass) return new HashSet<>();
+        return Arrays.stream(resourceClass.getDeclaredFields())
+                .map(Field::getName)
+                .filter(n -> !"this$0".equals(n))
+                .collect(Collectors.toSet());
     }
 }

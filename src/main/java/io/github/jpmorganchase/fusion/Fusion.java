@@ -372,11 +372,11 @@ public class Fusion {
      * @throws ParsingException if the response from Fusion could not be parsed successfully
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public Map<String, ReportObj> listReports(String catalogName, String contains, boolean idContains) {
+    public Map<String, Report> listReports(String catalogName, String contains, boolean idContains) {
         String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
         String json = this.api.callAPI(url);
 
-        Map<String, ReportObj> datasets =
+        Map<String, Report> datasets =
                 filterDatasets(responseParser.parseReportResponse(json, catalogName), contains, idContains);
         return filterByType(datasets, "Report");
     }
@@ -389,7 +389,7 @@ public class Fusion {
      * @throws ParsingException if the response from Fusion could not be parsed successfully
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public Map<String, ReportObj> listReports(String catalogName) {
+    public Map<String, Report> listReports(String catalogName) {
         return listReports(catalogName, null, false);
     }
 
@@ -400,7 +400,7 @@ public class Fusion {
      * @throws ParsingException if the response from Fusion could not be parsed successfully
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public Map<String, ReportObj> listReports() {
+    public Map<String, Report> listReports() {
         return listReports(this.getDefaultCatalog(), null, false);
     }
 

@@ -49,7 +49,8 @@ public class Attributes extends CatalogResource {
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();
-        return VarArgsHelper.getFieldNames(exclusions, Attributes.class);
+        exclusions.addAll(VarArgsHelper.getFieldNames(Attributes.class));
+        return exclusions;
     }
 
     public static class AttributesBuilder {

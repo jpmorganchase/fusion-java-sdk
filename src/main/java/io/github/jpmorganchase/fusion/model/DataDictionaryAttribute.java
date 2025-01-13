@@ -46,7 +46,8 @@ public class DataDictionaryAttribute extends CatalogResource {
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();
-        return VarArgsHelper.getFieldNames(exclusions, DataDictionaryAttribute.class);
+        exclusions.addAll(VarArgsHelper.getFieldNames(DataDictionaryAttribute.class));
+        return exclusions;
     }
 
     public static class DataDictionaryAttributeBuilder {

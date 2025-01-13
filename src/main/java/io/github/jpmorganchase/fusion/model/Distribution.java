@@ -53,7 +53,8 @@ public class Distribution extends CatalogResource {
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();
-        return VarArgsHelper.getFieldNames(exclusions, Distribution.class);
+        exclusions.addAll(VarArgsHelper.getFieldNames(Distribution.class));
+        return exclusions;
     }
 
     public static class DistributionBuilder {

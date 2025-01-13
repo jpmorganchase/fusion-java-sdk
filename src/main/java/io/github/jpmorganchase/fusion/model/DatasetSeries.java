@@ -42,7 +42,8 @@ public class DatasetSeries extends CatalogResource {
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();
-        return VarArgsHelper.getFieldNames(exclusions, DatasetSeries.class);
+        exclusions.addAll(VarArgsHelper.getFieldNames(DatasetSeries.class));
+        return exclusions;
     }
 
     @Override

@@ -12,13 +12,13 @@ import lombok.ToString;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class ReportObj extends Dataset {
+public class Report extends Dataset {
 
     ReportDetail report;
     String tier;
 
     @Builder(toBuilder = true)
-    public ReportObj(
+    public Report(
             @Builder.ObtainVia(method = "getIdentifier") String identifier,
             @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
             @Builder.ObtainVia(method = "getFusion") Fusion fusion,
@@ -57,28 +57,29 @@ public class ReportObj extends Dataset {
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();
-        return VarArgsHelper.getFieldNames(exclusions, ReportObj.class);
+        exclusions.addAll(VarArgsHelper.getFieldNames(Report.class));
+        return exclusions;
     }
 
-    public static class ReportObjBuilder extends DatasetBuilder {
+    public static class ReportBuilder extends DatasetBuilder {
         @SuppressWarnings("FieldCanBeLocal")
         private Map<String, Object> varArgs;
 
-        private ReportObj.ReportObjBuilder report(ReportDetail report) {
+        private Report.ReportBuilder report(ReportDetail report) {
             return this;
         }
 
-        public ReportObj.ReportObjBuilder varArg(String key, Object value) {
+        public Report.ReportBuilder varArg(String key, Object value) {
             this.varArgs = VarArgsHelper.varArg(key, value, this.varArgs);
             return this;
         }
 
-        public ReportObj.ReportObjBuilder varArgs(Map<String, Object> varArgs) {
+        public Report.ReportBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = VarArgsHelper.copyMap(varArgs);
             return this;
         }
 
-        public ReportObj.ReportObjBuilder tier(String tier) {
+        public Report.ReportBuilder tier(String tier) {
             this.tier = tier;
             if (null != tier && !tier.isEmpty()) {
                 this.report = ReportDetail.builder().tier(tier).build();
