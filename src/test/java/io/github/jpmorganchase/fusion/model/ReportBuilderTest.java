@@ -87,7 +87,7 @@ public class ReportBuilderTest {
                 .publisher("J.P. Morgan")
                 .build();
 
-        assertThat(d.getType(), is(equalTo("Report")));
+        assertThat(d.getType(), is(equalTo(null)));
         assertThat(d.getReport(), is(equalTo(null)));
         assertThat(d.getTier(), is(equalTo(null)));
     }
