@@ -1,1 +1,1 @@
-{"description":"Sample dataset description 1","@id":"SD0001/","title":"Sample Dataset 1 | North America","frequency":"Daily","identifier":"SD0001","type":"Report","publisher":"Publisher 1"}
+{"description":"Sample dataset description 1","@id":"SD0001/","title":"Sample Dataset 1 | North America","frequency":"Daily","identifier":"SD0001","type":"Report","report":{"tier":"Tier 1"},"publisher":"Publisher 1"}
