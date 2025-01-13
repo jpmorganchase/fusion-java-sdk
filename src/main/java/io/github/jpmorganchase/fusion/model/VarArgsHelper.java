@@ -27,10 +27,15 @@ public class VarArgsHelper {
     }
 
     public static Set<String> getFieldNames(Class<?> resourceClass) {
-        if (null == resourceClass) return new HashSet<>();
+        if (resourceClass == null) {
+            // Explicitly return an empty set to handle null input
+            return Collections.emptySet();
+        }
+
+        // Stream the fields, map names, and filter out synthetic fields like "this$0"
         return Arrays.stream(resourceClass.getDeclaredFields())
                 .map(Field::getName)
-                .filter(n -> !"this$0".equals(n))
-                .collect(Collectors.toSet());
+                .filter(name -> name != null && !name.equals("this$0")) // Null safety and exclude "this$0"
+                .collect(Collectors.toCollection(LinkedHashSet::new)); // Use LinkedHashSet for deterministic order
     }
 }
