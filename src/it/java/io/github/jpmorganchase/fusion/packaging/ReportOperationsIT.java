@@ -76,27 +76,26 @@ public class ReportOperationsIT extends BaseOperationsIT {
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)
-                        .withBodyFile("dataset/multiple-dataset-response.json")));
+                        .withBodyFile("report/multiple-reports-response.json")));
 
         wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/SR0001"))
-                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-report-SR0001-update-request.json")))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("report/dataset-report-SR0001-update-request.json")))
                 .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-create-response.json")));
+                        .withStatus(200)));
 
-        Map<String, Dataset> datasets = getSdk().listDatasets("common", "SR0001", true);
-        Dataset originalDataset = datasets.get("SR0001");
+        Map<String, ReportObj> reports = getSdk().listReports("common", "SR0001", true);
+        ReportObj originalReport = reports.get("SR0001");
 
         // When
-        Dataset amendedDataset = originalDataset
+        ReportObj amendedReport = originalReport
                 .toBuilder()
                 .description("Updated Sample report description 1")
                 .build();
 
         // When & Then
-        Assertions.assertDoesNotThrow(amendedDataset::update);
+        Assertions.assertDoesNotThrow(amendedReport::update);
     }
 
 
@@ -104,36 +103,34 @@ public class ReportOperationsIT extends BaseOperationsIT {
     @Test
     public void testDeleteReport() {
         // Given
-        wireMockRule.stubFor(WireMock.delete(WireMock.urlEqualTo("/catalogs/common/datasets/SD0001"))
+        wireMockRule.stubFor(WireMock.delete(WireMock.urlEqualTo("/catalogs/common/datasets/SR0001"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-delete-response.json")));
+                        .withStatus(200)));
 
-        Dataset dataset = getSdk().builders().dataset()
-                .identifier("SD0001")
+        ReportObj report = getSdk().builders().report()
+                .identifier("SR0001")
                 .build();
 
         // When & Then
-        Assertions.assertDoesNotThrow(dataset::delete);
+        Assertions.assertDoesNotThrow(report::delete);
     }
 
     @Test
     public void testDeleteReportWithCatalogOverride() {
         // Given
-        wireMockRule.stubFor(WireMock.delete(WireMock.urlEqualTo("/catalogs/foobar/datasets/SD0001"))
+        wireMockRule.stubFor(WireMock.delete(WireMock.urlEqualTo("/catalogs/foobar/datasets/SR0001"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-delete-response.json")));
+                        .withStatus(200)));
 
-        Dataset dataset = getSdk().builders().dataset()
-                .identifier("SD0001")
+        ReportObj report = getSdk().builders().report()
+                .identifier("SR0001")
                 .catalogIdentifier("foobar")
                 .build();
 
         // When & Then
-        Assertions.assertDoesNotThrow(dataset::delete);
+        Assertions.assertDoesNotThrow(report::delete);
     }
 
     @Test
@@ -143,16 +140,15 @@ public class ReportOperationsIT extends BaseOperationsIT {
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)
-                        .withBodyFile("dataset/multiple-dataset-response.json")));
+                        .withBodyFile("report/multiple-reports-response.json")));
 
         // When
-        Map<String, Dataset> datasets = getSdk().listDatasets();
+        Map<String, ReportObj> reports = getSdk().listReports();
 
         // Then Verify the response
-        assertThat(datasets.containsKey("SD0001"), is(equalTo(true)));
-        assertThat(datasets.containsKey("SD0002"), is(equalTo(true)));
-        assertThat(datasets.containsKey("SD0003"), is(equalTo(true)));
-        assertThat(datasets.containsKey("SR0001"), is(equalTo(true)));
+        assertThat(reports.size(), is(equalTo(2)));
+        assertThat(reports.containsKey("SR0001"), is(equalTo(true)));
+        assertThat(reports.containsKey("SR0002"), is(equalTo(true)));
     }
 
     @Test
@@ -162,17 +158,14 @@ public class ReportOperationsIT extends BaseOperationsIT {
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
                         .withStatus(200)
-                        .withBodyFile("dataset/multiple-dataset-response.json")));
+                        .withBodyFile("report/multiple-reports-response.json")));
 
         // When
-        Map<String, Dataset> datasets = getSdk().listDatasets("common", "SD0001", true);
+        Map<String, ReportObj> reports = getSdk().listReports("common", "SR0001", true);
 
         // Then Verify the response
-        assertThat(datasets.containsKey("SD0001"), is(equalTo(true)));
-        assertThat(datasets.containsKey("SD0002"), is(equalTo(false)));
-        assertThat(datasets.containsKey("SD0003"), is(equalTo(false)));
-        assertThat(datasets.containsKey("SR0001"), is(equalTo(false)));
-
+        assertThat(reports.size(), is(equalTo(1)));
+        assertThat(reports.containsKey("SR0001"), is(equalTo(true)));
     }
 
     private ReportObj reportSrOne() {

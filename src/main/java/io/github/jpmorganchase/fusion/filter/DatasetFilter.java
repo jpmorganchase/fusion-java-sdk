@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.filter;
 
 import io.github.jpmorganchase.fusion.model.Dataset;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class DatasetFilter {
@@ -14,8 +15,8 @@ public class DatasetFilter {
      * @param idContains True if the filter should only apply to the identifier.
      * @return A filtered map of datasets.
      */
-    public static Map<String, Dataset> filterDatasets(
-            Map<String, Dataset> datasets, String contains, boolean idContains) {
+    public static <T extends Dataset> Map<String, T> filterDatasets(
+            Map<String, T> datasets, String contains, boolean idContains) {
         if (contains == null || contains.isEmpty()) {
             return datasets; // No filtering needed
         }
@@ -24,6 +25,29 @@ public class DatasetFilter {
         return datasets.entrySet().stream()
                 .filter(entry -> matchesFilter(entry.getValue(), contains, idContains))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    /**
+     * Filters a map of datasets (or its subclasses) based on a specific type.
+     *
+     * @param <T>      The type of Dataset or its subclass.
+     * @param datasets The original map of datasets to filter.
+     * @param type     The type to filter datasets by.
+     * @return A filtered map of datasets containing only entries that match the specified type.
+     */
+    public static <T extends Dataset> Map<String, T> filterByType(Map<String, T> datasets, String type) {
+        if (type == null || type.isEmpty()) {
+            return datasets; // No filtering needed
+        }
+
+        // Use a stream to filter the datasets based on type
+        return datasets.entrySet().stream()
+                .filter(typePredicate(type))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private static <T extends Dataset> Predicate<Map.Entry<String, T>> typePredicate(String type) {
+        return entry -> type.equals(entry.getValue().getType());
     }
 
     /**

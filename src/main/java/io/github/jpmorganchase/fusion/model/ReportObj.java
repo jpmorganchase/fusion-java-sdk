@@ -27,6 +27,7 @@ public class ReportObj extends Dataset {
             @Builder.ObtainVia(method = "getLinkedEntity") String linkedEntity,
             @Builder.ObtainVia(method = "getTitle") String title,
             @Builder.ObtainVia(method = "getFrequency") String frequency,
+            @Builder.ObtainVia(method = "getType") String type,
             @Builder.ObtainVia(method = "getApplicationId") Application applicationId,
             @Builder.ObtainVia(method = "getProducerApplicationId") Application producerApplicationId,
             @Builder.ObtainVia(method = "getConsumerApplicationId") List<Application> consumerApplicationId,
@@ -43,7 +44,7 @@ public class ReportObj extends Dataset {
                 linkedEntity,
                 title,
                 frequency,
-                "Report",
+                type,
                 applicationId,
                 producerApplicationId,
                 consumerApplicationId,
@@ -81,6 +82,7 @@ public class ReportObj extends Dataset {
             this.tier = tier;
             if (null != tier && !tier.isEmpty()) {
                 this.report = ReportDetail.builder().tier(tier).build();
+                this.type = DatasetType.REPORT.getLabel();
             }
             return this;
         }

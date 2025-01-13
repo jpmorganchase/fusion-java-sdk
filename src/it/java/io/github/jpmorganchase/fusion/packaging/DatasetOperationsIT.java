@@ -106,48 +106,6 @@ public class DatasetOperationsIT extends BaseOperationsIT {
     }
 
     @Test
-    public void testCreateDatasetOfTypeReport() {
-        // Given
-        wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SR0001"))
-                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-report-SR0001-create-request.json")))
-                .withHeader("Content-Type", WireMock.equalTo("application/json"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-create-response.json")));
-
-        ReportObj report = getSdk().builders().report()
-                .identifier("SR0001")
-                .description("Sample report description 1")
-                .linkedEntity("SR0001/")
-                .title("Sample Report 1 | North America")
-                .frequency("Daily")
-                .publisher("Publisher 1")
-                .varArg("category", listOf("Category 1"))
-                .varArg("createdDate", "2022-02-06")
-                .varArg("coverageStartDate", "2022-02-06")
-                .varArg("coverageEndDate", "2023-03-09")
-                .varArg("isThirdPartyData", Boolean.FALSE)
-                .varArg("isInternalOnlyDataset", Boolean.FALSE)
-                .varArg("language", "English")
-                .varArg("maintainer", "Maintainer 1")
-                .varArg("modifiedDate", "2023-03-09")
-                .varArg("region", listOf("North America"))
-                .varArg("source", listOf("Source System 1"))
-                .varArg("subCategory", listOf("Subcategory 1"))
-                .varArg("tag", listOf("Tag1"))
-                .varArg("isRestricted", Boolean.FALSE)
-                .varArg("isRawData", Boolean.FALSE)
-                .varArg("hasSample", Boolean.FALSE)
-                .applicationId(Application.builder().sealId("12345").build())
-                .tier("Tier 1")
-                .build();
-
-        // When & Then
-        Assertions.assertDoesNotThrow(report::create);
-    }
-
-    @Test
     public void testCreateDatasetOfTypeFlowInput() {
         // Given
         wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SIF0001"))
@@ -299,35 +257,6 @@ public class DatasetOperationsIT extends BaseOperationsIT {
         Assertions.assertDoesNotThrow(amendedDataset::update);
     }
 
-    @Test
-    public void testUpdateDatasetOfTypeReportRetrievedFromListDatasets() {
-        // Given
-        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/multiple-dataset-response.json")));
-
-        wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/SR0001"))
-                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-report-SR0001-update-request.json")))
-                .withHeader("Content-Type", WireMock.equalTo("application/json"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-create-response.json")));
-
-        Map<String, Dataset> datasets = getSdk().listDatasets("common", "SR0001", true);
-        Dataset originalDataset = datasets.get("SR0001");
-
-        // When
-        Dataset amendedDataset = originalDataset
-                .toBuilder()
-                .description("Updated Sample report description 1")
-                .build();
-
-        // When & Then
-        Assertions.assertDoesNotThrow(amendedDataset::update);
-    }
 
     @Test
     public void testUpdateDatasetOfTypeFlowRetrievedFromListDatasets() {
