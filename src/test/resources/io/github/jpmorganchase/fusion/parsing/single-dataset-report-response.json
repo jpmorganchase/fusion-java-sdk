@@ -45,9 +45,7 @@
         "id": "12345",
         "type": "Application (SEAL)"
       },
-      "report": {
-        "tier": "Tier 1"
-      }
+      "tier": "Tier 1"
     }
   ],
   "title": "Datasets"

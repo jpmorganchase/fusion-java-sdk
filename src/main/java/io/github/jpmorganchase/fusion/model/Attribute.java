@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.Fusion;
 import java.util.Map;
+import java.util.Set;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -55,6 +56,13 @@ public class Attribute extends CatalogResource {
         return String.format(
                 "%1scatalogs/%2s/datasets/%3s/attributes/%4s",
                 getFusion().getRootURL(), getCatalogIdentifier(), this.getDatasetIdentifier(), this.getIdentifier());
+    }
+
+    @Override
+    public Set<String> getRegisteredAttributes() {
+        Set<String> exclusions = super.getRegisteredAttributes();
+        exclusions.addAll(VarArgsHelper.getFieldNames(Attribute.class));
+        return exclusions;
     }
 
     public static class AttributeBuilder {

@@ -31,6 +31,13 @@ public class AttributeLineages extends CatalogResource {
                 "%1scatalogs/%2s/attributes/lineage", getFusion().getRootURL(), this.getCatalogIdentifier());
     }
 
+    @Override
+    public Set<String> getRegisteredAttributes() {
+        Set<String> exclusions = super.getRegisteredAttributes();
+        exclusions.addAll(VarArgsHelper.getFieldNames(AttributeLineages.class));
+        return exclusions;
+    }
+
     public static class AttributeLineagesBuilder {
         @SuppressWarnings("FieldCanBeLocal")
         private Map<String, Object> varArgs;

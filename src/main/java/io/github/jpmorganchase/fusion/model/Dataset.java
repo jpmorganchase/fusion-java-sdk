@@ -2,18 +2,13 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import lombok.Value;
+import java.util.*;
+import lombok.*;
 
 /**
  * An object representing a dataset. Object properties hold dataset metadata attributes
  */
-@Value
+@Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class Dataset extends CatalogResource {
@@ -26,7 +21,6 @@ public class Dataset extends CatalogResource {
     String title;
     String frequency;
     String type;
-    Report report;
     Application applicationId;
     Application producerApplicationId;
     List<Application> consumerApplicationId;
@@ -44,7 +38,6 @@ public class Dataset extends CatalogResource {
             String title,
             String frequency,
             String type,
-            Report report,
             Application applicationId,
             Application producerApplicationId,
             List<Application> consumerApplicationId,
@@ -56,7 +49,6 @@ public class Dataset extends CatalogResource {
         this.title = title;
         this.frequency = frequency;
         this.type = type;
-        this.report = report;
         this.applicationId = applicationId;
         this.producerApplicationId = producerApplicationId;
         this.consumerApplicationId = consumerApplicationId;
@@ -71,6 +63,13 @@ public class Dataset extends CatalogResource {
                 getFusion().getRootURL(), this.getCatalogIdentifier(), this.getIdentifier());
     }
 
+    @Override
+    public Set<String> getRegisteredAttributes() {
+        Set<String> exclusions = super.getRegisteredAttributes();
+        exclusions.addAll(VarArgsHelper.getFieldNames(Dataset.class));
+        return exclusions;
+    }
+
     public static class DatasetBuilder {
         @SuppressWarnings("FieldCanBeLocal")
         private Map<String, Object> varArgs;
@@ -82,15 +81,6 @@ public class Dataset extends CatalogResource {
 
         public DatasetBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = VarArgsHelper.copyMap(varArgs);
-            return this;
-        }
-
-        public DatasetBuilder report(Report report) {
-
-            if (Objects.nonNull(report) && Objects.nonNull(report.getTier())) {
-                this.type = "Report";
-                this.report = report;
-            }
             return this;
         }
 

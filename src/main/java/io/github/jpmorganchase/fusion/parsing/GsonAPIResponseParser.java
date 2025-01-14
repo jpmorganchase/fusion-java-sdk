@@ -8,7 +8,6 @@ import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.serializing.mutation.MutationContext;
 import io.github.jpmorganchase.fusion.serializing.mutation.ResourceMutationFactory;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
@@ -17,6 +16,11 @@ import lombok.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Main class for parsing JSON responses with various resources.
+ *
+ * @see GsonAPIResponseParserBuilder
+ */
 @Builder
 public class GsonAPIResponseParser implements APIResponseParser {
 
@@ -46,6 +50,27 @@ public class GsonAPIResponseParser implements APIResponseParser {
     @Override
     public Map<String, Dataset> parseDatasetResponse(String json, String catalog) {
         return parseResourcesWithVarArgsFromResponse(json, Dataset.class, (resource, mc) -> resource.toBuilder()
+                .varArgs(mc.getVarArgs())
+                .fusion(fusion)
+                .catalogIdentifier(catalog)
+                .build());
+    }
+
+    /**
+     * Parses a JSON response to extract a map of reports.
+     * <p>
+     * This method deserializes the given JSON string into a map of {@link Report} objects.
+     * Each report is enriched with additional context, such as variable arguments and the
+     * {@code fusion} configuration, using the builder pattern.
+     * </p>
+     *
+     * @param json the JSON response containing dataset information to be parsed.
+     * @return a map where the keys represent dataset identifiers (or relevant keys from the JSON structure),
+     *         and the values are {@link Report} objects enriched with context.
+     */
+    @Override
+    public Map<String, Report> parseReportResponse(String json, String catalog) {
+        return parseResourcesWithVarArgsFromResponse(json, Report.class, (resource, mc) -> resource.toBuilder()
                 .varArgs(mc.getVarArgs())
                 .fusion(fusion)
                 .catalogIdentifier(catalog)
@@ -131,8 +156,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
         Map<String, Object> responseMap = getMapFromJsonResponse(json);
         T obj = gson.fromJson(json, resourceClass);
 
-        Set<String> excludes = varArgsExclusions(resourceClass);
-        return parseResourceWithVarArgs(excludes, obj, responseMap, mutator);
+        return parseResourceWithVarArgs(obj.getRegisteredAttributes(), obj, responseMap, mutator);
     }
 
     @Override
@@ -142,12 +166,11 @@ public class GsonAPIResponseParser implements APIResponseParser {
         Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json);
         JsonArray resources = getResources(json);
 
-        Set<String> excludes = varArgsExclusions(resourceClass);
         List<T> resourceList = new ArrayList<>();
         for (JsonElement element : resources) {
             T obj = gson.fromJson(element, resourceClass);
             Map<String, Object> untypedResource = untypedResources.get(obj.getIdentifier());
-            resourceList.add(parseResourceWithVarArgs(excludes, obj, untypedResource, mutator));
+            resourceList.add(parseResourceWithVarArgs(obj.getRegisteredAttributes(), obj, untypedResource, mutator));
         }
 
         return collectMapOfUniqueResources(resourceList);
@@ -216,23 +239,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
         return modified;
     }
 
-    private static <T extends CatalogResource> Set<String> varArgsExclusions(Class<T> resourceClass) {
-        // TODO :: Should this be returned by the Model Object ? My Thinking is yes.
-        Set<String> excludes = new HashSet<>();
-        Set<String> excludeFromType = Arrays.stream(resourceClass.getDeclaredFields())
-                .map(Field::getName)
-                .collect(Collectors.toSet());
-        Set<String> excludeFromCatalogResource = Arrays.stream(CatalogResource.class.getDeclaredFields())
-                .map(Field::getName)
-                .collect(Collectors.toSet());
-        excludes.addAll(excludeFromType);
-        excludes.addAll(excludeFromCatalogResource);
-        excludes.add("@id");
-        excludes.add("@context");
-        excludes.add("@base");
-        return excludes;
-    }
-
     private Map<String, Object> getMapFromJsonResponse(String json) {
         Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
         return gson.fromJson(json, mapType);
@@ -250,6 +256,27 @@ public class GsonAPIResponseParser implements APIResponseParser {
                         }));
     }
 
+    public static class GsonAPIResponseParserBuilder {}
+
+    /**
+     * A custom builder class for {@link GsonAPIResponseParser} that extends the default builder
+     * provided by Lombok's {@code @Builder} annotation. This builder allows for the customization
+     * of the {@link Gson} instance used during the construction of the {@link GsonAPIResponseParser}.
+     *
+     * <p>In the default behavior, if no {@link Gson} instance is provided, the builder will
+     * automatically use a default {@link Gson} configuration through the {@link DefaultGsonConfig} class.</p>
+     *
+     * <p>This class ensures that the {@link Gson} instance is set, either by the user or using
+     * the default configuration, before building the {@link GsonAPIResponseParser} object.</p>
+     *
+     * <p>This builder is particularly useful when you need to customize the behavior of the
+     * {@link GsonAPIResponseParser} by ensuring that a valid {@link Gson} object is always available.</p>
+     *
+     * @see GsonAPIResponseParser
+     * @see GsonAPIResponseParserBuilder
+     * @see Gson
+     * @see DefaultGsonConfig
+     */
     public static class CustomGsonAPIResponseParserBuilder extends GsonAPIResponseParser.GsonAPIResponseParserBuilder {
 
         private Gson gson;

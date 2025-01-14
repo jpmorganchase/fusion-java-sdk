@@ -4,10 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -151,6 +149,20 @@ class AttributeLineagesTest {
 
         assertThat(attributeLineages.getVarArgs(), is(notNullValue()));
         assertThat(attributeLineages.getVarArgs(), is(expectedVarArgs));
+    }
+
+    @Test
+    public void testRegisteredAttributesReturnedCorrectly() {
+        // Given
+        Set<String> expected = VarArgsHelper.getFieldNames(CatalogResource.class);
+        expected.addAll(VarArgsHelper.getFieldNames(AttributeLineages.class));
+        expected.addAll(Arrays.asList("@id", "@context", "@base"));
+
+        // When
+        Set<String> actual = AttributeLineages.builder().build().getRegisteredAttributes();
+
+        // Then
+        assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
     }
 
     private Fusion givenFusionMock() {

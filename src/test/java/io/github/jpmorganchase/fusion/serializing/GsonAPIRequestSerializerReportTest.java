@@ -7,7 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
-import io.github.jpmorganchase.fusion.model.Dataset;
+import io.github.jpmorganchase.fusion.model.Report;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,14 +17,14 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-class GsonAPIRequestSerializerDatasetTest {
+class GsonAPIRequestSerializerReportTest {
 
     @Test
-    public void testDatasetSerializesCorrectly() {
+    public void testReportSerializesCorrectly() {
         // Given
-        Dataset dataset = Dataset.builder()
+        Report report = Report.builder()
                 .identifier("SD0001")
-                .description("Sample dataset description 1")
+                .description("Sample report description 1")
                 .linkedEntity("SD0001/")
                 .title("Sample Dataset 1 | North America")
                 .frequency("Daily")
@@ -48,95 +48,98 @@ class GsonAPIRequestSerializerDatasetTest {
                 .applicationId(Application.builder().sealId("12345").build())
                 .fusion(Mockito.mock(Fusion.class))
                 .catalogIdentifier("foobar")
+                .tier("Tier 1")
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
 
         // When
-        String actual = serializer.serialize(dataset);
+        String actual = serializer.serialize(report);
 
         // Then
-        String expected = loadTestResource("dataset-request.json");
+        String expected = loadTestResource("report-request.json");
         assertThat(actual, is(equalTo(expected)));
     }
 
     @Test
-    public void testDatasetWithoutVarArgsSerializesCorrectly() {
+    public void testReportWithoutVarArgsSerializesCorrectly() {
         // Given
-        Dataset dataset = Dataset.builder()
+        Report report = Report.builder()
                 .identifier("SD0001")
                 .description("Sample dataset description 1")
                 .linkedEntity("SD0001/")
                 .title("Sample Dataset 1 | North America")
                 .frequency("Daily")
                 .publisher("Publisher 1")
+                .tier("Tier 1")
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
 
         // When
-        String actual = serializer.serialize(dataset);
+        String actual = serializer.serialize(report);
 
         // Then
-        String expected = loadTestResource("dataset-no-varags-request.json");
+        String expected = loadTestResource("report-no-varags-request.json");
         assertThat(actual, is(equalTo(expected)));
     }
 
     @Test
-    public void testDatasetWithNullValues() {
+    public void testReportWithNullValues() {
         // Given
-        Dataset dataset = Dataset.builder()
+        Report report = Report.builder()
                 .identifier("SD0002")
                 .description(null)
                 .linkedEntity(null)
                 .title("Sample Dataset with Nulls")
                 .frequency("Monthly")
                 .applicationId(null)
-                // TODO :: Ian ... Correct ...
-                // .report(null)
+                .tier("Tier 1")
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
 
         // When
-        String actual = serializer.serialize(dataset);
+        String actual = serializer.serialize(report);
 
         // Then
-        String expected = loadTestResource("dataset-with-nulls-request.json");
+        String expected = loadTestResource("report-with-nulls-request.json");
         assertThat(actual, is(equalTo(expected)));
     }
 
     @Test
-    public void testDatasetWithEmptyConsumerApplicationIds() {
+    public void testReportWithEmptyConsumerApplicationIds() {
         // Given
-        Dataset dataset = Dataset.builder()
+        Report report = Report.builder()
                 .identifier("SD0003")
                 .description("Sample dataset with empty consumer IDs")
                 .linkedEntity("SD0003/")
                 .title("Sample Dataset 3 | North America")
                 .frequency("Weekly")
                 .consumerApplicationId(new ArrayList<>())
+                .tier("Tier 1")
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
 
         // When
-        String actual = serializer.serialize(dataset);
+        String actual = serializer.serialize(report);
 
         // Then
-        String expected = loadTestResource("dataset-empty-consumer-ids.json");
+        String expected = loadTestResource("report-empty-consumer-ids.json");
         assertThat(actual, is(equalTo(expected)));
     }
 
     @Test
-    public void testDatasetWithSpecialCharacters() {
+    public void testReportWithSpecialCharacters() {
         // Given
-        Dataset dataset = Dataset.builder()
+        Report dataset = Report.builder()
                 .identifier("SD0004")
                 .description("Special characters: \"quotes\", \n newlines, and \u2022 bullets")
                 .linkedEntity("SD0004/")
                 .title("Dataset with Special Characters")
                 .frequency("Yearly")
+                .tier("Tier 1")
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
@@ -145,7 +148,7 @@ class GsonAPIRequestSerializerDatasetTest {
         String actual = serializer.serialize(dataset);
 
         // Then
-        String expected = loadTestResource("dataset-special-characters.json");
+        String expected = loadTestResource("report-special-characters.json");
         assertThat(actual, is(equalTo(expected)));
     }
 

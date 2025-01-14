@@ -5,8 +5,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -71,5 +71,19 @@ public class AttributeBuilderTest {
         assertThat(
                 a.getApiPath(),
                 is(equalTo("http://foo/api/v1/catalogs/bar/datasets/foobar/attributes/The identifier")));
+    }
+
+    @Test
+    public void testRegisteredAttributesReturnedCorrectly() {
+        // Given
+        Set<String> expected = VarArgsHelper.getFieldNames(CatalogResource.class);
+        expected.addAll(VarArgsHelper.getFieldNames(Attribute.class));
+        expected.addAll(Arrays.asList("@id", "@context", "@base"));
+
+        // When
+        Set<String> actual = Attribute.builder().build().getRegisteredAttributes();
+
+        // Then
+        assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
     }
 }

@@ -13,6 +13,14 @@ public interface Builders {
     Dataset.DatasetBuilder dataset();
 
     /**
+     * Returns a builder for creating a {@link Report} object.
+     * The builder can be used to set properties and then create / update an instance of ReportObj.
+     *
+     * @return {@link Report.ReportBuilder} the report builder
+     */
+    Report.ReportBuilder report();
+
+    /**
      * Returns a builder for creating a {@link DataDictionaryAttribute} object.
      * The builder can be used to set properties and then create / update an instance of Attribute.
      *

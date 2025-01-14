@@ -5,8 +5,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -36,5 +36,19 @@ public class DataProductBuilderTest {
         assertThat(p.getStatus(), is(equalTo("The status")));
         assertThat(p.getCatalogIdentifier(), is(equalTo("foobar")));
         assertThat(p.getFusion(), is(equalTo(fusion)));
+    }
+
+    @Test
+    public void testRegisteredAttributesReturnedCorrectly() {
+        // Given
+        Set<String> expected = VarArgsHelper.getFieldNames(CatalogResource.class);
+        expected.addAll(VarArgsHelper.getFieldNames(DataProduct.class));
+        expected.addAll(Arrays.asList("@id", "@context", "@base"));
+
+        // When
+        Set<String> actual = DataProduct.builder().build().getRegisteredAttributes();
+
+        // Then
+        assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
     }
 }

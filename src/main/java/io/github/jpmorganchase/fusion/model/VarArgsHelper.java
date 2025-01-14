@@ -1,8 +1,8 @@
 package io.github.jpmorganchase.fusion.model;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class VarArgsHelper {
 
@@ -24,5 +24,19 @@ public class VarArgsHelper {
 
     public static Map<String, Object> initializeMap() {
         return new HashMap<>();
+    }
+
+    public static Set<String> getFieldNames(Class<? extends CatalogResource> resourceClass) {
+        if (resourceClass == null) {
+            // Explicitly return an empty set to handle null input
+            return Collections.emptySet();
+        }
+
+        // Stream the fields, map names, and filter out synthetic fields like "this$0"
+        return Arrays.stream(resourceClass.getDeclaredFields())
+                .filter(f -> !f.isSynthetic())
+                .map(Field::getName)
+                .filter(name -> !name.startsWith("__$") && !name.equals("this$0"))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }
