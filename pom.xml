@@ -329,6 +329,8 @@
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
                 <configuration>
+                    <verbose>true</verbose>
+                    <reportsDirectory>${project.build.directory}/pit-reports</reportsDirectory>
                     <targetClasses>
                         <param>io.github.jpmorganchase.fusion.*</param>
                     </targetClasses>

@@ -26,7 +26,7 @@ public class VarArgsHelper {
         return new HashMap<>();
     }
 
-    public static Set<String> getFieldNames(Class<?> resourceClass) {
+    public static Set<String> getFieldNames(Class<? extends CatalogResource> resourceClass) {
         if (resourceClass == null) {
             // Explicitly return an empty set to handle null input
             return Collections.emptySet();
@@ -35,7 +35,7 @@ public class VarArgsHelper {
         // Stream the fields, map names, and filter out synthetic fields like "this$0"
         return Arrays.stream(resourceClass.getDeclaredFields())
                 .map(Field::getName)
-                .filter(name -> name != null && !name.equals("this$0"))
+                .filter(name -> !name.startsWith("__$") && !name.equals("this$0"))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }
