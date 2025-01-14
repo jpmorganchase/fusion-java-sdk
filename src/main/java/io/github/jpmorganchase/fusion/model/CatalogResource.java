@@ -70,7 +70,6 @@ public abstract class CatalogResource {
     /**
      * Returns the registered attributes pertaining to this catalog resource.
      * A 'registered' attribute is essentially member variables belonging to the class.
-     * </p>
      * It is expected that child classes will override, calling super to initialise and register attributes
      * @return set of attributes registered against this CatalogResource
      */

@@ -16,6 +16,11 @@ import lombok.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Main class for parsing JSON responses with various resources.
+ *
+ * @see GsonAPIResponseParserBuilder
+ */
 @Builder
 public class GsonAPIResponseParser implements APIResponseParser {
 
@@ -251,6 +256,27 @@ public class GsonAPIResponseParser implements APIResponseParser {
                         }));
     }
 
+    public static class GsonAPIResponseParserBuilder {}
+
+    /**
+     * A custom builder class for {@link GsonAPIResponseParser} that extends the default builder
+     * provided by Lombok's {@code @Builder} annotation. This builder allows for the customization
+     * of the {@link Gson} instance used during the construction of the {@link GsonAPIResponseParser}.
+     *
+     * <p>In the default behavior, if no {@link Gson} instance is provided, the builder will
+     * automatically use a default {@link Gson} configuration through the {@link DefaultGsonConfig} class.</p>
+     *
+     * <p>This class ensures that the {@link Gson} instance is set, either by the user or using
+     * the default configuration, before building the {@link GsonAPIResponseParser} object.</p>
+     *
+     * <p>This builder is particularly useful when you need to customize the behavior of the
+     * {@link GsonAPIResponseParser} by ensuring that a valid {@link Gson} object is always available.</p>
+     *
+     * @see GsonAPIResponseParser
+     * @see GsonAPIResponseParserBuilder
+     * @see Gson
+     * @see DefaultGsonConfig
+     */
     public static class CustomGsonAPIResponseParserBuilder extends GsonAPIResponseParser.GsonAPIResponseParserBuilder {
 
         private Gson gson;
