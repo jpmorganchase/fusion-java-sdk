@@ -1,0 +1,56 @@
+{
+  "description": "Sample flow description SOF0001",
+  "@id": "SOF0001/",
+  "title": "Sample Flow | North America SOF0001",
+  "frequency": "Daily",
+  "identifier": "SOF0001",
+  "subCategory": [
+    "Subcategory SOF0001"
+  ],
+  "isRawData": false,
+  "isInternalOnlyDataset": false,
+  "language": "English",
+  "source": [
+    "Source System SOF0001"
+  ],
+  "coverageEndDate": "2023-03-09",
+  "maintainer": "Maintainer SOF0001",
+  "coverageStartDate": "2022-02-06",
+  "createdDate": "2022-02-06",
+  "isThirdPartyData": false,
+  "modifiedDate": "2023-03-09",
+  "publisher": "Publisher SOF0001",
+  "tag": [
+    "TagSOF0001"
+  ],
+  "category": [
+    "Category SOF0001"
+  ],
+  "region": [
+    "North America"
+  ],
+  "hasSample": false,
+  "isRestricted": false,
+  "type": "Flow",
+  "applicationId": {
+    "id": "12345",
+    "type": "Application (SEAL)"
+  },
+  "producerApplicationId": {
+    "id": "123456",
+    "type": "Application (SEAL)"
+  },
+  "consumerApplicationId": [
+    {
+      "id": "456789",
+      "type": "Application (SEAL)"
+    },
+    {
+      "id": "901234",
+      "type": "Application (SEAL)"
+    }
+  ],
+  "flowDetails": {
+    "flowDirection": "Output"
+  }
+}

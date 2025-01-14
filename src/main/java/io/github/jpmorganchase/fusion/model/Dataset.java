@@ -22,9 +22,6 @@ public class Dataset extends CatalogResource {
     String frequency;
     String type;
     Application applicationId;
-    Application producerApplicationId;
-    List<Application> consumerApplicationId;
-    Flow flowDetails;
     String publisher;
 
     @Builder(toBuilder = true)
@@ -39,9 +36,6 @@ public class Dataset extends CatalogResource {
             String frequency,
             String type,
             Application applicationId,
-            Application producerApplicationId,
-            List<Application> consumerApplicationId,
-            Flow flowDetails,
             String publisher) {
         super(identifier, varArgs, fusion, catalogIdentifier);
         this.description = description;
@@ -50,9 +44,6 @@ public class Dataset extends CatalogResource {
         this.frequency = frequency;
         this.type = type;
         this.applicationId = applicationId;
-        this.producerApplicationId = producerApplicationId;
-        this.consumerApplicationId = consumerApplicationId;
-        this.flowDetails = flowDetails;
         this.publisher = publisher;
     }
 
@@ -81,15 +72,6 @@ public class Dataset extends CatalogResource {
 
         public DatasetBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = VarArgsHelper.copyMap(varArgs);
-            return this;
-        }
-
-        public DatasetBuilder flow(Flow flow) {
-            this.type = "Flow";
-
-            this.producerApplicationId = flow.getProducerApplicationId();
-            this.consumerApplicationId = flow.getConsumerApplicationId();
-            this.flowDetails = flow;
             return this;
         }
     }

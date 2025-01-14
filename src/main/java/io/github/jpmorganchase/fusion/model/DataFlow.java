@@ -1,6 +1,8 @@
 package io.github.jpmorganchase.fusion.model;
 
 import io.github.jpmorganchase.fusion.Fusion;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.Builder;
@@ -11,13 +13,14 @@ import lombok.ToString;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class Report extends Dataset {
+public class DataFlow extends Dataset {
 
-    ReportDetail report;
-    String tier;
+    Application producerApplicationId;
+    List<Application> consumerApplicationId;
+    Flow flowDetails;
 
     @Builder(toBuilder = true)
-    public Report(
+    public DataFlow(
             @Builder.ObtainVia(method = "getIdentifier") String identifier,
             @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
             @Builder.ObtainVia(method = "getFusion") Fusion fusion,
@@ -29,8 +32,9 @@ public class Report extends Dataset {
             @Builder.ObtainVia(method = "getType") String type,
             @Builder.ObtainVia(method = "getApplicationId") Application applicationId,
             @Builder.ObtainVia(method = "getPublisher") String publisher,
-            ReportDetail report,
-            String tier) {
+            Application producerApplicationId,
+            List<Application> consumerApplicationId,
+            Flow flowDetails) {
         super(
                 identifier,
                 varArgs,
@@ -43,40 +47,39 @@ public class Report extends Dataset {
                 type,
                 applicationId,
                 publisher);
-        this.report = report;
-        this.tier = tier;
+        this.producerApplicationId = producerApplicationId;
+        this.consumerApplicationId =
+                consumerApplicationId != null ? Collections.unmodifiableList(consumerApplicationId) : null;
+        this.flowDetails = flowDetails;
     }
 
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();
-        exclusions.addAll(VarArgsHelper.getFieldNames(Report.class));
+        exclusions.addAll(VarArgsHelper.getFieldNames(DataFlow.class));
         return exclusions;
     }
 
-    public static class ReportBuilder extends DatasetBuilder {
+    public static class DataFlowBuilder extends DatasetBuilder {
         @SuppressWarnings("FieldCanBeLocal")
         private Map<String, Object> varArgs;
 
-        private Report.ReportBuilder report(ReportDetail report) {
-            return this;
-        }
-
-        public Report.ReportBuilder varArg(String key, Object value) {
+        public DataFlow.DataFlowBuilder varArg(String key, Object value) {
             this.varArgs = VarArgsHelper.varArg(key, value, this.varArgs);
             return this;
         }
 
-        public Report.ReportBuilder varArgs(Map<String, Object> varArgs) {
+        public DataFlow.DataFlowBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = VarArgsHelper.copyMap(varArgs);
             return this;
         }
 
-        public Report.ReportBuilder tier(String tier) {
-            this.tier = tier;
-            if (null != tier && !tier.isEmpty()) {
-                this.report = ReportDetail.builder().tier(tier).build();
-                this.type = DatasetType.REPORT.getLabel();
+        public DataFlow.DataFlowBuilder flow(Flow flowDetails) {
+            this.type = DatasetType.FLOW.getLabel();
+            if (null != flowDetails) {
+                this.producerApplicationId = flowDetails.getProducerApplicationId();
+                this.consumerApplicationId = flowDetails.getConsumerApplicationId();
+                this.flowDetails = flowDetails;
             }
             return this;
         }

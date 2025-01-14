@@ -378,7 +378,7 @@ public class Fusion {
 
         Map<String, Report> datasets =
                 filterDatasets(responseParser.parseReportResponse(json, catalogName), contains, idContains);
-        return filterByType(datasets, "Report");
+        return filterByType(datasets, DatasetType.REPORT);
     }
 
     /**
@@ -402,6 +402,50 @@ public class Fusion {
      */
     public Map<String, Report> listReports() {
         return listReports(this.getDefaultCatalog(), null, false);
+    }
+
+    /**
+     * Get a filtered list of the data flows in the specified catalog
+     * <p>
+     * Note that as of current version this search capability is not yet implemented
+     *
+     * @param catalogName identifier of the catalog to be queried
+     * @param contains    a search keyword.
+     * @param idContains  is true if only apply the filter to the identifier
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public Map<String, DataFlow> listDataFlows(String catalogName, String contains, boolean idContains) {
+        String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
+        String json = this.api.callAPI(url);
+
+        Map<String, DataFlow> datasets =
+                filterDatasets(responseParser.parseDataFlowResponse(json, catalogName), contains, idContains);
+        return filterByType(datasets, DatasetType.FLOW);
+    }
+
+    /**
+     * Get a list of the data flows in the specified catalog
+     *
+     * @param catalogName identifier of the catalog to be queried
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public Map<String, DataFlow> listDataFlows(String catalogName) {
+        return listDataFlows(catalogName, null, false);
+    }
+
+    /**
+     * Get a list of the data flows in the default catalog
+     *
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public Map<String, DataFlow> listDataFlows() {
+        return listDataFlows(this.getDefaultCatalog(), null, false);
     }
 
     /**

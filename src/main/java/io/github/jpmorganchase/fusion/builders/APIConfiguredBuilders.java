@@ -20,6 +20,11 @@ public class APIConfiguredBuilders implements Builders {
     }
 
     @Override
+    public DataFlow.DataFlowBuilder dataFlow() {
+        return DataFlow.builder().fusion(fusion).type(DatasetType.FLOW.getLabel());
+    }
+
+    @Override
     public DataDictionaryAttribute.DataDictionaryAttributeBuilder dataDictionaryAttribute() {
         return DataDictionaryAttribute.builder().fusion(fusion);
     }

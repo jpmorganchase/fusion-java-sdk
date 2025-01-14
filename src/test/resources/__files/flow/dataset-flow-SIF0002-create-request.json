@@ -1,0 +1,60 @@
+{
+  "description": "Sample flow description SIF0002",
+  "@id": "SIF0002/",
+  "title": "Sample Flow | North America SIF0002",
+  "frequency": "Daily",
+  "identifier": "SIF0002",
+  "subCategory": [
+    "Subcategory SIF0002"
+  ],
+  "isRawData": false,
+  "isInternalOnlyDataset": false,
+  "language": "English",
+  "source": [
+    "Source System SIF0002"
+  ],
+  "coverageEndDate": "2023-03-09",
+  "maintainer": "Maintainer SIF0002",
+  "coverageStartDate": "2022-02-06",
+  "createdDate": "2022-02-06",
+  "isThirdPartyData": false,
+  "modifiedDate": "2023-03-09",
+  "publisher": "Publisher SIF0002",
+  "tag": [
+    "TagSIF0002"
+  ],
+  "category": [
+    "Category SIF0002"
+  ],
+  "region": [
+    "North America"
+  ],
+  "hasSample": false,
+  "isRestricted": false,
+  "type": "Flow",
+  "applicationId": {
+    "id": "12345",
+    "type": "Application (SEAL)"
+  },
+  "producerApplicationId": {
+    "id": "123456",
+    "type": "Application (SEAL)"
+  },
+  "consumerApplicationId": [
+    {
+      "id": "456789",
+      "type": "Application (SEAL)"
+    },
+    {
+      "id": "901234",
+      "type": "Application (SEAL)"
+    }
+  ],
+  "flowDetails": {
+    "flowDirection": "Input",
+    "flowType": "raw",
+    "startTime": "10:00",
+    "endTime": "13:00",
+    "timeZone": "UTC+1"
+  }
+}

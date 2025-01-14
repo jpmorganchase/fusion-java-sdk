@@ -12,6 +12,8 @@ public interface APIResponseParser {
 
     Map<String, Report> parseReportResponse(String json, String catalog);
 
+    Map<String, DataFlow> parseDataFlowResponse(String json, String catalog);
+
     Map<String, Attribute> parseAttributeResponse(String json, String catalog, String dataset);
 
     Map<String, DataDictionaryAttribute> parseDataDictionaryAttributesResponse(String json, String catalog);
