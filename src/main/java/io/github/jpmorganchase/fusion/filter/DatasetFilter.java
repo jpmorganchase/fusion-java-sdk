@@ -1,6 +1,7 @@
 package io.github.jpmorganchase.fusion.filter;
 
 import io.github.jpmorganchase.fusion.model.Dataset;
+import io.github.jpmorganchase.fusion.model.DatasetType;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -35,8 +36,8 @@ public class DatasetFilter {
      * @param type     The type to filter datasets by.
      * @return A filtered map of datasets containing only entries that match the specified type.
      */
-    public static <T extends Dataset> Map<String, T> filterByType(Map<String, T> datasets, String type) {
-        if (type == null || type.isEmpty()) {
+    public static <T extends Dataset> Map<String, T> filterByType(Map<String, T> datasets, DatasetType type) {
+        if (type == null) {
             return datasets; // No filtering needed
         }
 
@@ -46,8 +47,8 @@ public class DatasetFilter {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private static <T extends Dataset> Predicate<Map.Entry<String, T>> typePredicate(String type) {
-        return entry -> type.equals(entry.getValue().getType());
+    private static <T extends Dataset> Predicate<Map.Entry<String, T>> typePredicate(DatasetType type) {
+        return entry -> type.getLabel().equals(entry.getValue().getType());
     }
 
     /**

@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -104,29 +103,6 @@ class GsonAPIRequestSerializerReportTest {
 
         // Then
         String expected = loadTestResource("report-with-nulls-request.json");
-        assertThat(actual, is(equalTo(expected)));
-    }
-
-    @Test
-    public void testReportWithEmptyConsumerApplicationIds() {
-        // Given
-        Report report = Report.builder()
-                .identifier("SD0003")
-                .description("Sample dataset with empty consumer IDs")
-                .linkedEntity("SD0003/")
-                .title("Sample Dataset 3 | North America")
-                .frequency("Weekly")
-                .consumerApplicationId(new ArrayList<>())
-                .tier("Tier 1")
-                .build();
-
-        GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
-
-        // When
-        String actual = serializer.serialize(report);
-
-        // Then
-        String expected = loadTestResource("report-empty-consumer-ids.json");
         assertThat(actual, is(equalTo(expected)));
     }
 

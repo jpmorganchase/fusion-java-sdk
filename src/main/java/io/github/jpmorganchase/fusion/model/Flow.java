@@ -8,7 +8,12 @@ import lombok.*;
 @EqualsAndHashCode()
 @ToString()
 public class Flow {
+
     String flowDirection;
+    String flowType;
+    String startTime;
+    String endTime;
+    String timeZone;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

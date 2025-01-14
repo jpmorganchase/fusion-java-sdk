@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import io.github.jpmorganchase.fusion.model.Dataset;
+import io.github.jpmorganchase.fusion.model.DatasetType;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -132,7 +133,7 @@ class DatasetFilterTest {
                         .type("type2")
                         .build());
 
-        Map<String, Dataset> result = DatasetFilter.filterByType(datasets, "");
+        Map<String, Dataset> result = DatasetFilter.filterByType(datasets, null);
 
         assertThat("All datasets should be returned when no filter is applied.", result.size(), is(equalTo(2)));
     }
@@ -145,17 +146,17 @@ class DatasetFilterTest {
                 Dataset.builder()
                         .identifier("ID001")
                         .title("Dataset 1")
-                        .type("type1")
+                        .type(DatasetType.REPORT.getLabel())
                         .build());
         datasets.put(
                 "2",
                 Dataset.builder()
                         .identifier("ID002")
                         .title("Dataset 2")
-                        .type("type2")
+                        .type(DatasetType.FLOW.getLabel())
                         .build());
 
-        Map<String, Dataset> result = DatasetFilter.filterByType(datasets, "type1");
+        Map<String, Dataset> result = DatasetFilter.filterByType(datasets, DatasetType.REPORT);
 
         assertThat("Only datasets matching the type should be returned.", result.size(), is(equalTo(1)));
         assertThat("Filtered dataset should be present.", result.containsKey("1"), is(equalTo(true)));
@@ -169,17 +170,17 @@ class DatasetFilterTest {
                 Dataset.builder()
                         .identifier("ID001")
                         .title("Dataset 1")
-                        .type("type1")
+                        .type(DatasetType.REPORT.getLabel())
                         .build());
         datasets.put(
                 "2",
                 Dataset.builder()
                         .identifier("ID002")
                         .title("Dataset 2")
-                        .type("type2")
+                        .type(DatasetType.REPORT.getLabel())
                         .build());
 
-        Map<String, Dataset> result = DatasetFilter.filterByType(datasets, "non-existent");
+        Map<String, Dataset> result = DatasetFilter.filterByType(datasets, DatasetType.FLOW);
 
         assertThat("No datasets should be returned if no matches found.", result.isEmpty(), is(equalTo(true)));
     }
@@ -188,7 +189,7 @@ class DatasetFilterTest {
     public void testFilterByType_emptyInput() {
         Map<String, Dataset> datasets = new HashMap<>();
 
-        Map<String, Dataset> result = DatasetFilter.filterByType(datasets, "type1");
+        Map<String, Dataset> result = DatasetFilter.filterByType(datasets, DatasetType.REPORT);
 
         assertThat("No datasets should be returned from an empty input.", result.isEmpty(), is(equalTo(true)));
     }

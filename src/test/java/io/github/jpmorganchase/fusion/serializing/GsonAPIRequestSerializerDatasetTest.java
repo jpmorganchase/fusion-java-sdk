@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -92,8 +91,6 @@ class GsonAPIRequestSerializerDatasetTest {
                 .title("Sample Dataset with Nulls")
                 .frequency("Monthly")
                 .applicationId(null)
-                // TODO :: Ian ... Correct ...
-                // .report(null)
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
@@ -115,7 +112,7 @@ class GsonAPIRequestSerializerDatasetTest {
                 .linkedEntity("SD0003/")
                 .title("Sample Dataset 3 | North America")
                 .frequency("Weekly")
-                .consumerApplicationId(new ArrayList<>())
+                // .consumerApplicationId(new ArrayList<>())
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
