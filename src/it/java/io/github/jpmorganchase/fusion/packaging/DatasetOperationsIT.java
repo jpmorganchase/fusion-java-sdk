@@ -6,6 +6,8 @@ import io.github.jpmorganchase.fusion.test.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
@@ -129,6 +131,31 @@ public class DatasetOperationsIT extends BaseOperationsIT {
 
         // When & Then
         Assertions.assertDoesNotThrow(dataset::update);
+    }
+
+    @Test
+    public void testUpdateDatasetLineage() {
+        // Given
+        wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/SD0004"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-SD0004-update-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-update-response.json")));
+
+        Dataset dataset = getSdk().builders().dataset().build();
+
+
+        // When & Then
+        Assertions.assertDoesNotThrow(() ->  dataset.createLineage(DatasetLineage.builder()
+                .source(new LinkedHashSet<>(Arrays.asList(
+                        DatasetReference.builder().catalog("foo").dataset("d1").build(),
+                        DatasetReference.builder().catalog("foo").dataset("d2").build(),
+                        DatasetReference.builder().catalog("bar").dataset("d1").build(),
+                        DatasetReference.builder().catalog("bar").dataset("d3").build()
+                )))
+                .build()));
     }
 
     @Test

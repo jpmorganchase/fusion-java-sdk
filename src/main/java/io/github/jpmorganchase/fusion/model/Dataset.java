@@ -54,6 +54,14 @@ public class Dataset extends CatalogResource {
                 getFusion().getRootURL(), this.getCatalogIdentifier(), this.getIdentifier());
     }
 
+    protected String getApiPathForLineage() {
+        return getApiPath() + "/lineage";
+    }
+
+    public void createLineage(DatasetLineage lineage){
+       getFusion().create(getApiPathForLineage(), lineage);
+    }
+
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();
