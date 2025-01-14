@@ -136,15 +136,17 @@ public class DatasetOperationsIT extends BaseOperationsIT {
     @Test
     public void testUpdateDatasetLineage() {
         // Given
-        wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/SD0004"))
-                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-SD0004-update-request.json")))
+        wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SD0002/lineage"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-SD0002-lineage-create-request.json")))
                 .withHeader("Content-Type", WireMock.equalTo("application/json"))
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-update-response.json")));
+                        .withStatus(200)));
 
-        Dataset dataset = getSdk().builders().dataset().build();
+        Dataset dataset = getSdk().builders().dataset()
+                .identifier("SD0002")
+                .catalogIdentifier("common")
+                .build();
 
 
         // When & Then

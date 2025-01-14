@@ -1,0 +1,15 @@
+{
+  "source" : [ {
+    "catalog" : "foo",
+    "dataset" : "d1"
+  }, {
+    "catalog" : "foo",
+    "dataset" : "d2"
+  }, {
+    "catalog" : "bar",
+    "dataset" : "d1"
+  }, {
+    "catalog" : "bar",
+    "dataset" : "d3"
+  } ]
+}
