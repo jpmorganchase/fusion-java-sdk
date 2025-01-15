@@ -1,11 +1,10 @@
 package io.github.jpmorganchase.fusion.model;
 
+import java.util.Set;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
-
-import java.util.Set;
 
 @Value
 @EqualsAndHashCode
@@ -14,5 +13,4 @@ import java.util.Set;
 public class DatasetLineage {
 
     Set<DatasetReference> source;
-
 }

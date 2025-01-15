@@ -58,8 +58,8 @@ public class Dataset extends CatalogResource {
         return getApiPath() + "/lineage";
     }
 
-    public void createLineage(DatasetLineage lineage){
-       getFusion().create(getApiPathForLineage(), lineage);
+    public void createLineage(DatasetLineage lineage) {
+        getFusion().create(getApiPathForLineage(), lineage);
     }
 
     @Override

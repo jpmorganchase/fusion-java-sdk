@@ -13,5 +13,4 @@ public class DatasetReference {
 
     String catalog;
     String dataset;
-
 }
