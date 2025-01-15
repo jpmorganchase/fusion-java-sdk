@@ -162,6 +162,17 @@ public class Fusion {
     }
 
     /**
+     * Creates a new catalog resource by sending a POST request to the specified API path.
+     *
+     * @param apiPath the API endpoint path where the resource should be created.
+     * @param resource the {@link Object} to be created.
+     * @return the response from the API as a {@link String}.
+     */
+    public String create(String apiPath, Object resource) {
+        return this.api.callAPIToPost(apiPath, resource);
+    }
+
+    /**
      * Updates an existing catalog resource by sending a PUT request to the specified API path.
      *
      * @param apiPath the API endpoint path where the resource exists.
