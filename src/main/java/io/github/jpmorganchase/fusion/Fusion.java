@@ -372,6 +372,22 @@ public class Fusion {
     }
 
     /**
+     * Get the lineage for a dataset, in the specified catalog
+     * Currently this will always return a lineage.
+     *
+     * @param catalogName identifier of the catalog to be queried
+     * @param dataset     a String representing the dataset identifier to query.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public DatasetLineage getLineage(String catalogName, String dataset) {
+
+        String url = String.format("%1scatalogs/%2s/datasets/%3s/lineage", this.rootURL, catalogName, dataset);
+        return responseParser.parseDatasetLineage(this.api.callAPI(url), catalogName);
+    }
+
+    /**
      * Get a filtered list of the reports in the specified catalog
      * <p>
      * Note that as of current version this search capability is not yet implemented

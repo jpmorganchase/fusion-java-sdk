@@ -3,6 +3,7 @@ package io.github.jpmorganchase.fusion.packaging;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.test.TestUtils;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -13,8 +14,7 @@ import java.util.Map;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 public class DatasetOperationsIT extends BaseOperationsIT {
 
@@ -150,7 +150,7 @@ public class DatasetOperationsIT extends BaseOperationsIT {
 
 
         // When & Then
-        Assertions.assertDoesNotThrow(() ->  dataset.createLineage(DatasetLineage.builder()
+        Assertions.assertDoesNotThrow(() ->  dataset.createLineage(SourceDatasets.builder()
                 .source(new LinkedHashSet<>(Arrays.asList(
                         DatasetReference.builder().catalog("foo").dataset("d1").build(),
                         DatasetReference.builder().catalog("foo").dataset("d2").build(),
@@ -158,6 +158,59 @@ public class DatasetOperationsIT extends BaseOperationsIT {
                         DatasetReference.builder().catalog("bar").dataset("d3").build()
                 )))
                 .build()));
+    }
+
+    @Test
+    public void testGetDatasetLineage(){
+        // Given
+        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets/SD0002/lineage"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-SD0002-get-lineage-response.json")));
+
+        //When
+        Dataset dataset = getSdk().builders().dataset()
+                .identifier("SD0002")
+                .catalogIdentifier("common")
+                .build();
+
+        DatasetLineage lineage = dataset.getLineage();
+
+        //Then
+        assertThat(lineage, notNullValue());
+        assertThat(lineage.getDatasets(), notNullValue());
+        assertThat(lineage.getDatasets().size(), Matchers.is(2));
+        assertThat(lineage.getRelations(), notNullValue());
+        assertThat(lineage.getRelations(), containsInAnyOrder(
+                relationship("common","SD0002", "common","SD0001"),
+                relationship("common","SD0003", "common","SD0002")
+        ));
+
+    }
+
+    @Test
+    public void testGetDatasetLineageWithNoRelationships(){
+        // Given
+        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets/SD0002/lineage"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-SD0002-get-lineage-empty-response.json")));
+
+        //When
+        Dataset dataset = getSdk().builders().dataset()
+                .identifier("SD0002")
+                .catalogIdentifier("common")
+                .build();
+
+        DatasetLineage lineage = dataset.getLineage();
+
+        //Then
+        assertThat(lineage, notNullValue());
+        assertThat(lineage.getDatasets(), Matchers.is(Matchers.empty()));
+        assertThat(lineage.getRelations(), Matchers.is(Matchers.empty()));
+
     }
 
     @Test
@@ -262,6 +315,19 @@ public class DatasetOperationsIT extends BaseOperationsIT {
         assertThat(datasets.containsKey("SD0003"), is(equalTo(false)));
         assertThat(datasets.containsKey("SR0001"), is(equalTo(false)));
 
+    }
+
+    private DatasetRelationship relationship(String srcCatalog, String srcDataset, String destCatalog, String destDataset) {
+        return DatasetRelationship.builder()
+                .source(DatasetReference.builder()
+                        .catalog(srcCatalog)
+                        .dataset(srcDataset)
+                        .build())
+                .destination(DatasetReference.builder()
+                        .catalog(destCatalog)
+                        .dataset(destDataset)
+                        .build())
+                .build();
     }
 
 }

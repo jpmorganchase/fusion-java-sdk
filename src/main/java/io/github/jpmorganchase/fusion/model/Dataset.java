@@ -67,8 +67,12 @@ public class Dataset extends CatalogResource {
      *
      * @param lineage the {@code DatasetLineage} object representing the dataset lineage to be created
      */
-    public void createLineage(DatasetLineage lineage) {
+    public void createLineage(SourceDatasets lineage) {
         getFusion().create(getApiPathForLineage(), lineage);
+    }
+
+    public DatasetLineage getLineage() {
+        return getFusion().getLineage(this.getCatalogIdentifier(), this.getIdentifier());
     }
 
     @Override

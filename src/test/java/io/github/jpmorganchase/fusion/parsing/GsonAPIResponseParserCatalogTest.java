@@ -1,8 +1,7 @@
 package io.github.jpmorganchase.fusion.parsing;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.jpmorganchase.fusion.model.Catalog;
@@ -73,19 +72,21 @@ public class GsonAPIResponseParserCatalogTest {
     }
 
     @Test
-    public void missingResourcesSectionInResponseCausesCorrectException() {
-        ParsingException thrown =
-                assertThrows(ParsingException.class, () -> responseParser.parseCatalogResponse(invalidCatalogJson));
+    public void missingResourcesSectionInResponseReturnsEmptyMap() {
 
-        assertThat(thrown.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+        Map<String, Catalog> catalog = responseParser.parseCatalogResponse(invalidCatalogJson);
+
+        assertThat(catalog, is(notNullValue()));
+        assertThat(catalog, is(anEmptyMap()));
     }
 
     @Test
-    public void emptyResourcesSectionInResponseCausesCorrectException() {
-        ParsingException thrown =
-                assertThrows(ParsingException.class, () -> responseParser.parseCatalogResponse(noResourcesCatalogJson));
+    public void emptyResourcesSectionInResponseReturnsEmptyMap() {
 
-        assertThat(thrown.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+        Map<String, Catalog> catalog = responseParser.parseCatalogResponse(noResourcesCatalogJson);
+
+        assertThat(catalog, is(notNullValue()));
+        assertThat(catalog, is(anEmptyMap()));
     }
 
     @Test
@@ -97,11 +98,11 @@ public class GsonAPIResponseParserCatalogTest {
     }
 
     @Test
-    public void emptyResourcesSectionInResponseCausesCorrectExceptionForUntypedData() {
-        ParsingException thrown = assertThrows(
-                ParsingException.class, () -> responseParser.parseResourcesUntyped(noResourcesCatalogJson));
+    public void emptyResourcesSectionInResponseReturnsEmptyMapForUntypedData() {
 
-        assertThat(thrown.getMessage(), is(equalTo("Failed to parse resources from JSON, none found")));
+        Map<String, Map<String, Object>> actual = responseParser.parseResourcesUntyped(noResourcesCatalogJson);
+
+        assertThat(actual, is(anEmptyMap()));
     }
 
     private static String loadTestResource(String resourceName) {

@@ -5,6 +5,7 @@ import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.fai
 import static io.github.jpmorganchase.fusion.pact.util.RequestResponseHelper.getExpectation;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import au.com.dius.pact.consumer.MockServer;
@@ -19,7 +20,6 @@ import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.pact.util.FileHelper;
-import io.github.jpmorganchase.fusion.parsing.ParsingException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -218,11 +218,8 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-        ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listCatalogs());
-        assertThat(
-                "Exception message is incorrect",
-                ex.getMessage(),
-                is(equalTo("Failed to parse resources from JSON, none found")));
+        Map<String, Catalog> actual = fusion.listCatalogs();
+        assertThat("Empty map expected", actual, is(anEmptyMap()));
     }
 
     @Test
@@ -304,11 +301,8 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-        ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listProducts("common"));
-        assertThat(
-                "Exception message is incorrect",
-                ex.getMessage(),
-                is(equalTo("Failed to parse resources from JSON, none found")));
+        Map<String, DataProduct> actual = fusion.listProducts("common");
+        assertThat("Exception message is incorrect", actual, is(anEmptyMap()));
     }
 
     @Test
@@ -338,11 +332,8 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-        ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> fusion.listDatasets("common"));
-        assertThat(
-                "Exception message is incorrect",
-                ex.getMessage(),
-                is(equalTo("Failed to parse resources from JSON, none found")));
+        Map<String, Dataset> actual = fusion.listDatasets("common");
+        assertThat("Empty map expected", actual, is(anEmptyMap()));
     }
 
     @Test
@@ -395,12 +386,8 @@ public class FusionApiConsumerPactTest {
 
         givenInstanceOfFusionSdk(mockServer);
 
-        ParsingException ex =
-                Assertions.assertThrows(ParsingException.class, () -> fusion.listDatasetMembers("common", "API_TEST"));
-        assertThat(
-                "Exception message is incorrect",
-                ex.getMessage(),
-                is(equalTo("Failed to parse resources from JSON, none found")));
+        Map<String, DatasetSeries> actual = fusion.listDatasetMembers("common", "API_TEST");
+        assertThat("Empty map expected", actual, is(anEmptyMap()));
     }
 
     @Test
