@@ -43,6 +43,18 @@
       "isDatasetKey": false,
       "sourceFieldId": "",
       "title": "Term"
+    },
+    {
+      "id": 4,
+      "source": "Source System 1",
+      "term": "bizterm1",
+      "dataType": "String",
+      "description": "Description for A0001",
+      "identifier": "A0001",
+      "index": 1,
+      "isDatasetKey": false,
+      "sourceFieldId": "",
+      "title": "Title for A0001"
     }
   ],
   "title": "Attributes"
