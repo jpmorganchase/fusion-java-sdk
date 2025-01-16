@@ -58,6 +58,26 @@ public class Attribute extends CatalogResource {
                 getFusion().getRootURL(), getCatalogIdentifier(), this.getDatasetIdentifier(), this.getIdentifier());
     }
 
+    private String getApiPathForRegistration() {
+        return getApiPath() + "/registration";
+    }
+
+    /**
+     * Registers an attribute as a critical data element with the Fusion API.
+     * <p>
+     * This method sends a POST request to the Fusion API using the {@code create} method,
+     * specifying that the attribute being registered is a critical data element.
+     * </p>
+     */
+    public void register() {
+        getFusion()
+                .create(
+                        getApiPathForRegistration(),
+                        AttributeRegistration.builder()
+                                .isCriticalDataElement(true)
+                                .build());
+    }
+
     @Override
     public Set<String> getRegisteredAttributes() {
         Set<String> exclusions = super.getRegisteredAttributes();

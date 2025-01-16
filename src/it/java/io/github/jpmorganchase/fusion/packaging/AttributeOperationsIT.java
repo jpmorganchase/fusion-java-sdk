@@ -191,6 +191,30 @@ public class AttributeOperationsIT extends BaseOperationsIT {
     }
 
     @Test
+    public void testRegisterAttributeAsCriticalDataElement() {
+
+        // Given
+        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets/SD0001/attributes"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("attribute/multiple-attribute-response.json")));
+
+        wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SD0001/attributes/A0001/registration"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("attribute/attribute-registration-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)));
+
+        Map<String, Attribute> attributes = getSdk().listAttributes("SD0001");
+        Attribute original = attributes.get("A0001");
+
+        // When & Then
+        Assertions.assertDoesNotThrow(original::register);
+    }
+
+    @Test
     public void testDeleteAttribute() {
 
         // Given
