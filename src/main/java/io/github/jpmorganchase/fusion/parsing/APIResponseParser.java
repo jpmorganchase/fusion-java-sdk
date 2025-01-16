@@ -10,6 +10,8 @@ public interface APIResponseParser {
 
     Map<String, Dataset> parseDatasetResponse(String json, String catalog);
 
+    DatasetLineage parseDatasetLineage(String json, String catalog);
+
     Map<String, Report> parseReportResponse(String json, String catalog);
 
     Map<String, DataFlow> parseDataFlowResponse(String json, String catalog);
@@ -23,9 +25,6 @@ public interface APIResponseParser {
     Map<String, DatasetSeries> parseDatasetSeriesResponse(String json);
 
     Map<String, Distribution> parseDistributionResponse(String json);
-
-    <T extends CatalogResource> T parseResourceFromResponse(
-            String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator);
 
     <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass);
 

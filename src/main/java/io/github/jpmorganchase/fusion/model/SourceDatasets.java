@@ -10,8 +10,7 @@ import lombok.Value;
 @EqualsAndHashCode
 @ToString
 @Builder
-public class DatasetLineage {
+public class SourceDatasets {
 
-    Set<Dataset> datasets;
-    Set<DatasetRelationship> relations;
+    Set<DatasetReference> source;
 }

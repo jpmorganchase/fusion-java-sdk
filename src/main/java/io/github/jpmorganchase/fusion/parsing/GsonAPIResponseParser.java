@@ -56,6 +56,23 @@ public class GsonAPIResponseParser implements APIResponseParser {
                 .build());
     }
 
+    @Override
+    public DatasetLineage parseDatasetLineage(String json, String catalog) {
+
+        Map<String, Dataset> datasets = parseResourcesWithVarArgsFromResponse(
+                json, Dataset.class, "datasets", (resource, mc) -> resource.toBuilder()
+                        .varArgs(mc.getVarArgs())
+                        .fusion(fusion)
+                        .build());
+
+        List<DatasetRelationship> relations = parseListOfResources(json, DatasetRelationship.class, "relations");
+
+        return DatasetLineage.builder()
+                .relations(new HashSet<>(relations))
+                .datasets(new HashSet<>(datasets.values()))
+                .build();
+    }
+
     /**
      * Parses a JSON response to extract a map of reports.
      * <p>
@@ -171,21 +188,16 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
-    public <T extends CatalogResource> T parseResourceFromResponse(
-            String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator) {
-
-        Map<String, Object> responseMap = getMapFromJsonResponse(json);
-        T obj = gson.fromJson(json, resourceClass);
-
-        return parseResourceWithVarArgs(obj.getRegisteredAttributes(), obj, responseMap, mutator);
-    }
-
-    @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
             String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator) {
+        return parseResourcesWithVarArgsFromResponse(json, resourceClass, "resources", mutator);
+    }
 
-        Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json);
-        JsonArray resources = getResources(json);
+    public <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
+            String json, Class<T> resourceClass, String resourceAttribute, ResourceMutationFactory<T> mutator) {
+
+        Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json, resourceAttribute);
+        JsonArray resources = getResources(json, resourceAttribute);
 
         List<T> resourceList = new ArrayList<>();
         for (JsonElement element : resources) {
@@ -199,25 +211,34 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass) {
+        return parseResourcesFromResponse(json, resourceClass, "resources");
+    }
 
-        JsonArray resources = getResources(json);
+    public <T> List<T> parseListOfResources(String json, Class<T> resourceClass, String resourceAttribute) {
+        JsonArray resources = getResources(json, resourceAttribute);
 
         Type listType = TypeToken.getParameterized(List.class, resourceClass).getType();
-        List<T> resourceList = gson.fromJson(resources, listType);
+        return gson.fromJson(resources, listType);
+    }
 
-        return collectMapOfUniqueResources(resourceList);
+    public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(
+            String json, Class<T> resourceClass, String resourceAttribute) {
+        return collectMapOfUniqueResources(parseListOfResources(json, resourceClass, resourceAttribute));
     }
 
     @Override
     public Map<String, Map<String, Object>> parseResourcesUntyped(String json) {
+        return parseResourcesUntyped(json, "resources");
+    }
+
+    public Map<String, Map<String, Object>> parseResourcesUntyped(String json, String resourceAttribute) {
         Map<String, Object> responseMap = getMapFromJsonResponse(json);
 
-        Object resources = responseMap.get("resources");
+        Object resources = responseMap.get(resourceAttribute);
         if (resources instanceof List) {
             @SuppressWarnings("unchecked") // List<Object> is always safe, compiler disagrees
             List<Object> resourceList = (List<Object>) resources;
 
-            if (resourceList.size() == 0) throw generateNoResourceException();
             Map<String, Map<String, Object>> resourcesMap = new HashMap<>();
             resourceList.forEach((o -> {
                 @SuppressWarnings("unchecked") // Output of GSON parsing will always be in this format
@@ -232,11 +253,11 @@ public class GsonAPIResponseParser implements APIResponseParser {
         }
     }
 
-    private JsonArray getResources(String json) {
+    private JsonArray getResources(String json, String resourceAttribute) {
         JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
-        JsonArray array = obj.getAsJsonArray("resources");
-        if (array == null || array.size() == 0) {
-            throw generateNoResourceException();
+        JsonArray array = obj.getAsJsonArray(resourceAttribute);
+        if (array == null) {
+            array = new JsonArray();
         }
         return array;
     }

@@ -62,13 +62,26 @@ public class Dataset extends CatalogResource {
      * Creates a lineage in the Fusion API.
      * <p>
      * This method sends a POST request to the Fusion API to register the provided
-     * {@code DatasetLineage} object, establishing lineage information for a dataset.
+     * {@code SourceDatasets} object, establishing lineage information for a dataset.
      * </p>
      *
-     * @param lineage the {@code DatasetLineage} object representing the dataset lineage to be created
+     * @param lineage the {@code SourceDatasets} object representing the dataset lineage to be created
      */
-    public void createLineage(DatasetLineage lineage) {
+    public void createLineage(SourceDatasets lineage) {
         getFusion().create(getApiPathForLineage(), lineage);
+    }
+
+    /**
+     * Retrieves the lineage information for the current dataset from the Fusion API.
+     * <p>
+     * This method sends a request to the Fusion API to fetch the lineage details
+     * associated with the dataset identified by the catalog identifier and dataset identifier.
+     * </p>
+     *
+     * @return the {@code DatasetLineage} object containing lineage details for the dataset
+     */
+    public DatasetLineage getLineage() {
+        return getFusion().getLineage(this.getCatalogIdentifier(), this.getIdentifier());
     }
 
     @Override
