@@ -2,18 +2,13 @@ package io.github.jpmorganchase.fusion.model;
 
 import com.google.gson.annotations.SerializedName;
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import lombok.Value;
+import java.util.*;
+import lombok.*;
 
 /**
  * An object representing a dataset. Object properties hold dataset metadata attributes
  */
-@Value
+@Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class Dataset extends CatalogResource {
@@ -26,11 +21,7 @@ public class Dataset extends CatalogResource {
     String title;
     String frequency;
     String type;
-    Report report;
     Application applicationId;
-    Application producerApplicationId;
-    List<Application> consumerApplicationId;
-    Flow flowDetails;
     String publisher;
 
     @Builder(toBuilder = true)
@@ -44,11 +35,7 @@ public class Dataset extends CatalogResource {
             String title,
             String frequency,
             String type,
-            Report report,
             Application applicationId,
-            Application producerApplicationId,
-            List<Application> consumerApplicationId,
-            Flow flowDetails,
             String publisher) {
         super(identifier, varArgs, fusion, catalogIdentifier);
         this.description = description;
@@ -56,11 +43,7 @@ public class Dataset extends CatalogResource {
         this.title = title;
         this.frequency = frequency;
         this.type = type;
-        this.report = report;
         this.applicationId = applicationId;
-        this.producerApplicationId = producerApplicationId;
-        this.consumerApplicationId = consumerApplicationId;
-        this.flowDetails = flowDetails;
         this.publisher = publisher;
     }
 
@@ -69,6 +52,43 @@ public class Dataset extends CatalogResource {
         return String.format(
                 "%1scatalogs/%2s/datasets/%3s",
                 getFusion().getRootURL(), this.getCatalogIdentifier(), this.getIdentifier());
+    }
+
+    protected String getApiPathForLineage() {
+        return getApiPath() + "/lineage";
+    }
+
+    /**
+     * Creates a lineage in the Fusion API.
+     * <p>
+     * This method sends a POST request to the Fusion API to register the provided
+     * {@code SourceDatasets} object, establishing lineage information for a dataset.
+     * </p>
+     *
+     * @param lineage the {@code SourceDatasets} object representing the dataset lineage to be created
+     */
+    public void createLineage(SourceDatasets lineage) {
+        getFusion().create(getApiPathForLineage(), lineage);
+    }
+
+    /**
+     * Retrieves the lineage information for the current dataset from the Fusion API.
+     * <p>
+     * This method sends a request to the Fusion API to fetch the lineage details
+     * associated with the dataset identified by the catalog identifier and dataset identifier.
+     * </p>
+     *
+     * @return the {@code DatasetLineage} object containing lineage details for the dataset
+     */
+    public DatasetLineage getLineage() {
+        return getFusion().getLineage(this.getCatalogIdentifier(), this.getIdentifier());
+    }
+
+    @Override
+    public Set<String> getRegisteredAttributes() {
+        Set<String> exclusions = super.getRegisteredAttributes();
+        exclusions.addAll(VarArgsHelper.getFieldNames(Dataset.class));
+        return exclusions;
     }
 
     public static class DatasetBuilder {
@@ -82,24 +102,6 @@ public class Dataset extends CatalogResource {
 
         public DatasetBuilder varArgs(Map<String, Object> varArgs) {
             this.varArgs = VarArgsHelper.copyMap(varArgs);
-            return this;
-        }
-
-        public DatasetBuilder report(Report report) {
-
-            if (Objects.nonNull(report) && Objects.nonNull(report.getTier())) {
-                this.type = "Report";
-                this.report = report;
-            }
-            return this;
-        }
-
-        public DatasetBuilder flow(Flow flow) {
-            this.type = "Flow";
-
-            this.producerApplicationId = flow.getProducerApplicationId();
-            this.consumerApplicationId = flow.getConsumerApplicationId();
-            this.flowDetails = flow;
             return this;
         }
     }

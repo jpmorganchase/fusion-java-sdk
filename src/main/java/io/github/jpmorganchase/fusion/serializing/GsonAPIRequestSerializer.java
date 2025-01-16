@@ -18,11 +18,14 @@ public class GsonAPIRequestSerializer implements APIRequestSerializer {
     public GsonAPIRequestSerializer() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Dataset.class, new DatasetSerializer());
+        gsonBuilder.registerTypeAdapter(Report.class, new ReportSerializer());
+        gsonBuilder.registerTypeAdapter(DataFlow.class, new DataFlowSerializer());
         gsonBuilder.registerTypeAdapter(DataDictionaryAttribute.class, new DataDictionaryAttributeSerializer());
         gsonBuilder.registerTypeAdapter(DataDictionaryAttributes.class, new DataDictionaryAttributesSerializer());
         gsonBuilder.registerTypeAdapter(Attribute.class, new AttributeSerializer());
         gsonBuilder.registerTypeAdapter(Attributes.class, new AttributesSerializer());
         gsonBuilder.registerTypeAdapter(Flow.class, new FlowSerializer());
+        gsonBuilder.registerTypeAdapter(AttributeLineages.class, new AttributeLineagesSerializer());
         gson = gsonBuilder.create();
     }
 

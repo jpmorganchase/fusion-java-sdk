@@ -1,21 +1,20 @@
 package io.github.jpmorganchase.fusion.packaging;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import io.github.jpmorganchase.fusion.model.Application;
-import io.github.jpmorganchase.fusion.model.Dataset;
-import io.github.jpmorganchase.fusion.model.Flow;
-import io.github.jpmorganchase.fusion.model.Report;
+import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.test.TestUtils;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static io.github.jpmorganchase.fusion.test.TestUtils.listOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 public class DatasetOperationsIT extends BaseOperationsIT {
 
@@ -108,144 +107,6 @@ public class DatasetOperationsIT extends BaseOperationsIT {
         Assertions.assertDoesNotThrow(dataset::create);
     }
 
-    @Test
-    public void testCreateDatasetOfTypeReport() {
-        // Given
-        wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SR0001"))
-                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-report-SR0001-create-request.json")))
-                .withHeader("Content-Type", WireMock.equalTo("application/json"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-create-response.json")));
-
-        Dataset dataset = getSdk().builders().dataset()
-                .identifier("SR0001")
-                .description("Sample report description 1")
-                .linkedEntity("SR0001/")
-                .title("Sample Report 1 | North America")
-                .frequency("Daily")
-                .publisher("Publisher 1")
-                .varArg("category", listOf("Category 1"))
-                .varArg("createdDate", "2022-02-06")
-                .varArg("coverageStartDate", "2022-02-06")
-                .varArg("coverageEndDate", "2023-03-09")
-                .varArg("isThirdPartyData", Boolean.FALSE)
-                .varArg("isInternalOnlyDataset", Boolean.FALSE)
-                .varArg("language", "English")
-                .varArg("maintainer", "Maintainer 1")
-                .varArg("modifiedDate", "2023-03-09")
-                .varArg("region", listOf("North America"))
-                .varArg("source", listOf("Source System 1"))
-                .varArg("subCategory", listOf("Subcategory 1"))
-                .varArg("tag", listOf("Tag1"))
-                .varArg("isRestricted", Boolean.FALSE)
-                .varArg("isRawData", Boolean.FALSE)
-                .varArg("hasSample", Boolean.FALSE)
-                .applicationId(Application.builder().sealId("12345").build())
-                .report(Report.builder().tier("Tier 1").build())
-                .build();
-
-        // When & Then
-        Assertions.assertDoesNotThrow(dataset::create);
-    }
-
-    @Test
-    public void testCreateDatasetOfTypeFlowInput() {
-        // Given
-        wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SIF0001"))
-                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-flow-SIF0001-create-request.json")))
-                .withHeader("Content-Type", WireMock.equalTo("application/json"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-create-response.json")));
-
-        Dataset dataset = getSdk().builders().dataset()
-                .identifier("SIF0001")
-                .description("Sample input flow description 1")
-                .linkedEntity("SIF0001/")
-                .title("Sample Input Flow 1 | North America")
-                .frequency("Daily")
-                .publisher("Publisher 1")
-                .varArg("category", listOf("Category 1"))
-                .varArg("createdDate", "2022-02-06")
-                .varArg("coverageStartDate", "2022-02-06")
-                .varArg("coverageEndDate", "2023-03-09")
-                .varArg("isThirdPartyData", Boolean.FALSE)
-                .varArg("isInternalOnlyDataset", Boolean.FALSE)
-                .varArg("language", "English")
-                .varArg("maintainer", "Maintainer 1")
-                .varArg("modifiedDate", "2023-03-09")
-                .varArg("region", listOf("North America"))
-                .varArg("source", listOf("Source System 1"))
-                .varArg("subCategory", listOf("Subcategory 1"))
-                .varArg("tag", listOf("Tag1"))
-                .varArg("isRestricted", Boolean.FALSE)
-                .varArg("isRawData", Boolean.FALSE)
-                .varArg("hasSample", Boolean.FALSE)
-                .applicationId(Application.builder().sealId("12345").build())
-                .flow(
-                        Flow.builder()
-                                .flowDirection("Input")
-                                .producerApplicationId(Application.builder().sealId("123456").build())
-                                .consumerApplicationId(Application.builder().sealId("456789").build())
-                                .build()
-                )
-                .build();
-
-        // When & Then
-        Assertions.assertDoesNotThrow(dataset::create);
-    }
-
-    @Test
-    public void testCreateDatasetOfTypeFlowOutput() {
-        // Given
-        wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SOF0001"))
-                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-flow-SOF0001-create-request.json")))
-                .withHeader("Content-Type", WireMock.equalTo("application/json"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-create-response.json")));
-
-        Dataset dataset = getSdk().builders().dataset()
-                .identifier("SOF0001")
-                .description("Sample output flow description 1")
-                .linkedEntity("SOF0001/")
-                .title("Sample Output Flow 1 | North America")
-                .frequency("Daily")
-                .publisher("Publisher 1")
-                .varArg("category", listOf("Category 1"))
-                .varArg("createdDate", "2022-02-06")
-                .varArg("coverageStartDate", "2022-02-06")
-                .varArg("coverageEndDate", "2023-03-09")
-                .varArg("isThirdPartyData", Boolean.FALSE)
-                .varArg("isInternalOnlyDataset", Boolean.FALSE)
-                .varArg("language", "English")
-                .varArg("maintainer", "Maintainer 1")
-                .varArg("modifiedDate", "2023-03-09")
-                .varArg("region", listOf("North America"))
-                .varArg("source", listOf("Source System 1"))
-                .varArg("subCategory", listOf("Subcategory 1"))
-                .varArg("tag", listOf("Tag1"))
-                .varArg("isRestricted", Boolean.FALSE)
-                .varArg("isRawData", Boolean.FALSE)
-                .varArg("hasSample", Boolean.FALSE)
-                .applicationId(Application.builder().sealId("12345").build())
-                .flow(
-                        Flow.builder()
-                                .flowDirection("Output")
-                                .producerApplicationId(Application.builder().sealId("123456").build())
-                                .consumerApplicationId(Application.builder().sealId("456789").build())
-                                .consumerApplicationId(Application.builder().sealId("901234").build())
-                                .build()
-                )
-                .build();
-
-        // When & Then
-        Assertions.assertDoesNotThrow(dataset::create);
-    }
 
     @Test
     public void testUpdateDataset() {
@@ -273,6 +134,86 @@ public class DatasetOperationsIT extends BaseOperationsIT {
     }
 
     @Test
+    public void testUpdateDatasetLineage() {
+        // Given
+        wireMockRule.stubFor(WireMock.post(WireMock.urlEqualTo("/catalogs/common/datasets/SD0002/lineage"))
+                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-SD0002-lineage-create-request.json")))
+                .withHeader("Content-Type", WireMock.equalTo("application/json"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)));
+
+        Dataset dataset = getSdk().builders().dataset()
+                .identifier("SD0002")
+                .catalogIdentifier("common")
+                .build();
+
+
+        // When & Then
+        Assertions.assertDoesNotThrow(() ->  dataset.createLineage(SourceDatasets.builder()
+                .source(new LinkedHashSet<>(Arrays.asList(
+                        DatasetReference.builder().catalog("foo").dataset("d1").build(),
+                        DatasetReference.builder().catalog("foo").dataset("d2").build(),
+                        DatasetReference.builder().catalog("bar").dataset("d1").build(),
+                        DatasetReference.builder().catalog("bar").dataset("d3").build()
+                )))
+                .build()));
+    }
+
+    @Test
+    public void testGetDatasetLineage(){
+        // Given
+        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets/SD0002/lineage"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-SD0002-get-lineage-response.json")));
+
+        //When
+        Dataset dataset = getSdk().builders().dataset()
+                .identifier("SD0002")
+                .catalogIdentifier("common")
+                .build();
+
+        DatasetLineage lineage = dataset.getLineage();
+
+        //Then
+        assertThat(lineage, notNullValue());
+        assertThat(lineage.getDatasets(), notNullValue());
+        assertThat(lineage.getDatasets().size(), Matchers.is(2));
+        assertThat(lineage.getRelations(), notNullValue());
+        assertThat(lineage.getRelations(), containsInAnyOrder(
+                relationship("common","SD0002", "common","SD0001"),
+                relationship("common","SD0003", "common","SD0002")
+        ));
+
+    }
+
+    @Test
+    public void testGetDatasetLineageWithNoRelationships(){
+        // Given
+        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets/SD0002/lineage"))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withStatus(200)
+                        .withBodyFile("dataset/dataset-SD0002-get-lineage-empty-response.json")));
+
+        //When
+        Dataset dataset = getSdk().builders().dataset()
+                .identifier("SD0002")
+                .catalogIdentifier("common")
+                .build();
+
+        DatasetLineage lineage = dataset.getLineage();
+
+        //Then
+        assertThat(lineage, notNullValue());
+        assertThat(lineage.getDatasets(), Matchers.is(Matchers.empty()));
+        assertThat(lineage.getRelations(), Matchers.is(Matchers.empty()));
+
+    }
+
+    @Test
     public void testUpdateDatasetRetrievedFromListDatasets() {
         // Given
         wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets"))
@@ -296,66 +237,6 @@ public class DatasetOperationsIT extends BaseOperationsIT {
         Dataset amendedDataset = originalDataset
                 .toBuilder()
                 .description("Updated Sample dataset description 1")
-                .build();
-
-        // When & Then
-        Assertions.assertDoesNotThrow(amendedDataset::update);
-    }
-
-    @Test
-    public void testUpdateDatasetOfTypeReportRetrievedFromListDatasets() {
-        // Given
-        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/multiple-dataset-response.json")));
-
-        wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/SR0001"))
-                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-report-SR0001-update-request.json")))
-                .withHeader("Content-Type", WireMock.equalTo("application/json"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-create-response.json")));
-
-        Map<String, Dataset> datasets = getSdk().listDatasets("common", "SR0001", true);
-        Dataset originalDataset = datasets.get("SR0001");
-
-        // When
-        Dataset amendedDataset = originalDataset
-                .toBuilder()
-                .description("Updated Sample report description 1")
-                .build();
-
-        // When & Then
-        Assertions.assertDoesNotThrow(amendedDataset::update);
-    }
-
-    @Test
-    public void testUpdateDatasetOfTypeFlowRetrievedFromListDatasets() {
-        // Given
-        wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/catalogs/common/datasets"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/multiple-dataset-response.json")));
-
-        wireMockRule.stubFor(WireMock.put(WireMock.urlEqualTo("/catalogs/common/datasets/SIF0001"))
-                .withRequestBody(equalToJson(TestUtils.loadJsonForIt("dataset/dataset-flow-SIF0001-update-request.json")))
-                .withHeader("Content-Type", WireMock.equalTo("application/json"))
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", "application/json")
-                        .withStatus(200)
-                        .withBodyFile("dataset/dataset-create-response.json")));
-
-        Map<String, Dataset> datasets = getSdk().listDatasets("common", "SIF0001", true);
-        Dataset originalDataset = datasets.get("SIF0001");
-
-        // When
-        Dataset amendedDataset = originalDataset
-                .toBuilder()
-                .description("Updated Sample input flow description 1")
                 .build();
 
         // When & Then
@@ -434,6 +315,19 @@ public class DatasetOperationsIT extends BaseOperationsIT {
         assertThat(datasets.containsKey("SD0003"), is(equalTo(false)));
         assertThat(datasets.containsKey("SR0001"), is(equalTo(false)));
 
+    }
+
+    private DatasetRelationship relationship(String srcCatalog, String srcDataset, String destCatalog, String destDataset) {
+        return DatasetRelationship.builder()
+                .source(DatasetReference.builder()
+                        .catalog(srcCatalog)
+                        .dataset(srcDataset)
+                        .build())
+                .destination(DatasetReference.builder()
+                        .catalog(destCatalog)
+                        .dataset(destDataset)
+                        .build())
+                .build();
     }
 
 }

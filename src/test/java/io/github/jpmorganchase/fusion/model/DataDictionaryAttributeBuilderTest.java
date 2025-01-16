@@ -5,8 +5,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -95,5 +95,19 @@ public class DataDictionaryAttributeBuilderTest {
 
         // When & Then
         Assertions.assertThrows(UnsupportedOperationException.class, a::delete);
+    }
+
+    @Test
+    public void testRegisteredAttributesReturnedCorrectly() {
+        // Given
+        Set<String> expected = VarArgsHelper.getFieldNames(CatalogResource.class);
+        expected.addAll(VarArgsHelper.getFieldNames(DataDictionaryAttribute.class));
+        expected.addAll(Arrays.asList("@id", "@context", "@base"));
+
+        // When
+        Set<String> actual = DataDictionaryAttribute.builder().build().getRegisteredAttributes();
+
+        // Then
+        assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
     }
 }

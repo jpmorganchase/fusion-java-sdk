@@ -89,6 +89,30 @@ public class FusionAPIManager implements APIManager {
     }
 
     /**
+     * Sends a POST request to the specified API endpoint with the provided catalog resource.
+     *
+     * <p>This method constructs the necessary authorization headers using a bearer token from
+     * the {@code tokenProvider}, serializes the given {@code catalogResource} into JSON,
+     * and sends a POST request to the specified {@code apiPath} using the {@code httpClient}.
+     * It then checks the HTTP response status for errors and returns the response body if successful.
+     *
+     * @param apiPath         the API endpoint path to which the POST request will be sent
+     * @param resource the resource object to be serialized and sent as the request body
+     * @return the response body as a {@code String} if the request is successful
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    @Override
+    public String callAPIToPost(String apiPath, Object resource) throws APICallException {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+        requestHeaders.put("Content-Type", "application/json");
+
+        HttpResponse<String> response = httpClient.post(apiPath, requestHeaders, serializer.serialize(resource));
+        checkResponseStatus(response);
+        return response.getBody();
+    }
+
+    /**
      * Sends a PUT request to the specified API endpoint with the provided catalog resource.
      *
      * @param apiPath         the API endpoint path to which the PUT request will be sent

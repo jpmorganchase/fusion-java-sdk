@@ -6,11 +6,11 @@ import static org.hamcrest.Matchers.is;
 
 import org.junit.jupiter.api.Test;
 
-public class ReportTest {
+public class ReportDetailTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
-        Report report = Report.builder().tier("The tier").build();
-        assertThat(report.getTier(), is(equalTo("The tier")));
+        ReportDetail reportDetail = ReportDetail.builder().tier("The tier").build();
+        assertThat(reportDetail.getTier(), is(equalTo("The tier")));
     }
 }

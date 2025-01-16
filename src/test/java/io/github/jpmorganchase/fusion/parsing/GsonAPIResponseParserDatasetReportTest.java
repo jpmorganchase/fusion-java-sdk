@@ -20,10 +20,10 @@ import org.mockito.Mockito;
 
 public class GsonAPIResponseParserDatasetReportTest {
 
-    private static final String singleDatasetJson = loadTestResource("single-dataset-report-response.json");
-    private static final String multipleDatasetJson = loadTestResource("multiple-dataset-report-response.json");
+    private static final String singleReportJson = loadTestResource("single-dataset-report-response.json");
+    private static final String multipleReportJson = loadTestResource("multiple-dataset-report-response.json");
 
-    private final Dataset testDataset = Dataset.builder()
+    private final Report testReport = Report.builder()
             .identifier("SR0001")
             .description("Sample report description 1")
             .linkedEntity("SR0001/")
@@ -48,11 +48,11 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
             .applicationId(Application.builder().sealId("12345").build())
-            .report(Report.builder().tier("Tier 1").build())
+            .tier("Tier 1")
             .catalogIdentifier("foobar")
             .build();
 
-    private final Dataset testDataset2 = Dataset.builder()
+    private final Report testReport2 = Report.builder()
             .identifier("SR0002")
             .description("Sample report description 2")
             .linkedEntity("SR0002/")
@@ -77,11 +77,11 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
             .applicationId(Application.builder().sealId("12345").build())
-            .report(Report.builder().tier("Tier 2").build())
+            .tier("Tier 2")
             .catalogIdentifier("foobar")
             .build();
 
-    private final Dataset testDataset3 = Dataset.builder()
+    private final Report testReport3 = Report.builder()
             .identifier("SR0003")
             .description("Sample report description 3")
             .linkedEntity("SR0003/")
@@ -106,7 +106,7 @@ public class GsonAPIResponseParserDatasetReportTest {
             .varArg("isRawData", Boolean.FALSE)
             .varArg("hasSample", Boolean.FALSE)
             .applicationId(Application.builder().sealId("12345").build())
-            .report(Report.builder().tier("Tier 3").build())
+            .tier("Tier 3")
             .catalogIdentifier("foobar")
             .build();
 
@@ -119,26 +119,26 @@ public class GsonAPIResponseParserDatasetReportTest {
 
     @Test
     public void singleDatasetInResourcesParsesCorrectly() {
-        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(singleDatasetJson, "foobar");
-        assertThat(datasetMap.size(), is(1));
+        Map<String, Report> reportObjMap = responseParser.parseReportResponse(singleReportJson, "foobar");
+        assertThat(reportObjMap.size(), is(1));
 
-        Dataset testDatasetResponse = datasetMap.get("SR0001");
-        assertThat(testDatasetResponse, is(equalTo(testDataset)));
+        Report actualReport = reportObjMap.get("SR0001");
+        assertThat(actualReport, is(equalTo(testReport)));
     }
 
     @Test
     public void multipleCatalogsInResourcesParseCorrectly() {
-        Map<String, Dataset> datasetMap = responseParser.parseDatasetResponse(multipleDatasetJson, "foobar");
-        assertThat(datasetMap.size(), is(3));
+        Map<String, Report> reportObjMap = responseParser.parseReportResponse(multipleReportJson, "foobar");
+        assertThat(reportObjMap.size(), is(3));
 
-        Dataset testDatasetResponse = datasetMap.get("SR0001");
-        assertThat(testDatasetResponse, is(equalTo(testDataset)));
+        Dataset actualReport = reportObjMap.get("SR0001");
+        assertThat(actualReport, is(equalTo(testReport)));
 
-        Dataset testDatasetResponse2 = datasetMap.get("SR0002");
-        assertThat(testDatasetResponse2, is(equalTo(testDataset2)));
+        Dataset actualReport2 = reportObjMap.get("SR0002");
+        assertThat(actualReport2, is(equalTo(testReport2)));
 
-        Dataset testDatasetResponse3 = datasetMap.get("SR0003");
-        assertThat(testDatasetResponse3, is(equalTo(testDataset3)));
+        Dataset actualReport3 = reportObjMap.get("SR0003");
+        assertThat(actualReport3, is(equalTo(testReport3)));
     }
 
     private static String loadTestResource(String resourceName) {

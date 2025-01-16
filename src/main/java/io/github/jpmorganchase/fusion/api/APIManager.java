@@ -27,6 +27,16 @@ public interface APIManager extends APIDownloadOperations, APIUploadOperations {
     String callAPIToPost(String apiPath, CatalogResource catalogResource);
 
     /**
+     * Sends a POST request to the specified API endpoint with the provided catalog resource.
+     *
+     * @param apiPath         the API endpoint path to which the POST request will be sent
+     * @param resource     the resource object to be serialized and sent as the request body
+     * @return the response body as a {@code String} if the request is successful
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    String callAPIToPost(String apiPath, Object resource);
+
+    /**
      * Sends a PUT request to the specified API endpoint with the provided catalog resource.
      *
      * @param apiPath         the API endpoint path to which the PUT request will be sent

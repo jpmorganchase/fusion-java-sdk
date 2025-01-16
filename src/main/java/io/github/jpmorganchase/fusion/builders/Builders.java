@@ -13,6 +13,22 @@ public interface Builders {
     Dataset.DatasetBuilder dataset();
 
     /**
+     * Returns a builder for creating a {@link Report} object.
+     * The builder can be used to set properties and then create / update an instance of ReportObj.
+     *
+     * @return {@link Report.ReportBuilder} the report builder
+     */
+    Report.ReportBuilder report();
+
+    /**
+     * Returns a builder for creating a {@link DataFlow} object.
+     * The builder can be used to set properties and then create / update an instance of ReportObj.
+     *
+     * @return {@link DataFlow.DataFlowBuilder} the report builder
+     */
+    DataFlow.DataFlowBuilder dataFlow();
+
+    /**
      * Returns a builder for creating a {@link DataDictionaryAttribute} object.
      * The builder can be used to set properties and then create / update an instance of Attribute.
      *
@@ -48,4 +64,14 @@ public interface Builders {
      * @return {@link io.github.jpmorganchase.fusion.model.Attributes.AttributesBuilder} an instance of the attributes builder
      */
     Attributes.AttributesBuilder attributes();
+
+    /**
+     * Returns a builder for creating an {@link io.github.jpmorganchase.fusion.model.AttributeLineages} object.
+     * The builder facilitates the configuration of multiple {@code AttributeLineage} objects and other properties
+     * associated with the {@code AttributeLineages} resource. It supports chaining calls for setting
+     * properties and building an {@code AttributeLineages} instance.
+     *
+     * @return {@link io.github.jpmorganchase.fusion.model.AttributeLineages.AttributeLineagesBuilder} an instance of the attribute lineages builder
+     */
+    AttributeLineages.AttributeLineagesBuilder attributeLineages();
 }

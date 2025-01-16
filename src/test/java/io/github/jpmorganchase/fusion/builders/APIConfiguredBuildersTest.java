@@ -83,6 +83,19 @@ class APIConfiguredBuildersTest {
         thenFusionShouldBeNonNull(a);
     }
 
+    @Test
+    public void testAttributeLineagesBuilderReturned() {
+        // Given
+        AttributeLineages.AttributeLineagesBuilder attributesLineagesBuilder =
+                apiConfiguredBuilders.attributeLineages();
+
+        // When
+        AttributeLineages a = attributesLineagesBuilder.build();
+
+        // Then
+        thenFusionShouldBeNonNull(a);
+    }
+
     private static void thenFusionShouldBeNonNull(CatalogResource cr) {
         assertThat(cr.getFusion(), is(notNullValue()));
     }

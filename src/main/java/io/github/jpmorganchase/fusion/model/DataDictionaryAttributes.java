@@ -1,9 +1,7 @@
 package io.github.jpmorganchase.fusion.model;
 
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -40,6 +38,13 @@ public class DataDictionaryAttributes extends CatalogResource {
     @Override
     public String delete() {
         throw new UnsupportedOperationException("Operation not yet supported for DataDictionaryAttribute");
+    }
+
+    @Override
+    public Set<String> getRegisteredAttributes() {
+        Set<String> exclusions = super.getRegisteredAttributes();
+        exclusions.addAll(VarArgsHelper.getFieldNames(DataDictionaryAttributes.class));
+        return exclusions;
     }
 
     public static class DataDictionaryAttributesBuilder {

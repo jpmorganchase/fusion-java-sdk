@@ -1,5 +1,6 @@
 package io.github.jpmorganchase.fusion;
 
+import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterByType;
 import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
 
 import io.github.jpmorganchase.fusion.api.APIManager;
@@ -157,6 +158,17 @@ public class Fusion {
      * @return the response from the API as a {@link String}.
      */
     public String create(String apiPath, CatalogResource resource) {
+        return this.api.callAPIToPost(apiPath, resource);
+    }
+
+    /**
+     * Creates a new catalog resource by sending a POST request to the specified API path.
+     *
+     * @param apiPath the API endpoint path where the resource should be created.
+     * @param resource the {@link Object} to be created.
+     * @return the response from the API as a {@link String}.
+     */
+    public String create(String apiPath, Object resource) {
         return this.api.callAPIToPost(apiPath, resource);
     }
 
@@ -357,6 +369,110 @@ public class Fusion {
 
         String url = String.format("%1scatalogs/%2s/datasets/%3s", this.rootURL, catalogName, dataset);
         return this.callForMap(url);
+    }
+
+    /**
+     * Get the lineage for a dataset, in the specified catalog
+     * Currently this will always return a lineage.
+     *
+     * @param catalogName identifier of the catalog to be queried
+     * @param dataset     a String representing the dataset identifier to query.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public DatasetLineage getLineage(String catalogName, String dataset) {
+
+        String url = String.format("%1scatalogs/%2s/datasets/%3s/lineage", this.rootURL, catalogName, dataset);
+        return responseParser.parseDatasetLineage(this.api.callAPI(url), catalogName);
+    }
+
+    /**
+     * Get a filtered list of the reports in the specified catalog
+     * <p>
+     * Note that as of current version this search capability is not yet implemented
+     *
+     * @param catalogName identifier of the catalog to be queried
+     * @param contains    a search keyword.
+     * @param idContains  is true if only apply the filter to the identifier
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public Map<String, Report> listReports(String catalogName, String contains, boolean idContains) {
+        String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
+        String json = this.api.callAPI(url);
+
+        Map<String, Report> datasets =
+                filterDatasets(responseParser.parseReportResponse(json, catalogName), contains, idContains);
+        return filterByType(datasets, DatasetType.REPORT);
+    }
+
+    /**
+     * Get a list of the reports in the specified catalog
+     *
+     * @param catalogName identifier of the catalog to be queried
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public Map<String, Report> listReports(String catalogName) {
+        return listReports(catalogName, null, false);
+    }
+
+    /**
+     * Get a list of the reports in the default catalog
+     *
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public Map<String, Report> listReports() {
+        return listReports(this.getDefaultCatalog(), null, false);
+    }
+
+    /**
+     * Get a filtered list of the data flows in the specified catalog
+     * <p>
+     * Note that as of current version this search capability is not yet implemented
+     *
+     * @param catalogName identifier of the catalog to be queried
+     * @param contains    a search keyword.
+     * @param idContains  is true if only apply the filter to the identifier
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public Map<String, DataFlow> listDataFlows(String catalogName, String contains, boolean idContains) {
+        String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
+        String json = this.api.callAPI(url);
+
+        Map<String, DataFlow> datasets =
+                filterDatasets(responseParser.parseDataFlowResponse(json, catalogName), contains, idContains);
+        return filterByType(datasets, DatasetType.FLOW);
+    }
+
+    /**
+     * Get a list of the data flows in the specified catalog
+     *
+     * @param catalogName identifier of the catalog to be queried
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public Map<String, DataFlow> listDataFlows(String catalogName) {
+        return listDataFlows(catalogName, null, false);
+    }
+
+    /**
+     * Get a list of the data flows in the default catalog
+     *
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public Map<String, DataFlow> listDataFlows() {
+        return listDataFlows(this.getDefaultCatalog(), null, false);
     }
 
     /**

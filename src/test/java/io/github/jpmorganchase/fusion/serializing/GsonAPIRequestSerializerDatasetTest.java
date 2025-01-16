@@ -8,13 +8,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import io.github.jpmorganchase.fusion.Fusion;
 import io.github.jpmorganchase.fusion.model.Application;
 import io.github.jpmorganchase.fusion.model.Dataset;
-import io.github.jpmorganchase.fusion.model.Report;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -47,7 +45,6 @@ class GsonAPIRequestSerializerDatasetTest {
                 .varArg("isRawData", Boolean.FALSE)
                 .varArg("hasSample", Boolean.FALSE)
                 .applicationId(Application.builder().sealId("12345").build())
-                .report(Report.builder().tier("Tier 1").build())
                 .fusion(Mockito.mock(Fusion.class))
                 .catalogIdentifier("foobar")
                 .build();
@@ -94,7 +91,6 @@ class GsonAPIRequestSerializerDatasetTest {
                 .title("Sample Dataset with Nulls")
                 .frequency("Monthly")
                 .applicationId(null)
-                .report(null)
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
@@ -116,7 +112,7 @@ class GsonAPIRequestSerializerDatasetTest {
                 .linkedEntity("SD0003/")
                 .title("Sample Dataset 3 | North America")
                 .frequency("Weekly")
-                .consumerApplicationId(new ArrayList<>())
+                // .consumerApplicationId(new ArrayList<>())
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();

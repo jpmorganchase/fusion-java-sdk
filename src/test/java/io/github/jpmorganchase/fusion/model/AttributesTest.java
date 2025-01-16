@@ -7,10 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.jpmorganchase.fusion.Fusion;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -164,5 +162,19 @@ public class AttributesTest {
 
         // When & Then
         Assertions.assertThrows(UnsupportedOperationException.class, attributes::delete);
+    }
+
+    @Test
+    public void testRegisteredAttributesReturnedCorrectly() {
+        // Given
+        Set<String> expected = VarArgsHelper.getFieldNames(CatalogResource.class);
+        expected.addAll(VarArgsHelper.getFieldNames(Attributes.class));
+        expected.addAll(Arrays.asList("@id", "@context", "@base"));
+
+        // When
+        Set<String> actual = Attributes.builder().build().getRegisteredAttributes();
+
+        // Then
+        assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
     }
 }

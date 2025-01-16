@@ -8,7 +8,6 @@ import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.serializing.mutation.MutationContext;
 import io.github.jpmorganchase.fusion.serializing.mutation.ResourceMutationFactory;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
@@ -17,6 +16,11 @@ import lombok.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Main class for parsing JSON responses with various resources.
+ *
+ * @see GsonAPIResponseParserBuilder
+ */
 @Builder
 public class GsonAPIResponseParser implements APIResponseParser {
 
@@ -46,6 +50,65 @@ public class GsonAPIResponseParser implements APIResponseParser {
     @Override
     public Map<String, Dataset> parseDatasetResponse(String json, String catalog) {
         return parseResourcesWithVarArgsFromResponse(json, Dataset.class, (resource, mc) -> resource.toBuilder()
+                .varArgs(mc.getVarArgs())
+                .fusion(fusion)
+                .catalogIdentifier(catalog)
+                .build());
+    }
+
+    @Override
+    public DatasetLineage parseDatasetLineage(String json, String catalog) {
+
+        Map<String, Dataset> datasets = parseResourcesWithVarArgsFromResponse(
+                json, Dataset.class, "datasets", (resource, mc) -> resource.toBuilder()
+                        .varArgs(mc.getVarArgs())
+                        .fusion(fusion)
+                        .build());
+
+        List<DatasetRelationship> relations = parseListOfResources(json, DatasetRelationship.class, "relations");
+
+        return DatasetLineage.builder()
+                .relations(new HashSet<>(relations))
+                .datasets(new HashSet<>(datasets.values()))
+                .build();
+    }
+
+    /**
+     * Parses a JSON response to extract a map of reports.
+     * <p>
+     * This method deserializes the given JSON string into a map of {@link Report} objects.
+     * Each report is enriched with additional context, such as variable arguments and the
+     * {@code fusion} configuration, using the builder pattern.
+     * </p>
+     *
+     * @param json the JSON response containing dataset information to be parsed.
+     * @return a map where the keys represent dataset identifiers (or relevant keys from the JSON structure),
+     *         and the values are {@link Report} objects enriched with context.
+     */
+    @Override
+    public Map<String, Report> parseReportResponse(String json, String catalog) {
+        return parseResourcesWithVarArgsFromResponse(json, Report.class, (resource, mc) -> resource.toBuilder()
+                .varArgs(mc.getVarArgs())
+                .fusion(fusion)
+                .catalogIdentifier(catalog)
+                .build());
+    }
+
+    /**
+     * Parses a JSON response to extract a map of reports.
+     * <p>
+     * This method deserializes the given JSON string into a map of {@link DataFlow} objects.
+     * Each report is enriched with additional context, such as variable arguments and the
+     * {@code fusion} configuration, using the builder pattern.
+     * </p>
+     *
+     * @param json the JSON response containing dataset information to be parsed.
+     * @return a map where the keys represent dataset identifiers (or relevant keys from the JSON structure),
+     *         and the values are {@link DataFlow} objects enriched with context.
+     */
+    @Override
+    public Map<String, DataFlow> parseDataFlowResponse(String json, String catalog) {
+        return parseResourcesWithVarArgsFromResponse(json, DataFlow.class, (resource, mc) -> resource.toBuilder()
                 .varArgs(mc.getVarArgs())
                 .fusion(fusion)
                 .catalogIdentifier(catalog)
@@ -125,29 +188,22 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
-    public <T extends CatalogResource> T parseResourceFromResponse(
-            String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator) {
-
-        Map<String, Object> responseMap = getMapFromJsonResponse(json);
-        T obj = gson.fromJson(json, resourceClass);
-
-        Set<String> excludes = varArgsExclusions(resourceClass);
-        return parseResourceWithVarArgs(excludes, obj, responseMap, mutator);
-    }
-
-    @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
             String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator) {
+        return parseResourcesWithVarArgsFromResponse(json, resourceClass, "resources", mutator);
+    }
 
-        Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json);
-        JsonArray resources = getResources(json);
+    public <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
+            String json, Class<T> resourceClass, String resourceAttribute, ResourceMutationFactory<T> mutator) {
 
-        Set<String> excludes = varArgsExclusions(resourceClass);
+        Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json, resourceAttribute);
+        JsonArray resources = getResources(json, resourceAttribute);
+
         List<T> resourceList = new ArrayList<>();
         for (JsonElement element : resources) {
             T obj = gson.fromJson(element, resourceClass);
             Map<String, Object> untypedResource = untypedResources.get(obj.getIdentifier());
-            resourceList.add(parseResourceWithVarArgs(excludes, obj, untypedResource, mutator));
+            resourceList.add(parseResourceWithVarArgs(obj.getRegisteredAttributes(), obj, untypedResource, mutator));
         }
 
         return collectMapOfUniqueResources(resourceList);
@@ -155,25 +211,34 @@ public class GsonAPIResponseParser implements APIResponseParser {
 
     @Override
     public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass) {
+        return parseResourcesFromResponse(json, resourceClass, "resources");
+    }
 
-        JsonArray resources = getResources(json);
+    public <T> List<T> parseListOfResources(String json, Class<T> resourceClass, String resourceAttribute) {
+        JsonArray resources = getResources(json, resourceAttribute);
 
         Type listType = TypeToken.getParameterized(List.class, resourceClass).getType();
-        List<T> resourceList = gson.fromJson(resources, listType);
+        return gson.fromJson(resources, listType);
+    }
 
-        return collectMapOfUniqueResources(resourceList);
+    public <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(
+            String json, Class<T> resourceClass, String resourceAttribute) {
+        return collectMapOfUniqueResources(parseListOfResources(json, resourceClass, resourceAttribute));
     }
 
     @Override
     public Map<String, Map<String, Object>> parseResourcesUntyped(String json) {
+        return parseResourcesUntyped(json, "resources");
+    }
+
+    public Map<String, Map<String, Object>> parseResourcesUntyped(String json, String resourceAttribute) {
         Map<String, Object> responseMap = getMapFromJsonResponse(json);
 
-        Object resources = responseMap.get("resources");
+        Object resources = responseMap.get(resourceAttribute);
         if (resources instanceof List) {
             @SuppressWarnings("unchecked") // List<Object> is always safe, compiler disagrees
             List<Object> resourceList = (List<Object>) resources;
 
-            if (resourceList.size() == 0) throw generateNoResourceException();
             Map<String, Map<String, Object>> resourcesMap = new HashMap<>();
             resourceList.forEach((o -> {
                 @SuppressWarnings("unchecked") // Output of GSON parsing will always be in this format
@@ -188,11 +253,11 @@ public class GsonAPIResponseParser implements APIResponseParser {
         }
     }
 
-    private JsonArray getResources(String json) {
+    private JsonArray getResources(String json, String resourceAttribute) {
         JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
-        JsonArray array = obj.getAsJsonArray("resources");
-        if (array == null || array.size() == 0) {
-            throw generateNoResourceException();
+        JsonArray array = obj.getAsJsonArray(resourceAttribute);
+        if (array == null) {
+            array = new JsonArray();
         }
         return array;
     }
@@ -216,23 +281,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
         return modified;
     }
 
-    private static <T extends CatalogResource> Set<String> varArgsExclusions(Class<T> resourceClass) {
-        // TODO :: Should this be returned by the Model Object ? My Thinking is yes.
-        Set<String> excludes = new HashSet<>();
-        Set<String> excludeFromType = Arrays.stream(resourceClass.getDeclaredFields())
-                .map(Field::getName)
-                .collect(Collectors.toSet());
-        Set<String> excludeFromCatalogResource = Arrays.stream(CatalogResource.class.getDeclaredFields())
-                .map(Field::getName)
-                .collect(Collectors.toSet());
-        excludes.addAll(excludeFromType);
-        excludes.addAll(excludeFromCatalogResource);
-        excludes.add("@id");
-        excludes.add("@context");
-        excludes.add("@base");
-        return excludes;
-    }
-
     private Map<String, Object> getMapFromJsonResponse(String json) {
         Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
         return gson.fromJson(json, mapType);
@@ -250,6 +298,27 @@ public class GsonAPIResponseParser implements APIResponseParser {
                         }));
     }
 
+    public static class GsonAPIResponseParserBuilder {}
+
+    /**
+     * A custom builder class for {@link GsonAPIResponseParser} that extends the default builder
+     * provided by Lombok's {@code @Builder} annotation. This builder allows for the customization
+     * of the {@link Gson} instance used during the construction of the {@link GsonAPIResponseParser}.
+     *
+     * <p>In the default behavior, if no {@link Gson} instance is provided, the builder will
+     * automatically use a default {@link Gson} configuration through the {@link DefaultGsonConfig} class.</p>
+     *
+     * <p>This class ensures that the {@link Gson} instance is set, either by the user or using
+     * the default configuration, before building the {@link GsonAPIResponseParser} object.</p>
+     *
+     * <p>This builder is particularly useful when you need to customize the behavior of the
+     * {@link GsonAPIResponseParser} by ensuring that a valid {@link Gson} object is always available.</p>
+     *
+     * @see GsonAPIResponseParser
+     * @see GsonAPIResponseParserBuilder
+     * @see Gson
+     * @see DefaultGsonConfig
+     */
     public static class CustomGsonAPIResponseParserBuilder extends GsonAPIResponseParser.GsonAPIResponseParserBuilder {
 
         private Gson gson;

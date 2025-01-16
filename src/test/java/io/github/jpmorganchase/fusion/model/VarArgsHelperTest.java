@@ -1,11 +1,15 @@
 package io.github.jpmorganchase.fusion.model;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import io.github.jpmorganchase.fusion.Fusion;
+import java.util.*;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 class VarArgsHelperTest {
 
     @Test
@@ -76,5 +80,122 @@ class VarArgsHelperTest {
 
         assertNotNull(map);
         assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void testGetFieldNamesWithValidClass() {
+        Set<String> result = VarArgsHelper.getFieldNames(TestClass.class);
+
+        Set<String> expected = new LinkedHashSet<>(Arrays.asList("field1", "field2"));
+        assertThat(
+                "The method should return all declared fields of the given class.",
+                result,
+                containsInAnyOrder(expected.toArray()));
+    }
+
+    @Test
+    public void testGetFieldNamesWithInheritedClass() {
+        Set<String> result = VarArgsHelper.getFieldNames(SubClass.class);
+
+        Set<String> expected = new LinkedHashSet<>(Arrays.asList("field3"));
+        assertThat(
+                "The method should only return fields declared in the subclass, not inherited fields.",
+                result,
+                containsInAnyOrder(expected.toArray()));
+    }
+
+    @Test
+    public void testGetFieldNamesWithEmptyClass() {
+        class EmptyClass extends CatalogResource {
+            public EmptyClass(String identifier, Map<String, Object> varArgs, Fusion fusion, String catalogIdentifier) {
+                super(identifier, varArgs, fusion, catalogIdentifier);
+            }
+
+            @Override
+            protected String getApiPath() {
+                return null;
+            }
+        }
+
+        Set<String> result = VarArgsHelper.getFieldNames(EmptyClass.class);
+
+        assertThat("The method should return an empty set for a class with no declared fields.", result, is(empty()));
+    }
+
+    @Test
+    public void testGetFieldNamesWithNullClass() {
+        Set<String> result = VarArgsHelper.getFieldNames(null);
+
+        assertThat("The method should return an empty set for a null class.", result, is(empty()));
+    }
+
+    @Test
+    public void testGetFieldNamesExcludesSyntheticFields() {
+        class SyntheticFieldClass extends CatalogResource {
+            private String field1;
+            private transient String this$0; // Synthetic field
+
+            public SyntheticFieldClass(
+                    String identifier, Map<String, Object> varArgs, Fusion fusion, String catalogIdentifier) {
+                super(identifier, varArgs, fusion, catalogIdentifier);
+            }
+
+            @Override
+            protected String getApiPath() {
+                return null;
+            }
+        }
+
+        Set<String> result = VarArgsHelper.getFieldNames(SyntheticFieldClass.class);
+
+        assertThat("Synthetic field 'this$0' should not be included.", result, not(hasItem("this$0")));
+    }
+
+    @Test
+    public void testGetFieldNamesHandlesExactMatch() {
+        class ExactMatchTestClass extends CatalogResource {
+            private String field1;
+            private int field2;
+
+            public ExactMatchTestClass(
+                    String identifier, Map<String, Object> varArgs, Fusion fusion, String catalogIdentifier) {
+                super(identifier, varArgs, fusion, catalogIdentifier);
+            }
+
+            @Override
+            protected String getApiPath() {
+                return null;
+            }
+        }
+
+        Set<String> result = VarArgsHelper.getFieldNames(ExactMatchTestClass.class);
+
+        Set<String> expected = new LinkedHashSet<>(Arrays.asList("field1", "field2"));
+        assertThat(
+                "Field names should match exactly without extra or missing fields.",
+                result,
+                containsInAnyOrder(expected.toArray()));
+    }
+
+    static class TestClass extends CatalogResource {
+        private String field1;
+        private int field2;
+
+        public TestClass(String identifier, Map<String, Object> varArgs, Fusion fusion, String catalogIdentifier) {
+            super(identifier, varArgs, fusion, catalogIdentifier);
+        }
+
+        @Override
+        protected String getApiPath() {
+            return null;
+        }
+    }
+
+    static class SubClass extends TestClass {
+        private double field3;
+
+        public SubClass(String identifier, Map<String, Object> varArgs, Fusion fusion, String catalogIdentifier) {
+            super(identifier, varArgs, fusion, catalogIdentifier);
+        }
     }
 }
