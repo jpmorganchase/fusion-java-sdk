@@ -12,13 +12,7 @@ public interface Builders {
      */
     Dataset.DatasetBuilder dataset();
 
-    /**
-     * Returns a builder for creating a {@link Report} object.
-     * The builder can be used to set properties and then create / update an instance of ReportObj.
-     *
-     * @return {@link Report.ReportBuilder} the report builder
-     */
-    Report.ReportBuilder report();
+    //    Report.ReportBuilder report(); TODO Report
 
     /**
      * Returns a builder for creating a {@link DataFlow} object.

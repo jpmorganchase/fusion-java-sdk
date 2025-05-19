@@ -76,27 +76,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
     /**
      * Parses a JSON response to extract a map of reports.
      * <p>
-     * This method deserializes the given JSON string into a map of {@link Report} objects.
-     * Each report is enriched with additional context, such as variable arguments and the
-     * {@code fusion} configuration, using the builder pattern.
-     * </p>
-     *
-     * @param json the JSON response containing dataset information to be parsed.
-     * @return a map where the keys represent dataset identifiers (or relevant keys from the JSON structure),
-     *         and the values are {@link Report} objects enriched with context.
-     */
-    @Override
-    public Map<String, Report> parseReportResponse(String json, String catalog) {
-        return parseResourcesWithVarArgsFromResponse(json, Report.class, (resource, mc) -> resource.toBuilder()
-                .varArgs(mc.getVarArgs())
-                .fusion(fusion)
-                .catalogIdentifier(catalog)
-                .build());
-    }
-
-    /**
-     * Parses a JSON response to extract a map of reports.
-     * <p>
      * This method deserializes the given JSON string into a map of {@link DataFlow} objects.
      * Each report is enriched with additional context, such as variable arguments and the
      * {@code fusion} configuration, using the builder pattern.

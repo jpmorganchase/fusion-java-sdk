@@ -1,4 +1,10 @@
 # Fusion Java SDK
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Maven Central Version](https://img.shields.io/maven-central/v/io.github.jpmorganchase.fusion/fusion-sdk)](https://github.com/jpmorganchase/fusion-java-sdk/releases)
+[![Java Docs](https://javadoc.io/badge2/io.github.jpmorganchase.fusion/fusion-sdk/javadoc.svg)](https://javadoc.io/doc/io.github.jpmorganchase.fusion/fusion-sdk)
+[![Workflow](https://github.com/jpmorganchase/fusion-java-sdk/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/jpmorganchase/fusion-java-sdk/actions/workflows/build.yml)
+
 A Java SDK for the Fusion platform API
 
 Fusion by J.P. Morgan is a cloud-native data platform for institutional investors, providing end-to-end data management, analytics, and reporting solutions across the investment lifecycle. The platform allows clients to seamlessly integrate and combine data from multiple sources into a single data model that delivers the benefits and scale and reduces costs, along with the ability to more easily unlock timely analysis and insights. Fusion's open data architecture supports flexible distribution, including partnerships with cloud and data providers, all managed by J.P. Morgan data experts.
@@ -7,21 +13,27 @@ For more information, please visit [fusion.jpmorgan.com](https://fusion.jpmorgan
 
 ## Usage
 
-***
+> [!WARNING]
+> This SDK is undergoing active development towards a stable release. While the version remains < 1.0.0 there may be some changes to the public API. We will endeavour to avoid that or keep to a minimum where possible
 
-:warning: This SDK is undergoing active development towards a stable release. While the version remains < 1.0.0 there may be some changes to the public API. We will endeavour to avoid that or keep to a minimum where possible
-
-***
 ### Acquiring
 
-The Fusion SDK is published to Maven Central and can be retrieved from there using standard dependency resolution tools. For example, with Maven, add this to the dependencies in your POM:
+The Fusion SDK is published to Maven Central and can be retrieved using standard dependency resolution tools:
+
+#### Apache Maven
 
 ```xml    
   <dependency>
     <groupId>io.github.jpmorganchase.fusion</groupId>
     <artifactId>fusion-sdk</artifactId>
-    <version>0.0.15</version>
+    <version>${fusion.version}</version>
   </dependency>
+```
+
+#### Gradle
+
+```
+implementation 'io.github.jpmorganchase.fusion:fusion-sdk:${fusion.version}'
 ```
 
 ### Getting started

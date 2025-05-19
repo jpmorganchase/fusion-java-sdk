@@ -11,32 +11,23 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class ReportBuilderTest {
+public class ReportAttributeBuilderTest {
 
     @Test
     void constructionWithBuilderCorrectlyPopulatesAllFields() {
         Fusion fusion = Mockito.mock(Fusion.class);
         Map<String, Object> varArgs = new HashMap<>();
         varArgs.put("key1", "value1");
-        DataNodeId dataNodeId = new DataNodeId("id", "name", "type");
-        Domain domain = new Domain("id", "name");
-        AlternativeId alternativeId = new AlternativeId(domain, "value");
 
-        Report r = Report.builder()
+        ReportAttribute r = ReportAttribute.builder()
                 .name("name")
-                .tierType("tierType")
-                .lob("LOB")
-                .dataNodeId(dataNodeId)
-                .alternativeId(alternativeId)
+                .title("title")
                 .varArgs(varArgs)
                 .fusion(fusion)
                 .build();
 
         assertThat(r.getName(), is(equalTo("name")));
-        assertThat(r.getTierType(), is(equalTo("tierType")));
-        assertThat(r.getLob(), is(equalTo("LOB")));
-        assertThat(r.getDataNodeId(), is(equalTo(dataNodeId)));
-        assertThat(r.getAlternativeId(), is(equalTo(alternativeId)));
+        assertThat(r.getTitle(), is(equalTo("title")));
         assertThat(r.getVarArgs(), is(equalTo(varArgs)));
         assertThat(r.getFusion(), notNullValue());
     }

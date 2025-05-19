@@ -18,7 +18,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
@@ -218,6 +220,36 @@ public class FusionTest {
 
         Map<String, Distribution> actualResponse = f.listDistributions("sample_dataset", "20230308");
         assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testReportSpecInteraction() throws Exception {
+        Fusion f = stubFusion();
+
+        List<ReportAttribute> reportAttributes = new ArrayList<>();
+        f.registerReportSpecification("report", reportAttributes);
+
+        verify(apiManager, times(1))
+                .callAPIToPost(
+                        String.format(
+                                "%1s/api/corelineage-service/v1/reports/%2s/reportElements",
+                                f.getNewRootURL(), "report"),
+                        reportAttributes);
+    }
+
+    @Test
+    public void testReportBusinessTermInteraction() throws Exception {
+        Fusion f = stubFusion();
+
+        List<ReportBusinessTerm> reportBusinessTerms = new ArrayList<>();
+        f.registerReportAttributeToBusinessTerm("report", reportBusinessTerms);
+
+        verify(apiManager, times(1))
+                .callAPIToPost(
+                        String.format(
+                                "%1s/api/corelineage-service/v1/reports/%2s/reportElements/businessTerms",
+                                f.getNewRootURL(), "report"),
+                        reportBusinessTerms);
     }
 
     @Test
