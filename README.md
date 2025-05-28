@@ -13,9 +13,6 @@ For more information, please visit [fusion.jpmorgan.com](https://fusion.jpmorgan
 
 ## Usage
 
-> [!WARNING]
-> This SDK is undergoing active development towards a stable release. While the version remains < 1.0.0 there may be some changes to the public API. We will endeavour to avoid that or keep to a minimum where possible
-
 ### Acquiring
 
 The Fusion SDK is published to Maven Central and can be retrieved using standard dependency resolution tools:
