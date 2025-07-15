@@ -20,23 +20,28 @@ public class ReportBuilderTest {
         varArgs.put("key1", "value1");
         DataNodeId dataNodeId = new DataNodeId("id", "name", "type");
         Domain domain = new Domain("id", "name");
-        AlternativeId alternativeId = new AlternativeId(domain, "value");
 
         Report r = Report.builder()
-                .name("name")
-                .tierType("tierType")
-                .lob("LOB")
+                .title("title")
+                .description("description")
+                .frequency("frequency")
+                .category("category")
+                .subCategory("subCategory")
+                .regulatoryRelated(true)
+                .domain(domain)
                 .dataNodeId(dataNodeId)
-                .alternativeId(alternativeId)
                 .varArgs(varArgs)
                 .fusion(fusion)
                 .build();
 
-        assertThat(r.getName(), is(equalTo("name")));
-        assertThat(r.getTierType(), is(equalTo("tierType")));
-        assertThat(r.getLob(), is(equalTo("LOB")));
+        assertThat(r.getTitle(), is(equalTo("title")));
+        assertThat(r.getDescription(), is(equalTo("description")));
+        assertThat(r.getFrequency(), is(equalTo("frequency")));
+        assertThat(r.getCategory(), is(equalTo("category")));
+        assertThat(r.getSubCategory(), is(equalTo("subCategory")));
+        assertThat(r.isRegulatoryRelated(), is(equalTo(true)));
+        assertThat(r.getDomain(), is(equalTo(domain)));
         assertThat(r.getDataNodeId(), is(equalTo(dataNodeId)));
-        assertThat(r.getAlternativeId(), is(equalTo(alternativeId)));
         assertThat(r.getVarArgs(), is(equalTo(varArgs)));
         assertThat(r.getFusion(), notNullValue());
     }

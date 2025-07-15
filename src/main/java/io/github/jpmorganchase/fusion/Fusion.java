@@ -372,6 +372,26 @@ public class Fusion {
     }
 
     /**
+     * Get a list of the reports
+     *
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws ParsingException if the response from Fusion could not be parsed successfully
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public Map<String, Report> listReports() {
+        String url = String.format("%1s/api/corelineage-service/v1/reports/list", this.getNewRootURL());
+        String json = this.api.callAPIToPost(url);
+        return responseParser.parseReportResponse(json);
+    }
+
+    public Map<String, ReportAttribute> listReportAttributes(String reportId) {
+        String url = String.format(
+                "%1s/api/corelineage-service/v1/reports/%2s/reportElements", this.getNewRootURL(), reportId);
+        String json = this.api.callAPI(url);
+        return responseParser.parseReportAttributeResponse(json);
+    }
+
+    /**
      * Get the available resources for a dataset, in the specified catalog
      * Currently this will always return a dataset.
      *

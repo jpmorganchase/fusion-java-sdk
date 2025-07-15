@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.model;
 
 import io.github.jpmorganchase.fusion.Fusion;
 import java.util.Map;
+import java.util.Set;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -12,27 +13,39 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class Report extends Resource {
 
-    String name;
-    String tierType;
-    String lob;
+    String id;
+    String title;
+    String description;
+    String frequency;
+    String category;
+    String subCategory;
+    boolean regulatoryRelated;
+    Domain domain;
     DataNodeId dataNodeId;
-    AlternativeId alternativeId;
 
     @Builder(toBuilder = true)
     public Report(
             @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
             @Builder.ObtainVia(method = "getFusion") Fusion fusion,
-            String name,
-            String tierType,
-            String lob,
-            DataNodeId dataNodeId,
-            AlternativeId alternativeId) {
+            String id,
+            String title,
+            String description,
+            String frequency,
+            String category,
+            String subCategory,
+            boolean regulatoryRelated,
+            Domain domain,
+            DataNodeId dataNodeId) {
         super(varArgs, fusion);
-        this.name = name;
-        this.tierType = tierType;
-        this.lob = lob;
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.frequency = frequency;
+        this.category = category;
+        this.subCategory = subCategory;
+        this.regulatoryRelated = regulatoryRelated;
+        this.domain = domain;
         this.dataNodeId = dataNodeId;
-        this.alternativeId = alternativeId;
     }
 
     private String getAPIPath() {
@@ -44,11 +57,17 @@ public class Report extends Resource {
         return getFusion().create(getAPIPath(), this);
     }
 
+    @Override
+    public Set<String> getRegisteredAttributes() {
+        Set<String> exclusions = super.getRegisteredAttributes();
+        exclusions.addAll(VarArgsHelper.getFieldNames(Report.class));
+        return exclusions;
+    }
+
     @SuppressWarnings("FieldCanBeLocal")
     public static class ReportBuilder {
         private Map<String, Object> varArgs;
         private DataNodeId dataNodeId;
-        private AlternativeId alternativeId;
 
         public Report.ReportBuilder varArg(String key, Object value) {
             this.varArgs = VarArgsHelper.varArg(key, value, this.varArgs);
@@ -62,11 +81,6 @@ public class Report extends Resource {
 
         public Report.ReportBuilder dataNodeIdValues(String id, String name, String type) {
             this.dataNodeId = new DataNodeId(id, name, type);
-            return this;
-        }
-
-        public Report.ReportBuilder alternativeIdValues(Domain domain, String value) {
-            this.alternativeId = new AlternativeId(domain, value);
             return this;
         }
     }

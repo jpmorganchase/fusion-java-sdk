@@ -4,6 +4,7 @@ import io.github.jpmorganchase.fusion.Fusion;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,17 +15,17 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class ReportAttribute extends Resource {
 
-    String name;
+    String id;
     String title;
 
     @Builder(toBuilder = true)
     public ReportAttribute(
             @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
             @Builder.ObtainVia(method = "getFusion") Fusion fusion,
-            String name,
+            String id,
             String title) {
         super(varArgs, fusion);
-        this.name = name;
+        this.id = id;
         this.title = title;
     }
 
@@ -38,6 +39,13 @@ public class ReportAttribute extends Resource {
         List<ReportAttribute> attributes = new ArrayList<>();
         attributes.add(this);
         return getFusion().create(getAPIPath(reportId), attributes);
+    }
+
+    @Override
+    public Set<String> getRegisteredAttributes() {
+        Set<String> exclusions = super.getRegisteredAttributes();
+        exclusions.addAll(VarArgsHelper.getFieldNames(ReportAttribute.class));
+        return exclusions;
     }
 
     @SuppressWarnings("FieldCanBeLocal")

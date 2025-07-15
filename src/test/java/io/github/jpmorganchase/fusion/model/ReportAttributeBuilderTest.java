@@ -20,13 +20,11 @@ public class ReportAttributeBuilderTest {
         varArgs.put("key1", "value1");
 
         ReportAttribute r = ReportAttribute.builder()
-                .name("name")
                 .title("title")
                 .varArgs(varArgs)
                 .fusion(fusion)
                 .build();
 
-        assertThat(r.getName(), is(equalTo("name")));
         assertThat(r.getTitle(), is(equalTo("title")));
         assertThat(r.getVarArgs(), is(equalTo(varArgs)));
         assertThat(r.getFusion(), notNullValue());

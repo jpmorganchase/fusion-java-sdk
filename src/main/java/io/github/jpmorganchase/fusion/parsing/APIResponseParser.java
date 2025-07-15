@@ -24,12 +24,18 @@ public interface APIResponseParser {
 
     Map<String, Distribution> parseDistributionResponse(String json);
 
+    Map<String, Report> parseReportResponse(String json);
+
+    Map<String, ReportAttribute> parseReportAttributeResponse(String json);
+
     <T extends CatalogResource> Map<String, T> parseResourcesFromResponse(String json, Class<T> resourceClass);
 
     <T extends CatalogResource> Map<String, T> parseResourcesWithVarArgsFromResponse(
             String json, Class<T> resourceClass, ResourceMutationFactory<T> mutator);
 
     Map<String, Map<String, Object>> parseResourcesUntyped(String json);
+
+    Map<String, Map<String, Object>> parseResourcesUntypedList(String json, String identifierAttribute);
 
     Operation parseOperationResponse(String json);
 

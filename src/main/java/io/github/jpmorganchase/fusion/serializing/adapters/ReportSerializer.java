@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import io.github.jpmorganchase.fusion.model.AlternativeId;
 import io.github.jpmorganchase.fusion.model.DataNodeId;
 import io.github.jpmorganchase.fusion.model.Domain;
 import io.github.jpmorganchase.fusion.model.Report;
@@ -18,9 +17,17 @@ public class ReportSerializer implements JsonSerializer<Report> {
 
         JsonObject jsonObject = new JsonObject();
 
-        jsonObject.add("name", context.serialize(src.getName()));
-        jsonObject.add("tierType", context.serialize(src.getTierType()));
-        jsonObject.add("lob", context.serialize(src.getLob()));
+        jsonObject.add("title", context.serialize(src.getTitle()));
+        jsonObject.add("description", context.serialize(src.getDescription()));
+        jsonObject.add("frequency", context.serialize(src.getFrequency()));
+        jsonObject.add("category", context.serialize(src.getCategory()));
+        jsonObject.add("subCategory", context.serialize(src.getSubCategory()));
+        jsonObject.add("regulatoryRelated", context.serialize(src.isRegulatoryRelated()));
+
+        JsonObject domain = serializeDomain(src.getDomain(), context);
+        if (domain != null) {
+            jsonObject.add("domain", domain);
+        }
 
         DataNodeId dataNodeId = src.getDataNodeId();
         if (dataNodeId != null) {
@@ -31,27 +38,23 @@ public class ReportSerializer implements JsonSerializer<Report> {
             jsonObject.add("dataNodeId", dataNodeJson);
         }
 
-        AlternativeId alternativeId = src.getAlternativeId();
-        if (alternativeId != null) {
-            JsonObject alternativeIdJson = new JsonObject();
-
-            Domain domain = alternativeId.getDomain();
-            if (domain != null) {
-                JsonObject domainJson = new JsonObject();
-                domainJson.add("id", context.serialize(domain.getId()));
-                domainJson.add("name", context.serialize(domain.getName()));
-                alternativeIdJson.add("domain", domainJson);
-            }
-
-            alternativeIdJson.add("value", context.serialize(alternativeId.getValue()));
-            jsonObject.add("alternativeId", alternativeIdJson);
-        }
-
         Map<String, Object> varArgs = src.getVarArgs();
         if (varArgs != null) {
             varArgs.forEach((key, value) -> jsonObject.add(key, context.serialize(value)));
         }
 
         return jsonObject;
+    }
+
+    private JsonObject serializeDomain(Domain domain, JsonSerializationContext context) {
+        JsonObject domainJson = null;
+
+        if (domain != null) {
+            domainJson = new JsonObject();
+            domainJson.add("id", context.serialize(domain.getId()));
+            domainJson.add("name", context.serialize(domain.getName()));
+        }
+
+        return domainJson;
     }
 }

@@ -15,7 +15,6 @@ public class ReportAttributeSerializer implements JsonSerializer<ReportAttribute
 
         JsonObject jsonObject = new JsonObject();
 
-        jsonObject.add("name", context.serialize(src.getName()));
         jsonObject.add("title", context.serialize(src.getTitle()));
 
         Map<String, Object> varArgs = src.getVarArgs();

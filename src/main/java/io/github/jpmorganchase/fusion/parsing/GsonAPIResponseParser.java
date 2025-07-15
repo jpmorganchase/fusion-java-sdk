@@ -142,6 +142,51 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
+    public Map<String, Report> parseReportResponse(String json) {
+        Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json, "content", "id");
+
+        JsonArray resources = getResources(json, "content");
+
+        Map<String, Report> resourceMap = new HashMap<>();
+        for (JsonElement element : resources) {
+            Report obj = gson.fromJson(element, Report.class);
+            Map<String, Object> untypedResource =
+                    untypedResources.get(obj.getId()); // This is the json of the report we're looking at
+            resourceMap.put(
+                    obj.getId(),
+                    parseResourceWithVarArgs(
+                            obj.getRegisteredAttributes(), obj, untypedResource, (resource, mc) -> resource.toBuilder()
+                                    .varArgs(mc.getVarArgs())
+                                    .fusion(fusion)
+                                    .build()));
+        }
+
+        return resourceMap;
+    }
+
+    @Override
+    public Map<String, ReportAttribute> parseReportAttributeResponse(String json) {
+        Map<String, Map<String, Object>> untypedResources = parseResourcesUntypedList(json, "id");
+
+        JsonArray resources = JsonParser.parseString(json).getAsJsonArray();
+
+        Map<String, ReportAttribute> resourceMap = new HashMap<>();
+        for (JsonElement element : resources) {
+            ReportAttribute obj = gson.fromJson(element, ReportAttribute.class);
+            Map<String, Object> untypedResource = untypedResources.get(obj.getId());
+            resourceMap.put(
+                    obj.getId(),
+                    parseResourceWithVarArgs(
+                            obj.getRegisteredAttributes(), obj, untypedResource, (resource, mc) -> resource.toBuilder()
+                                    .varArgs(mc.getVarArgs())
+                                    .fusion(fusion)
+                                    .build()));
+        }
+
+        return resourceMap;
+    }
+
+    @Override
     public Map<String, DataProduct> parseDataProductResponse(String json) {
         return parseResourcesFromResponse(json, DataProduct.class);
     }
@@ -211,25 +256,37 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     public Map<String, Map<String, Object>> parseResourcesUntyped(String json, String resourceAttribute) {
+        return parseResourcesUntyped(json, resourceAttribute, "identifier");
+    }
+
+    public Map<String, Map<String, Object>> parseResourcesUntyped(
+            String json, String resourceAttribute, String identifierAttribute) {
         Map<String, Object> responseMap = getMapFromJsonResponse(json);
 
         Object resources = responseMap.get(resourceAttribute);
         if (resources instanceof List) {
-            @SuppressWarnings("unchecked") // List<Object> is always safe, compiler disagrees
-            List<Object> resourceList = (List<Object>) resources;
+            @SuppressWarnings("unchecked") // Output of GSON parsing will always be in this format
+            List<Map<String, Object>> resourceList = (List<Map<String, Object>>) resources;
 
-            Map<String, Map<String, Object>> resourcesMap = new HashMap<>();
-            resourceList.forEach((o -> {
-                @SuppressWarnings("unchecked") // Output of GSON parsing will always be in this format
-                Map<String, Object> resource = (Map<String, Object>) o;
-
-                String identifier = (String) resource.get("identifier");
-                resourcesMap.put(identifier, resource);
-            }));
-            return resourcesMap;
+            return parseResourcesByAttribute(resourceList, identifierAttribute);
         } else {
             throw generateNoResourceException();
         }
+    }
+
+    public Map<String, Map<String, Object>> parseResourcesUntypedList(String json, String identifierAttribute) {
+        List<Map<String, Object>> responseList = getListFromJsonResponse(json);
+        return parseResourcesByAttribute(responseList, identifierAttribute);
+    }
+
+    private Map<String, Map<String, Object>> parseResourcesByAttribute(
+            List<Map<String, Object>> resourceList, String identifierAttribute) {
+        Map<String, Map<String, Object>> resourcesMap = new HashMap<>();
+        resourceList.forEach((resource -> {
+            String identifier = (String) resource.get(identifierAttribute);
+            resourcesMap.put(identifier, resource);
+        }));
+        return resourcesMap;
     }
 
     private JsonArray getResources(String json, String resourceAttribute) {
@@ -247,7 +304,7 @@ public class GsonAPIResponseParser implements APIResponseParser {
         return new ParsingException(message);
     }
 
-    private <T extends CatalogResource> T parseResourceWithVarArgs(
+    private <T extends Resource> T parseResourceWithVarArgs(
             Set<String> excludes, T obj, Map<String, Object> untypedResource, ResourceMutationFactory<T> mutator) {
 
         Map<String, Object> varArgs = getVarArgsToInclude(untypedResource, excludes);
@@ -263,6 +320,11 @@ public class GsonAPIResponseParser implements APIResponseParser {
     private Map<String, Object> getMapFromJsonResponse(String json) {
         Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
         return gson.fromJson(json, mapType);
+    }
+
+    private List<Map<String, Object>> getListFromJsonResponse(String json) {
+        Type listType = new TypeToken<List<Map<String, Object>>>() {}.getType();
+        return gson.fromJson(json, listType);
     }
 
     private static <T extends CatalogResource> Map<String, T> collectMapOfUniqueResources(List<T> resourceList) {

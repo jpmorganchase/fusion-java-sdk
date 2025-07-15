@@ -552,6 +552,42 @@ public class FusionTest {
     }
 
     @Test
+    public void testListReportsInteraction() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, Report> stubResponse = new HashMap<>();
+        stubResponse.put("first", Report.builder().id("report1").build());
+
+        String rootUrl = config.getRootURL().replace("/api/v1/", "");
+        when(apiManager.callAPIToPost(String.format("%1s/api/corelineage-service/v1/reports/list", rootUrl)))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseReportResponse("{\"key\":value}")).thenReturn(stubResponse);
+
+        Map<String, Report> actualResponse = f.listReports();
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
+    public void testListReportAttributesInteraction() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, ReportAttribute> stubResponse = new HashMap<>();
+        stubResponse.put(
+                "first", ReportAttribute.builder().id("reportAttribute1").build());
+
+        String reportId = "report1";
+
+        String rootUrl = config.getRootURL().replace("/api/v1/", "");
+        when(apiManager.callAPI(
+                        String.format("%1s/api/corelineage-service/v1/reports/%2s/reportElements", rootUrl, reportId)))
+                .thenReturn("{\"key\":value}");
+        when(responseParser.parseReportAttributeResponse("{\"key\":value}")).thenReturn(stubResponse);
+
+        Map<String, ReportAttribute> actualResponse = f.listReportAttributes(reportId);
+        assertThat(actualResponse, is(equalTo(stubResponse)));
+    }
+
+    @Test
     public void testDatasetInteractionUntyped() throws Exception {
         Fusion f = stubFusion();
 

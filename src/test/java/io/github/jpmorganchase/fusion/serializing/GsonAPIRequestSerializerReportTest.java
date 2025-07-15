@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import io.github.jpmorganchase.fusion.model.AlternativeId;
 import io.github.jpmorganchase.fusion.model.DataNodeId;
 import io.github.jpmorganchase.fusion.model.Domain;
 import io.github.jpmorganchase.fusion.model.Report;
@@ -21,12 +20,15 @@ class GsonAPIRequestSerializerReportTest {
     public void testReportSerializesCorrectly() {
         // Given
         Report report = Report.builder()
-                .name("Sample Report")
-                .tierType("Report")
-                .lob("LOB")
-                .dataNodeId(new DataNodeId("id", "name", "type"))
-                .alternativeId(new AlternativeId(new Domain("id", "name"), "value"))
-                .varArg("title", "Report Title")
+                .title("Sample Report")
+                .description("Report")
+                .frequency("Daily")
+                .category("Report Category")
+                .subCategory("Report Sub Category")
+                .regulatoryRelated(true)
+                .domain(new Domain("domainId", "domainName"))
+                .dataNodeId(new DataNodeId("dataNodeDomainId", "dataNodeDomainName", "type"))
+                .varArg("name", "Report Name")
                 .varArg("description", "Report Description")
                 .varArg("category", "Report Category")
                 .build();
@@ -45,11 +47,14 @@ class GsonAPIRequestSerializerReportTest {
     public void testReportWithoutVarArgsSerializesCorrectly() {
         // Given
         Report report = Report.builder()
-                .name("Sample Report")
-                .tierType("Report")
-                .lob("LOB")
-                .dataNodeId(new DataNodeId("id", "name", "type"))
-                .alternativeId(new AlternativeId(new Domain("id", "name"), "value"))
+                .title("Sample Report")
+                .description("Report")
+                .frequency("Daily")
+                .category("Report Category")
+                .subCategory("Report Sub Category")
+                .regulatoryRelated(true)
+                .domain(new Domain("domainId", "domainName"))
+                .dataNodeId(new DataNodeId("dataNodeDomainId", "dataNodeDomainName", "type"))
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
@@ -66,11 +71,10 @@ class GsonAPIRequestSerializerReportTest {
     public void testReportWithNullValues() {
         // Given
         Report report = Report.builder()
-                .name("Sample Report")
-                .tierType(null)
-                .lob(null)
+                .title("Sample Report")
+                .description(null)
+                .category(null)
                 .dataNodeId(new DataNodeId("id", "name", null))
-                .alternativeId(new AlternativeId(new Domain("id", null), "value"))
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();
@@ -87,11 +91,14 @@ class GsonAPIRequestSerializerReportTest {
     public void testReportWithSpecialCharacters() {
         // Given
         Report report = Report.builder()
-                .name("Sample Report")
-                .tierType("Special characters: \"quotes\", \n newlines, and \u2022 bullets")
-                .lob("LOB")
-                .dataNodeId(new DataNodeId("id", "name", "type"))
-                .alternativeId(new AlternativeId(new Domain("id", "name"), "value"))
+                .title("Sample Report")
+                .description("Special characters: \"quotes\", \n newlines, and \u2022 bullets")
+                .frequency("Daily")
+                .category("Report Category")
+                .subCategory("Report Sub Category")
+                .regulatoryRelated(true)
+                .domain(new Domain("domainId", "domainName"))
+                .dataNodeId(new DataNodeId("dataNodeDomainId", "dataNodeDomainName", "type"))
                 .build();
 
         GsonAPIRequestSerializer serializer = new GsonAPIRequestSerializer();

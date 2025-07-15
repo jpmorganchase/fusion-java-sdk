@@ -63,6 +63,16 @@ public class FusionAPIManager implements APIManager {
         return response.getBody();
     }
 
+    @Override
+    public String callAPIToPost(String apiPath) throws APICallException {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+
+        HttpResponse<String> response = httpClient.post(apiPath, requestHeaders, null);
+        checkResponseStatus(response);
+        return response.getBody();
+    }
+
     /**
      * Sends a POST request to the specified API endpoint with the provided catalog resource.
      *

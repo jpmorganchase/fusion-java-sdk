@@ -15,6 +15,8 @@ public interface APIManager extends APIDownloadOperations, APIUploadOperations {
      */
     String callAPI(String apiPath) throws APICallException;
 
+    String callAPIToPost(String apiPath) throws APICallException;
+
     /**
      * Sends a POST request to the specified API endpoint with the provided catalog resource.
      *

@@ -1,1 +1,1 @@
-{"name":"Sample Report","dataNodeId":{"id":"id","name":"name"},"alternativeId":{"domain":{"id":"id"},"value":"value"}}
+{"title":"Sample Report","regulatoryRelated":false,"dataNodeId":{"id":"id","name":"name"}}
