@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.api.request;
 
 import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
 
+import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
@@ -80,13 +81,17 @@ public class PartFetcher {
     }
 
     private String getPath(PartRequest pr) {
+        String path;
+
         if (pr.isHeadRequest()) {
-            return getHeadPath(pr);
+            path = getHeadPath(pr);
+        } else if (pr.isSinglePartDownloadRequest()) {
+            path = getSinglePartPath(pr);
+        } else {
+            path = getMultiPartPath(pr);
         }
-        if (pr.isSinglePartDownloadRequest()) {
-            return getSinglePartPath(pr);
-        }
-        return getMultiPartPath(pr);
+
+        return APIManager.encodeUrl(path);
     }
 
     private String getSinglePartPath(PartRequest pr) {

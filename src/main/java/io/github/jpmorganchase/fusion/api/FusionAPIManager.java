@@ -58,7 +58,7 @@ public class FusionAPIManager implements APIManager {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
 
-        HttpResponse<String> response = httpClient.get(apiPath, requestHeaders);
+        HttpResponse<String> response = httpClient.get(APIManager.encodeUrl(apiPath), requestHeaders);
         checkResponseStatus(response);
         return response.getBody();
     }
@@ -68,7 +68,7 @@ public class FusionAPIManager implements APIManager {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
 
-        HttpResponse<String> response = httpClient.post(apiPath, requestHeaders, null);
+        HttpResponse<String> response = httpClient.post(APIManager.encodeUrl(apiPath), requestHeaders, null);
         checkResponseStatus(response);
         return response.getBody();
     }
@@ -92,7 +92,8 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
         requestHeaders.put("Content-Type", "application/json");
 
-        HttpResponse<String> response = httpClient.post(apiPath, requestHeaders, serializer.serialize(resource));
+        HttpResponse<String> response =
+                httpClient.post(APIManager.encodeUrl(apiPath), requestHeaders, serializer.serialize(resource));
         checkResponseStatus(response);
         return response.getBody();
     }
@@ -111,7 +112,8 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
         requestHeaders.put("Content-Type", "application/json");
 
-        HttpResponse<String> response = httpClient.put(apiPath, serializer.serialize(resource), requestHeaders);
+        HttpResponse<String> response =
+                httpClient.put(APIManager.encodeUrl(apiPath), serializer.serialize(resource), requestHeaders);
         checkResponseStatus(response);
         return response.getBody();
     }
@@ -127,7 +129,7 @@ public class FusionAPIManager implements APIManager {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
 
-        HttpResponse<String> response = httpClient.delete(apiPath, requestHeaders, null);
+        HttpResponse<String> response = httpClient.delete(APIManager.encodeUrl(apiPath), requestHeaders, null);
         checkResponseStatus(response);
         return response.getBody();
     }
@@ -142,7 +144,7 @@ public class FusionAPIManager implements APIManager {
     @Override
     public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset, Map<String, String> headers)
             throws APICallException, FileDownloadException {
-        return downloader.callAPIFileDownload(apiPath, catalog, dataset, headers);
+        return downloader.callAPIFileDownload(APIManager.encodeUrl(apiPath), catalog, dataset, headers);
     }
 
     @Override

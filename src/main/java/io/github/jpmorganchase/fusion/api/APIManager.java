@@ -3,6 +3,10 @@ package io.github.jpmorganchase.fusion.api;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.operations.APIDownloadOperations;
 import io.github.jpmorganchase.fusion.api.operations.APIUploadOperations;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
 
 public interface APIManager extends APIDownloadOperations, APIUploadOperations {
 
@@ -44,4 +48,58 @@ public interface APIManager extends APIDownloadOperations, APIUploadOperations {
      * @throws APICallException if the response status indicates an error or the request fails
      */
     String callAPIToDelete(String apiPath);
+
+    static String encodeUrl(String rawUrl) {
+        try {
+            URL url = new URL(rawUrl);
+
+            String protocol = url.getProtocol();
+            String host = url.getHost();
+            int port = url.getPort();
+            String path = url.getPath();
+            String query = url.getQuery();
+
+            boolean endsWithSlash = path.endsWith("/");
+
+            String[] segments = path.split("/");
+            StringBuilder encodedPath = new StringBuilder();
+            for (String segment : segments) {
+                if (segment.isEmpty()) continue;
+
+                String encodedSegment;
+                if (segment.equals(".") || segment.equals("..")) {
+                    // Leave path unencoded
+                    encodedSegment = segment;
+                } else {
+                    encodedSegment = URLEncoder.encode(segment, "UTF-8").replace("+", "%20");
+
+                    // If segment contains '.' not used as special path
+                    if (segment.contains(".")) {
+                        encodedSegment = encodedSegment.replace(".", "%2E");
+                    }
+                }
+
+                encodedPath.append("/").append(encodedSegment);
+            }
+
+            StringBuilder finalUrl = new StringBuilder();
+            finalUrl.append(protocol).append("://").append(host);
+            if (port != -1) {
+                finalUrl.append(":").append(port);
+            }
+            finalUrl.append(encodedPath);
+
+            if (endsWithSlash && !finalUrl.toString().endsWith("/")) {
+                finalUrl.append("/");
+            }
+
+            if (query != null) {
+                finalUrl.append("?").append(query);
+            }
+
+            return finalUrl.toString();
+        } catch (MalformedURLException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

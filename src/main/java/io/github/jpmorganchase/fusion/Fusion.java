@@ -685,7 +685,9 @@ public class Fusion {
         } catch (InvalidPathException | IOException e) {
             throw new FusionException(String.format("Unable to save to target path %s", path), e);
         }
-        String filepath = String.format("%s/%s_%s_%s.%s", path, catalogName, dataset, seriesMember, distribution);
+        String fileName =
+                String.format("%s_%s_%s", catalogName, dataset, seriesMember).replaceAll("[^a-zA-Z0-9_\\-]", "_");
+        String filepath = String.format("%s/%s.%s", path, fileName, distribution);
         this.api.callAPIFileDownload(url, filepath, catalogName, dataset, headers);
     }
 
