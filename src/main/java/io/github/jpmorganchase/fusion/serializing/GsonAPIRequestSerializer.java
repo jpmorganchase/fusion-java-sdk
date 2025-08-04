@@ -3,6 +3,7 @@ package io.github.jpmorganchase.fusion.serializing;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.github.jpmorganchase.fusion.model.*;
+import io.github.jpmorganchase.fusion.model.Report;
 import io.github.jpmorganchase.fusion.serializing.adapters.*;
 import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
@@ -19,6 +20,8 @@ public class GsonAPIRequestSerializer implements APIRequestSerializer {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Dataset.class, new DatasetSerializer());
         gsonBuilder.registerTypeAdapter(Report.class, new ReportSerializer());
+        gsonBuilder.registerTypeAdapter(ReportAttribute.class, new ReportAttributeSerializer());
+        gsonBuilder.registerTypeAdapter(ReportBusinessTerm.class, new ReportBusinessTermSerializer());
         gsonBuilder.registerTypeAdapter(DataFlow.class, new DataFlowSerializer());
         gsonBuilder.registerTypeAdapter(DataDictionaryAttribute.class, new DataDictionaryAttributeSerializer());
         gsonBuilder.registerTypeAdapter(DataDictionaryAttributes.class, new DataDictionaryAttributesSerializer());

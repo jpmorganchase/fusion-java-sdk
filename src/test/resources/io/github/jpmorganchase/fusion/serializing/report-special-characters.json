@@ -1,1 +1,1 @@
-{"description":"Special characters: \"quotes\", \n newlines, and • bullets","@id":"SD0004/","title":"Dataset with Special Characters","frequency":"Yearly","identifier":"SD0004","type":"Report","report":{"tier":"Tier 1"}}
+{"title":"Sample Report","description":"Special characters: \"quotes\", \n newlines, and • bullets","frequency":"Daily","category":"Report Category","subCategory":"Report Sub Category","regulatoryRelated":true,"domain":{"id":"domainId","name":"domainName"},"dataNodeId":{"id":"dataNodeDomainId","name":"dataNodeDomainName","dataNodeType":"type"}}

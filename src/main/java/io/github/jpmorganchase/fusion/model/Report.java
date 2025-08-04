@@ -11,40 +11,50 @@ import lombok.ToString;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class Report extends Dataset {
+public class Report extends Resource {
 
-    ReportDetail report;
-    String tier;
+    String id;
+    String title;
+    String description;
+    String frequency;
+    String category;
+    String subCategory;
+    boolean regulatoryRelated;
+    Domain domain;
+    DataNodeId dataNodeId;
 
     @Builder(toBuilder = true)
     public Report(
-            @Builder.ObtainVia(method = "getIdentifier") String identifier,
             @Builder.ObtainVia(method = "getVarArgs") Map<String, Object> varArgs,
             @Builder.ObtainVia(method = "getFusion") Fusion fusion,
-            @Builder.ObtainVia(method = "getCatalogIdentifier") String catalogIdentifier,
-            @Builder.ObtainVia(method = "getDescription") String description,
-            @Builder.ObtainVia(method = "getLinkedEntity") String linkedEntity,
-            @Builder.ObtainVia(method = "getTitle") String title,
-            @Builder.ObtainVia(method = "getFrequency") String frequency,
-            @Builder.ObtainVia(method = "getType") String type,
-            @Builder.ObtainVia(method = "getApplicationId") Application applicationId,
-            @Builder.ObtainVia(method = "getPublisher") String publisher,
-            ReportDetail report,
-            String tier) {
-        super(
-                identifier,
-                varArgs,
-                fusion,
-                catalogIdentifier,
-                description,
-                linkedEntity,
-                title,
-                frequency,
-                type,
-                applicationId,
-                publisher);
-        this.report = report;
-        this.tier = tier;
+            String id,
+            String title,
+            String description,
+            String frequency,
+            String category,
+            String subCategory,
+            boolean regulatoryRelated,
+            Domain domain,
+            DataNodeId dataNodeId) {
+        super(varArgs, fusion);
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.frequency = frequency;
+        this.category = category;
+        this.subCategory = subCategory;
+        this.regulatoryRelated = regulatoryRelated;
+        this.domain = domain;
+        this.dataNodeId = dataNodeId;
+    }
+
+    private String getAPIPath() {
+        return String.format(
+                "%1s/api/corelineage-service/v1/reports", getFusion().getNewRootURL());
+    }
+
+    public String create() {
+        return getFusion().create(getAPIPath(), this);
     }
 
     @Override
@@ -54,13 +64,10 @@ public class Report extends Dataset {
         return exclusions;
     }
 
-    public static class ReportBuilder extends DatasetBuilder {
-        @SuppressWarnings("FieldCanBeLocal")
+    @SuppressWarnings("FieldCanBeLocal")
+    public static class ReportBuilder {
         private Map<String, Object> varArgs;
-
-        private Report.ReportBuilder report(ReportDetail report) {
-            return this;
-        }
+        private DataNodeId dataNodeId;
 
         public Report.ReportBuilder varArg(String key, Object value) {
             this.varArgs = VarArgsHelper.varArg(key, value, this.varArgs);
@@ -72,12 +79,8 @@ public class Report extends Dataset {
             return this;
         }
 
-        public Report.ReportBuilder tier(String tier) {
-            this.tier = tier;
-            if (null != tier && !tier.isEmpty()) {
-                this.report = ReportDetail.builder().tier(tier).build();
-                this.type = DatasetType.REPORT.getLabel();
-            }
+        public Report.ReportBuilder dataNodeIdValues(String id, String name, String type) {
+            this.dataNodeId = new DataNodeId(id, name, type);
             return this;
         }
     }

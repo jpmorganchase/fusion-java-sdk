@@ -1,1 +1,1 @@
-{"description":"Sample dataset description 1","@id":"SD0001/","title":"Sample Dataset 1 | North America","frequency":"Daily","identifier":"SD0001","type":"Report","report":{"tier":"Tier 1"},"publisher":"Publisher 1"}
+{"title":"Sample Report","description":"Report","frequency":"Daily","category":"Report Category","subCategory":"Report Sub Category","regulatoryRelated":true,"domain":{"id":"domainId","name":"domainName"},"dataNodeId":{"id":"dataNodeDomainId","name":"dataNodeDomainName","dataNodeType":"type"}}

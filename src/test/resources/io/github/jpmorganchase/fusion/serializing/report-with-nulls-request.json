@@ -1,1 +1,1 @@
-{"title":"Sample Dataset with Nulls","frequency":"Monthly","identifier":"SD0002","type":"Report","report":{"tier":"Tier 1"}}
+{"title":"Sample Report","regulatoryRelated":false,"dataNodeId":{"id":"id","name":"name"}}

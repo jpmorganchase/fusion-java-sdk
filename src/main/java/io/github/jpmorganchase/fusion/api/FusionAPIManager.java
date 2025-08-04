@@ -13,7 +13,6 @@ import io.github.jpmorganchase.fusion.api.operations.FusionAPIUploadOperations;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.http.JdkClient;
-import io.github.jpmorganchase.fusion.model.CatalogResource;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import io.github.jpmorganchase.fusion.serializing.APIRequestSerializer;
@@ -59,31 +58,17 @@ public class FusionAPIManager implements APIManager {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
 
-        HttpResponse<String> response = httpClient.get(apiPath, requestHeaders);
+        HttpResponse<String> response = httpClient.get(APIManager.encodeUrl(apiPath), requestHeaders);
         checkResponseStatus(response);
         return response.getBody();
     }
 
-    /**
-     * Sends a POST request to the specified API endpoint with the provided catalog resource.
-     *
-     * <p>This method constructs the necessary authorization headers using a bearer token from
-     * the {@code tokenProvider}, serializes the given {@code catalogResource} into JSON,
-     * and sends a POST request to the specified {@code apiPath} using the {@code httpClient}.
-     * It then checks the HTTP response status for errors and returns the response body if successful.
-     *
-     * @param apiPath         the API endpoint path to which the POST request will be sent
-     * @param catalogResource the resource object to be serialized and sent as the request body
-     * @return the response body as a {@code String} if the request is successful
-     * @throws APICallException if the response status indicates an error or the request fails
-     */
     @Override
-    public String callAPIToPost(String apiPath, CatalogResource catalogResource) throws APICallException {
+    public String callAPIToPost(String apiPath) throws APICallException {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
-        requestHeaders.put("Content-Type", "application/json");
 
-        HttpResponse<String> response = httpClient.post(apiPath, requestHeaders, serializer.serialize(catalogResource));
+        HttpResponse<String> response = httpClient.post(APIManager.encodeUrl(apiPath), requestHeaders, null);
         checkResponseStatus(response);
         return response.getBody();
     }
@@ -107,7 +92,8 @@ public class FusionAPIManager implements APIManager {
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
         requestHeaders.put("Content-Type", "application/json");
 
-        HttpResponse<String> response = httpClient.post(apiPath, requestHeaders, serializer.serialize(resource));
+        HttpResponse<String> response =
+                httpClient.post(APIManager.encodeUrl(apiPath), requestHeaders, serializer.serialize(resource));
         checkResponseStatus(response);
         return response.getBody();
     }
@@ -116,17 +102,18 @@ public class FusionAPIManager implements APIManager {
      * Sends a PUT request to the specified API endpoint with the provided catalog resource.
      *
      * @param apiPath         the API endpoint path to which the PUT request will be sent
-     * @param catalogResource the resource object to be serialized and sent as the request body
+     * @param resource the resource object to be serialized and sent as the request body
      * @return the response body as a {@code String} if the request is successful
      * @throws APICallException if the response status indicates an error or the request fails
      */
     @Override
-    public String callAPIToPut(String apiPath, CatalogResource catalogResource) {
+    public String callAPIToPut(String apiPath, Object resource) {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
         requestHeaders.put("Content-Type", "application/json");
 
-        HttpResponse<String> response = httpClient.put(apiPath, serializer.serialize(catalogResource), requestHeaders);
+        HttpResponse<String> response =
+                httpClient.put(APIManager.encodeUrl(apiPath), serializer.serialize(resource), requestHeaders);
         checkResponseStatus(response);
         return response.getBody();
     }
@@ -142,7 +129,7 @@ public class FusionAPIManager implements APIManager {
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
 
-        HttpResponse<String> response = httpClient.delete(apiPath, requestHeaders, null);
+        HttpResponse<String> response = httpClient.delete(APIManager.encodeUrl(apiPath), requestHeaders, null);
         checkResponseStatus(response);
         return response.getBody();
     }
@@ -157,7 +144,7 @@ public class FusionAPIManager implements APIManager {
     @Override
     public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset, Map<String, String> headers)
             throws APICallException, FileDownloadException {
-        return downloader.callAPIFileDownload(apiPath, catalog, dataset, headers);
+        return downloader.callAPIFileDownload(APIManager.encodeUrl(apiPath), catalog, dataset, headers);
     }
 
     @Override
