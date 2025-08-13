@@ -1,6 +1,5 @@
 package io.github.jpmorganchase.fusion;
 
-import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterByType;
 import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
 
 import io.github.jpmorganchase.fusion.api.APIManager;
