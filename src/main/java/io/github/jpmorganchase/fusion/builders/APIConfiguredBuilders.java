@@ -15,6 +15,11 @@ public class APIConfiguredBuilders implements Builders {
     }
 
     @Override
+    public Report.ReportBuilder report() {
+        return Report.builder().fusion(fusion);
+    }
+
+    @Override
     public DataFlow.DataFlowBuilder dataFlow() {
         return DataFlow.builder().fusion(fusion).type(DatasetType.FLOW.getLabel());
     }
