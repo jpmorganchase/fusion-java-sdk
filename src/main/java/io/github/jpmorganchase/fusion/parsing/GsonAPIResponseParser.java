@@ -74,27 +74,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     /**
-     * Parses a JSON response to extract a map of reports.
-     * <p>
-     * This method deserializes the given JSON string into a map of {@link DataFlow} objects.
-     * Each report is enriched with additional context, such as variable arguments and the
-     * {@code fusion} configuration, using the builder pattern.
-     * </p>
-     *
-     * @param json the JSON response containing dataset information to be parsed.
-     * @return a map where the keys represent dataset identifiers (or relevant keys from the JSON structure),
-     *         and the values are {@link DataFlow} objects enriched with context.
-     */
-    @Override
-    public Map<String, DataFlow> parseDataFlowResponse(String json, String catalog) {
-        return parseResourcesWithVarArgsFromResponse(json, DataFlow.class, (resource, mc) -> resource.toBuilder()
-                .varArgs(mc.getVarArgs())
-                .fusion(fusion)
-                .catalogIdentifier(catalog)
-                .build());
-    }
-
-    /**
      * Parses a JSON response to extract a map of attributes associated with a specific catalog and dataset.
      * <p>
      * This method deserializes the given JSON string into a map of attribute objects, using the provided
@@ -116,51 +95,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
                 .fusion(fusion)
                 .catalogIdentifier(catalog)
                 .build());
-    }
-
-    @Override
-    public Map<String, Report> parseReportResponse(String json) {
-        Map<String, Map<String, Object>> untypedResources = parseResourcesUntyped(json, "content", "id");
-
-        JsonArray resources = getResources(json, "content");
-
-        Map<String, Report> resourceMap = new HashMap<>();
-        for (JsonElement element : resources) {
-            Report obj = gson.fromJson(element, Report.class);
-            Map<String, Object> untypedResource =
-                    untypedResources.get(obj.getId()); // This is the json of the report we're looking at
-            resourceMap.put(
-                    obj.getId(),
-                    parseResourceWithVarArgs(
-                            obj.getRegisteredAttributes(), obj, untypedResource, (resource, mc) -> resource.toBuilder()
-                                    .varArgs(mc.getVarArgs())
-                                    .fusion(fusion)
-                                    .build()));
-        }
-
-        return resourceMap;
-    }
-
-    @Override
-    public Map<String, ReportAttribute> parseReportAttributeResponse(String json) {
-        Map<String, Map<String, Object>> untypedResources = parseResourcesUntypedList(json, "id");
-
-        JsonArray resources = JsonParser.parseString(json).getAsJsonArray();
-
-        Map<String, ReportAttribute> resourceMap = new HashMap<>();
-        for (JsonElement element : resources) {
-            ReportAttribute obj = gson.fromJson(element, ReportAttribute.class);
-            Map<String, Object> untypedResource = untypedResources.get(obj.getId());
-            resourceMap.put(
-                    obj.getId(),
-                    parseResourceWithVarArgs(
-                            obj.getRegisteredAttributes(), obj, untypedResource, (resource, mc) -> resource.toBuilder()
-                                    .varArgs(mc.getVarArgs())
-                                    .fusion(fusion)
-                                    .build()));
-        }
-
-        return resourceMap;
     }
 
     @Override

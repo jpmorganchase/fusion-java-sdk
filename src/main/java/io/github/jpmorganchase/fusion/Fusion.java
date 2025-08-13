@@ -1,6 +1,5 @@
 package io.github.jpmorganchase.fusion;
 
-import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterByType;
 import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
 
 import io.github.jpmorganchase.fusion.api.APIManager;
@@ -117,33 +116,6 @@ public class Fusion {
      */
     public String getRootURL() {
         return this.rootURL;
-    }
-
-    /**
-     * Returns a modified version of the root URL to support the new API format.
-     * <p>
-     * This method temporarily strips trailing segments such as <code>/api/v1/</code> or <code>/v1/</code>
-     * from the original {@link #getRootURL()} to align with an updated API base path format.
-     * </p>
-     *
-     * @return the adjusted root URL without trailing version segments
-     * @deprecated This method is temporary and will be removed once all components have migrated
-     *             to the new API structure. Use {@link #getRootURL()} and apply formatting externally as needed.
-     */
-    @Deprecated
-    public String getNewRootURL() {
-        String newRootURL = getRootURL();
-
-        // Temporarily remove trailing "/api/v1/" or "/v1/" to support new API format
-        if (newRootURL != null) {
-            if (newRootURL.endsWith("/api/v1/")) {
-                newRootURL = newRootURL.substring(0, newRootURL.length() - 8); // remove "/api/v1/"
-            } else if (newRootURL.endsWith("/v1/")) {
-                newRootURL = newRootURL.substring(0, newRootURL.length() - 4); // remove "/v1/"
-            }
-        }
-
-        return newRootURL;
     }
 
     /**
@@ -333,26 +305,6 @@ public class Fusion {
     }
 
     /**
-     * Get a list of the reports
-     *
-     * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the response from Fusion could not be parsed successfully
-     * @throws OAuthException if a token could not be retrieved for authentication
-     */
-    public Map<String, Report> listReports() {
-        String url = String.format("%1s/api/corelineage-service/v1/reports/list", this.getNewRootURL());
-        String json = this.api.callAPIToPost(url);
-        return responseParser.parseReportResponse(json);
-    }
-
-    public Map<String, ReportAttribute> listReportAttributes(String reportId) {
-        String url = String.format(
-                "%1s/api/corelineage-service/v1/reports/%2s/reportElements", this.getNewRootURL(), reportId);
-        String json = this.api.callAPI(url);
-        return responseParser.parseReportAttributeResponse(json);
-    }
-
-    /**
      * Get the available resources for a dataset, in the specified catalog
      * Currently this will always return a dataset.
      *
@@ -382,50 +334,6 @@ public class Fusion {
 
         String url = String.format("%1scatalogs/%2s/datasets/%3s/lineage", this.rootURL, catalogName, dataset);
         return responseParser.parseDatasetLineage(this.api.callAPI(url), catalogName);
-    }
-
-    /**
-     * Get a filtered list of the data flows in the specified catalog
-     * <p>
-     * Note that as of current version this search capability is not yet implemented
-     *
-     * @param catalogName identifier of the catalog to be queried
-     * @param contains    a search keyword.
-     * @param idContains  is true if only apply the filter to the identifier
-     * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the response from Fusion could not be parsed successfully
-     * @throws OAuthException if a token could not be retrieved for authentication
-     */
-    public Map<String, DataFlow> listDataFlows(String catalogName, String contains, boolean idContains) {
-        String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
-        String json = this.api.callAPI(url);
-
-        Map<String, DataFlow> datasets =
-                filterDatasets(responseParser.parseDataFlowResponse(json, catalogName), contains, idContains);
-        return filterByType(datasets, DatasetType.FLOW);
-    }
-
-    /**
-     * Get a list of the data flows in the specified catalog
-     *
-     * @param catalogName identifier of the catalog to be queried
-     * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the response from Fusion could not be parsed successfully
-     * @throws OAuthException if a token could not be retrieved for authentication
-     */
-    public Map<String, DataFlow> listDataFlows(String catalogName) {
-        return listDataFlows(catalogName, null, false);
-    }
-
-    /**
-     * Get a list of the data flows in the default catalog
-     *
-     * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the response from Fusion could not be parsed successfully
-     * @throws OAuthException if a token could not be retrieved for authentication
-     */
-    public Map<String, DataFlow> listDataFlows() {
-        return listDataFlows(this.getDefaultCatalog(), null, false);
     }
 
     /**
@@ -575,30 +483,6 @@ public class Fusion {
     public Map<String, Distribution> listDistributions(String dataset, String seriesMember) {
 
         return this.listDistributions(this.getDefaultCatalog(), dataset, seriesMember);
-    }
-
-    /**
-     * Registers a report specification.
-     *
-     * @param report     the identifier of the report to register
-     * @param attributes a list of {@link ReportAttribute} objects representing the elements of the report
-     */
-    public void registerReportSpecification(String report, List<ReportAttribute> attributes) {
-        String apiPath =
-                String.format("%1s/api/corelineage-service/v1/reports/%2s/reportElements", getNewRootURL(), report);
-        this.create(apiPath, attributes);
-    }
-
-    /**
-     * Registers business terms to an attribute for a specific report.
-     *
-     * @param report        the identifier of the report to associate the business terms with
-     * @param businessTerms a list of {@link ReportBusinessTerm} objects representing the business terms to register
-     */
-    public void registerReportAttributeToBusinessTerm(String report, List<ReportBusinessTerm> businessTerms) {
-        String apiPath = String.format(
-                "%1s/api/corelineage-service/v1/reports/%2s/reportElements/businessTerms", getNewRootURL(), report);
-        this.create(apiPath, businessTerms);
     }
 
     /**
