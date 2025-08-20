@@ -1,7 +1,11 @@
 package io.github.jpmorganchase.fusion.model;
 
+import static io.github.jpmorganchase.fusion.model.VarArgsHelper.copyMap;
+
+import com.google.gson.annotations.Expose;
 import io.github.jpmorganchase.fusion.Fusion;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import lombok.EqualsAndHashCode;
@@ -14,20 +18,25 @@ import lombok.ToString;
 @Getter
 @ToString
 @EqualsAndHashCode
-public abstract class CatalogResource extends Resource {
+public abstract class CatalogResource {
 
     private final String identifier;
+
+    private final Map<String, Object> varArgs;
+
+    @Expose(serialize = false, deserialize = false)
+    private final Fusion fusion;
 
     private final String catalogIdentifier;
 
     public CatalogResource(String identifier, Map<String, Object> varArgs, Fusion fusion, String catalogIdentifier) {
-        super(varArgs, fusion);
+        this.varArgs = copyMap(varArgs);
         this.identifier = identifier;
+        this.fusion = fusion;
         this.catalogIdentifier = catalogIdentifier;
     }
 
     protected String getCatalogIdentifier() {
-        Fusion fusion = getFusion();
         if (catalogIdentifier == null && fusion != null) {
             return fusion.getDefaultCatalog();
         }
@@ -35,15 +44,15 @@ public abstract class CatalogResource extends Resource {
     }
 
     public String create() {
-        return this.getFusion().create(getApiPath(), this);
+        return this.fusion.create(getApiPath(), this);
     }
 
     public String update() {
-        return this.getFusion().update(getApiPath(), this);
+        return this.fusion.update(getApiPath(), this);
     }
 
     public String delete() {
-        return this.getFusion().delete(getApiPath());
+        return this.fusion.delete(getApiPath());
     }
 
     /**
@@ -54,6 +63,10 @@ public abstract class CatalogResource extends Resource {
      */
     protected abstract String getApiPath();
 
+    public Map<String, Object> getVarArgs() {
+        return copyMap(varArgs);
+    }
+
     /**
      * Returns the registered attributes pertaining to this catalog resource.
      * A 'registered' attribute is essentially member variables belonging to the class.
@@ -61,7 +74,7 @@ public abstract class CatalogResource extends Resource {
      * @return set of attributes registered against this CatalogResource
      */
     public Set<String> getRegisteredAttributes() {
-        Set<String> registered = super.getRegisteredAttributes();
+        Set<String> registered = new LinkedHashSet<>();
         registered.addAll(VarArgsHelper.getFieldNames(CatalogResource.class));
         registered.addAll(Arrays.asList("@id", "@context", "@base"));
         return registered;

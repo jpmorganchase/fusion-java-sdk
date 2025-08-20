@@ -26,7 +26,7 @@ public class VarArgsHelper {
         return new HashMap<>();
     }
 
-    public static Set<String> getFieldNames(Class<? extends Resource> resourceClass) {
+    public static Set<String> getFieldNames(Class<? extends CatalogResource> resourceClass) {
         if (resourceClass == null) {
             // Explicitly return an empty set to handle null input
             return Collections.emptySet();
