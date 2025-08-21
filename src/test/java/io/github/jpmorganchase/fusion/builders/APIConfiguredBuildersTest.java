@@ -34,32 +34,6 @@ class APIConfiguredBuildersTest {
     }
 
     @Test
-    public void testDataDictionaryAttributeBuilderReturned() {
-        // Given
-        DataDictionaryAttribute.DataDictionaryAttributeBuilder attributeBuilder =
-                apiConfiguredBuilders.dataDictionaryAttribute();
-
-        // When
-        DataDictionaryAttribute a = attributeBuilder.build();
-
-        // Then
-        thenFusionShouldBeNonNull(a);
-    }
-
-    @Test
-    public void testDataDictionaryAttributesBuilderReturned() {
-        // Given
-        DataDictionaryAttributes.DataDictionaryAttributesBuilder attributeBuilder =
-                apiConfiguredBuilders.dataDictionaryAttributes();
-
-        // When
-        DataDictionaryAttributes a = attributeBuilder.build();
-
-        // Then
-        thenFusionShouldBeNonNull(a);
-    }
-
-    @Test
     public void testAttributeBuilderReturned() {
         // Given
         Attribute.AttributeBuilder attributeBuilder = apiConfiguredBuilders.attribute();
