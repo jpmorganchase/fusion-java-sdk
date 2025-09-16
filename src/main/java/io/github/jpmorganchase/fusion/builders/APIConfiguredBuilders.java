@@ -20,16 +20,6 @@ public class APIConfiguredBuilders implements Builders {
     }
 
     @Override
-    public DataDictionaryAttribute.DataDictionaryAttributeBuilder dataDictionaryAttribute() {
-        return DataDictionaryAttribute.builder().fusion(fusion);
-    }
-
-    @Override
-    public DataDictionaryAttributes.DataDictionaryAttributesBuilder dataDictionaryAttributes() {
-        return DataDictionaryAttributes.builder().fusion(fusion);
-    }
-
-    @Override
     public Attribute.AttributeBuilder attribute() {
         return Attribute.builder().fusion(fusion);
     }
