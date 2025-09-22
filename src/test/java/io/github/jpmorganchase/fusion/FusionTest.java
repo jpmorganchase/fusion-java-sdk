@@ -18,9 +18,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
@@ -220,36 +218,6 @@ public class FusionTest {
 
         Map<String, Distribution> actualResponse = f.listDistributions("sample_dataset", "20230308");
         assertThat(actualResponse, is(equalTo(stubResponse)));
-    }
-
-    @Test
-    public void testReportSpecInteraction() throws Exception {
-        Fusion f = stubFusion();
-
-        List<ReportAttribute> reportAttributes = new ArrayList<>();
-        f.registerReportSpecification("report", reportAttributes);
-
-        verify(apiManager, times(1))
-                .callAPIToPost(
-                        String.format(
-                                "%1s/api/corelineage-service/v1/reports/%2s/reportElements",
-                                f.getNewRootURL(), "report"),
-                        reportAttributes);
-    }
-
-    @Test
-    public void testReportBusinessTermInteraction() throws Exception {
-        Fusion f = stubFusion();
-
-        List<ReportBusinessTerm> reportBusinessTerms = new ArrayList<>();
-        f.registerReportAttributeToBusinessTerm("report", reportBusinessTerms);
-
-        verify(apiManager, times(1))
-                .callAPIToPost(
-                        String.format(
-                                "%1s/api/corelineage-service/v1/reports/%2s/reportElements/businessTerms",
-                                f.getNewRootURL(), "report"),
-                        reportBusinessTerms);
     }
 
     @Test
@@ -548,42 +516,6 @@ public class FusionTest {
         when(responseParser.parseResourcesUntyped("{\"key\":value}")).thenReturn(stubResponse);
 
         Map<String, Map<String, Object>> actualResponse = f.catalogResources("common");
-        assertThat(actualResponse, is(equalTo(stubResponse)));
-    }
-
-    @Test
-    public void testListReportsInteraction() throws Exception {
-        Fusion f = stubFusion();
-
-        Map<String, Report> stubResponse = new HashMap<>();
-        stubResponse.put("first", Report.builder().id("report1").build());
-
-        String rootUrl = config.getRootURL().replace("/api/v1/", "");
-        when(apiManager.callAPIToPost(String.format("%1s/api/corelineage-service/v1/reports/list", rootUrl)))
-                .thenReturn("{\"key\":value}");
-        when(responseParser.parseReportResponse("{\"key\":value}")).thenReturn(stubResponse);
-
-        Map<String, Report> actualResponse = f.listReports();
-        assertThat(actualResponse, is(equalTo(stubResponse)));
-    }
-
-    @Test
-    public void testListReportAttributesInteraction() throws Exception {
-        Fusion f = stubFusion();
-
-        Map<String, ReportAttribute> stubResponse = new HashMap<>();
-        stubResponse.put(
-                "first", ReportAttribute.builder().id("reportAttribute1").build());
-
-        String reportId = "report1";
-
-        String rootUrl = config.getRootURL().replace("/api/v1/", "");
-        when(apiManager.callAPI(
-                        String.format("%1s/api/corelineage-service/v1/reports/%2s/reportElements", rootUrl, reportId)))
-                .thenReturn("{\"key\":value}");
-        when(responseParser.parseReportAttributeResponse("{\"key\":value}")).thenReturn(stubResponse);
-
-        Map<String, ReportAttribute> actualResponse = f.listReportAttributes(reportId);
         assertThat(actualResponse, is(equalTo(stubResponse)));
     }
 

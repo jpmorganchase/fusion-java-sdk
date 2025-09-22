@@ -12,16 +12,6 @@ public interface Builders {
      */
     Dataset.DatasetBuilder dataset();
 
-    //    Report.ReportBuilder report(); TODO Report
-
-    /**
-     * Returns a builder for creating a {@link DataFlow} object.
-     * The builder can be used to set properties and then create / update an instance of ReportObj.
-     *
-     * @return {@link DataFlow.DataFlowBuilder} the report builder
-     */
-    DataFlow.DataFlowBuilder dataFlow();
-
     /**
      * Returns a builder for creating a {@link io.github.jpmorganchase.fusion.model.Attribute} object.
      * The builder can be used to set properties and then create / update an instance of Attribute.
