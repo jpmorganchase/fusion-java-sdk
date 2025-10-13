@@ -292,45 +292,6 @@ public class Fusion {
     }
 
     /**
-     * List the data dictionary attributes in a defined catalog
-     *
-     * @param catalogName a String representing the identifier of the catalog to query.
-     * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the response from Fusion could not be parsed successfully
-     * @throws OAuthException if a token could not be retrieved for authentication
-     */
-    public Map<String, DataDictionaryAttribute> listDataDictionaryAttributes(String catalogName) {
-        String url = String.format("%1scatalogs/%2s/attributes", this.rootURL, catalogName);
-        String json = this.api.callAPI(url);
-        return responseParser.parseDataDictionaryAttributesResponse(json, catalogName);
-    }
-
-    /**
-     * List the data dictionary attributes, uses the default catalog.
-     *
-     * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the response from Fusion could not be parsed successfully
-     * @throws OAuthException if a token could not be retrieved for authentication
-     */
-    public Map<String, DataDictionaryAttribute> listDataDictionaryAttributes() {
-
-        return this.listDataDictionaryAttributes(this.getDefaultCatalog());
-    }
-
-    /**
-     * Get the metadata for a data dictionary attributes, using the specified catalog
-     *
-     * @param catalogName identifier of the catalog to be queried
-     * @throws APICallException if the call to the Fusion API fails
-     * @throws ParsingException if the response from Fusion could not be parsed successfully
-     * @throws OAuthException if a token could not be retrieved for authentication
-     */
-    public Map<String, Map<String, Object>> dataDictionaryAttributeResources(String catalogName) {
-        String url = String.format("%1scatalogs/%2s/attributes", this.rootURL, catalogName);
-        return this.callForMap(url);
-    }
-
-    /**
      * Get a filtered list of the datasets in the specified catalog
      * <p>
      * Note that as of current version this search capability is not yet implemented

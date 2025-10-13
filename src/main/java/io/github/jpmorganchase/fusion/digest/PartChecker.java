@@ -35,7 +35,7 @@ public class PartChecker {
 
     public void verify(String checksum) throws IOException {
         String encodedDigest = Base64.getEncoder().encodeToString(digest.digest());
-        if (Objects.isNull(checksum) || !checksum.equals(encodedDigest)) {
+        if (!Objects.isNull(checksum) && !checksum.equals(encodedDigest)) {
             log.error(
                     "Corrupted stream encountered, failed to verify checksum [{}] against calculated checksum [{}]",
                     checksum,

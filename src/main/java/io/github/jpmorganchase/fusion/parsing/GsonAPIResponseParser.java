@@ -95,29 +95,6 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     /**
-     * Parses a JSON response to extract a map of data dictionary attributes.
-     * <p>
-     * This method deserializes the given JSON string into a map of {@link DataDictionaryAttribute} objects.
-     * Each attribute is enriched with additional context, including variable arguments and the {@code fusion} configuration,
-     * using the builder pattern.
-     * </p>
-     *
-     * @param json the JSON response containing data dictionary attribute information to be parsed.
-     * @param catalog the catalog identifier to associate with each parsed attribute.
-     * @return a map where the keys represent attribute identifiers (or relevant keys from the JSON structure),
-     *         and the values are {@link DataDictionaryAttribute} objects enriched with context.
-     */
-    @Override
-    public Map<String, DataDictionaryAttribute> parseDataDictionaryAttributesResponse(String json, String catalog) {
-        return parseResourcesWithVarArgsFromResponse(
-                json, DataDictionaryAttribute.class, (resource, mc) -> resource.toBuilder()
-                        .varArgs(mc.getVarArgs())
-                        .fusion(fusion)
-                        .catalogIdentifier(catalog)
-                        .build());
-    }
-
-    /**
      * Parses a JSON response to extract a map of attributes associated with a specific catalog and dataset.
      * <p>
      * This method deserializes the given JSON string into a map of attribute objects, using the provided
