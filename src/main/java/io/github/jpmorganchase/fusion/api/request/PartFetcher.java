@@ -2,7 +2,6 @@ package io.github.jpmorganchase.fusion.api.request;
 
 import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
 
-import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
@@ -91,7 +90,7 @@ public class PartFetcher {
             path = getMultiPartPath(pr);
         }
 
-        return APIManager.encodeUrl(path);
+        return path;
     }
 
     private String getSinglePartPath(PartRequest pr) {
