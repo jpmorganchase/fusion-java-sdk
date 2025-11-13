@@ -20,26 +20,39 @@ public class PartChecker {
 
     MessageDigest digest;
 
-    String digestAlgo;
+    private DigestProvider digestProvider;
+    private String digestAlgo;
+    private boolean skipChecksum;
+    private DigestProviderService digestProviderService;
 
-    public PartChecker(String digestAlgo) {
+
+
+    public PartChecker(String digestAlgo, DigestProviderService digestProviderService) {
         this.digestAlgo = digestAlgo;
+        this.digestProviderService = digestProviderService;
     }
 
     public void update(int bytesRead) throws IOException {
-        if (Objects.isNull(digest)) {
+        if (Objects.isNull(digestProvider)) {
             init();
         }
-        digest.update(Integer.valueOf(bytesRead).byteValue());
+        digestProvider.update(Integer.valueOf(bytesRead).byteValue());
     }
 
-    public void verify(String checksum) throws IOException {
+    public void verify(String expectedChecksum) throws IOException {
         String encodedDigest = Base64.getEncoder().encodeToString(digest.digest());
-        if (!Objects.isNull(checksum) && !checksum.equals(encodedDigest)) {
+        if (skipChecksum) {
+            return;
+        }
+
+        String calculatedChecksum = digestProvider.getDigest();
+
+
+        if (!Objects.equals(expectedChecksum, calculatedChecksum)) {
             log.error(
                     "Corrupted stream encountered, failed to verify checksum [{}] against calculated checksum [{}]",
-                    checksum,
-                    encodedDigest);
+                    expectedChecksum,
+                    calculatedChecksum);
             throw new IOException("Corrupted stream, verification of checksum failed");
         }
     }
@@ -53,11 +66,13 @@ public class PartChecker {
     }
 
     public static class PartCheckerBuilder {
+
+        DigestProviderService digestProviderService = new DigestProviderService();
         public PartChecker build() {
             if (digestAlgo == null) {
                 digestAlgo = DEFAULT_DIGEST_ALGO;
             }
-            return new PartChecker(digestAlgo);
+            return new PartChecker(digestAlgo, skipChecksum, digestProviderService);
         }
     }
 }

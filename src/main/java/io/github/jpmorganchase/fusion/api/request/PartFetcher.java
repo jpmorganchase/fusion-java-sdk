@@ -5,6 +5,7 @@ import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResp
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
+import io.github.jpmorganchase.fusion.digest.PartChecker;
 import io.github.jpmorganchase.fusion.http.Client;
 import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
@@ -55,6 +56,7 @@ public class PartFetcher {
         return IntegrityCheckingInputStream.builder()
                 .part(response.getBody())
                 .checksum(head.getChecksum())
+                .partChecker(PartChecker.builder())
                 .build();
     }
 
