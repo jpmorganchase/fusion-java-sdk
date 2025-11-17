@@ -3,7 +3,9 @@ package io.github.jpmorganchase.fusion.api.request;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.lenient;
 
+import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
@@ -34,6 +36,9 @@ class PartFetcherTest {
 
     @Mock
     FusionTokenProvider credentials;
+
+    @Mock
+    FusionConfiguration configuration;
 
     DownloadRequest dr;
 
@@ -338,8 +343,17 @@ class PartFetcherTest {
     }
 
     private void givenPartFetcher() {
-        testee = PartFetcher.builder().client(client).credentials(credentials).build();
+        // New config behaviour for PartChecker
+        lenient().when(configuration.getDigestAlgorithm()).thenReturn("SHA-256");
+        lenient().when(configuration.isSkipCheckSumValidation()).thenReturn(false);
+
+        testee = PartFetcher.builder()
+                .client(client)
+                .credentials(credentials)
+                .configuration(configuration)
+                .build();
     }
+
 
     private void givenDownloadRequest(String catalog, String dataset, String apiPath) {
         dr = DownloadRequest.builder()
