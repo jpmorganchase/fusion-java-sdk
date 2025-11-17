@@ -63,6 +63,13 @@
             <scope>provided</scope> <!-- lombok is not needed at runtime -->
         </dependency>
 
+        <dependency>
+            <groupId>software.amazon.awssdk.crt</groupId>
+            <artifactId>aws-crt</artifactId>
+            <version>0.38.4</version>
+        </dependency>
+
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>ch.qos.logback</groupId>

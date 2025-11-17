@@ -2,14 +2,14 @@ package io.github.jpmorganchase.fusion.digest.checksum;
 
 import java.util.Base64;
 import java.util.zip.Checksum;
-import software.amazon.awssdk.crt.checksums.CRC32C;
+import software.amazon.awssdk.crt.checksums.CRC64NVME;
 
-public class CRC32CProvider implements DigestProvider {
+public class CRC64NVMEProvider implements DigestProvider {
 
     private final Checksum checksum;
 
-    public CRC32CProvider() {
-        this.checksum = new CRC32C();
+    public CRC64NVMEProvider() {
+        this.checksum = new CRC64NVME();
     }
 
     @Override
