@@ -354,7 +354,6 @@ class PartFetcherTest {
                 .build();
     }
 
-
     private void givenDownloadRequest(String catalog, String dataset, String apiPath) {
         dr = DownloadRequest.builder()
                 .catalog(catalog)
