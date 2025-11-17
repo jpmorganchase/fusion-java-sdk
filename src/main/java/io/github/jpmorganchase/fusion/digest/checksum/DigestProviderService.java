@@ -16,10 +16,10 @@ public class DigestProviderService {
                     return new CRC64NVMEProvider();
                 case "SHA-1":
                 case "SHA-256":
-                case "SHA-512":
+                case "MD5":
                     return new SHAProvider(digestAlgo);
                 default:
-                    throw new NoSuchAlgorithmException();
+                    throw new IOException("Inavlid digest algorithm provided");
             }
         } catch (NoSuchAlgorithmException e) {
             throw new IOException("Invalid digest algorithm provided", e);

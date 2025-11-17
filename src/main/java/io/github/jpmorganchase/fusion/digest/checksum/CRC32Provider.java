@@ -1,32 +1,30 @@
 package io.github.jpmorganchase.fusion.digest.checksum;
 
 import java.util.Base64;
-import java.util.zip.CRC32;
+import java.util.zip.Checksum;
+import software.amazon.awssdk.crt.checksums.CRC32;
 
 public class CRC32Provider implements DigestProvider {
 
-    private final CRC32 crc32;
+    private final Checksum checksum;
 
     public CRC32Provider() {
-        this.crc32 = new CRC32();
+        checksum = new CRC32();
     }
 
     @Override
     public void update(byte singleByte) {
-        crc32.update(singleByte);
+        checksum.update(singleByte);
     }
 
     @Override
     public String getDigest() {
-        long value = crc32.getValue();
+        long checksumValue = checksum.getValue();
 
-        byte[] bytes = new byte[] {
-                (byte) (value >>> 24),
-                (byte) (value >>> 16),
-                (byte) (value >>> 8),
-                (byte) value
-        };
+        return Base64.getEncoder().encodeToString(longToBytes(checksumValue));
+    }
 
-        return Base64.getEncoder().encodeToString(bytes);
+    private byte[] longToBytes(long value) {
+        return new byte[] {(byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value};
     }
 }

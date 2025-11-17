@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.api.request;
 
 import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
 
+import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
@@ -29,6 +30,7 @@ public class PartFetcher {
 
     Client client;
     FusionTokenProvider credentials;
+    FusionConfiguration configuration;
 
     /**
      * Makes a call to get the part corresponding to the part number in the {@link PartRequest}.
@@ -57,13 +59,13 @@ public class PartFetcher {
                 .part(response.getBody())
                 .checksum(head.getChecksum())
                 .partChecker(PartChecker.builder()
-                        .digestAlgo(getDigestAlgo(head)))
+                        .digestAlgo(getDigestAlgo(head))
                         .skipChecksum(configuration.isSkipCheckSumValidation())
-                        .build()
+                        .build())
                 .build();
     }
 
-    private String getDigestAlgo(Head head){
+    private String getDigestAlgo(Head head) {
         return head.getChecksumAlgorithm() != null ? head.getChecksumAlgorithm() : configuration.getDigestAlgorithm();
     }
 

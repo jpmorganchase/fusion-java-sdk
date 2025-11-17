@@ -25,7 +25,8 @@ public class Head {
     private static String CONTENT_LENGTH_HEADER = "Content-Length";
     private static String CONTENT_RANGE_HEADER = "Content-Range";
     private static String CHECKSUM_SEPARATOR = "-";
-    private  static  String DEFAULT_ALGORITHM = "SHA-256";
+    private static String DEFAULT_ALGORITHM = "SHA-256";
+    private static String CHECKSUM_ALGO_HEADER = "x-jpmc-checksum-algorithm";
 
     private String version;
     private String checksum;
@@ -92,29 +93,23 @@ public class Head {
                 if (!values.isEmpty() && nonNull(values.get(0))) {
                     this.checksum = values.get(0).split(CHECKSUM_SEPARATOR)[0];
                 }
-            }
-            else {
+            } else {
                 List<String> values = this.headers.get(CHECKSUM_SHA256_HEADER);
-                if (nonNull(values) && !values.isEmpty() && nonNull(values.get(0))){
+                if (nonNull(values) && !values.isEmpty() && nonNull(values.get(0))) {
                     this.checksum = values.get(0).split(CHECKSUM_SEPARATOR)[0];
                 }
-
             }
-
         }
 
         private void handleChecksumAlgorithmHeader() {
-            if(this.headers.containsKey(CHECKSUM_AlGO_HEADER)){
+            if (this.headers.containsKey(CHECKSUM_ALGO_HEADER)) {
                 List<String> values = this.headers.get(CHECKSUM_ALGO_HEADER);
-                if(!values.isEmpty() && nonNull(values.get(0))) {
+                if (!values.isEmpty() && nonNull(values.get(0))) {
                     this.checksumAlgorithm = values.get(0);
                 }
-            } else
-            {
-                this.checksumALgorithm = DEFAULT_ALGORITHM;
+            } else {
+                this.checksumAlgorithm = DEFAULT_ALGORITHM;
             }
-
-
         }
 
         private void handlePartCountHeader() {
