@@ -56,8 +56,15 @@ public class PartFetcher {
         return IntegrityCheckingInputStream.builder()
                 .part(response.getBody())
                 .checksum(head.getChecksum())
-                .partChecker(PartChecker.builder())
+                .partChecker(PartChecker.builder()
+                        .digestAlgo(getDigestAlgo(head)))
+                        .skipChecksum(configuration.isSkipCheckSumValidation())
+                        .build()
                 .build();
+    }
+
+    private String getDigestAlgo(Head head){
+        return head.getChecksumAlgorithm() != null ? head.getChecksumAlgorithm() : configuration.getDigestAlgorithm();
     }
 
     private Head getHead(HttpResponse<InputStream> response, PartRequest pr) {
