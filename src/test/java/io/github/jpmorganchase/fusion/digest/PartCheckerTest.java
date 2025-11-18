@@ -32,6 +32,22 @@ class PartCheckerTest {
     }
 
     @Test
+    public void testSkipChecksumSkipsVerificationEvenWhenChecksumIsWrong() throws Exception {
+
+        // Given
+        // skipChecksum = true, so verification should NO-OP
+        testee = PartChecker.builder().skipChecksum(true).build();
+
+        givenBytesToVerify("foobar");
+
+        // When
+        whenAllBytesHaveBeenReadByThePartChecker();
+
+        // Then - even with wrong checksum, no exception should be thrown
+        Assertions.assertDoesNotThrow(() -> testee.verify("dodgy-checksum"));
+    }
+
+    @Test
     public void testAlternateMessageDigestAlgoCanBeSet() throws Exception {
 
         // Given
