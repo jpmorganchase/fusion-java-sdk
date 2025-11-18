@@ -19,7 +19,7 @@ public class DigestProviderService {
                 case "MD5":
                     return new SHAProvider(digestAlgo);
                 default:
-                    throw new IOException("Inavlid digest algorithm provided");
+                    throw new IOException("Invalid digest algorithm provided");
             }
         } catch (NoSuchAlgorithmException e) {
             throw new IOException("Invalid digest algorithm provided", e);
