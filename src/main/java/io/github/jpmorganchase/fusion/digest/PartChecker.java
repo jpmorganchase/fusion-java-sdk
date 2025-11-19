@@ -22,13 +22,11 @@ public class PartChecker {
 
     private DigestProvider digestProvider;
     private String digestAlgo;
-    private boolean skipChecksum;
     private DigestProviderService digestProviderService;
 
-    public PartChecker(String digestAlgo, boolean skipChecksum, DigestProviderService digestProviderService) {
+    public PartChecker(String digestAlgo, DigestProviderService digestProviderService) {
         this.digestAlgo = digestAlgo;
         this.digestProviderService = digestProviderService;
-        this.skipChecksum = skipChecksum;
     }
 
     public void update(int bytesRead) throws IOException {
@@ -39,10 +37,6 @@ public class PartChecker {
     }
 
     public void verify(String expectedChecksum) throws IOException {
-        if (skipChecksum) {
-            return;
-        }
-
         String calculatedChecksum = digestProvider.getDigest();
 
         if (!Objects.equals(expectedChecksum, calculatedChecksum)) {
@@ -66,7 +60,7 @@ public class PartChecker {
             if (digestAlgo == null) {
                 digestAlgo = DEFAULT_DIGEST_ALGO;
             }
-            return new PartChecker(digestAlgo, skipChecksum, digestProviderService);
+            return new PartChecker(digestAlgo, digestProviderService);
         }
     }
 }

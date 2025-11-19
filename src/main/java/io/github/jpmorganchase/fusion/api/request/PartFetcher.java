@@ -58,10 +58,8 @@ public class PartFetcher {
         return IntegrityCheckingInputStream.builder()
                 .part(response.getBody())
                 .checksum(head.getChecksum())
-                .partChecker(PartChecker.builder()
-                        .digestAlgo(getDigestAlgo(head))
-                        .skipChecksum(configuration.isSkipCheckSumValidation())
-                        .build())
+                .partChecker(
+                        PartChecker.builder().digestAlgo(getDigestAlgo(head)).build())
                 .build();
     }
 

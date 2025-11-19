@@ -3,7 +3,6 @@ package io.github.jpmorganchase.fusion.api.request;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.lenient;
 
 import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
@@ -54,6 +53,14 @@ class PartFetcherTest {
     HttpResponse badResponse;
 
     APICallException exception;
+
+    private void givenPartFetcher() {
+        testee = PartFetcher.builder()
+                .client(client)
+                .credentials(credentials)
+                .configuration(configuration)
+                .build();
+    }
 
     @Test
     public void testFetchPartForSinglePartDownloadWithoutHeaders() throws Exception {
@@ -374,62 +381,6 @@ class PartFetcherTest {
 
     private void givenCallToGetSessionBearerReturns(String token) {
         Mockito.when(credentials.getSessionBearerToken()).thenReturn(token);
-    }
-
-    private void givenPartFetcher() {
-
-        givenPartFetcherWithSkipChecksum(false);
-        // New config behaviour for PartChecker
-        lenient().when(configuration.getDigestAlgorithm()).thenReturn("SHA-256");
-        lenient().when(configuration.isSkipCheckSumValidation()).thenReturn(false);
-
-        testee = PartFetcher.builder()
-                .client(client)
-                .credentials(credentials)
-                .configuration(configuration)
-                .build();
-    }
-
-    private void givenPartFetcherWithSkipChecksum(boolean skipChecksum) {
-        lenient().when(configuration.getDigestAlgorithm()).thenReturn("SHA-256");
-        lenient().when(configuration.isSkipCheckSumValidation()).thenReturn(skipChecksum);
-
-        testee = PartFetcher.builder()
-                .client(client)
-                .credentials(credentials)
-                .configuration(configuration)
-                .build();
-    }
-
-    @Test
-    public void testFetchSkipsChecksumValidationWhenConfigured() throws Exception {
-
-        // Given
-        givenPartFetcherWithSkipChecksum(true); // skip checksum = true
-
-        givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
-
-        // Head with a deliberately wrong checksum
-        Head head = Head.builder()
-                .checksum("dodgy-checksum")
-                .checksumAlgorithm("SHA-256")
-                .build();
-
-        pr = PartRequest.builder().partNo(1).downloadRequest(dr).head(head).build();
-
-        givenCallToGetSessionBearerReturns("session-token");
-        givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
-        givenSinglePartResponseHeaders("6");
-        givenCallToGetInputStreamForSinglePartDownload(
-                "foobar", "http://foobar.com/v1/some/resource", "session-token", "dataset-token");
-
-        // When
-        actual = testee.fetch(pr);
-
-        // Then – even with wrong checksum, reading should NOT throw because skipChecksum = true
-        byte[] bytes = new byte["foobar".getBytes().length];
-        Assertions.assertDoesNotThrow(() -> actual.getContent().read(bytes));
-        assertThat(new String(bytes), equalTo("foobar"));
     }
 
     private void givenDownloadRequest(String catalog, String dataset, String apiPath) {

@@ -71,10 +71,4 @@ public class FusionConfiguration {
      */
     @Builder.Default
     String digestAlgorithm = "SHA-256";
-    /**
-     *  checkSum validation flag to skip checksum validation or not
-     *  Defaults
-     */
-    @Builder.Default
-    boolean skipCheckSumValidation = false;
 }
