@@ -21,7 +21,7 @@ class DigestProviderIntegrationTest {
         }
         String digest = provider.getDigest();
 
-        // This is the SHA-256 Base64 you already use in PartCheckerTest
+
         assertThat(digest, equalTo("w6uP8Tcg6K2QR905Rms8iXTlksL6OD1KOWBxTK7wxPI="));
     }
 
@@ -34,7 +34,7 @@ class DigestProviderIntegrationTest {
         }
         String digest = provider.getDigest();
 
-        // This is the SHA-1 Base64 you already use in tests
+
         assertThat(digest, equalTo("iEPX+SQWIR3p67lj/0zigSWTKHg="));
     }
 
@@ -47,7 +47,7 @@ class DigestProviderIntegrationTest {
         }
         String digest = provider.getDigest();
 
-        // 4-byte CRC32 -> Base64 length 8, and non-null
+
         assertThat(digest, notNullValue());
         org.junit.jupiter.api.Assertions.assertEquals(8, digest.length());
     }
@@ -61,7 +61,7 @@ class DigestProviderIntegrationTest {
         }
         String digest = provider.getDigest();
 
-        // 4-byte CRC32C -> Base64 length 8, and non-null
+
         assertThat(digest, notNullValue());
         org.junit.jupiter.api.Assertions.assertEquals(8, digest.length());
     }
@@ -75,7 +75,7 @@ class DigestProviderIntegrationTest {
         }
         String digest = provider.getDigest();
 
-        // 8-byte CRC64 -> Base64 length 12, and non-null
+
         assertThat(digest, notNullValue());
         org.junit.jupiter.api.Assertions.assertEquals(12, digest.length());
     }

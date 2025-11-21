@@ -164,31 +164,28 @@ class PartFetcherTest {
     @Test
     public void testHeadChecksumAlgorithmOverridesConfigurationDigestAlgorithm() throws Exception {
 
-        // Given
-        // configuration default algorithm is SHA-256 (already stubbed in givenPartFetcher)
         givenPartFetcher();
         givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
 
-        // SHA-1 checksum for "foobar" (same as in PartCheckerTest)
+
         String sha1Checksum = "OFj2IjCsPJFfMAxmQxLGPw==";
 
         Head head =
                 Head.builder().checksum(sha1Checksum).checksumAlgorithm("SHA-1").build();
 
-        // Single-part download that uses the provided Head (not response head)
         pr = PartRequest.builder().partNo(1).downloadRequest(dr).head(head).build();
 
         givenCallToGetSessionBearerReturns("session-token");
         givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
-        // Response headers only need content-length for this path
+
         givenSinglePartResponseHeaders("6");
         givenCallToGetInputStreamForSinglePartDownload(
                 "foobar", "http://foobar.com/v1/some/resource", "session-token", "dataset-token");
 
-        // When
+
         actual = testee.fetch(pr);
 
-        // Then – read the whole stream so checksum verification actually runs
+
         byte[] bytes = new byte["foobar".getBytes().length];
         actual.getContent().read(bytes);
 
@@ -198,7 +195,7 @@ class PartFetcherTest {
     @Test
     public void testFetchPartForHead() throws Exception {
 
-        // Given
+
         givenPartFetcher();
         givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
         givenPartRequestForHead();
@@ -208,10 +205,10 @@ class PartFetcherTest {
         givenCallToGetInputStreamReturnsSuccess(
                 "data", "http://foobar.com/v1/some/resource/operationType/download", "session-token", "dataset-token");
 
-        // when
+
         whenFetchIsInvoked();
 
-        // Then
+
         thenStreamShouldBeAsExpected();
         thenStreamDataShouldBeAsExpected("data");
         thenChecksumInHeadShouldBeAsExpected("Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=");
@@ -220,7 +217,7 @@ class PartFetcherTest {
     @Test
     public void testFetchThrowsExceptionWhenHttpResponseInError() {
 
-        // Given
+
         givenPartFetcher();
         givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
         givenPartRequestForMultiPartDownload(2);
@@ -232,10 +229,10 @@ class PartFetcherTest {
                 "session-token",
                 "dataset-token");
 
-        // when
+
         whenFetchIsInvokedWithException();
 
-        // Then
+
         thenTheExceptionShouldBeAsExpected("bad-data", 400);
     }
 

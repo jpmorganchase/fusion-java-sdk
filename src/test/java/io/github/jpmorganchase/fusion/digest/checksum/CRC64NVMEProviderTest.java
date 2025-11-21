@@ -21,7 +21,7 @@ class CRC64NVMEProviderTest {
         }
         String actualDigest = provider.getDigest();
 
-        // Compute expected digest using the raw AWS CRT checksum + our own longToBytes logic
+
         Checksum checksum = new CRC64NVME();
         for (byte b : data) {
             checksum.update(b);
