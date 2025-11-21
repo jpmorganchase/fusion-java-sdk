@@ -21,7 +21,6 @@ class DigestProviderIntegrationTest {
         }
         String digest = provider.getDigest();
 
-
         assertThat(digest, equalTo("w6uP8Tcg6K2QR905Rms8iXTlksL6OD1KOWBxTK7wxPI="));
     }
 
@@ -34,7 +33,6 @@ class DigestProviderIntegrationTest {
         }
         String digest = provider.getDigest();
 
-
         assertThat(digest, equalTo("iEPX+SQWIR3p67lj/0zigSWTKHg="));
     }
 
@@ -46,7 +44,6 @@ class DigestProviderIntegrationTest {
             provider.update(b);
         }
         String digest = provider.getDigest();
-
 
         assertThat(digest, notNullValue());
         org.junit.jupiter.api.Assertions.assertEquals(8, digest.length());
@@ -61,7 +58,6 @@ class DigestProviderIntegrationTest {
         }
         String digest = provider.getDigest();
 
-
         assertThat(digest, notNullValue());
         org.junit.jupiter.api.Assertions.assertEquals(8, digest.length());
     }
@@ -74,7 +70,6 @@ class DigestProviderIntegrationTest {
             provider.update(b);
         }
         String digest = provider.getDigest();
-
 
         assertThat(digest, notNullValue());
         org.junit.jupiter.api.Assertions.assertEquals(12, digest.length());

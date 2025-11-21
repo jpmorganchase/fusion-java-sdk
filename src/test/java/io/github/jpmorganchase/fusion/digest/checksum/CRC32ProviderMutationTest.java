@@ -14,20 +14,17 @@ class CRC32ProviderMutationTest {
     void testUpdateAndGetDigestMatchesReferenceImplementation() {
         byte[] data = "123456789".getBytes(StandardCharsets.UTF_8);
 
-
         CRC32Provider provider = new CRC32Provider();
         for (byte b : data) {
             provider.update(b);
         }
         String actualDigest = provider.getDigest();
 
-
         Checksum checksum = new CRC32();
         for (byte b : data) {
             checksum.update(b);
         }
         long value = checksum.getValue();
-
 
         byte[] expectedBytes =
                 new byte[] {(byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value};

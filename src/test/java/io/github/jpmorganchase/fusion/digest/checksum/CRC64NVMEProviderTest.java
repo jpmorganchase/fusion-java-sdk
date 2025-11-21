@@ -21,7 +21,6 @@ class CRC64NVMEProviderTest {
         }
         String actualDigest = provider.getDigest();
 
-
         Checksum checksum = new CRC64NVME();
         for (byte b : data) {
             checksum.update(b);

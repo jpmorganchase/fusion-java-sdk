@@ -167,7 +167,6 @@ class PartFetcherTest {
         givenPartFetcher();
         givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
 
-
         String sha1Checksum = "OFj2IjCsPJFfMAxmQxLGPw==";
 
         Head head =
@@ -182,9 +181,7 @@ class PartFetcherTest {
         givenCallToGetInputStreamForSinglePartDownload(
                 "foobar", "http://foobar.com/v1/some/resource", "session-token", "dataset-token");
 
-
         actual = testee.fetch(pr);
-
 
         byte[] bytes = new byte["foobar".getBytes().length];
         actual.getContent().read(bytes);
@@ -195,7 +192,6 @@ class PartFetcherTest {
     @Test
     public void testFetchPartForHead() throws Exception {
 
-
         givenPartFetcher();
         givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
         givenPartRequestForHead();
@@ -205,9 +201,7 @@ class PartFetcherTest {
         givenCallToGetInputStreamReturnsSuccess(
                 "data", "http://foobar.com/v1/some/resource/operationType/download", "session-token", "dataset-token");
 
-
         whenFetchIsInvoked();
-
 
         thenStreamShouldBeAsExpected();
         thenStreamDataShouldBeAsExpected("data");
@@ -216,7 +210,6 @@ class PartFetcherTest {
 
     @Test
     public void testFetchThrowsExceptionWhenHttpResponseInError() {
-
 
         givenPartFetcher();
         givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
@@ -229,9 +222,7 @@ class PartFetcherTest {
                 "session-token",
                 "dataset-token");
 
-
         whenFetchIsInvokedWithException();
-
 
         thenTheExceptionShouldBeAsExpected("bad-data", 400);
     }
