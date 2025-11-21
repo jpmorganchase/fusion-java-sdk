@@ -94,6 +94,30 @@ class HeadTest {
                         ContentRange.builder().start(0L).end(5L).total(10L).build()));
     }
 
+    @Test
+    public void testChecksumAlgorithmIsParsedFromHeaders() {
+        // given
+        givenResponseHeader("x-jpmc-checksum-algorithm", "CRC32C");
+
+        // when
+        headIsBuiltFromHeaders();
+
+        // then
+        assertThat(testee.getChecksumAlgorithm(), CoreMatchers.equalTo("CRC32C"));
+    }
+
+    @Test
+    public void testChecksumAlgorithmDefaultsToSha256WhenHeaderMissing() {
+        // given
+        // no checksum algorithm header added
+
+        // when
+        headIsBuiltFromHeaders();
+
+        // then
+        assertThat(testee.getChecksumAlgorithm(), CoreMatchers.equalTo("SHA-256"));
+    }
+
     private void givenResponseHeader(String key, String value) {
         List<String> values = new ArrayList<>();
         values.add(value);
