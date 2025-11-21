@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import io.github.jpmorganchase.fusion.FusionConfiguration;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
@@ -35,6 +36,9 @@ class PartFetcherTest {
     @Mock
     FusionTokenProvider credentials;
 
+    @Mock
+    FusionConfiguration configuration;
+
     DownloadRequest dr;
 
     PartRequest pr;
@@ -49,6 +53,14 @@ class PartFetcherTest {
     HttpResponse badResponse;
 
     APICallException exception;
+
+    private void givenPartFetcher() {
+        testee = PartFetcher.builder()
+                .client(client)
+                .credentials(credentials)
+                .configuration(configuration)
+                .build();
+    }
 
     @Test
     public void testFetchPartForSinglePartDownloadWithoutHeaders() throws Exception {
@@ -150,9 +162,36 @@ class PartFetcherTest {
     }
 
     @Test
+    public void testHeadChecksumAlgorithmOverridesConfigurationDigestAlgorithm() throws Exception {
+
+        givenPartFetcher();
+        givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
+
+        String sha1Checksum = "OFj2IjCsPJFfMAxmQxLGPw==";
+
+        Head head =
+                Head.builder().checksum(sha1Checksum).checksumAlgorithm("SHA-1").build();
+
+        pr = PartRequest.builder().partNo(1).downloadRequest(dr).head(head).build();
+
+        givenCallToGetSessionBearerReturns("session-token");
+        givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
+
+        givenSinglePartResponseHeaders("6");
+        givenCallToGetInputStreamForSinglePartDownload(
+                "foobar", "http://foobar.com/v1/some/resource", "session-token", "dataset-token");
+
+        actual = testee.fetch(pr);
+
+        byte[] bytes = new byte["foobar".getBytes().length];
+        actual.getContent().read(bytes);
+
+        assertThat(new String(bytes), equalTo("foobar"));
+    }
+
+    @Test
     public void testFetchPartForHead() throws Exception {
 
-        // Given
         givenPartFetcher();
         givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
         givenPartRequestForHead();
@@ -162,10 +201,8 @@ class PartFetcherTest {
         givenCallToGetInputStreamReturnsSuccess(
                 "data", "http://foobar.com/v1/some/resource/operationType/download", "session-token", "dataset-token");
 
-        // when
         whenFetchIsInvoked();
 
-        // Then
         thenStreamShouldBeAsExpected();
         thenStreamDataShouldBeAsExpected("data");
         thenChecksumInHeadShouldBeAsExpected("Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=");
@@ -174,7 +211,6 @@ class PartFetcherTest {
     @Test
     public void testFetchThrowsExceptionWhenHttpResponseInError() {
 
-        // Given
         givenPartFetcher();
         givenDownloadRequest("foo", "bar", "http://foobar.com/v1/some/resource");
         givenPartRequestForMultiPartDownload(2);
@@ -186,10 +222,8 @@ class PartFetcherTest {
                 "session-token",
                 "dataset-token");
 
-        // when
         whenFetchIsInvokedWithException();
 
-        // Then
         thenTheExceptionShouldBeAsExpected("bad-data", 400);
     }
 
@@ -335,10 +369,6 @@ class PartFetcherTest {
 
     private void givenCallToGetSessionBearerReturns(String token) {
         Mockito.when(credentials.getSessionBearerToken()).thenReturn(token);
-    }
-
-    private void givenPartFetcher() {
-        testee = PartFetcher.builder().client(client).credentials(credentials).build();
     }
 
     private void givenDownloadRequest(String catalog, String dataset, String apiPath) {

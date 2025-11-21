@@ -18,15 +18,19 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class Head {
 
-    private static String CHECKSUM_HEADER = "x-jpmc-checksum-sha256";
+    private static String CHECKSUM_HEADER = "x-jpmc-checksum";
+    private static String CHECKSUM_SHA256_HEADER = "x-jpmc-checksum-sha256";
     private static String VERSION_HEADER = "x-jpmc-version-id";
     private static String PART_COUNT_HEADER = "x-jpmc-mp-parts-count";
     private static String CONTENT_LENGTH_HEADER = "Content-Length";
     private static String CONTENT_RANGE_HEADER = "Content-Range";
     private static String CHECKSUM_SEPARATOR = "-";
+    private static String DEFAULT_ALGORITHM = "SHA-256";
+    private static String CHECKSUM_ALGO_HEADER = "x-jpmc-checksum-algorithm";
 
     private String version;
     private String checksum;
+    private String checksumAlgorithm;
     private int partCount;
     private long contentLength;
     private ContentRange contentRange;
@@ -58,10 +62,11 @@ public class Head {
                 handlePartCountHeader();
                 handleChecksumHeader();
                 handleVersionHeader();
+                handleChecksumAlgorithmHeader();
                 handleContentLength();
                 handleContentRangeHeader();
             }
-            return new Head(version, checksum, partCount, contentLength, contentRange, isMultipart);
+            return new Head(version, checksum, checksumAlgorithm, partCount, contentLength, contentRange, isMultipart);
         }
 
         private void handleContentLength() {
@@ -88,6 +93,22 @@ public class Head {
                 if (!values.isEmpty() && nonNull(values.get(0))) {
                     this.checksum = values.get(0).split(CHECKSUM_SEPARATOR)[0];
                 }
+            } else {
+                List<String> values = this.headers.get(CHECKSUM_SHA256_HEADER);
+                if (nonNull(values) && !values.isEmpty() && nonNull(values.get(0))) {
+                    this.checksum = values.get(0).split(CHECKSUM_SEPARATOR)[0];
+                }
+            }
+        }
+
+        private void handleChecksumAlgorithmHeader() {
+            if (this.headers.containsKey(CHECKSUM_ALGO_HEADER)) {
+                List<String> values = this.headers.get(CHECKSUM_ALGO_HEADER);
+                if (!values.isEmpty() && nonNull(values.get(0))) {
+                    this.checksumAlgorithm = values.get(0);
+                }
+            } else {
+                this.checksumAlgorithm = DEFAULT_ALGORITHM;
             }
         }
 
