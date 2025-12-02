@@ -3,6 +3,15 @@ package io.github.jpmorganchase.fusion;
 import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterByType;
 import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.FusionAPIManager;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
@@ -308,6 +317,54 @@ public class Fusion {
         String json = this.api.callAPI(url);
         return filterDatasets(responseParser.parseDatasetResponse(json, catalogName), contains, idContains);
     }
+
+    /**
+     * List distribution file names for a given dataset series and format.
+     * <p>
+     * This calls the Fusion API, parses the JSON response, and returns a list of
+     * file names. It does not construct any typed model objects – only strings.
+     * </p>
+     *
+     * @param dataset     dataset identifier
+     * @param series      series member identifier
+     * @param fileFormat  file format / distribution identifier (e.g. "csv")
+     * @param catalog     catalog identifier
+     * @param maxResults  maximum number of file names to return; if &lt;= 0, all are returned
+     * @return list of file names (may be empty but never {@code null})
+     * @throws APICallException   if the call to the Fusion API fails
+     * @throws ParsingException   if the response cannot be parsed
+     * @throws OAuthException     if a token could not be retrieved for authentication
+     */
+    public List<String> listDistributionFiles(
+            String dataset,
+            String series,
+            String fileFormat,
+            String catalog,
+            int maxResults) {
+
+        String url = String.format(
+                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                this.rootURL, catalog, dataset, series, fileFormat);
+
+        String json = this.api.callAPI(url);
+
+        if (json == null || json.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
+        List<String> files = new ArrayList<>();
+
+        for (JsonElement el : arr) {
+            if (maxResults > 0 && files.size() >= maxResults) {
+                break;
+            }
+            files.add(el.getAsString());
+        }
+
+        return files;
+    }
+
 
     /**
      * Get a list of the datasets in the specified catalog
@@ -617,40 +674,53 @@ public class Fusion {
         download(catalogName, dataset, seriesMember, distribution, path, new HashMap<>());
     }
 
-    /**
-     * Download a single distribution to the local filesystem
-     *
-     * @param catalogName  identifier of the catalog to be queried
-     * @param dataset      a String representing the dataset identifier to download.
-     * @param seriesMember a String representing the series member identifier.
-     * @param distribution a String representing the distribution identifier, this is the file extension.
-     * @param path         the absolute file path where the file should be written.
-     * @param headers       http headers to be provided in the request.  For headers with multiple instances, the value should be a csv list
-     * @throws APICallException if the call to the Fusion API fails
-     * @throws FileDownloadException if there is an issue handling the response from Fusion API
-     * @throws OAuthException if a token could not be retrieved for authentication
-     */
     public void download(
             String catalogName,
             String dataset,
             String seriesMember,
             String distribution,
             String path,
-            Map<String, String> headers) {
+            Map<String, String> headers,
+            List<String> fileNames) {
 
-        String url = String.format(
-                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                this.rootURL, catalogName, dataset, seriesMember, distribution);
+        // If user didn't give filenames → fetch all
+        if (fileNames == null || fileNames.isEmpty()) {
+            fileNames = listDistributionFiles(dataset, seriesMember, distribution, catalogName, 0);
+        }
+
+        if (fileNames == null || fileNames.isEmpty()) {
+            throw new FusionException(String.format(
+                    "No files found to download for catalog=%s, dataset=%s, series=%s, distribution=%s",
+                    catalogName, dataset, seriesMember, distribution));
+        }
+
+        // Ensure directory exists
         try {
             Files.createDirectories(Paths.get(path));
-        } catch (InvalidPathException | IOException e) {
-            throw new FusionException(String.format("Unable to save to target path %s", path), e);
+        } catch (Exception e) {
+            throw new FusionException("Unable to save to " + path, e);
         }
-        String fileName =
-                String.format("%s_%s_%s", catalogName, dataset, seriesMember).replaceAll("[^a-zA-Z0-9_\\-]", "_");
-        String filepath = String.format("%s/%s.%s", path, fileName, distribution);
-        this.api.callAPIFileDownload(url, filepath, catalogName, dataset, headers);
+
+        // Loop over each file
+        for (String fileName : fileNames) {
+
+            // Sanitize filename for local filesystem
+            String safeFileName = fileName.replaceAll("[^a-zA-Z0-9_.\\-]", "_");
+            String fullPath = path + "/" + safeFileName;
+
+            // Base URL (same as existing download)
+            String url = String.format(
+                    "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                    this.rootURL, catalogName, dataset, seriesMember, distribution);
+
+            // Add filename EXACTLY like downloadStream
+            url = url + "?fileName=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+
+            // Download the file
+            this.api.callAPIFileDownload(url, fullPath, catalogName, dataset, headers);
+        }
     }
+
 
     /**
      * Download a single distribution to the local filesystem. By default, this will write to downloads folder.
@@ -713,34 +783,57 @@ public class Fusion {
      * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution) {
+    public Map<String, InputStream> downloadStream(String catalogName, String dataset, String seriesMember, String distribution, List<String> fileNames) {
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                 this.rootURL, catalogName, dataset, seriesMember, distribution);
-        return downloadStream(catalogName, dataset, seriesMember, distribution, new HashMap<>());
+        return downloadStream(catalogName, dataset, seriesMember, distribution, new HashMap<>(), fileNames);
+    }
+    public Map<String, InputStream> downloadStream(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            Map<String, String> headers,
+            List<String> fileNames) {
+
+        // 1. Auto-discover file list if none provided
+        if (fileNames == null || fileNames.isEmpty()) {
+            fileNames = listDistributionFiles(dataset, seriesMember, distribution, catalogName, 0);
+        }
+
+        if (fileNames == null || fileNames.isEmpty()) {
+            throw new FusionException(
+                    String.format(
+                            "No files found to download for catalog=%s, dataset=%s, series=%s, distribution=%s",
+                            catalogName, dataset, seriesMember, distribution));
+        }
+
+        Map<String, InputStream> result = new HashMap<>();
+
+        // 2. Loop and download each file
+        for (String rawName : fileNames) {
+
+            if (rawName == null || rawName.trim().isEmpty()) {
+                continue;
+            }
+
+            // Only remove trailing slashes, nothing else
+            String cleaned = rawName.replaceAll("[/\\\\]+$", "");
+
+            String url = String.format(
+                    "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files/%s",
+                    this.rootURL, catalogName, dataset, seriesMember, distribution, cleaned);
+
+            InputStream stream = this.api.callAPIFileDownload(url, catalogName, dataset, headers);
+            result.put(cleaned, stream);
+        }
+
+        return result;
     }
 
-    /**
-     * Download a single distribution and return the data as an InputStream
-     * Note that users of this method are required to close the returned InputStream. Failure to do so will
-     * result in resource leaks, including the Http connection used to communicate with Fusion
-     *
-     * @param catalogName  identifier of the catalog to be queried
-     * @param dataset      a String representing the dataset identifier to download.
-     * @param seriesMember a String representing the series member identifier.
-     * @param distribution a String representing the distribution identifier, this is the file extension.
-     * @param headers       http headers to be provided in the request.  For headers with multiple instances, the value should be a csv list
-     * @throws APICallException if the call to the Fusion API fails
-     * @throws FileDownloadException if there is an issue handling the response from Fusion API
-     * @throws OAuthException if a token could not be retrieved for authentication
-     */
-    public InputStream downloadStream(
-            String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers) {
-        String url = String.format(
-                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                this.rootURL, catalogName, dataset, seriesMember, distribution);
-        return this.api.callAPIFileDownload(url, catalogName, dataset, headers);
-    }
+
+    public
 
     /**
      * Upload a new dataset series member to a catalog.
@@ -1006,6 +1099,7 @@ public class Fusion {
     public static FusionBuilder builder() {
         return new CustomFusionBuilder();
     }
+
 
     public static class FusionBuilder {
 
