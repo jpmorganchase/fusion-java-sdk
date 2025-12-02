@@ -670,8 +670,8 @@ public class Fusion {
      * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public void download(String catalogName, String dataset, String seriesMember, String distribution, String path) {
-        download(catalogName, dataset, seriesMember, distribution, path, new HashMap<>());
+    public void download(String catalogName, String dataset, String seriesMember, String distribution, String path, List<String> fileNames) {
+        download(catalogName, dataset, seriesMember, distribution, path, new HashMap<>(), fileNames);
     }
 
     public void download(
@@ -733,8 +733,8 @@ public class Fusion {
      * @throws FileDownloadException  if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public void download(String catalogName, String dataset, String seriesMember, String distribution) {
-        this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath(), new HashMap<>());
+    public void download(String catalogName, String dataset, String seriesMember, String distribution, List<String> fileNames) {
+        this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath(), new HashMap<>(), fileNames);
     }
 
     /**
@@ -750,8 +750,8 @@ public class Fusion {
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(
-            String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers) {
-        this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath());
+            String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers, List<String> fileNames) {
+        this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath(), fileNames);
     }
 
     /**
@@ -797,7 +797,7 @@ public class Fusion {
             Map<String, String> headers,
             List<String> fileNames) {
 
-        // 1. Auto-discover file list if none provided
+
         if (fileNames == null || fileNames.isEmpty()) {
             fileNames = listDistributionFiles(dataset, seriesMember, distribution, catalogName, 0);
         }
@@ -811,14 +811,13 @@ public class Fusion {
 
         Map<String, InputStream> result = new HashMap<>();
 
-        // 2. Loop and download each file
         for (String rawName : fileNames) {
 
             if (rawName == null || rawName.trim().isEmpty()) {
                 continue;
             }
 
-            // Only remove trailing slashes, nothing else
+
             String cleaned = rawName.replaceAll("[/\\\\]+$", "");
 
             String url = String.format(
