@@ -3,16 +3,8 @@ package io.github.jpmorganchase.fusion;
 import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterByType;
 import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.FusionAPIManager;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
@@ -35,13 +27,15 @@ import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.DefaultGsonConfig;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -337,11 +331,7 @@ public class Fusion {
      * @throws OAuthException     if a token could not be retrieved for authentication
      */
     public List<String> listDistributionFiles(
-            String dataset,
-            String series,
-            String fileFormat,
-            String catalog,
-            int maxResults) {
+            String dataset, String series, String fileFormat, String catalog, int maxResults) {
 
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
@@ -362,7 +352,6 @@ public class Fusion {
 
         return files;
     }
-
 
     /**
      * Get a list of the datasets in the specified catalog
@@ -668,7 +657,13 @@ public class Fusion {
      * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public void download(String catalogName, String dataset, String seriesMember, String distribution, String path, List<String> fileNames) {
+    public void download(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            String path,
+            List<String> fileNames) {
         download(catalogName, dataset, seriesMember, distribution, path, new HashMap<>(), fileNames);
     }
 
@@ -699,10 +694,8 @@ public class Fusion {
 
         for (String fileName : fileNames) {
 
-
             String safeFileName = fileName.replaceAll("[^a-zA-Z0-9_.\\-]", "_");
             String fullPath = path + "/" + safeFileName;
-
 
             String url = null;
             try {
@@ -713,18 +706,15 @@ public class Fusion {
                         dataset,
                         seriesMember,
                         distribution,
-                        URLEncoder.encode(fileName, "UTF-8")
+                        URLEncoder.encode(fileName, "UTF-8"));
 
-                );
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
 
-
             this.api.callAPIFileDownload(url, fullPath, catalogName, dataset, headers);
         }
     }
-
 
     /**
      * Download a single distribution to the local filesystem. By default, this will write to downloads folder.
@@ -737,7 +727,8 @@ public class Fusion {
      * @throws FileDownloadException  if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public void download(String catalogName, String dataset, String seriesMember, String distribution, List<String> fileNames) {
+    public void download(
+            String catalogName, String dataset, String seriesMember, String distribution, List<String> fileNames) {
         this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath(), new HashMap<>(), fileNames);
     }
 
@@ -754,7 +745,12 @@ public class Fusion {
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(
-            String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers, List<String> fileNames) {
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            Map<String, String> headers,
+            List<String> fileNames) {
         this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath(), fileNames);
     }
 
@@ -787,14 +783,15 @@ public class Fusion {
      * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public Map<String, InputStream> downloadStream(String catalogName, String dataset, String seriesMember, String distribution, List<String> fileNames) {
+    public Map<String, InputStream> downloadStream(
+            String catalogName, String dataset, String seriesMember, String distribution, List<String> fileNames) {
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                 this.rootURL, catalogName, dataset, seriesMember, distribution);
 
-
         return downloadStream(catalogName, dataset, seriesMember, distribution, new HashMap<>(), fileNames);
     }
+
     public Map<String, InputStream> downloadStream(
             String catalogName,
             String dataset,
@@ -803,16 +800,14 @@ public class Fusion {
             Map<String, String> headers,
             List<String> fileNames) {
 
-
         if (fileNames == null || fileNames.isEmpty()) {
             fileNames = listDistributionFiles(dataset, seriesMember, distribution, catalogName, 0);
         }
 
         if (fileNames == null || fileNames.isEmpty()) {
-            throw new FusionException(
-                    String.format(
-                            "No files found to download for catalog=%s, dataset=%s, series=%s, distribution=%s",
-                            catalogName, dataset, seriesMember, distribution));
+            throw new FusionException(String.format(
+                    "No files found to download for catalog=%s, dataset=%s, series=%s, distribution=%s",
+                    catalogName, dataset, seriesMember, distribution));
         }
 
         Map<String, InputStream> result = new HashMap<>();
@@ -822,7 +817,6 @@ public class Fusion {
             if (rawName == null || rawName.trim().isEmpty()) {
                 continue;
             }
-
 
             String cleaned = rawName.replaceAll("[/\\\\]+$", "");
 
@@ -835,12 +829,10 @@ public class Fusion {
                         dataset,
                         seriesMember,
                         distribution,
-                        URLEncoder.encode(cleaned, "UTF-8")
-                );
+                        URLEncoder.encode(cleaned, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
-
 
             InputStream stream = this.api.callAPIFileDownload(url, catalogName, dataset, headers);
             result.put(cleaned, stream);
@@ -848,7 +840,6 @@ public class Fusion {
 
         return result;
     }
-
 
     /**
      * Upload a new dataset series member to a catalog.
@@ -1114,7 +1105,6 @@ public class Fusion {
     public static FusionBuilder builder() {
         return new CustomFusionBuilder();
     }
-
 
     public static class FusionBuilder {
 
