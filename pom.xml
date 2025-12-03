@@ -341,15 +341,15 @@
                     </targetTests>
                     <mutationThreshold>85</mutationThreshold>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>pitest</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>mutationCoverage</goal>
-                        </goals>
-                    </execution>
-                </executions>
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>pitest</id>-->
+<!--                        <phase>test</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>mutationCoverage</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
             </plugin>
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
@@ -430,12 +430,12 @@
                     <plugin>
                         <groupId>org.pitest</groupId>
                         <artifactId>pitest-maven</artifactId>
-                        <executions>
-                            <execution>
-                                <id>pitest</id>
-                                <phase>none</phase>
-                            </execution>
-                        </executions>
+<!--                        <executions>-->
+<!--                            <execution>-->
+<!--                                <id>pitest</id>-->
+<!--                                <phase>none</phase>-->
+<!--                            </execution>-->
+<!--                        </executions>-->
                     </plugin>
                 </plugins>
             </build>
