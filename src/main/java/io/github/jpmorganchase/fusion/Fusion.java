@@ -322,15 +322,15 @@ public class Fusion {
      * List distribution file names for a given dataset series and format.
      * <p>
      * This calls the Fusion API, parses the JSON response, and returns a list of
-     * file names. It does not construct any typed model objects – only strings.
+     * file names.
      * </p>
      *
      * @param dataset     dataset identifier
      * @param series      series member identifier
-     * @param fileFormat  file format / distribution identifier (e.g. "csv")
+     * @param fileFormat  file format / distribution identifier
      * @param catalog     catalog identifier
-     * @param maxResults  maximum number of file names to return; if &lt;= 0, all are returned
-     * @return list of file names (may be empty but never {@code null})
+     * @param maxResults  maximum number of file names to return; if = 0, all are returned
+     * @return list of file names
      * @throws APICallException   if the call to the Fusion API fails
      * @throws ParsingException   if the response cannot be parsed
      * @throws OAuthException     if a token could not be retrieved for authentication
@@ -355,11 +355,8 @@ public class Fusion {
         JsonArray arr = JsonParser.parseString(json).getAsJsonArray();
         List<String> files = new ArrayList<>();
 
-        for (JsonElement el : arr) {
-            if (maxResults > 0 && files.size() >= maxResults) {
-                break;
-            }
-            files.add(el.getAsString());
+        for (int i = 0; i < arr.size() && (maxResults <= 0 || i < maxResults); i++) {
+            files.add(arr.get(i).getAsString());
         }
 
         return files;
@@ -683,7 +680,6 @@ public class Fusion {
             Map<String, String> headers,
             List<String> fileNames) {
 
-        // If user didn't give filenames → fetch all
         if (fileNames == null || fileNames.isEmpty()) {
             fileNames = listDistributionFiles(dataset, seriesMember, distribution, catalogName, 0);
         }
@@ -694,29 +690,36 @@ public class Fusion {
                     catalogName, dataset, seriesMember, distribution));
         }
 
-        // Ensure directory exists
         try {
             Files.createDirectories(Paths.get(path));
         } catch (Exception e) {
             throw new FusionException("Unable to save to " + path, e);
         }
 
-        // Loop over each file
         for (String fileName : fileNames) {
 
-            // Sanitize filename for local filesystem
+
             String safeFileName = fileName.replaceAll("[^a-zA-Z0-9_.\\-]", "_");
             String fullPath = path + "/" + safeFileName;
 
-            // Base URL (same as existing download)
-            String url = String.format(
-                    "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                    this.rootURL, catalogName, dataset, seriesMember, distribution);
 
-            // Add filename EXACTLY like downloadStream
-            url = url + "?fileName=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8);
+            String url = null;
+            try {
+                url = String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s?fileName=%s",
+                        this.rootURL,
+                        catalogName,
+                        dataset,
+                        seriesMember,
+                        distribution,
+                        URLEncoder.encode(fileName, "UTF-8")
 
-            // Download the file
+                );
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+
+
             this.api.callAPIFileDownload(url, fullPath, catalogName, dataset, headers);
         }
     }
@@ -787,6 +790,8 @@ public class Fusion {
         String url = String.format(
                 "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
                 this.rootURL, catalogName, dataset, seriesMember, distribution);
+
+
         return downloadStream(catalogName, dataset, seriesMember, distribution, new HashMap<>(), fileNames);
     }
     public Map<String, InputStream> downloadStream(
@@ -820,9 +825,21 @@ public class Fusion {
 
             String cleaned = rawName.replaceAll("[/\\\\]+$", "");
 
-            String url = String.format(
-                    "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files/%s",
-                    this.rootURL, catalogName, dataset, seriesMember, distribution, cleaned);
+            String url = null;
+            try {
+                url = String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files/operationType/download?fileName=%s",
+                        this.rootURL,
+                        catalogName,
+                        dataset,
+                        seriesMember,
+                        distribution,
+                        URLEncoder.encode(cleaned, "UTF-8")
+                );
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+
 
             InputStream stream = this.api.callAPIFileDownload(url, catalogName, dataset, headers);
             result.put(cleaned, stream);
@@ -831,8 +848,6 @@ public class Fusion {
         return result;
     }
 
-
-    public
 
     /**
      * Upload a new dataset series member to a catalog.
