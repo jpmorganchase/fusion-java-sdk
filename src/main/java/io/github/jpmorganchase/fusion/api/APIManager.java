@@ -68,12 +68,12 @@ public interface APIManager extends APIDownloadOperations, APIUploadOperations {
 
                 String encodedSegment;
                 if (segment.equals(".") || segment.equals("..")) {
-                    // Leave path unencoded
+                    // Leave the path unencoded
                     encodedSegment = segment;
                 } else {
                     encodedSegment = URLEncoder.encode(segment, "UTF-8").replace("+", "%20");
 
-                    // If segment contains '.' not used as special path
+                    // If the segment contains '.' not used as a special path
                     if (segment.contains(".")) {
                         encodedSegment = encodedSegment.replace(".", "%2E");
                     }
