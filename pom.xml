@@ -4,7 +4,7 @@
     <groupId>io.github.jpmorganchase.fusion</groupId>
     <artifactId>fusion-sdk</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.17-SNAPSHOT</version>
+    <version>0.0.18-SNAPSHOT</version>
 
     <name>fusion-sdk</name>
     <description>A Java SDK for the Fusion platform API</description>
