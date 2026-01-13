@@ -66,13 +66,13 @@ public class ApiCallExceptionTest {
     void badRequestMessageWhenDetailIsUnknown() {
         APICallException e = new APICallException(400, "Unknown");
         assertThat(e.getResponseCode(), is(400));
-        assertThat(e.getMessage(), is(equalTo("Bad Request.  Please verify the correct data has been provided.")));
+        assertThat(e.getMessage(), is(equalTo("Bad Request. Please verify the correct data has been provided.")));
     }
 
     @Test
     void badRequestMessageWhenDetailIsUnknownLowercase() {
         APICallException e = new APICallException(400, "unknown");
         assertThat(e.getResponseCode(), is(400));
-        assertThat(e.getMessage(), is(equalTo("Bad Request.  Please verify the correct data has been provided.")));
+        assertThat(e.getMessage(), is(equalTo("Bad Request. Please verify the correct data has been provided.")));
     }
 }
