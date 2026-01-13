@@ -18,6 +18,8 @@ public class DownloadRequest {
     private String catalog;
     private String dataset;
     private String filePath;
+    private String fileIdentifier;
     private boolean isDownloadToStream;
     private Map<String, String> headers;
+    private boolean skipChecksumValidationIfMissing;
 }

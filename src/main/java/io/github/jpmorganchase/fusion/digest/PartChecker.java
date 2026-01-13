@@ -37,6 +37,10 @@ public class PartChecker {
     }
 
     public void verify(String expectedChecksum) throws IOException {
+        if (Objects.isNull(expectedChecksum) || expectedChecksum.isEmpty()) {
+            return;
+        }
+
         String calculatedChecksum = digestProvider.getDigest();
 
         if (!Objects.equals(expectedChecksum, calculatedChecksum)) {
