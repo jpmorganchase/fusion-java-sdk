@@ -24,14 +24,14 @@ import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.DefaultGsonConfig;
 import io.github.jpmorganchase.fusion.parsing.GsonAPIResponseParser;
 import io.github.jpmorganchase.fusion.parsing.ParsingException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -282,6 +282,45 @@ public class Fusion {
     }
 
     /**
+     * List distribution files for a given dataset series and format.
+     *
+     * @param catalogName   identifier of the catalog to be queried
+     * @param dataset       dataset identifier
+     * @param seriesMember  series member identifier
+     * @param distribution  file format / distribution identifier
+     * @param maxResults    maximum number of files to return; if = 0, all are returned
+     * @return map of distribution files keyed by identifier
+     * @throws APICallException   if the call to the Fusion API fails
+     * @throws ParsingException   if the response cannot be parsed
+     * @throws OAuthException     if a token could not be retrieved for authentication
+     */
+    public Map<String, DistributionFile> listDistributionFiles(
+            String catalogName, String dataset, String seriesMember, String distribution, int maxResults) {
+
+        String url = String.format(
+                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                this.rootURL, catalogName, dataset, seriesMember, distribution);
+
+        String json = this.api.callAPI(url);
+        Map<String, DistributionFile> allFiles = responseParser.parseDistributionFilesResponse(json);
+
+        if (maxResults > 0 && allFiles.size() > maxResults) {
+            Map<String, DistributionFile> limitedFiles = new LinkedHashMap<>();
+            int count = 0;
+            for (Map.Entry<String, DistributionFile> entry : allFiles.entrySet()) {
+                if (count >= maxResults) {
+                    break;
+                }
+                limitedFiles.put(entry.getKey(), entry.getValue());
+                count++;
+            }
+            return limitedFiles;
+        }
+
+        return allFiles;
+    }
+
+    /**
      * Get a list of the datasets in the specified catalog
      *
      * @param catalogName identifier of the catalog to be queried
@@ -498,7 +537,30 @@ public class Fusion {
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, String seriesMember, String distribution, String path) {
-        download(catalogName, dataset, seriesMember, distribution, path, new HashMap<>());
+        download(catalogName, dataset, seriesMember, distribution, path, (List<String>) null);
+    }
+
+    /**
+     * Download a single distribution to the local filesystem
+     *
+     * @param catalogName  identifier of the catalog to be queried
+     * @param dataset      a String representing the dataset identifier to download.
+     * @param seriesMember a String representing the series member identifier.
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param path         the absolute file path where the file should be written.
+     * @param fileNames    a list of file names to download.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public void download(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            String path,
+            List<String> fileNames) {
+        download(catalogName, dataset, seriesMember, distribution, path, new HashMap<>(), fileNames);
     }
 
     /**
@@ -521,19 +583,63 @@ public class Fusion {
             String distribution,
             String path,
             Map<String, String> headers) {
+        download(catalogName, dataset, seriesMember, distribution, path, headers, null);
+    }
 
-        String url = String.format(
-                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                this.rootURL, catalogName, dataset, seriesMember, distribution);
+    /**
+     * Download a single distribution to the local filesystem
+     *
+     * @param catalogName  identifier of the catalog to be queried
+     * @param dataset      a String representing the dataset identifier to download.
+     * @param seriesMember a String representing the series member identifier.
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param path         the absolute file path where the file should be written.
+     * @param headers       http headers to be provided in the request.  For headers with multiple instances, the value should be a csv list
+     * @param fileNames    a list of file names to download.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public void download(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            String path,
+            Map<String, String> headers,
+            List<String> fileNames) {
+
+        Map<String, DistributionFile> distributionFiles =
+                getDistributionFilesForDownload(catalogName, dataset, seriesMember, distribution, fileNames);
+
+        boolean skipChecksumValidationIfMissing = shouldSkipChecksumValidationForDataset(catalogName, dataset);
+
         try {
             Files.createDirectories(Paths.get(path));
-        } catch (InvalidPathException | IOException e) {
-            throw new FusionException(String.format("Unable to save to target path %s", path), e);
+        } catch (Exception e) {
+            throw new FusionException("Unable to save to " + path, e);
         }
-        String fileName =
-                String.format("%s_%s_%s", catalogName, dataset, seriesMember).replaceAll("[^a-zA-Z0-9_\\-]", "_");
-        String filepath = String.format("%s/%s.%s", path, fileName, distribution);
-        this.api.callAPIFileDownload(url, filepath, catalogName, dataset, headers);
+
+        for (Map.Entry<String, DistributionFile> entry : distributionFiles.entrySet()) {
+            DistributionFile file = entry.getValue();
+            String identifier = file.getIdentifier();
+
+            // Use fileExtension from the DistributionFile object, fallback to the distribution parameter if null
+            String extension = file.getFileExtension() != null ? file.getFileExtension() : "." + distribution;
+            if (!extension.startsWith(".")) {
+                extension = "." + extension;
+            }
+
+            String safeFileName = identifier.replaceAll("[^a-zA-Z0-9_.\\-]", "_");
+            String fullPath = path + "/" + safeFileName + extension;
+
+            String url = String.format(
+                    "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files/operationType/download",
+                    this.rootURL, catalogName, dataset, seriesMember, distribution);
+
+            this.api.callAPIFileDownload(
+                    url, fullPath, catalogName, dataset, headers, identifier, skipChecksumValidationIfMissing);
+        }
     }
 
     /**
@@ -548,7 +654,24 @@ public class Fusion {
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public void download(String catalogName, String dataset, String seriesMember, String distribution) {
-        this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath(), new HashMap<>());
+        this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath(), new HashMap<>(), null);
+    }
+
+    /**
+     * Download a single distribution to the local filesystem. By default, this will write to downloads folder.
+     *
+     * @param catalogName  identifier of the catalog to be queried
+     * @param dataset      a String representing the dataset identifier to download.
+     * @param seriesMember a String representing the series member identifier.
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param fileNames    a list of file names to download.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException  if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public void download(
+            String catalogName, String dataset, String seriesMember, String distribution, List<String> fileNames) {
+        this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath(), new HashMap<>(), fileNames);
     }
 
     /**
@@ -565,7 +688,30 @@ public class Fusion {
      */
     public void download(
             String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers) {
-        this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath());
+        download(catalogName, dataset, seriesMember, distribution, headers, null);
+    }
+
+    /**
+     * Download a single distribution to the local filesystem. By default, this will write to downloads folder.
+     *
+     * @param catalogName  identifier of the catalog to be queried
+     * @param dataset      a String representing the dataset identifier to download.
+     * @param seriesMember a String representing the series member identifier.
+     * @param distribution a String representing the distribution identifier, this is the file extension.
+     * @param headers       http headers to be provided in the request.  For headers with multiple instances, the value should be a csv list
+     * @param fileNames    a list of file names to download.
+     * @throws APICallException if the call to the Fusion API fails
+     * @throws FileDownloadException  if there is an issue handling the response from Fusion API
+     * @throws OAuthException if a token could not be retrieved for authentication
+     */
+    public void download(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            Map<String, String> headers,
+            List<String> fileNames) {
+        this.download(catalogName, dataset, seriesMember, distribution, getDefaultPath(), fileNames);
     }
 
     /**
@@ -597,11 +743,9 @@ public class Fusion {
      * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public InputStream downloadStream(String catalogName, String dataset, String seriesMember, String distribution) {
-        String url = String.format(
-                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                this.rootURL, catalogName, dataset, seriesMember, distribution);
-        return downloadStream(catalogName, dataset, seriesMember, distribution, new HashMap<>());
+    public Map<String, InputStream> downloadStream(
+            String catalogName, String dataset, String seriesMember, String distribution) {
+        return downloadStream(catalogName, dataset, seriesMember, distribution, (List<String>) null);
     }
 
     /**
@@ -613,17 +757,139 @@ public class Fusion {
      * @param dataset      a String representing the dataset identifier to download.
      * @param seriesMember a String representing the series member identifier.
      * @param distribution a String representing the distribution identifier, this is the file extension.
-     * @param headers       http headers to be provided in the request.  For headers with multiple instances, the value should be a csv list
+     * @param fileNames    a list of file names to download.
      * @throws APICallException if the call to the Fusion API fails
      * @throws FileDownloadException if there is an issue handling the response from Fusion API
      * @throws OAuthException if a token could not be retrieved for authentication
      */
-    public InputStream downloadStream(
+    public Map<String, InputStream> downloadStream(
+            String catalogName, String dataset, String seriesMember, String distribution, List<String> fileNames) {
+        return downloadStream(catalogName, dataset, seriesMember, distribution, new HashMap<>(), fileNames);
+    }
+
+    public Map<String, InputStream> downloadStream(
             String catalogName, String dataset, String seriesMember, String distribution, Map<String, String> headers) {
-        String url = String.format(
-                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                this.rootURL, catalogName, dataset, seriesMember, distribution);
-        return this.api.callAPIFileDownload(url, catalogName, dataset, headers);
+        return downloadStream(catalogName, dataset, seriesMember, distribution, headers, null);
+    }
+
+    public Map<String, InputStream> downloadStream(
+            String catalogName,
+            String dataset,
+            String seriesMember,
+            String distribution,
+            Map<String, String> headers,
+            List<String> fileNames) {
+
+        Map<String, DistributionFile> distributionFiles =
+                getDistributionFilesForDownload(catalogName, dataset, seriesMember, distribution, fileNames);
+
+        boolean skipChecksumValidationIfMissing = shouldSkipChecksumValidationForDataset(catalogName, dataset);
+
+        Map<String, InputStream> result = new HashMap<>();
+
+        for (Map.Entry<String, DistributionFile> entry : distributionFiles.entrySet()) {
+            DistributionFile file = entry.getValue();
+            String identifier = file.getIdentifier();
+
+            if (identifier == null || identifier.trim().isEmpty()) {
+                continue;
+            }
+
+            String url = String.format(
+                    "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files/operationType/download",
+                    this.rootURL, catalogName, dataset, seriesMember, distribution);
+
+            InputStream stream = this.api.callAPIFileDownload(
+                    url, catalogName, dataset, headers, identifier, skipChecksumValidationIfMissing);
+            result.put(identifier, stream);
+        }
+
+        return result;
+    }
+
+    /**
+     * Private helper method to fetch and filter distribution files for download operations.
+     * This validates that the requested files exist and returns the DistributionFile objects.
+     *
+     * @param catalogName  identifier of the catalog
+     * @param dataset      the dataset identifier
+     * @param seriesMember the series member identifier
+     * @param distribution the distribution identifier
+     * @param fileNames    optional list of specific file names to filter for (null or empty means all files)
+     * @return Map of DistributionFile objects keyed by identifier
+     * @throws FusionException if no files are found or if requested files don't exist
+     */
+    private Map<String, DistributionFile> getDistributionFilesForDownload(
+            String catalogName, String dataset, String seriesMember, String distribution, List<String> fileNames) {
+
+        Map<String, DistributionFile> distributionFiles =
+                listDistributionFiles(catalogName, dataset, seriesMember, distribution, 0);
+
+        if (distributionFiles == null || distributionFiles.isEmpty()) {
+            throw new FusionException(String.format(
+                    "No files found to download for catalog=%s, dataset=%s, series=%s, distribution=%s",
+                    catalogName, dataset, seriesMember, distribution));
+        }
+
+        // Filter to only include requested files if fileNames is provided
+        if (fileNames != null && !fileNames.isEmpty()) {
+            // First, check if all requested files exist
+            List<String> missingFiles = new ArrayList<>();
+            for (String fileName : fileNames) {
+                if (!distributionFiles.containsKey(fileName)) {
+                    missingFiles.add(fileName);
+                }
+            }
+
+            // If any requested files don't exist, throw an exception before starting download
+            if (!missingFiles.isEmpty()) {
+                throw new FusionException(String.format(
+                        "The following requested files do not exist in catalog=%s, dataset=%s, series=%s, distribution=%s: %s",
+                        catalogName, dataset, seriesMember, distribution, String.join(", ", missingFiles)));
+            }
+
+            // All requested files exist, so filter to only include them
+            Map<String, DistributionFile> filtered = new LinkedHashMap<>();
+            for (String fileName : fileNames) {
+                filtered.put(fileName, distributionFiles.get(fileName));
+            }
+            distributionFiles = filtered;
+        }
+
+        return distributionFiles;
+    }
+
+    private boolean shouldSkipChecksumValidationForDataset(String catalogName, String dataset) {
+        try {
+            Dataset datasetMetadata = getDataset(catalogName, dataset);
+            Object deliveryChannel = Objects.nonNull(datasetMetadata)
+                    ? datasetMetadata.getVarArgs().get("deliveryChannel")
+                    : null;
+
+            if (deliveryChannel instanceof Iterable<?>) {
+                for (Object channel : (Iterable<?>) deliveryChannel) {
+                    if (Objects.nonNull(channel) && "glue".equalsIgnoreCase(channel.toString())) return true;
+                }
+            }
+
+            return false;
+        } catch (RuntimeException ex) {
+            return false;
+        }
+    }
+
+    private Dataset getDataset(String catalogName, String dataset) {
+        String url = String.format("%scatalogs/%s/datasets/%s", this.rootURL, catalogName, dataset);
+        String json = this.api.callAPI(url);
+        if (Objects.isNull(json)) {
+            return null;
+        }
+
+        Map<String, Dataset> datasets =
+                responseParser.parseDatasetResponse(String.format("{\"resources\":[%s]}", json), catalogName);
+        return datasets != null && datasets.size() == 1
+                ? datasets.values().iterator().next()
+                : null;
     }
 
     /**

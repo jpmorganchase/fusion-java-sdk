@@ -59,7 +59,7 @@ class ResponseCheckerTest {
 
         APICallException ex = assertThrows(APICallException.class, () -> ResponseChecker.checkResponseStatus(response));
         assertThat(ex.getResponseCode(), equalTo(400));
-        assertThat(ex.getMessage(), equalTo("Bad Request.  Please verify the correct data has been provided."));
+        assertThat(ex.getMessage(), equalTo("Bad Request. Please verify the correct data has been provided."));
     }
 
     @Test
