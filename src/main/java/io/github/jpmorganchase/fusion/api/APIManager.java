@@ -3,10 +3,12 @@ package io.github.jpmorganchase.fusion.api;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
 import io.github.jpmorganchase.fusion.api.operations.APIDownloadOperations;
 import io.github.jpmorganchase.fusion.api.operations.APIUploadOperations;
+import io.github.jpmorganchase.fusion.http.HttpResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Map;
 
 public interface APIManager extends APIDownloadOperations, APIUploadOperations {
 
@@ -18,6 +20,16 @@ public interface APIManager extends APIDownloadOperations, APIUploadOperations {
      * @throws APICallException if the response status indicates an error or the request fails
      */
     String callAPI(String apiPath) throws APICallException;
+
+    /**
+     * Sends a GET request to the specified API endpoint with custom headers and returns the full HTTP response.
+     *
+     * @param apiPath the API endpoint path to which the GET request will be sent
+     * @param headers additional HTTP headers to include in the request
+     * @return the full {@code HttpResponse} including headers and body
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    HttpResponse<String> callAPIWithResponse(String apiPath, Map<String, String> headers) throws APICallException;
 
     String callAPIToPost(String apiPath) throws APICallException;
 

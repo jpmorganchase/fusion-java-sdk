@@ -63,6 +63,38 @@ public class FusionAPIManager implements APIManager {
         return response.getBody();
     }
 
+    /**
+     * Sends a GET request to the specified API endpoint with custom headers and returns the full HTTP response.
+     *
+     * <p>This method constructs the necessary authorization headers using a bearer token from
+     * the {@code tokenProvider}, merges them with the provided custom headers, and sends a GET
+     * request to the specified {@code apiPath} using the {@code httpClient}. It checks the HTTP
+     * response status for errors and returns the full response including headers.
+     *
+     * @param apiPath the API endpoint path to which the GET request will be sent
+     * @param customHeaders additional HTTP headers to include in the request
+     * @return the full {@code HttpResponse} including status, headers, and body
+     * @throws APICallException if the response status indicates an error or the request fails
+     */
+    @Override
+    public HttpResponse<String> callAPIWithResponse(String apiPath, Map<String, String> customHeaders)
+            throws APICallException {
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("Authorization", "Bearer " + tokenProvider.getSessionBearerToken());
+
+        if (customHeaders != null) {
+            customHeaders.forEach((key, value) -> {
+                if (!"Authorization".equalsIgnoreCase(key)) {
+                    requestHeaders.put(key, value);
+                }
+            });
+        }
+
+        HttpResponse<String> response = httpClient.get(APIManager.encodeUrl(apiPath), requestHeaders);
+        checkResponseStatus(response);
+        return response;
+    }
+
     @Override
     public String callAPIToPost(String apiPath) throws APICallException {
         Map<String, String> requestHeaders = new HashMap<>();
