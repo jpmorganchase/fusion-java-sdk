@@ -2,6 +2,10 @@ package io.github.jpmorganchase.fusion;
 
 import static io.github.jpmorganchase.fusion.filter.DatasetFilter.filterDatasets;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.api.FusionAPIManager;
 import io.github.jpmorganchase.fusion.api.exception.APICallException;
@@ -11,6 +15,7 @@ import io.github.jpmorganchase.fusion.api.exception.FileUploadException;
 import io.github.jpmorganchase.fusion.builders.APIConfiguredBuilders;
 import io.github.jpmorganchase.fusion.builders.Builders;
 import io.github.jpmorganchase.fusion.http.Client;
+import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.http.JdkClient;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
@@ -36,13 +41,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Class representing the Fusion API, providing methods that correspond to available API endpoints
  */
+@Slf4j
+@SuppressWarnings({"LombokSetterMayBeUsed", "LombokGetterMayBeUsed"})
 public class Fusion {
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
+    private static int defaultPageSize = -1;
 
     private final APIManager api;
     private String defaultCatalog;
@@ -196,6 +207,91 @@ public class Fusion {
     }
 
     /**
+     * Makes paginated API calls and aggregates all results transparently.
+     * This method handles the pagination logic internally, making multiple API calls
+     * as needed and combining the results into a single response string.
+     *
+     * @param url the API endpoint URL
+     * @return aggregated JSON response containing all pages of data
+     */
+    private String callAPIWithPagination(String url) {
+        log.debug("Starting paginated request to URL: {}", url);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("x-jpmc-paginate", "true");
+        if (defaultPageSize > 0) {
+            log.debug("Using page size: {}", defaultPageSize);
+            headers.put("x-jpmc-page-size", String.valueOf(defaultPageSize));
+        }
+
+        Gson gson = new Gson();
+        JsonArray aggregatedResources = new JsonArray();
+        String nextToken = null;
+        int pageCount = 0;
+
+        do {
+            pageCount++;
+            if (nextToken != null) {
+                headers.put("x-jpmc-next-token", nextToken);
+                log.debug("Fetching page {} with next token", pageCount);
+            } else {
+                log.debug("Fetching page {}", pageCount);
+            }
+
+            HttpResponse<String> response = this.api.callAPIWithResponse(url, headers);
+            String pageJson = response.getBody();
+
+            JsonObject pageObject = JsonParser.parseString(pageJson).getAsJsonObject();
+            if (pageObject.has("resources") && pageObject.get("resources").isJsonArray()) {
+                JsonArray pageResources = pageObject.getAsJsonArray("resources");
+                int pageResourceCount = pageResources.size();
+                pageResources.forEach(aggregatedResources::add);
+                log.debug("Retrieved {} resources from page {}", pageResourceCount, pageCount);
+            }
+
+            nextToken = getHeaderValue(response.getHeaders(), "x-jpmc-next-token");
+
+            if (nextToken != null && !nextToken.isEmpty()) {
+                log.debug("Next token received, more pages available");
+            }
+
+        } while (nextToken != null && !nextToken.isEmpty());
+
+        log.debug(
+                "Pagination complete. Total pages fetched: {}, Total resources: {}",
+                pageCount,
+                aggregatedResources.size());
+
+        JsonObject result = new JsonObject();
+        result.add("resources", aggregatedResources);
+        return gson.toJson(result);
+    }
+
+    /**
+     * Gets a header value from the response headers map (case-insensitive).
+     *
+     * @param headers the response headers map
+     * @param headerName the header name to look for
+     * @return the header value, or null if not found
+     */
+    @SuppressWarnings("SameParameterValue")
+    private String getHeaderValue(Map<String, List<String>> headers, String headerName) {
+        if (headers == null || headerName == null) {
+            return null;
+        }
+
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            if (entry.getKey() != null && entry.getKey().equalsIgnoreCase(headerName)) {
+                List<String> values = entry.getValue();
+                if (values != null && !values.isEmpty()) {
+                    return values.get(0);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Get a list of the catalogs available to the API account.
      *
      * @throws APICallException if the call to the Fusion API fails
@@ -203,7 +299,8 @@ public class Fusion {
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Catalog> listCatalogs() {
-        String json = this.api.callAPI(rootURL.concat("catalogs"));
+        String url = rootURL.concat("catalogs");
+        String json = callAPIWithPagination(url);
         return responseParser.parseCatalogResponse(json);
     }
 
@@ -223,7 +320,7 @@ public class Fusion {
     /**
      * Get a filtered list of the data products in the specified catalog
      * <p>
-     * Note that as of current version this search capability is not yet implemented
+     * Note that as of the current version, this search capability is not yet implemented
      *
      * @param catalogName identifier of the catalog to be queried
      * @param contains    a search keyword.
@@ -235,7 +332,7 @@ public class Fusion {
     public Map<String, DataProduct> listProducts(String catalogName, String contains, boolean idContains) {
         // TODO: unimplemented logic implied by the method parameters
         String url = String.format("%1scatalogs/%2s/products", this.rootURL, catalogName);
-        String json = this.api.callAPI(url);
+        String json = callAPIWithPagination(url);
         return responseParser.parseDataProductResponse(json);
     }
 
@@ -266,7 +363,7 @@ public class Fusion {
     /**
      * Get a filtered list of the datasets in the specified catalog
      * <p>
-     * Note that as of current version this search capability is not yet implemented
+     * Note that as of the current version, this search capability is not yet implemented
      *
      * @param catalogName identifier of the catalog to be queried
      * @param contains    a search keyword.
@@ -277,7 +374,7 @@ public class Fusion {
      */
     public Map<String, Dataset> listDatasets(String catalogName, String contains, boolean idContains) {
         String url = String.format("%1scatalogs/%2s/datasets", this.rootURL, catalogName);
-        String json = this.api.callAPI(url);
+        String json = callAPIWithPagination(url);
         return filterDatasets(responseParser.parseDatasetResponse(json, catalogName), contains, idContains);
     }
 
@@ -361,7 +458,7 @@ public class Fusion {
      */
     public Map<String, DatasetSeries> listDatasetMembers(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/datasetseries", this.rootURL, catalogName, dataset);
-        String json = this.api.callAPI(url);
+        String json = callAPIWithPagination(url);
         return responseParser.parseDatasetSeriesResponse(json);
     }
 
@@ -421,7 +518,7 @@ public class Fusion {
      */
     public Map<String, Attribute> listAttributes(String catalogName, String dataset) {
         String url = String.format("%1scatalogs/%2s/datasets/%3s/attributes", this.rootURL, catalogName, dataset);
-        String json = this.api.callAPI(url);
+        String json = callAPIWithPagination(url);
         return responseParser.parseAttributeResponse(json, catalogName, dataset);
     }
 
@@ -463,11 +560,10 @@ public class Fusion {
      * @throws OAuthException if a token could not be retrieved for authentication
      */
     public Map<String, Distribution> listDistributions(String catalogName, String dataset, String seriesMember) {
-
         String url = String.format(
                 "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
                 this.rootURL, catalogName, dataset, seriesMember);
-        String json = this.api.callAPI(url);
+        String json = callAPIWithPagination(url);
         return responseParser.parseDistributionResponse(json);
     }
 
