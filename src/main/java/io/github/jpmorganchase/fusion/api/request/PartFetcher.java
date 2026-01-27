@@ -3,6 +3,7 @@ package io.github.jpmorganchase.fusion.api.request;
 import static io.github.jpmorganchase.fusion.api.tools.ResponseChecker.checkResponseStatus;
 
 import io.github.jpmorganchase.fusion.FusionConfiguration;
+import io.github.jpmorganchase.fusion.api.exception.FileDownloadException;
 import io.github.jpmorganchase.fusion.api.response.GetPartResponse;
 import io.github.jpmorganchase.fusion.api.response.Head;
 import io.github.jpmorganchase.fusion.api.stream.IntegrityCheckingInputStream;
@@ -13,6 +14,7 @@ import io.github.jpmorganchase.fusion.oauth.provider.FusionTokenProvider;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PartFetcher {
 
     private static final String HEAD_PATH = "%s/operationType/download";
-    private static final String HEAD_PATH_FOR_PART = "%s?downloadPartNumber=%d";
 
     Client client;
     FusionTokenProvider credentials;
@@ -48,16 +49,28 @@ public class PartFetcher {
         checkResponseStatus(response);
 
         Head head = getHead(response, pr);
-        InputStream inputStream = getIntegrityCheckingInputStream(response, head);
+        InputStream inputStream = getIntegrityCheckingInputStream(response, head, pr);
 
         return GetPartResponse.builder().content(inputStream).head(head).build();
     }
 
-    private IntegrityCheckingInputStream getIntegrityCheckingInputStream(
-            HttpResponse<InputStream> response, Head head) {
+    private InputStream getIntegrityCheckingInputStream(HttpResponse<InputStream> response, Head head, PartRequest pr) {
+        String checksum = head.getChecksum();
+        boolean checksumMissing = Objects.isNull(checksum) || checksum.isEmpty();
+        DownloadRequest downloadRequest = pr.getDownloadRequest();
+
+        if (downloadRequest.isSkipChecksumValidationIfMissing()) {
+            log.debug("Skipping checksum validation for download request {}", downloadRequest);
+            return response.getBody();
+        } else if (checksumMissing) {
+            throw new FileDownloadException(
+                    "Checksum validation failed: checksum is missing for download request: " + downloadRequest);
+        }
+
+        log.debug("Verifying checksum for download request {} with checksum: {}", downloadRequest, checksum);
         return IntegrityCheckingInputStream.builder()
                 .part(response.getBody())
-                .checksum(head.getChecksum())
+                .checksum(checksum)
                 .partChecker(
                         PartChecker.builder().digestAlgo(getDigestAlgo(head)).build())
                 .build();
@@ -89,28 +102,20 @@ public class PartFetcher {
     }
 
     private String getPath(PartRequest pr) {
-        String path;
+        String path = appendFileQueryParam(pr.getDownloadRequest().getApiPath(), pr.getDownloadRequest());
 
-        if (pr.isHeadRequest()) {
-            path = getHeadPath(pr);
-        } else if (pr.isSinglePartDownloadRequest()) {
-            path = getSinglePartPath(pr);
-        } else {
-            path = getMultiPartPath(pr);
+        if (!pr.isHeadRequest() && !pr.isSinglePartDownloadRequest()) {
+            String separator = path.contains("?") ? "&" : "?";
+            return path + separator + "downloadPartNumber=" + pr.getPartNo();
         }
 
         return path;
     }
 
-    private String getSinglePartPath(PartRequest pr) {
-        return pr.getDownloadRequest().getApiPath();
-    }
-
-    private String getMultiPartPath(PartRequest pr) {
-        return String.format(HEAD_PATH_FOR_PART, getHeadPath(pr), pr.getPartNo());
-    }
-
-    private String getHeadPath(PartRequest pr) {
-        return String.format(HEAD_PATH, pr.getDownloadRequest().getApiPath());
+    private String appendFileQueryParam(String path, DownloadRequest dr) {
+        if (dr.getFileIdentifier() != null && !dr.getFileIdentifier().isEmpty()) {
+            return path + "?file=" + dr.getFileIdentifier();
+        }
+        return path;
     }
 }

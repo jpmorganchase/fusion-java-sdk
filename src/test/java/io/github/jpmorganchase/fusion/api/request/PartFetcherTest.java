@@ -2,6 +2,7 @@ package io.github.jpmorganchase.fusion.api.request;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import io.github.jpmorganchase.fusion.FusionConfiguration;
@@ -108,6 +109,31 @@ class PartFetcherTest {
     }
 
     @Test
+    public void testFetchSkipsChecksumValidationWhenMissingAndAllowed() throws Exception {
+
+        // Given
+        givenPartFetcher();
+        givenDownloadRequestSkippingChecksumValidation("foo", "bar", "http://foobar.com/v1/some/resource");
+        pr = PartRequest.builder()
+                .partNo(1)
+                .downloadRequest(dr)
+                .head(Head.builder().build())
+                .build();
+        givenCallToGetSessionBearerReturns("session-token");
+        givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
+        givenCallToGetInputStreamForSinglePartDownload(
+                "data", "http://foobar.com/v1/some/resource", "session-token", "dataset-token");
+
+        // when
+        whenFetchIsInvoked();
+
+        // Then
+        thenStreamShouldSkipChecksumValidation();
+        thenStreamDataShouldBeAsExpected("data");
+        thenChecksumInHeadShouldBeAsExpected(null);
+    }
+
+    @Test
     public void testFetchPartForMultipartDownloadWithoutHeaders() throws Exception {
 
         // Given
@@ -119,10 +145,7 @@ class PartFetcherTest {
         givenResponseHeadersForMultipart(
                 "version-1", "Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=", "5", "23", "bytes 0-4/23");
         givenCallToGetInputStreamReturnsSuccess(
-                "data",
-                "http://foobar.com/v1/some/resource/operationType/download?downloadPartNumber=2",
-                "session-token",
-                "dataset-token");
+                "data", "http://foobar.com/v1/some/resource?downloadPartNumber=2", "session-token", "dataset-token");
 
         // when
         whenFetchIsInvoked();
@@ -147,7 +170,7 @@ class PartFetcherTest {
                 "version-1", "Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=", "5", "23", "bytes 0-4/23");
         givenCallToGetInputStreamReturnsSuccess(
                 "data",
-                "http://foobar.com/v1/some/resource/operationType/download?downloadPartNumber=2",
+                "http://foobar.com/v1/some/resource?downloadPartNumber=2",
                 "session-token",
                 "dataset-token",
                 headers);
@@ -199,7 +222,7 @@ class PartFetcherTest {
         givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
         givenResponseHeadersForHead("version-1", "Om6weQ85rIfJTzhWst0sXREOaBFgImGpqSPTuyOtyLc=", "5", "23");
         givenCallToGetInputStreamReturnsSuccess(
-                "data", "http://foobar.com/v1/some/resource/operationType/download", "session-token", "dataset-token");
+                "data", "http://foobar.com/v1/some/resource", "session-token", "dataset-token");
 
         whenFetchIsInvoked();
 
@@ -218,7 +241,7 @@ class PartFetcherTest {
         givenCallToGetDatasetBearerReturns("foo", "bar", "dataset-token");
         givenCallToGetInputStreamReturnsFailure(
                 "bad-data",
-                "http://foobar.com/v1/some/resource/operationType/download?downloadPartNumber=2",
+                "http://foobar.com/v1/some/resource?downloadPartNumber=2",
                 "session-token",
                 "dataset-token");
 
@@ -269,6 +292,10 @@ class PartFetcherTest {
 
     private void thenStreamShouldBeAsExpected() {
         assertThat(this.actual.getContent(), instanceOf(IntegrityCheckingInputStream.class));
+    }
+
+    private void thenStreamShouldSkipChecksumValidation() {
+        assertThat(this.actual.getContent(), not(instanceOf(IntegrityCheckingInputStream.class)));
     }
 
     private void whenFetchIsInvoked() {
@@ -376,6 +403,15 @@ class PartFetcherTest {
                 .catalog(catalog)
                 .dataset(dataset)
                 .apiPath(apiPath)
+                .build();
+    }
+
+    private void givenDownloadRequestSkippingChecksumValidation(String catalog, String dataset, String apiPath) {
+        dr = DownloadRequest.builder()
+                .catalog(catalog)
+                .dataset(dataset)
+                .apiPath(apiPath)
+                .skipChecksumValidationIfMissing(true)
                 .build();
     }
 
