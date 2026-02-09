@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import io.github.jpmorganchase.fusion.api.APIManager;
 import io.github.jpmorganchase.fusion.http.Client;
+import io.github.jpmorganchase.fusion.http.HttpResponse;
 import io.github.jpmorganchase.fusion.model.*;
 import io.github.jpmorganchase.fusion.oauth.credential.BearerTokenCredentials;
 import io.github.jpmorganchase.fusion.parsing.APIResponseParser;
@@ -109,9 +110,17 @@ public class FusionTest {
                         .title("Title datasetOne")
                         .build());
 
-        when(apiManager.callAPI(String.format("%1scatalogs/%2s/datasets", config.getRootURL(), catalog)))
-                .thenReturn("{\"key\":value}");
-        when(responseParser.parseDatasetResponse("{\"key\":value}", catalog)).thenReturn(stubResponse);
+        HttpResponse<String> httpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"key\":\"value\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format("%1scatalogs/%2s/datasets", config.getRootURL(), catalog)), anyMap()))
+                .thenReturn(httpResponse);
+        when(responseParser.parseDatasetResponse("{\"resources\":[{\"key\":\"value\"}]}", catalog))
+                .thenReturn(stubResponse);
 
         return stubResponse;
     }
@@ -141,9 +150,17 @@ public class FusionTest {
         Map<String, DataProduct> stubResponse = new HashMap<>();
         stubResponse.put("first", DataProduct.builder().identifier("product1").build());
 
-        when(apiManager.callAPI(String.format("%1scatalogs/%2s/products", config.getRootURL(), catalog)))
-                .thenReturn("{\"key\":value}");
-        when(responseParser.parseDataProductResponse("{\"key\":value}")).thenReturn(stubResponse);
+        HttpResponse<String> httpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"key\":\"value\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format("%1scatalogs/%2s/products", config.getRootURL(), catalog)), anyMap()))
+                .thenReturn(httpResponse);
+        when(responseParser.parseDataProductResponse("{\"resources\":[{\"key\":\"value\"}]}"))
+                .thenReturn(stubResponse);
 
         return stubResponse;
     }
@@ -155,10 +172,20 @@ public class FusionTest {
         Map<String, DatasetSeries> stubResponse = new HashMap<>();
         stubResponse.put("first", DatasetSeries.builder().identifier("dataset1").build());
 
-        when(apiManager.callAPI(String.format(
-                        "%1scatalogs/%2s/datasets/%3s/datasetseries", config.getRootURL(), "common", "sample_dataset")))
-                .thenReturn("{\"key\":value}");
-        when(responseParser.parseDatasetSeriesResponse("{\"key\":value}")).thenReturn(stubResponse);
+        HttpResponse<String> httpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"key\":\"value\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format(
+                                "%1scatalogs/%2s/datasets/%3s/datasetseries",
+                                config.getRootURL(), "common", "sample_dataset")),
+                        anyMap()))
+                .thenReturn(httpResponse);
+        when(responseParser.parseDatasetSeriesResponse("{\"resources\":[{\"key\":\"value\"}]}"))
+                .thenReturn(stubResponse);
 
         Map<String, DatasetSeries> actualResponse = f.listDatasetMembers("sample_dataset");
         assertThat(actualResponse, is(equalTo(stubResponse)));
@@ -171,10 +198,19 @@ public class FusionTest {
         Map<String, Attribute> stubResponse = new HashMap<>();
         stubResponse.put("first", Attribute.builder().identifier("attribute1").build());
 
-        when(apiManager.callAPI(String.format(
-                        "%1scatalogs/%2s/datasets/%3s/attributes", config.getRootURL(), "common", "sample_dataset")))
-                .thenReturn("{\"key\":value}");
-        when(responseParser.parseAttributeResponse("{\"key\":value}", "common", "sample_dataset"))
+        HttpResponse<String> httpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"key\":\"value\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format(
+                                "%1scatalogs/%2s/datasets/%3s/attributes",
+                                config.getRootURL(), "common", "sample_dataset")),
+                        anyMap()))
+                .thenReturn(httpResponse);
+        when(responseParser.parseAttributeResponse("{\"resources\":[{\"key\":\"value\"}]}", "common", "sample_dataset"))
                 .thenReturn(stubResponse);
 
         Map<String, Attribute> actualResponse = f.listAttributes("sample_dataset");
@@ -208,11 +244,20 @@ public class FusionTest {
         stubResponse.put(
                 "first", Distribution.builder().identifier("attribute1").build());
 
-        when(apiManager.callAPI(String.format(
-                        "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
-                        config.getRootURL(), "common", "sample_dataset", "20230308")))
-                .thenReturn("{\"key\":value}");
-        when(responseParser.parseDistributionResponse("{\"key\":value}")).thenReturn(stubResponse);
+        HttpResponse<String> httpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"attribute1\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format(
+                                "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
+                                config.getRootURL(), "common", "sample_dataset", "20230308")),
+                        anyMap()))
+                .thenReturn(httpResponse);
+        when(responseParser.parseDistributionResponse("{\"resources\":[{\"identifier\":\"attribute1\"}]}"))
+                .thenReturn(stubResponse);
 
         Map<String, Distribution> actualResponse = f.listDistributions("sample_dataset", "20230308");
         assertThat(actualResponse, is(equalTo(stubResponse)));
@@ -588,9 +633,16 @@ public class FusionTest {
         Map<String, Catalog> stubResponse = new HashMap<>();
         stubResponse.put("first", Catalog.builder().identifier("catalog1").build());
 
-        when(apiManager.callAPI(String.format("%1scatalogs", config.getRootURL())))
-                .thenReturn("{\"key\":value}");
-        when(responseParser.parseCatalogResponse("{\"key\":value}")).thenReturn(stubResponse);
+        HttpResponse<String> httpResponse = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"catalog1\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(eq(String.format("%1scatalogs", config.getRootURL())), anyMap()))
+                .thenReturn(httpResponse);
+        when(responseParser.parseCatalogResponse("{\"resources\":[{\"identifier\":\"catalog1\"}]}"))
+                .thenReturn(stubResponse);
 
         Map<String, Catalog> actualResponse = f.listCatalogs();
         assertThat(actualResponse, is(equalTo(stubResponse)));
@@ -979,5 +1031,276 @@ public class FusionTest {
                 is(
                         equalTo(
                                 "The following requested files do not exist in catalog=common, dataset=sample_dataset, series=20230308, distribution=csv: nonexistent_file, another_missing_file")));
+    }
+
+    @Test
+    public void testListDatasetsWithPagination() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, List<String>> headers1 = new HashMap<>();
+        headers1.put("x-jpmc-next-token", Collections.singletonList("token123"));
+
+        HttpResponse<String> httpResponse1 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"dataset1\",\"description\":\"First\"}]}")
+                .headers(headers1)
+                .build();
+
+        HttpResponse<String> httpResponse2 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"dataset2\",\"description\":\"Second\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format("%1scatalogs/%2s/datasets", config.getRootURL(), "common")),
+                        argThat(headers -> !headers.containsKey("x-jpmc-next-token"))))
+                .thenReturn(httpResponse1);
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format("%1scatalogs/%2s/datasets", config.getRootURL(), "common")),
+                        argThat(headers -> "token123".equals(headers.get("x-jpmc-next-token")))))
+                .thenReturn(httpResponse2);
+
+        Map<String, Dataset> stubResponse = new HashMap<>();
+        stubResponse.put("dataset1", Dataset.builder().identifier("dataset1").build());
+        stubResponse.put("dataset2", Dataset.builder().identifier("dataset2").build());
+
+        String aggregatedJson =
+                "{\"resources\":[{\"identifier\":\"dataset1\",\"description\":\"First\"},{\"identifier\":\"dataset2\",\"description\":\"Second\"}]}";
+        when(responseParser.parseDatasetResponse(aggregatedJson, "common")).thenReturn(stubResponse);
+
+        Map<String, Dataset> actualResponse = f.listDatasets("common");
+        assertThat(actualResponse.size(), is(equalTo(2)));
+        assertThat(actualResponse.containsKey("dataset1"), is(true));
+        assertThat(actualResponse.containsKey("dataset2"), is(true));
+
+        verify(apiManager, times(2)).callAPIWithResponse(anyString(), anyMap());
+    }
+
+    @Test
+    public void testListProductsWithPagination() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, List<String>> headers1 = new HashMap<>();
+        headers1.put("x-jpmc-next-token", Collections.singletonList("productToken"));
+
+        HttpResponse<String> httpResponse1 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"product1\"}]}")
+                .headers(headers1)
+                .build();
+
+        HttpResponse<String> httpResponse2 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"product2\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format("%1scatalogs/%2s/products", config.getRootURL(), "common")),
+                        argThat(headers -> !headers.containsKey("x-jpmc-next-token"))))
+                .thenReturn(httpResponse1);
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format("%1scatalogs/%2s/products", config.getRootURL(), "common")),
+                        argThat(headers -> "productToken".equals(headers.get("x-jpmc-next-token")))))
+                .thenReturn(httpResponse2);
+
+        Map<String, DataProduct> stubResponse = new HashMap<>();
+        stubResponse.put(
+                "product1", DataProduct.builder().identifier("product1").build());
+        stubResponse.put(
+                "product2", DataProduct.builder().identifier("product2").build());
+
+        String aggregatedJson = "{\"resources\":[{\"identifier\":\"product1\"},{\"identifier\":\"product2\"}]}";
+        when(responseParser.parseDataProductResponse(aggregatedJson)).thenReturn(stubResponse);
+
+        Map<String, DataProduct> actualResponse = f.listProducts("common");
+        assertThat(actualResponse.size(), is(equalTo(2)));
+
+        verify(apiManager, times(2)).callAPIWithResponse(anyString(), anyMap());
+    }
+
+    @Test
+    public void testListAttributesWithPagination() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, List<String>> headers1 = new HashMap<>();
+        headers1.put("x-jpmc-next-token", Collections.singletonList("attrToken"));
+
+        HttpResponse<String> httpResponse1 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"attr1\"}]}")
+                .headers(headers1)
+                .build();
+
+        HttpResponse<String> httpResponse2 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"attr2\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format(
+                                "%1scatalogs/%2s/datasets/%3s/attributes",
+                                config.getRootURL(), "common", "sample_dataset")),
+                        argThat(headers -> !headers.containsKey("x-jpmc-next-token"))))
+                .thenReturn(httpResponse1);
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format(
+                                "%1scatalogs/%2s/datasets/%3s/attributes",
+                                config.getRootURL(), "common", "sample_dataset")),
+                        argThat(headers -> "attrToken".equals(headers.get("x-jpmc-next-token")))))
+                .thenReturn(httpResponse2);
+
+        Map<String, Attribute> stubResponse = new HashMap<>();
+        stubResponse.put("attr1", Attribute.builder().identifier("attr1").build());
+        stubResponse.put("attr2", Attribute.builder().identifier("attr2").build());
+
+        String aggregatedJson = "{\"resources\":[{\"identifier\":\"attr1\"},{\"identifier\":\"attr2\"}]}";
+        when(responseParser.parseAttributeResponse(aggregatedJson, "common", "sample_dataset"))
+                .thenReturn(stubResponse);
+
+        Map<String, Attribute> actualResponse = f.listAttributes("common", "sample_dataset");
+        assertThat(actualResponse.size(), is(equalTo(2)));
+
+        verify(apiManager, times(2)).callAPIWithResponse(anyString(), anyMap());
+    }
+
+    @Test
+    public void testListDatasetMembersWithPagination() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, List<String>> headers1 = new HashMap<>();
+        headers1.put("x-jpmc-next-token", Collections.singletonList("seriesToken"));
+
+        HttpResponse<String> httpResponse1 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"series1\"}]}")
+                .headers(headers1)
+                .build();
+
+        HttpResponse<String> httpResponse2 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"series2\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format(
+                                "%1scatalogs/%2s/datasets/%3s/datasetseries",
+                                config.getRootURL(), "common", "sample_dataset")),
+                        argThat(headers -> !headers.containsKey("x-jpmc-next-token"))))
+                .thenReturn(httpResponse1);
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format(
+                                "%1scatalogs/%2s/datasets/%3s/datasetseries",
+                                config.getRootURL(), "common", "sample_dataset")),
+                        argThat(headers -> "seriesToken".equals(headers.get("x-jpmc-next-token")))))
+                .thenReturn(httpResponse2);
+
+        Map<String, DatasetSeries> stubResponse = new HashMap<>();
+        stubResponse.put(
+                "series1", DatasetSeries.builder().identifier("series1").build());
+        stubResponse.put(
+                "series2", DatasetSeries.builder().identifier("series2").build());
+
+        when(responseParser.parseDatasetSeriesResponse(anyString())).thenReturn(stubResponse);
+
+        Map<String, DatasetSeries> actualResponse = f.listDatasetMembers("common", "sample_dataset");
+        assertThat(actualResponse.size(), is(equalTo(2)));
+
+        verify(apiManager, times(2)).callAPIWithResponse(anyString(), anyMap());
+    }
+
+    @Test
+    public void testListCatalogsWithPagination() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, List<String>> headers1 = new HashMap<>();
+        headers1.put("x-jpmc-next-token", Collections.singletonList("catalogToken"));
+
+        HttpResponse<String> httpResponse1 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"catalog1\"}]}")
+                .headers(headers1)
+                .build();
+
+        HttpResponse<String> httpResponse2 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"catalog2\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format("%1scatalogs", config.getRootURL())),
+                        argThat(headers -> !headers.containsKey("x-jpmc-next-token"))))
+                .thenReturn(httpResponse1);
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format("%1scatalogs", config.getRootURL())),
+                        argThat(headers -> "catalogToken".equals(headers.get("x-jpmc-next-token")))))
+                .thenReturn(httpResponse2);
+
+        Map<String, Catalog> stubResponse = new HashMap<>();
+        stubResponse.put("catalog1", Catalog.builder().identifier("catalog1").build());
+        stubResponse.put("catalog2", Catalog.builder().identifier("catalog2").build());
+
+        String aggregatedJson = "{\"resources\":[{\"identifier\":\"catalog1\"},{\"identifier\":\"catalog2\"}]}";
+        when(responseParser.parseCatalogResponse(aggregatedJson)).thenReturn(stubResponse);
+
+        Map<String, Catalog> actualResponse = f.listCatalogs();
+        assertThat(actualResponse.size(), is(equalTo(2)));
+
+        verify(apiManager, times(2)).callAPIWithResponse(anyString(), anyMap());
+    }
+
+    @Test
+    public void testListDistributionsWithPagination() throws Exception {
+        Fusion f = stubFusion();
+
+        Map<String, List<String>> headers1 = new HashMap<>();
+        headers1.put("x-jpmc-next-token", Collections.singletonList("distToken"));
+
+        HttpResponse<String> httpResponse1 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"csv\"}]}")
+                .headers(headers1)
+                .build();
+
+        HttpResponse<String> httpResponse2 = HttpResponse.<String>builder()
+                .statusCode(200)
+                .body("{\"resources\":[{\"identifier\":\"parquet\"}]}")
+                .headers(new HashMap<>())
+                .build();
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format(
+                                "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
+                                config.getRootURL(), "common", "sample_dataset", "20230308")),
+                        argThat(headers -> !headers.containsKey("x-jpmc-next-token"))))
+                .thenReturn(httpResponse1);
+
+        when(apiManager.callAPIWithResponse(
+                        eq(String.format(
+                                "%1scatalogs/%2s/datasets/%3s/datasetseries/%4s/distributions",
+                                config.getRootURL(), "common", "sample_dataset", "20230308")),
+                        argThat(headers -> "distToken".equals(headers.get("x-jpmc-next-token")))))
+                .thenReturn(httpResponse2);
+
+        Map<String, Distribution> stubResponse = new HashMap<>();
+        stubResponse.put("csv", Distribution.builder().identifier("csv").build());
+        stubResponse.put("parquet", Distribution.builder().identifier("parquet").build());
+
+        String aggregatedJson = "{\"resources\":[{\"identifier\":\"csv\"},{\"identifier\":\"parquet\"}]}";
+        when(responseParser.parseDistributionResponse(aggregatedJson)).thenReturn(stubResponse);
+
+        Map<String, Distribution> actualResponse = f.listDistributions("common", "sample_dataset", "20230308");
+        assertThat(actualResponse.size(), is(equalTo(2)));
+
+        verify(apiManager, times(2)).callAPIWithResponse(anyString(), anyMap());
     }
 }
