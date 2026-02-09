@@ -630,7 +630,11 @@ public class Fusion {
                 extension = "." + extension;
             }
 
-            String safeFileName = identifier.replaceAll("[^a-zA-Z0-9_.\\-]", "_");
+            String safeFileName = (identifier.equals(distribution)
+                            ? String.format("%s_%s_%s", catalogName, dataset, seriesMember)
+                            : identifier)
+                    .replaceAll("[^a-zA-Z0-9_.\\-]", "_");
+
             String fullPath = path + "/" + safeFileName + extension;
 
             String url = String.format(
