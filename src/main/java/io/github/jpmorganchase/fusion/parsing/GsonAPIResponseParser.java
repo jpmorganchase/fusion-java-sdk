@@ -113,6 +113,11 @@ public class GsonAPIResponseParser implements APIResponseParser {
     }
 
     @Override
+    public Map<String, DistributionFile> parseDistributionFilesResponse(String json) {
+        return parseResourcesFromResponse(json, DistributionFile.class);
+    }
+
+    @Override
     public Operation parseOperationResponse(String json) {
         return gson.fromJson(json, Operation.class);
     }

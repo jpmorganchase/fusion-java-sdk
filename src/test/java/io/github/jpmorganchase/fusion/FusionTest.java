@@ -17,12 +17,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.InvalidPathException;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -271,34 +267,113 @@ public class FusionTest {
     public void testFileDownloadInteraction() throws Exception {
         Fusion f = stubFusion();
 
+        // Mock listDistributionFiles to return a list of files
+        String jsonResponse = "{\"resources\": [{\"identifier\": \"file1\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put(
+                "file1",
+                DistributionFile.builder()
+                        .identifier("file1")
+                        .fileExtension(".csv")
+                        .build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
         doNothing()
                 .when(apiManager)
                 .callAPIFileDownload(
-                        String.format(
-                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
-                        String.format("%s/%s_%s_%s.%s", TMP_PATH, "common", "sample_dataset", "20230308", "csv"),
-                        "common",
-                        "sample_dataset",
-                        new HashMap<>());
+                        anyString(),
+                        eq(String.format("%s/%s", TMP_PATH, "file1.csv")),
+                        eq("common"),
+                        eq("sample_dataset"),
+                        eq(new HashMap<>()),
+                        eq("file1"),
+                        eq(false));
 
         f.download("common", "sample_dataset", "20230308", "csv", TMP_PATH);
+    }
+
+    @Test
+    public void testFileDownloadWithSkipsChecksumValidationWhenMissing() throws Exception {
+        Fusion f = stubFusion();
+
+        // Mock dataset response for checksum validation check
+        String datasetJsonRaw = "{\"identifier\":\"sample_dataset\",\"deliveryChannel\":[\"glue\"]}";
+        Dataset glueDataset = Dataset.builder()
+                .identifier("sample_dataset")
+                .varArg("deliveryChannel", Arrays.asList("glue"))
+                .build();
+        Map<String, Dataset> datasets = new HashMap<>();
+        datasets.put("sample_dataset", glueDataset);
+
+        when(apiManager.callAPI(
+                        String.format("%scatalogs/%s/datasets/%s", config.getRootURL(), "common", "sample_dataset")))
+                .thenReturn(datasetJsonRaw);
+        when(responseParser.parseDatasetResponse(String.format("{\"resources\":[%s]}", datasetJsonRaw), "common"))
+                .thenReturn(datasets);
+
+        // Mock distribution files response
+        String jsonResponse = "{\"resources\": [{\"identifier\": \"file1\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put(
+                "file1",
+                DistributionFile.builder()
+                        .identifier("file1")
+                        .fileExtension(".csv")
+                        .build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
+        doNothing()
+                .when(apiManager)
+                .callAPIFileDownload(
+                        anyString(), anyString(), anyString(), anyString(), anyMap(), anyString(), eq(true));
+
+        f.download("common", "sample_dataset", "20230308", "csv", TMP_PATH);
+
+        verify(apiManager)
+                .callAPIFileDownload(
+                        anyString(), anyString(), eq("common"), eq("sample_dataset"), anyMap(), eq("file1"), eq(true));
     }
 
     @Test
     public void testFileDownloadInteractionWithDefaultPath() throws Exception {
         Fusion f = stubFusion();
 
+        // Mock listDistributionFiles to return a list of files
+        String jsonResponse = "{\"resources\": [{\"identifier\": \"file1\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put(
+                "file1",
+                DistributionFile.builder()
+                        .identifier("file1")
+                        .fileExtension(".csv")
+                        .build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
         doNothing()
                 .when(apiManager)
                 .callAPIFileDownload(
-                        String.format(
-                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
-                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
-                        String.format("%s/%s_%s_%s.%s", "downloads", "common", "sample_dataset", "20230308", "csv"),
-                        "common",
-                        "sample_dataset",
-                        new HashMap<>());
+                        anyString(),
+                        eq(String.format("%s/%s", "downloads", "file1.csv")),
+                        eq("common"),
+                        eq("sample_dataset"),
+                        eq(new HashMap<>()),
+                        eq("file1"),
+                        eq(false));
 
         f.download("common", "sample_dataset", "20230308", "csv");
     }
@@ -307,18 +382,35 @@ public class FusionTest {
     public void testFileDownloadAsStreamInteraction() throws Exception {
         Fusion f = stubFusion();
 
+        // Mock listDistributionFiles to return a list of files
+        String jsonResponse = "{\"resources\": [{\"identifier\": \"file1\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put("file1", DistributionFile.builder().identifier("file1").build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
         when(apiManager.callAPIFileDownload(
                         String.format(
-                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s",
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files/operationType/download",
                                 config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
                         "common",
                         "sample_dataset",
-                        new HashMap<>()))
+                        new HashMap<>(),
+                        "file1",
+                        false))
                 .thenReturn(new ByteArrayInputStream("A,B,C\nD,E,F".getBytes()));
 
-        InputStream response = f.downloadStream("common", "sample_dataset", "20230308", "csv");
+        Map<String, InputStream> response = f.downloadStream("common", "sample_dataset", "20230308", "csv");
 
-        String responseText = new BufferedReader(new InputStreamReader(response, StandardCharsets.UTF_8))
+        assertThat(response.size(), is(equalTo(1)));
+        assertThat(response.containsKey("file1"), is(true));
+
+        InputStream stream = response.get("file1");
+        String responseText = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))
                 .lines()
                 .collect(Collectors.joining("\n"));
         assertThat(responseText, is(equalTo("A,B,C\nD,E,F")));
@@ -615,10 +707,330 @@ public class FusionTest {
     public void fileDownloadWithInvalidPathThrowsFusionException() throws Exception {
         Fusion f = stubFusion();
 
+        // Mock listDistributionFiles to return a list of files
+        String jsonResponse = "{\"resources\": [{\"identifier\": \"file1\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put("file1", DistributionFile.builder().identifier("file1").build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample", "1", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
         FusionException thrown = assertThrows(FusionException.class, () -> {
             f.download("common", "sample", "1", "csv", "\0");
         });
-        assertThat(thrown.getCause().getClass(), is(equalTo(InvalidPathException.class)));
+        assertThat(thrown.getMessage(), is(equalTo("Unable to save to \0")));
+    }
+
+    @Test
+    public void testListDistributionFiles() throws Exception {
+        Fusion f = stubFusion();
+
+        String jsonResponse =
+                "{\"resources\": [{\"identifier\": \"file1\"}, {\"identifier\": \"file2\"}, {\"identifier\": \"file3\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put("file1", DistributionFile.builder().identifier("file1").build());
+        stubResponse.put("file2", DistributionFile.builder().identifier("file2").build());
+        stubResponse.put("file3", DistributionFile.builder().identifier("file3").build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
+        Map<String, DistributionFile> files = f.listDistributionFiles("common", "sample_dataset", "20230308", "csv", 0);
+        assertThat(files.size(), is(equalTo(3)));
+        assertThat(files.containsKey("file1"), is(true));
+        assertThat(files.containsKey("file2"), is(true));
+        assertThat(files.containsKey("file3"), is(true));
+        assertThat(files.get("file1").getIdentifier(), is(equalTo("file1")));
+    }
+
+    @Test
+    public void testListDistributionFilesWithMaxResults() throws Exception {
+        Fusion f = stubFusion();
+
+        String jsonResponse =
+                "{\"resources\": [{\"identifier\": \"file1\"}, {\"identifier\": \"file2\"}, {\"identifier\": \"file3\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put("file1", DistributionFile.builder().identifier("file1").build());
+        stubResponse.put("file2", DistributionFile.builder().identifier("file2").build());
+        stubResponse.put("file3", DistributionFile.builder().identifier("file3").build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
+        Map<String, DistributionFile> files = f.listDistributionFiles("common", "sample_dataset", "20230308", "csv", 2);
+        assertThat(files.size(), is(equalTo(2)));
+        assertThat(files.containsKey("file1"), is(true));
+        assertThat(files.containsKey("file2"), is(true));
+        assertThat(files.containsKey("file3"), is(false));
+    }
+
+    @Test
+    public void testListDistributionFilesWhenEmpty() throws Exception {
+        Fusion f = stubFusion();
+
+        String jsonResponse = "{\"resources\": []}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
+        Map<String, DistributionFile> files = f.listDistributionFiles("common", "sample_dataset", "20230308", "csv", 0);
+        assertThat(files.size(), is(equalTo(0)));
+    }
+
+    @Test
+    public void testDownloadMultipleFiles() throws Exception {
+        Fusion f = stubFusion();
+
+        // Mock listDistributionFiles to return multiple files
+        String jsonResponse = "{\"resources\": [{\"identifier\": \"file1\"}, {\"identifier\": \"file2\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put(
+                "file1",
+                DistributionFile.builder()
+                        .identifier("file1")
+                        .fileExtension(".csv")
+                        .build());
+        stubResponse.put(
+                "file2",
+                DistributionFile.builder()
+                        .identifier("file2")
+                        .fileExtension(".csv")
+                        .build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
+        doNothing()
+                .when(apiManager)
+                .callAPIFileDownload(
+                        anyString(),
+                        eq(String.format("%s/%s", TMP_PATH, "file1.csv")),
+                        eq("common"),
+                        eq("sample_dataset"),
+                        eq(new HashMap<>()),
+                        eq("file1"),
+                        eq(false));
+
+        doNothing()
+                .when(apiManager)
+                .callAPIFileDownload(
+                        anyString(),
+                        eq(String.format("%s/%s", TMP_PATH, "file2.csv")),
+                        eq("common"),
+                        eq("sample_dataset"),
+                        eq(new HashMap<>()),
+                        eq("file2"),
+                        eq(false));
+
+        f.download("common", "sample_dataset", "20230308", "csv", TMP_PATH);
+
+        verify(apiManager, times(1))
+                .callAPIFileDownload(
+                        anyString(),
+                        eq(String.format("%s/%s", TMP_PATH, "file1.csv")),
+                        eq("common"),
+                        eq("sample_dataset"),
+                        eq(new HashMap<>()),
+                        eq("file1"),
+                        eq(false));
+
+        verify(apiManager, times(1))
+                .callAPIFileDownload(
+                        anyString(),
+                        eq(String.format("%s/%s", TMP_PATH, "file2.csv")),
+                        eq("common"),
+                        eq("sample_dataset"),
+                        eq(new HashMap<>()),
+                        eq("file2"),
+                        eq(false));
+    }
+
+    @Test
+    public void testDownloadThrowsExceptionWhenNoFilesFound() throws Exception {
+        Fusion f = stubFusion();
+
+        // Mock listDistributionFiles to return empty list
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn("{\"resources\": []}");
+
+        FusionException thrown = assertThrows(FusionException.class, () -> {
+            f.download("common", "sample_dataset", "20230308", "csv", TMP_PATH);
+        });
+
+        assertThat(
+                thrown.getMessage(),
+                is(
+                        equalTo(
+                                "No files found to download for catalog=common, dataset=sample_dataset, series=20230308, distribution=csv")));
+    }
+
+    @Test
+    public void testDownloadStreamMultipleFiles() throws Exception {
+        Fusion f = stubFusion();
+
+        // Mock listDistributionFiles to return multiple files
+        String jsonResponse = "{\"resources\": [{\"identifier\": \"file1\"}, {\"identifier\": \"file2\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put("file1", DistributionFile.builder().identifier("file1").build());
+        stubResponse.put("file2", DistributionFile.builder().identifier("file2").build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
+        when(apiManager.callAPIFileDownload(
+                        String.format(
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files/operationType/download",
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
+                        "common",
+                        "sample_dataset",
+                        new HashMap<>(),
+                        "file1",
+                        false))
+                .thenReturn(new ByteArrayInputStream("A,B,C\n1,2,3".getBytes()));
+
+        when(apiManager.callAPIFileDownload(
+                        String.format(
+                                "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files/operationType/download",
+                                config.getRootURL(), "common", "sample_dataset", "20230308", "csv"),
+                        "common",
+                        "sample_dataset",
+                        new HashMap<>(),
+                        "file2",
+                        false))
+                .thenReturn(new ByteArrayInputStream("D,E,F\n4,5,6".getBytes()));
+
+        Map<String, InputStream> response = f.downloadStream("common", "sample_dataset", "20230308", "csv");
+
+        assertThat(response.size(), is(equalTo(2)));
+        assertThat(response.containsKey("file1"), is(true));
+        assertThat(response.containsKey("file2"), is(true));
+    }
+
+    @Test
+    public void testDownloadStreamThrowsExceptionWhenNoFilesFound() throws Exception {
+        Fusion f = stubFusion();
+
+        // Mock listDistributionFiles to return empty list
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn("{\"resources\": []}");
+
+        FusionException thrown = assertThrows(FusionException.class, () -> {
+            f.downloadStream("common", "sample_dataset", "20230308", "csv");
+        });
+
+        assertThat(
+                thrown.getMessage(),
+                is(
+                        equalTo(
+                                "No files found to download for catalog=common, dataset=sample_dataset, series=20230308, distribution=csv")));
+    }
+
+    @Test
+    public void testDownloadWithProvidedFileList() throws Exception {
+        Fusion f = stubFusion();
+
+        List<String> fileNames = Arrays.asList("custom_file");
+
+        // Mock listDistributionFiles response
+        String jsonResponse = "{\"resources\": [{\"identifier\": \"custom_file\", \"fileExtension\": \".csv\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put(
+                "custom_file",
+                DistributionFile.builder()
+                        .identifier("custom_file")
+                        .fileExtension(".csv")
+                        .build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
+        doNothing()
+                .when(apiManager)
+                .callAPIFileDownload(
+                        anyString(),
+                        eq(String.format("%s/%s", TMP_PATH, "custom_file.csv")),
+                        eq("common"),
+                        eq("sample_dataset"),
+                        eq(new HashMap<>()),
+                        eq("custom_file"),
+                        eq(false));
+
+        f.download("common", "sample_dataset", "20230308", "csv", TMP_PATH, fileNames);
+
+        verify(apiManager, times(1))
+                .callAPIFileDownload(
+                        anyString(),
+                        eq(String.format("%s/%s", TMP_PATH, "custom_file.csv")),
+                        eq("common"),
+                        eq("sample_dataset"),
+                        eq(new HashMap<>()),
+                        eq("custom_file"),
+                        eq(false));
+
+        // Verify that listDistributionFiles IS called to validate files and get metadata
+        verify(apiManager, times(1))
+                .callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv"));
+    }
+
+    @Test
+    public void testDownloadWithNonExistentFilesThrowsException() throws Exception {
+        Fusion f = stubFusion();
+
+        List<String> fileNames = Arrays.asList("file1", "nonexistent_file", "another_missing_file");
+
+        // Mock listDistributionFiles response - only file1 exists
+        String jsonResponse = "{\"resources\": [{\"identifier\": \"file1\", \"fileExtension\": \".csv\"}]}";
+        Map<String, DistributionFile> stubResponse = new LinkedHashMap<>();
+        stubResponse.put(
+                "file1",
+                DistributionFile.builder()
+                        .identifier("file1")
+                        .fileExtension(".csv")
+                        .build());
+
+        when(apiManager.callAPI(String.format(
+                        "%scatalogs/%s/datasets/%s/datasetseries/%s/distributions/%s/files",
+                        config.getRootURL(), "common", "sample_dataset", "20230308", "csv")))
+                .thenReturn(jsonResponse);
+        when(responseParser.parseDistributionFilesResponse(jsonResponse)).thenReturn(stubResponse);
+
+        FusionException thrown = assertThrows(FusionException.class, () -> {
+            f.download("common", "sample_dataset", "20230308", "csv", TMP_PATH, fileNames);
+        });
+
+        assertThat(
+                thrown.getMessage(),
+                is(
+                        equalTo(
+                                "The following requested files do not exist in catalog=common, dataset=sample_dataset, series=20230308, distribution=csv: nonexistent_file, another_missing_file")));
     }
 
     @Test
