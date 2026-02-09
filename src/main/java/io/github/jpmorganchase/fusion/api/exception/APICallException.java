@@ -61,7 +61,7 @@ public class APICallException extends FusionException {
 
     private String getBadRequestMessage() {
         if (UNKNOWN.equalsIgnoreCase(responseDetail)) {
-            return "Bad Request.  Please verify the correct data has been provided.";
+            return "Bad Request. Please verify the correct data has been provided.";
         }
         return responseDetail;
     }

@@ -59,11 +59,40 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
             String apiPath, String filePath, String catalog, String dataset, Map<String, String> headers)
             throws APICallException, FileDownloadException {
 
+        callAPIFileDownload(apiPath, filePath, catalog, dataset, headers, null, false);
+    }
+
+    @Override
+    public void callAPIFileDownload(
+            String apiPath,
+            String filePath,
+            String catalog,
+            String dataset,
+            Map<String, String> headers,
+            boolean skipChecksumValidationIfMissing)
+            throws APICallException, FileDownloadException {
+
+        callAPIFileDownload(apiPath, filePath, catalog, dataset, headers, null, skipChecksumValidationIfMissing);
+    }
+
+    @Override
+    public void callAPIFileDownload(
+            String apiPath,
+            String filePath,
+            String catalog,
+            String dataset,
+            Map<String, String> headers,
+            String fileIdentifier,
+            boolean skipChecksumValidationIfMissing)
+            throws APICallException, FileDownloadException {
+
         DownloadRequest dr = DownloadRequest.builder()
                 .apiPath(apiPath)
                 .filePath(filePath)
                 .catalog(catalog)
                 .dataset(dataset)
+                .fileIdentifier(fileIdentifier)
+                .skipChecksumValidationIfMissing(skipChecksumValidationIfMissing)
                 .headers(headers)
                 .build();
 
@@ -85,11 +114,38 @@ public class FusionAPIDownloadOperations implements APIDownloadOperations {
     public InputStream callAPIFileDownload(String apiPath, String catalog, String dataset, Map<String, String> headers)
             throws APICallException, FileDownloadException {
 
+        return callAPIFileDownload(apiPath, catalog, dataset, headers, null, false);
+    }
+
+    @Override
+    public InputStream callAPIFileDownload(
+            String apiPath,
+            String catalog,
+            String dataset,
+            Map<String, String> headers,
+            boolean skipChecksumValidationIfMissing)
+            throws APICallException, FileDownloadException {
+
+        return callAPIFileDownload(apiPath, catalog, dataset, headers, null, skipChecksumValidationIfMissing);
+    }
+
+    @Override
+    public InputStream callAPIFileDownload(
+            String apiPath,
+            String catalog,
+            String dataset,
+            Map<String, String> headers,
+            String fileIdentifier,
+            boolean skipChecksumValidationIfMissing)
+            throws APICallException, FileDownloadException {
+
         DownloadRequest dr = DownloadRequest.builder()
                 .apiPath(apiPath)
                 .catalog(catalog)
                 .dataset(dataset)
+                .fileIdentifier(fileIdentifier)
                 .isDownloadToStream(true)
+                .skipChecksumValidationIfMissing(skipChecksumValidationIfMissing)
                 .headers(headers)
                 .build();
 

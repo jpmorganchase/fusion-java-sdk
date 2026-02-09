@@ -148,13 +148,24 @@ Map<String, DatasetSeries> members = fusion.listDatasetMembers("my-catalog", "my
 ```java
 Map<String, Distribution> distributions = fusion.listDistributions("my-catalog", "my-dataset", "my-series-member");
 ```
-6. Download as a file
+6. List the files available in a distribution
+```java
+Map<String, DistributionFile> files = fusion.listDistributionFiles("my-catalog", "my-dataset", "my-series-member", "csv", 0);
+```
+7. Download all files in a distribution
 ```java
 fusion.download("my-catalog", "my-dataset", "my-series-member", "csv", "/downloads/distributions");
 ```
-7. Download as a stream
+8. Download specific files in a distribution
 ```java
-InputStream is = fusion.downloadStream("my-catalog", "my-dataset", "my-series-member", "csv");
+List<String> fileNames = Arrays.asList("file1", "file2");
+fusion.download("my-catalog", "my-dataset", "my-series-member", "csv", "/downloads/distributions", fileNames);
+```
+9. Download as a stream (returns a Map of file names to InputStreams)
+```java
+Map<String, InputStream> streams = fusion.downloadStream("my-catalog", "my-dataset", "my-series-member", "csv");
+// Access individual file streams
+InputStream fileStream = streams.get("file1");
 ```
 
 #### Logging

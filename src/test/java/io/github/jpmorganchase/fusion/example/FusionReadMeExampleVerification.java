@@ -131,8 +131,11 @@ public class FusionReadMeExampleVerification {
 
     @Test
     void downloadAsStream() {
+        Map<String, InputStream> streams = new HashMap<>();
+        streams.put("file1", mock(InputStream.class));
+
         given(fusion.downloadStream("my-catalog", "my-dataset", "my-series-member", "csv"))
-                .willReturn(mock(InputStream.class));
+                .willReturn(streams);
         assertThat(
                 "Fusion interface has changed, please correct README.md examples",
                 fusion.downloadStream("my-catalog", "my-dataset", "my-series-member", "csv"),
