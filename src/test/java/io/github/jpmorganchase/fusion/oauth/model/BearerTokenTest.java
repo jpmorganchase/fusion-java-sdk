@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import io.github.jpmorganchase.fusion.oauth.retriever.OAuthServerResponse;
+
 class BearerTokenTest {
 
     @Test
@@ -35,6 +37,27 @@ class BearerTokenTest {
         long expiresIn = 3600L;
 
         BearerToken bearerToken = BearerToken.of(token, currentTimeInMillis, expiresIn);
+
+        long expiry = bearerToken.getExpiry();
+
+        assertTrue(bearerToken.hasTokenExpired(expiry + 1));
+        assertFalse(bearerToken.hasTokenExpired(expiry - 1));
+    }
+
+    @Test
+    public void testHasTokenExpiredWhenCanExpireFromResponse() {
+        String token = "my-token";
+        long currentTimeInMillis = 1625666400000L;
+        int expiresIn = 3600;
+
+        OAuthServerResponse oAuthServerResponse =
+
+                OAuthServerResponse.builder()
+                        .accessToken(token)
+                        .expiresIn(expiresIn)
+                        .build();
+
+        BearerToken bearerToken = BearerToken.of(oAuthServerResponse, currentTimeInMillis);
 
         long expiry = bearerToken.getExpiry();
 
