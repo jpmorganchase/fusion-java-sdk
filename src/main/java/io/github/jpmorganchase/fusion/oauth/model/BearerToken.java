@@ -27,7 +27,7 @@ public class BearerToken {
 
     public static BearerToken of(OAuthServerResponse oAuthServerResponse, long currentTimeInMillis) {
         return BearerToken.of(
-                oAuthServerResponse.getAccessToken(), oAuthServerResponse.getExpiresIn(), currentTimeInMillis);
+                oAuthServerResponse.getAccessToken(), currentTimeInMillis, oAuthServerResponse.getExpiresIn());
     }
 
     public static BearerToken of(String token, long currentTimeInMillis, long expiresIn) {
